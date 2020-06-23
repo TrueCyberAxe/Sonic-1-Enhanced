@@ -22,7 +22,11 @@ lamp_time:	equ $36		; length of time to twirl the lamp
 Lamp_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Lamp,obMap(a0)
+	if FeatureSpindash<2
 		move.w	#$7A0,obGfx(a0)
+	else ; Spindust glitch fix @TODO remove divide
+		move.w	#($D800/$20),obGfx(a0)
+	endc
 		move.b	#4,obRender(a0)
 		move.b	#8,obActWid(a0)
 		move.b	#5,obPriority(a0)
@@ -43,7 +47,7 @@ Lamp_Main:	; Routine 0
 		bset	#0,2(a2,d0.w)
 		move.b	#4,obRoutine(a0) ; goto Lamp_Finish next
 		move.b	#3,obFrame(a0)	; use red lamppost frame
-		rts	
+		rts
 ; ===========================================================================
 
 Lamp_Blue:	; Routine 2
@@ -88,7 +92,11 @@ Lamp_Blue:	; Routine 2
 		move.w	obY(a0),lamp_origY(a1)
 		subi.w	#$18,lamp_origY(a1)
 		move.l	#Map_Lamp,obMap(a1)
+	if FeatureSpindash<2
 		move.w	#$7A0,obGfx(a1)
+	else ; Spindust glitch fix @TODO remove divide
+		move.w	#($D800/$20),obGfx(a1)
+	endc
 		move.b	#4,obRender(a1)
 		move.b	#8,obActWid(a1)
 		move.b	#4,obPriority(a1)
@@ -104,11 +112,11 @@ Lamp_Blue:	; Routine 2
 		bset	#0,2(a2,d0.w)
 
 	@donothing:
-		rts	
+		rts
 ; ===========================================================================
 
 Lamp_Finish:	; Routine 4
-		rts	
+		rts
 ; ===========================================================================
 
 Lamp_Twirl:	; Routine 6
@@ -129,7 +137,7 @@ Lamp_Twirl:	; Routine 6
 		swap	d0
 		add.w	lamp_origY(a0),d0
 		move.w	d0,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Subroutine to	store information when you hit a lamppost
@@ -156,7 +164,7 @@ Lamp_StoreInfo:
 		move.w	(v_waterpos2).w,($FFFFFE50).w 	; water height
 		move.b	(v_wtr_routine).w,($FFFFFE52).w ; rountine counter for water
 		move.b	(f_wtr_state).w,($FFFFFE53).w 	; water direction
-		rts	
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to	load stored info when you start	a level	from a lamppost
@@ -203,4 +211,4 @@ Lamp_LoadInfo:
 		move.w	d0,(v_limitleft2).w
 
 locret_170F6:
-		rts	
+		rts

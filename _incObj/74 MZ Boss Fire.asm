@@ -46,10 +46,13 @@ Obj74_Action:	; Routine 2
 		jsr	(AnimateSprite).l
 		cmpi.w	#$2E8,obY(a0)
 		bhi.s	Obj74_Delete
-		rts	
+		rts
 ; ===========================================================================
 
 Obj74_Delete:
+	if BugFixRenderBeforeInit>0 ; Bug 6 Fix
+		addq.l  #4,sp
+	endc
 		jmp	(DeleteObject).l
 ; ===========================================================================
 Obj74_Index2:	dc.w Obj74_Drop-Obj74_Index2
@@ -72,7 +75,7 @@ Obj74_Drop:
 		addq.b	#2,ob2ndRout(a0)
 
 locret_18780:
-		rts	
+		rts
 ; ===========================================================================
 
 Obj74_MakeFlame:
@@ -101,7 +104,7 @@ Obj74_Loop:
 
 loc_187CA:
 		addq.b	#2,ob2ndRout(a0)
-		rts	
+		rts
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -115,7 +118,7 @@ Obj74_Duplicate2:
 		move.w	#$67,obSubtype(a1)
 
 locret_187EE:
-		rts	
+		rts
 ; End of function Obj74_Duplicate2
 
 ; ===========================================================================
@@ -139,17 +142,17 @@ Obj74_Duplicate:
 
 loc_1881E:
 		move.w	obX(a0),$30(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18826:
 		addq.b	#2,ob2ndRout(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1882C:
 		addq.b	#2,obRoutine(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 Obj74_FallEdge:
@@ -178,10 +181,13 @@ loc_18856:
 		subq.b	#2,ob2ndRout(a0)
 
 locret_1887E:
-		rts	
+		rts
 ; ===========================================================================
 
 Obj74_Delete2:
+	if BugFixRenderBeforeInit>0 ; Bug 6 Fix
+		addq.l  #4,sp
+	endc
 		jmp	(DeleteObject).l
 ; ===========================================================================
 
@@ -199,4 +205,7 @@ Obj74_Animate:
 ; ===========================================================================
 
 Obj74_Delete3:	; Routine 6
+	if BugFixRenderBeforeInit>0 ; Bug 6 Fix
+		addq.l  #4,sp
+	endc
 		jmp	(DeleteObject).l

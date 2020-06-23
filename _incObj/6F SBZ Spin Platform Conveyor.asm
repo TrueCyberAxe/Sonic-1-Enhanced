@@ -98,6 +98,9 @@ loc_16380:
 		lea	(v_obj63).w,a2
 		bset	#0,(a2,d0.w)
 		beq.s	loc_1639A
+	if BugFixRenderBeforeInit>0 ; Bug 6
+    addq.l  #4,sp
+  endc
 		jmp	(DeleteObject).l
 ; ===========================================================================
 
@@ -127,7 +130,7 @@ loc_163D0:
 		dbf	d1,SpinC_Loop
 
 		addq.l	#4,sp
-		rts	
+		rts
 ; ===========================================================================
 
 loc_163D8:	; Routine 2

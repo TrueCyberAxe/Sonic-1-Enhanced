@@ -108,9 +108,15 @@ loc_9C0E:
 
 Ring_Animate:	; Routine 2
 		move.b	(v_ani1_frame).w,obFrame(a0) ; set frame
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range.s	Ring_Delete,$32(a0)
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Ring_Collect:	; Routine 4
@@ -215,6 +221,16 @@ RLoss_Count:	; Routine 0
 		bsr.w	CalcSine
 		move.w	d4,d2
 		lsr.w	#8,d2
+	if TweakFixUnderwaterRingPhysics>0
+		tst.b	(f_water).w								; Does the level have water?
+		beq.s	@skiphalvingvel						; If not, branch and skip underwater checks
+		move.w	(v_waterpos1).w,d6			; Move water level to d6
+		cmp.w	$C(a0),d6									; Is the ring object underneath the water level?
+		bgt.s	@skiphalvingvel						; If not, branch and skip underwater commands
+		asr.w	d0												; Half d0. Makes the ring's x_vel bounce to the left/right slower
+		asr.w	d1												; Half d1. Makes the ring's y_vel bounce up/down slower
+	@skiphalvingvel:
+	endc
 		asl.w	d2,d0
 		asl.w	d2,d1
 		move.w	d0,d2
@@ -236,12 +252,26 @@ RLoss_Count:	; Routine 0
 		move.w	#0,(v_rings).w	; reset number of rings to zero
 		move.b	#$80,(f_ringcount).w ; update ring counter
 		move.b	#0,(v_lifecount).w
+	if BugFixScatteredRingsTimer>0
+		moveq   #-1,d0                  ; Move #-1 to d0
+		move.b  d0,obDelayAni(a0)       ; Move d0 to new timer
+		move.b  d0,(v_ani3_time).w      ; Move d0 to old timer (for animated purposes)
+	endc
 		sfx	sfx_RingLoss,0,0,0	; play ring loss sound
 
 RLoss_Bounce:	; Routine 2
 		move.b	(v_ani3_frame).w,obFrame(a0)
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)
+	if TweakFixUnderwaterRingPhysics>0
+		tst.b	(f_water).w								; Does the level have water?
+		beq.s	@skipbounceslow						; If not, branch and skip underwater checks
+		move.w	(v_waterpos1).w,d6			; Move water level to d6
+		cmp.w	obY(a0),d6								; Is the ring object underneath the water level?
+		bgt.s	@skipbounceslow						; If not, branch and skip underwater commands
+		subi.w	#$E,obVelY(a0)					; Reduce gravity by $E ($18-$E=$A), giving the underwater effect
+	@skipbounceslow:
+	endc
 		bmi.s	@chkdel
 		move.b	(v_vbla_byte).w,d0
 		add.b	d7,d0
@@ -257,12 +287,20 @@ RLoss_Bounce:	; Routine 2
 		neg.w	obVelY(a0)
 
 	@chkdel:
+	if BugFixScatteredRingsTimer=0
 		tst.b	(v_ani3_time).w
 		beq.s	RLoss_Delete
+	else
+		subq.b  #1,obDelayAni(a0)       ; Subtract 1
+		beq.w   DeleteObject            ; If 0, delete
+	endc
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
-		cmp.w	obY(a0),d0	; has object moved below level boundary?
-		bcs.s	RLoss_Delete	; if yes, branch
+		cmp.w	obY(a0),d0					; has object moved below level boundary?
+		bcs.s	RLoss_Delete				; if yes, branch
+	if BugFixDeleteScatteredRings>0
+		cmpi.w	#$FF00,(v_limittop2).w	; is vertical wrapping enabled?
+	endc
 		bra.w	DisplaySprite
 ; ===========================================================================
 

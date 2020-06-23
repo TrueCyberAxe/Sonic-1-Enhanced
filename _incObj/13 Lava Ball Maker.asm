@@ -7,7 +7,12 @@ LavaMaker:
 		move.b	obRoutine(a0),d0
 		move.w	LavaM_Index(pc,d0.w),d1
 		jsr	LavaM_Index(pc,d1.w)
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		bra.w	LBall_ChkDel
+	else
+		out_of_range    DeleteObject
+    rts
+  endc
 ; ===========================================================================
 LavaM_Index:	dc.w LavaM_Main-LavaM_Index
 		dc.w LavaM_MakeLava-LavaM_Index
@@ -41,4 +46,4 @@ LavaM_MakeLava:	; Routine 2
 		move.b	obSubtype(a0),obSubtype(a1)
 
 	LavaM_Wait:
-		rts	
+		rts

@@ -71,9 +71,15 @@ Cbal_Animate:
 		bchg	#0,obFrame(a0)	; change frame
 
 Cbal_Display:
+	if BugFixRenderBeforeInit=0 ; Bug 4
 		bsr.w	DisplaySprite
+	endc
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0	; has object fallen off	the level?
 		bcs.w	DeleteObject	; if yes, branch
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 4
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

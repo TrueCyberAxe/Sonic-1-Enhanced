@@ -79,8 +79,8 @@ PLC_GameOver:	dc.w ((PLC_GameOverend-PLC_GameOver-2)/6)-1
 ; Pattern load cues - Green Hill
 ; ---------------------------------------------------------------------------
 PLC_GHZ:	dc.w ((PLC_GHZ2-PLC_GHZ-2)/6)-1
-		plcm	Nem_GHZ_1st, 0		; GHZ main patterns
-		plcm	Nem_GHZ_2nd, $39A0	; GHZ secondary	patterns
+		plcm	Gra_Title, 0		; GHZ main patterns
+		plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
 		plcm	Nem_Stalk, $6B00	; flower stalk
 		plcm	Nem_PplRock, $7A00	; purple rock
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
@@ -104,7 +104,7 @@ PLC_GHZ2:	dc.w ((PLC_GHZ2end-PLC_GHZ2-2)/6)-1
 ; Pattern load cues - Labyrinth
 ; ---------------------------------------------------------------------------
 PLC_LZ:		dc.w ((PLC_LZ2-PLC_LZ-2)/6)-1
-		plcm	Nem_LZ,0		; LZ main patterns
+		plcm	Gra_LZ,0		; LZ main patterns
 		plcm	Nem_LzBlock1, $3C00	; block
 		plcm	Nem_LzBlock2, $3E00	; blocks
 		plcm	Nem_Splash, $4B20	; waterfalls and splash
@@ -139,7 +139,7 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 ; Pattern load cues - Marble
 ; ---------------------------------------------------------------------------
 PLC_MZ:		dc.w ((PLC_MZ2-PLC_MZ-2)/6)-1
-		plcm	Nem_MZ,0		; MZ main patterns
+		plcm	Gra_MZ,0		; MZ main patterns
 		plcm	Nem_MzMetal, $6000	; metal	blocks
 		plcm	Nem_MzFire, $68A0	; fireballs
 		plcm	Nem_Swing, $7000	; swinging platform
@@ -161,7 +161,7 @@ PLC_MZ2:	dc.w ((PLC_MZ2end-PLC_MZ2-2)/6)-1
 ; Pattern load cues - Star Light
 ; ---------------------------------------------------------------------------
 PLC_SLZ:	dc.w ((PLC_SLZ2-PLC_SLZ-2)/6)-1
-		plcm	Nem_SLZ,0		; SLZ main patterns
+		plcm	Gra_SLZ,0		; SLZ main patterns
 		plcm	Nem_Bomb, $8000		; bomb enemy
 		plcm	Nem_Orbinaut, $8520	; orbinaut enemy
 		plcm	Nem_MzFire, $9000	; fireballs
@@ -183,7 +183,7 @@ PLC_SLZ2:	dc.w ((PLC_SLZ2end-PLC_SLZ2-2)/6)-1
 ; Pattern load cues - Spring Yard
 ; ---------------------------------------------------------------------------
 PLC_SYZ:	dc.w ((PLC_SYZ2-PLC_SYZ-2)/6)-1
-		plcm	Nem_SYZ,0		; SYZ main patterns
+		plcm	Gra_SYZ,0		; SYZ main patterns
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
 		plcm	Nem_Buzz, $8880		; buzz bomber enemy
 		plcm	Nem_Yadrin, $8F60	; yadrin enemy
@@ -203,7 +203,7 @@ PLC_SYZ2:	dc.w ((PLC_SYZ2end-PLC_SYZ2-2)/6)-1
 ; Pattern load cues - Scrap Brain
 ; ---------------------------------------------------------------------------
 PLC_SBZ:	dc.w ((PLC_SBZ2-PLC_SBZ-2)/6)-1
-		plcm	Nem_SBZ,0		; SBZ main patterns
+		plcm	Gra_SBZ,0		; SBZ main patterns
 		plcm	Nem_Stomper, $5800	; moving platform and stomper
 		plcm	Nem_SbzDoor1, $5D00	; door
 		plcm	Nem_Girder, $5E00	; girder
@@ -235,18 +235,18 @@ PLC_SBZ2:	dc.w ((PLC_SBZ2end-PLC_SBZ2-2)/6)-1
 ; Pattern load cues - title card
 ; ---------------------------------------------------------------------------
 PLC_TitleCard:	dc.w ((PLC_TitleCardend-PLC_TitleCard-2)/6)-1
-		plcm	Nem_TitleCard, $B000
+		plcm	Gra_TitleCard, $B000
 	PLC_TitleCardend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - act 3 boss
 ; ---------------------------------------------------------------------------
 PLC_Boss:	dc.w ((PLC_Bossend-PLC_Boss-2)/6)-1
-		plcm	Nem_Eggman, $8000	; Eggman main patterns
-		plcm	Nem_Weapons, $8D80	; Eggman's weapons
-		plcm	Nem_Prison, $93A0	; prison capsule
+		plcm	Gra_Eggman, $8000	; Eggman main patterns
+		plcm	Gra_Weapons, $8D80	; Eggman's weapons
+		plcm	Gra_Prison, $93A0	; prison capsule
 		plcm	Nem_Bomb, $A300		; bomb enemy ((gets overwritten)
 		plcm	Nem_SlzSpike, $A300	; spikeball ((SLZ boss)
-		plcm	Nem_Exhaust, $A540	; exhaust flame
+		plcm	Gra_Exhaust, $A540	; exhaust flame
 	PLC_Bossend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - act 1/2 signpost
@@ -344,12 +344,12 @@ PLC_SSResult:dc.w ((PLC_SpeStResultend-PLC_SSResult-2)/6)-1
 ; Pattern load cues - ending sequence
 ; ---------------------------------------------------------------------------
 PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
-		plcm	Nem_GHZ_1st,0		; GHZ main patterns
-		plcm	Nem_GHZ_2nd, $39A0	; GHZ secondary	patterns
+		plcm	Gra_Title,0		; GHZ main patterns
+		plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
 		plcm	Nem_Stalk, $6B00	; flower stalk
-		plcm	Nem_EndFlower, $7400	; flowers
-		plcm	Nem_EndEm, $78A0	; emeralds
-		plcm	Nem_EndSonic, $7C20	; Sonic
+		plcm	Gra_EndFlower, $7400	; flowers
+		plcm	Gra_EndEm, $78A0	; emeralds
+		plcm	Gra_EndSonic, $7C20	; Sonic
 		if Revision=0
 		plcm	Nem_EndEggman, $A480	; Eggman's death ((unused)
 		else
@@ -361,33 +361,33 @@ PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
 		plcm	Nem_Pig, $B260		; pig
 		plcm	Nem_Flicky, $B4A0	; flicky
 		plcm	Nem_Squirrel, $B660	; squirrel
-		plcm	Nem_EndStH, $B8A0	; "SONIC THE HEDGEHOG"
+		plcm	Gra_EndStH, $B8A0	; "SONIC THE HEDGEHOG"
 	PLC_Endingend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - "TRY AGAIN" and "END" screens
 ; ---------------------------------------------------------------------------
 PLC_TryAgain:	dc.w ((PLC_TryAgainend-PLC_TryAgain-2)/6)-1
-		plcm	Nem_EndEm, $78A0	; emeralds
-		plcm	Nem_TryAgain, $7C20	; Eggman
-		plcm	Nem_CreditText, $B400	; credits alphabet
+		plcm	Gra_EndEm, $78A0	; emeralds
+		plcm	Gra_TryAgain, $7C20	; Eggman
+		plcm	Gra_CreditText, $B400	; credits alphabet
 	PLC_TryAgainend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - Eggman on SBZ 2
 ; ---------------------------------------------------------------------------
 PLC_EggmanSBZ2:	dc.w ((PLC_EggmanSBZ2end-PLC_EggmanSBZ2-2)/6)-1
 		plcm	Nem_SbzBlock, $A300	; block
-		plcm	Nem_Sbz2Eggman, $8000	; Eggman
+		plcm	Gra_Sbz2Eggman, $8000	; Eggman
 		plcm	Nem_LzSwitch, $9400	; switch
 	PLC_EggmanSBZ2end:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - final boss
 ; ---------------------------------------------------------------------------
 PLC_FZBoss:	dc.w ((PLC_FZBossend-PLC_FZBoss-2)/6)-1
-		plcm	Nem_FzEggman, $7400	; Eggman after boss
-		plcm	Nem_FzBoss, $6000	; FZ boss
-		plcm	Nem_Eggman, $8000	; Eggman main patterns
-		plcm	Nem_Sbz2Eggman, $8E00	; Eggman without ship
-		plcm	Nem_Exhaust, $A540	; exhaust flame
+		plcm	Gra_FzEggman, $7400	; Eggman after boss
+		plcm	Gra_FzBoss, $6000	; FZ boss
+		plcm	Gra_Eggman, $8000	; Eggman main patterns
+		plcm	Gra_Sbz2Eggman, $8E00	; Eggman without ship
+		plcm	Gra_Exhaust, $A540	; exhaust flame
 	PLC_FZBossend:
 		even
 

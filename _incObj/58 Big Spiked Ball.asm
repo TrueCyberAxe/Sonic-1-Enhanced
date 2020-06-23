@@ -55,11 +55,15 @@ BBall_Move:	; Routine 2
 ; ===========================================================================
 
 @type00:
-		rts	
+		rts
 ; ===========================================================================
 
 @type01:
+	if TweakMathOptimizations=0
 		move.w	#$60,d1
+	else
+		moveq	#$60,d1
+	endc
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
@@ -71,23 +75,31 @@ BBall_Move:	; Routine 2
 		move.w	bball_origX(a0),d1
 		sub.w	d0,d1
 		move.w	d1,obX(a0)	; move object horizontally
-		rts	
+		rts
 ; ===========================================================================
 
 @type02:
-		move.w	#$60,d1
+	if TweakRemoveReduntantCode>0
+		if TweakMathOptimizations=0
+			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
+		else
+			moveq	#$60,d1 															; <- WTF??? Why is this here? It's not even used
+		endc
+	endc
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
 		beq.s	@noflip2
 		neg.w	d0
-		addi.w	#$80,d0
+	if TweakRemoveReduntantCode>0
+		addi.w	#$80,d0																; add $80 to osc value <-HEY why is this not $60?
+	endc
 
 	@noflip2:
 		move.w	bball_origY(a0),d1
 		sub.w	d0,d1
 		move.w	d1,obY(a0)	; move object vertically
-		rts	
+		rts
 ; ===========================================================================
 
 @type03:
@@ -108,4 +120,4 @@ BBall_Move:	; Routine 2
 		add.w	d3,d5
 		move.w	d4,obY(a0)	; move object circularly
 		move.w	d5,obX(a0)
-		rts	
+		rts

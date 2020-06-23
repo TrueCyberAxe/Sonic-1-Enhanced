@@ -126,10 +126,10 @@ FBlock_Action:	; Routine 2
 		bsr.w	SolidObject
 
 	@chkdel:
-		if Revision=0
+	if Revision=0
 		out_of_range	DeleteObject,fb_origX(a0)
 		bra.w	DisplaySprite
-		else
+	else
 			out_of_range.s	@chkdel2,fb_origX(a0)
 		@display:
 			bra.w	DisplaySprite
@@ -140,7 +140,7 @@ FBlock_Action:	; Routine 2
 			bne.s	@display
 		@delete:
 			jmp	(DeleteObject).l
-		endc
+	endc
 ; ===========================================================================
 @index:		dc.w @type00-@index, @type01-@index
 		dc.w @type02-@index, @type03-@index
@@ -153,7 +153,7 @@ FBlock_Action:	; Routine 2
 
 @type00:
 ; doesn't move
-		rts	
+		rts
 ; ===========================================================================
 
 @type01:
@@ -180,7 +180,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origX(a0),d1
 		sub.w	d0,d1
 		move.w	d1,obX(a0)	; move object horizontally
-		rts	
+		rts
 ; ===========================================================================
 
 @type03:
@@ -207,7 +207,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origY(a0),d1
 		sub.w	d0,d1
 		move.w	d1,obY(a0)	; move object vertically
-		rts	
+		rts
 ; ===========================================================================
 
 @type05:
@@ -254,7 +254,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origY(a0),d1
 		add.w	d0,d1
 		move.w	d1,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_104C8:
@@ -296,7 +296,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origY(a0),d1
 		add.w	d0,d1
 		move.w	d1,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_1052C:
@@ -332,7 +332,7 @@ FBlock_Action:	; Routine 2
 		clr.b	obSubtype(a0)
 
 @locret_10578:
-		rts	
+		rts
 ; ===========================================================================
 
 @type0C:
@@ -361,7 +361,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origX(a0),d1
 		add.w	d0,d1
 		move.w	d1,obX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_105C0:
@@ -402,7 +402,7 @@ FBlock_Action:	; Routine 2
 		move.w	fb_origX(a0),d1
 		add.w	d0,d1
 		move.w	d1,obX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_10624:
@@ -463,7 +463,7 @@ FBlock_Action:	; Routine 2
 		neg.w	d1
 		add.w	fb_origY(a0),d1
 		move.w	d1,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_106AE:
@@ -477,7 +477,7 @@ FBlock_Action:	; Routine 2
 		addq.w	#1,d1
 		add.w	fb_origX(a0),d1
 		move.w	d1,obX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_106CC:
@@ -491,7 +491,7 @@ FBlock_Action:	; Routine 2
 		addq.w	#1,d1
 		add.w	fb_origY(a0),d1
 		move.w	d1,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_106EA:
@@ -501,4 +501,4 @@ FBlock_Action:	; Routine 2
 		neg.w	d1
 		add.w	fb_origX(a0),d1
 		move.w	d1,obX(a0)
-		rts	
+		rts

@@ -98,13 +98,19 @@ LWall_Solid:	; Routine 2
 		bsr.w	SpeedToPos
 
 	@rangechk:
+	if BugFixRenderBeforeInit=0 ; Bug 1 / 6 Fix
 		bsr.w	DisplaySprite
+	endc
 		tst.b	lwall_flag(a0)	; is wall already moving?
 		bne.s	@moving		; if yes, branch
 		out_of_range.s	@chkgone
 
 	@moving:
-		rts	
+		if BugFixRenderBeforeInit=0 ; Bug 1 / 6 Fix
+			rts
+		else
+			bra.w	DisplaySprite
+		endc
 ; ===========================================================================
 
 @chkgone:
@@ -113,7 +119,7 @@ LWall_Solid:	; Routine 2
 		move.b	obRespawnNo(a0),d0
 		bclr	#7,2(a2,d0.w)
 		move.b	#8,obRoutine(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 LWall_Move:	; Routine 6

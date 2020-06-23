@@ -78,7 +78,9 @@ Bri_Action:	; Routine 2
 		bsr.w	Bri_Bend
 
 	@display:
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Bri_ChkDel
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||

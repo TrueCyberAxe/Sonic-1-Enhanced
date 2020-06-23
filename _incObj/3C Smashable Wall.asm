@@ -36,7 +36,7 @@ Smash_Solid:	; Routine 2
 		bne.s	@chkroll	; if yes, branch
 
 @donothing:
-		rts	
+		rts
 ; ===========================================================================
 
 @chkroll:
@@ -67,9 +67,18 @@ Smash_Solid:	; Routine 2
 		bsr.s	SmashObject
 
 Smash_FragMove:	; Routine 4
+	if BugFixRenderBeforeInit>0 ; Bug 6
+		addq.l  #4,sp
+	endc
 		bsr.w	SpeedToPos
 		addi.w	#$70,obVelY(a0)	; make fragment	fall faster
+	if BugFixRenderBeforeInit=0 ; Bug 3
 		bsr.w	DisplaySprite
+	endc
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 3
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

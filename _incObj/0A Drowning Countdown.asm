@@ -123,7 +123,7 @@ Drown_AirLeft:	; Routine $C
 		bpl.s	Drown_AirLeft_Delete
 		jmp	(DisplaySprite).l
 
-Drown_AirLeft_Delete:	
+Drown_AirLeft_Delete:
 		jmp	(DeleteObject).l
 ; ===========================================================================
 
@@ -149,7 +149,7 @@ Drown_ShowNumber:
 		move.b	#id_Drown_AirLeft,obRoutine(a0) ; goto Drown_AirLeft next
 
 	@nonumber:
-		rts	
+		rts
 ; ===========================================================================
 Drown_WobbleData:
 		if Revision=0
@@ -221,13 +221,17 @@ Drown_Countdown:; Routine $A
 		sfx	sfx_Warning,0,0,0	; play "ding-ding" warning sound
 
 @reduceair:
-		subq.w	#1,(v_air).w	; subtract 1 from air remaining
-		bcc.w	@gotomakenum	; if air is above 0, branch
+	if TweakFixMonitorScubaGear>0
+		tst.b	(f_gogglecheck).w				; was a goggle monitor broken?
+		bne	@gotomakenum							; if yes, branch
+	endc
+		subq.w	#1,(v_air).w					; subtract 1 from air remaining
+		bcc.w	@gotomakenum						; if air is above 0, branch
 
 		; Sonic drowns here
 		bsr.w	ResumeMusic
-		move.b	#$81,(f_lockmulti).w ; lock controls
-		sfx	sfx_Drown,0,0,0	; play drowning sound
+		move.b	#$81,(f_lockmulti).w 	; lock controls
+		sfx	sfx_Drown,0,0,0						; play drowning sound
 		move.b	#$A,$34(a0)
 		move.w	#1,$36(a0)
 		move.w	#$78,$2C(a0)
@@ -242,16 +246,20 @@ Drown_Countdown:; Routine $A
 		move.w	#0,obInertia(a0)
 		move.b	#1,(f_nobgscroll).w
 		movea.l	(sp)+,a0
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_13F86:
 		subq.w	#1,$2C(a0)
+	if BugFixDrowningTimer=0
 		bne.s	@loc_13F94
+	else
+		bne.s	@nochange
+	endc
 		move.b	#6,(v_player+obRoutine).w
-		rts	
+		rts
 ; ===========================================================================
-
+	if BugFixDrowningTimer=0 ; @TODO Double check this is correct
 	@loc_13F94:
 		move.l	a0,-(sp)
 		lea	(v_player).w,a0
@@ -259,6 +267,7 @@ Drown_Countdown:; Routine $A
 		addi.w	#$10,obVelY(a0)
 		movea.l	(sp)+,a0
 		bra.s	@nochange
+	endc
 ; ===========================================================================
 
 @gotomakenum:
@@ -332,4 +341,4 @@ Drown_Countdown:; Routine $A
 		clr.w	$36(a0)
 
 @nocountdown:
-		rts	
+		rts

@@ -62,7 +62,11 @@ SBall_Main:	; Routine 0
 		bcs.s	@fail
 
 @makechain:
+	if BugFixRenderBeforeInit=0 ; Bug 5
 		bsr.w	FindFreeObj
+	else
+		bsr.w	FindNextFreeObj
+	endc
 		bne.s	@fail
 		addq.b	#1,sball_childs(a0) ; increment child object counter
 		move.w	a1,d5		; get child object RAM address
@@ -136,7 +140,7 @@ SBall_Move:	; Routine 2
 		move.w	d4,obY(a1)
 		move.w	d5,obX(a1)
 		dbf	d6,@loop
-		rts	
+		rts
 ; ===========================================================================
 
 @chkdel:
@@ -158,7 +162,7 @@ SBall_Move:	; Routine 2
 		bsr.w	DeleteChild
 		dbf	d2,@deleteloop ; delete all pieces of	chain
 
-		rts	
+		rts
 ; ===========================================================================
 
 SBall_Display:	; Routine 4

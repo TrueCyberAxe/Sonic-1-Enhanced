@@ -10,7 +10,7 @@ Sonic_Water:
 		beq.s	@islabyrinth	; if yes, branch
 
 	@exit:
-		rts	
+		rts
 ; ===========================================================================
 
 	@islabyrinth:
@@ -41,6 +41,9 @@ Sonic_Water:
 		move.w	#$C,(v_sonspeedacc).w ; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w ; restore Sonic's deceleration
 		asl	obVelY(a0)
+	if TweakFixHurtWaterPhystics>0
+    tst.w obVelY(a0)
+	endc
 		beq.w	@exit
 		move.b	#id_Splash,(v_objspace+$300).w ; load splash object
 		cmpi.w	#-$1000,obVelY(a0)

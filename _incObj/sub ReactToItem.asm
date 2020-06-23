@@ -6,7 +6,7 @@
 
 
 ReactToItem:
-		nop	
+		nop
 		move.w	obX(a0),d2	; load Sonic's x-axis position
 		move.w	obY(a0),d3	; load Sonic's y-axis position
 		subq.w	#8,d2
@@ -36,7 +36,7 @@ ReactToItem:
 		dbf	d6,@loop	; repeat $5F more times
 
 		moveq	#0,d0
-		rts	
+		rts
 ; ===========================================================================
 @sizes:		;   width, height
 		dc.b  $14, $14		; $01
@@ -135,7 +135,7 @@ ReactToItem:
 		addq.b	#2,obRoutine(a1) ; advance the object's routine counter
 
 	@invincible:
-		rts	
+		rts
 ; ===========================================================================
 
 React_Monitor:
@@ -151,7 +151,7 @@ React_Monitor:
 		tst.b	ob2ndRout(a1)
 		bne.s	@donothing
 		addq.b	#4,ob2ndRout(a1) ; advance the monitor's routine counter
-		rts	
+		rts
 ; ===========================================================================
 
 @movingdown:
@@ -161,12 +161,16 @@ React_Monitor:
 		addq.b	#2,obRoutine(a1) ; advance the monitor's routine counter
 
 	@donothing:
-		rts	
+		rts
 ; ===========================================================================
 
 React_Enemy:
 		tst.b	(v_invinc).w	; is Sonic invincible?
 		bne.s	@donthurtsonic	; if yes, branch
+	if FeatureSpindash>1
+		cmpi.b	#id_Spindash,obAnim(a0)	; is Sonic Spin Dashing?
+		beq.w @donthurtsonic	; if yes, branch
+	endc
 		cmpi.b	#id_Roll,obAnim(a0) ; is Sonic rolling/jumping?
 		bne.w	React_ChkHurt	; if not, branch
 
@@ -184,7 +188,7 @@ React_Enemy:
 		bset	#7,obStatus(a1)
 
 	@flagnotclear:
-		rts	
+		rts
 ; ===========================================================================
 
 @breakenemy:
@@ -214,16 +218,16 @@ React_Enemy:
 		cmp.w	obY(a1),d0
 		bcc.s	@bounceup
 		neg.w	obVelY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 	@bouncedown:
 		addi.w	#$100,obVelY(a0)
-		rts	
+		rts
 
 	@bounceup:
 		subi.w	#$100,obVelY(a0)
-		rts	
+		rts
 
 @points:	dc.w 10, 20, 50, 100	; points awarded div 10
 
@@ -238,11 +242,11 @@ React_ChkHurt:
 
 	@isflashing:
 		moveq	#-1,d0
-		rts	
+		rts
 ; ===========================================================================
 
 	@notinvincible:
-		nop	
+		nop
 		tst.w	$30(a0)		; is Sonic flashing?
 		bne.s	@isflashing	; if yes, branch
 		movea.l	a1,a2
@@ -258,56 +262,67 @@ React_ChkHurt:
 
 
 HurtSonic:
-		tst.b	(v_shield).w	; does Sonic have a shield?
-		bne.s	@hasshield	; if yes, branch
-		tst.w	(v_rings).w	; does Sonic have any rings?
-		beq.w	@norings	; if not, branch
+	if TweakFixMonitorScubaGear>0
+		tst.b	(f_gogglecheck).w						; does Sonic have a Goggle Flag?
+	endc
+		tst.b	(v_shield).w								; does Sonic have a shield?
+		bne.s	@hasshield									; if yes, branch
+		tst.w	(v_rings).w									; does Sonic have any rings?
+		beq.w	@norings										; if not, branch
 
 		jsr	(FindFreeObj).l
 		bne.s	@hasshield
-		move.b	#id_RingLoss,0(a1) ; load bouncing multi rings object
+		move.b	#id_RingLoss,0(a1) 				; load bouncing multi rings object
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 
+	if TweakFixMonitorScubaGear>0
+	@hasscuba:
+		move.b	#0,(f_gogglecheck).w 			; move 0 to the goggle check
+	endc
+
 	@hasshield:
-		move.b	#0,(v_shield).w	; remove shield
+		move.b	#0,(v_shield).w						; remove shield
 		move.b	#4,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
 		bset	#1,obStatus(a0)
-		move.w	#-$400,obVelY(a0) ; make Sonic bounce away from the object
+		move.w	#-$400,obVelY(a0) 				; make Sonic bounce away from the object
 		move.w	#-$200,obVelX(a0)
-		btst	#6,obStatus(a0)	; is Sonic underwater?
-		beq.s	@isdry		; if not, branch
+		btst	#6,obStatus(a0)							; is Sonic underwater?
+		beq.s	@isdry											; if not, branch
 
-		move.w	#-$200,obVelY(a0) ; slower bounce
+		move.w	#-$200,obVelY(a0) 				; slower bounce
 		move.w	#-$100,obVelX(a0)
 
 	@isdry:
 		move.w	obX(a0),d0
 		cmp.w	obX(a2),d0
-		bcs.s	@isleft		; if Sonic is left of the object, branch
-		neg.w	obVelX(a0)	; if Sonic is right of the object, reverse
+		bcs.s	@isleft											; if Sonic is left of the object, branch
+		neg.w	obVelX(a0)									; if Sonic is right of the object, reverse
 
 	@isleft:
+	if FeatureSpindash>0
+		move.b #0,f_spindash(a0) 					; clear Spin Dash flag
+	endc
 		move.w	#0,obInertia(a0)
 		move.b	#id_Hurt,obAnim(a0)
-		move.w	#120,$30(a0)	; set temp invincible time to 2 seconds
-		move.w	#sfx_Death,d0	; load normal damage sound
-		cmpi.b	#id_Spikes,(a2)	; was damage caused by spikes?
-		bne.s	@sound		; if not, branch
-		cmpi.b	#id_Harpoon,(a2) ; was damage caused by LZ harpoon?
-		bne.s	@sound		; if not, branch
-		move.w	#sfx_HitSpikes,d0 ; load spikes damage sound
+		move.w	#120,$30(a0)							; set temp invincible time to 2 seconds
+		move.w	#sfx_Death,d0							; load normal damage sound
+		cmpi.b	#id_Spikes,(a2)						; was damage caused by spikes?
+		bne.s	@sound											; if not, branch
+		cmpi.b	#id_Harpoon,(a2) 					; was damage caused by LZ harpoon?
+		bne.s	@sound											; if not, branch
+		move.w	#sfx_HitSpikes,d0 				; load spikes damage sound
 
 	@sound:
 		jsr	(PlaySound_Special).l
 		moveq	#-1,d0
-		rts	
+		rts
 ; ===========================================================================
 
 @norings:
 		tst.w	(f_debugmode).w	; is debug mode	cheat on?
-		bne.w	@hasshield	; if yes, branch
+		bne.w	@hasshield			; if yes, branch
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to	kill Sonic
@@ -317,9 +332,12 @@ HurtSonic:
 
 
 KillSonic:
-		tst.w	(v_debuguse).w	; is debug mode	active?
-		bne.s	@dontdie	; if yes, branch
-		move.b	#0,(v_invinc).w	; remove invincibility
+	if FeatureRetainRingsBetweenActs>0
+		move.w	d0,(v_rings).w				; clear rings
+	endc
+		tst.w	(v_debuguse).w					; is debug mode	active?
+		bne.s	@dontdie								; if yes, branch
+		move.b	#0,(v_invinc).w				; remove invincibility
 		move.b	#6,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
 		bset	#1,obStatus(a0)
@@ -329,17 +347,17 @@ KillSonic:
 		move.w	obY(a0),$38(a0)
 		move.b	#id_Death,obAnim(a0)
 		bset	#7,obGfx(a0)
-		move.w	#sfx_Death,d0	; play normal death sound
-		cmpi.b	#id_Spikes,(a2)	; check	if you were killed by spikes
+		move.w	#sfx_Death,d0					; play normal death sound
+		cmpi.b	#id_Spikes,(a2)				; check	if you were killed by spikes
 		bne.s	@sound
-		move.w	#sfx_HitSpikes,d0 ; play spikes death sound
+		move.w	#sfx_HitSpikes,d0 		; play spikes death sound
 
 	@sound:
 		jsr	(PlaySound_Special).l
 
 	@dontdie:
 		moveq	#-1,d0
-		rts	
+		rts
 ; End of function KillSonic
 
 
@@ -357,7 +375,7 @@ React_Special:
 		beq.s	@D7orE1		; if yes, branch
 		cmpi.b	#$21,d1		; is collision type $E1	?
 		beq.s	@D7orE1		; if yes, branch
-		rts	
+		rts
 ; ===========================================================================
 
 @caterkiller:
@@ -396,5 +414,5 @@ React_Special:
 
 @D7orE1:
 		addq.b	#1,obColProp(a1)
-		rts	
+		rts
 ; End of function React_Special

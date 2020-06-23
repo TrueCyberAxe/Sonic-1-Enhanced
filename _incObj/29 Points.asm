@@ -6,8 +6,12 @@ Points:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
 		move.w	Poi_Index(pc,d0.w),d1
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		jsr	Poi_Index(pc,d1.w)
 		bra.w	DisplaySprite
+	else
+		jmp Poi_Index(pc,d1.w)
+	endc
 ; ===========================================================================
 Poi_Index:	dc.w Poi_Main-Poi_Index
 		dc.w Poi_Slower-Poi_Index
@@ -27,4 +31,8 @@ Poi_Slower:	; Routine 2
 		bpl.w	DeleteObject	; if not, delete
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)	; reduce object	speed
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 6
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

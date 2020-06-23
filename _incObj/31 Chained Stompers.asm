@@ -129,7 +129,9 @@ loc_B798:	; Routine 2
 		movea.l	a2,a0
 
 CStom_Display:
+	if BugFixRenderBeforeInit=0 ; Bug 2 / 6 Fix
 		bsr.w	DisplaySprite
+	endc
 		bra.w	CStom_ChkDel
 ; ===========================================================================
 
@@ -150,11 +152,17 @@ loc_B7FE:	; Routine 4
 		move.w	d0,obY(a0)
 
 CStom_Display2:	; Routine 6
+	if BugFixRenderBeforeInit=0  ; Bug 1 / 6 Fix
 		bsr.w	DisplaySprite
+	endc
 
 CStom_ChkDel:
-		out_of_range	DeleteObject
-		rts	
+	out_of_range	DeleteObject
+	if BugFixRenderBeforeInit=0 ; Bug 1 / 2 / 6 Fix
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 CStom_Types:
@@ -224,7 +232,7 @@ CStom_Restart:
 		move.b	$32(a0),d0
 		add.w	$30(a0),d0
 		move.w	d0,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 CStom_Type01:

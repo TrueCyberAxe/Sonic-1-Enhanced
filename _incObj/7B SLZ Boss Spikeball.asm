@@ -78,7 +78,7 @@ loc_18DAE:
 ; ===========================================================================
 
 locret_18DC4:
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18DC6:	; Routine 4
@@ -141,7 +141,7 @@ loc_18E48:
 		bne.s	loc_18E7A
 		move.w	#$20,obSubtype(a0)
 		move.b	#8,obRoutine(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18E7A:
@@ -161,7 +161,7 @@ loc_18E96:
 		move.b	obDelayAni(a0),obTimeFrame(a0)
 
 locret_18EA8:
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18EAA:	; Routine 6
@@ -313,7 +313,7 @@ Obj7B_Explode:	; Routine 8
 		clr.b	obRoutine(a0)
 		cmpi.w	#$20,obSubtype(a0)
 		beq.s	Obj7B_MakeFrag
-		rts	
+		rts
 ; ===========================================================================
 
 Obj7B_MakeFrag:
@@ -341,7 +341,7 @@ Obj7B_Loop:
 loc_1909A:
 		dbf	d1,Obj7B_Loop	; repeat sequence 3 more times
 
-		rts	
+		rts
 ; ===========================================================================
 Obj7B_FragSpeed:dc.w -$100, -$340	; horizontal, vertical
 		dc.w -$A0, -$240
@@ -359,5 +359,12 @@ Obj7B_MoveFrag:	; Routine $A
 		lsr.w	#2,d0
 		move.b	d0,obFrame(a0)
 		tst.b	1(a0)
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		bpl.w	Obj7A_Delete
-		rts	
+	else
+		bmi.s   @locret
+		addq.l  #4,sp
+		bra.w   Obj7A_Delete
+	@locret:
+	endc
+		rts

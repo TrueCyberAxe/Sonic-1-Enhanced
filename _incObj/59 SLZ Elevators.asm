@@ -49,7 +49,7 @@ Elev_Main:	; Routine 0
 		move.w	d0,elev_dist(a0)
 		move.w	d0,$3E(a0)
 		addq.l	#4,sp
-		rts	
+		rts
 ; ===========================================================================
 
 	@normal:
@@ -93,7 +93,7 @@ Elev_Action:	; Routine 4
 		jmp	(MvSonicOnPtfm2).l
 
 	@deleted:
-		rts	
+		rts
 ; ===========================================================================
 
 Elev_Types:
@@ -112,7 +112,7 @@ Elev_Types:
 ; ===========================================================================
 
 @type00:
-		rts	
+		rts
 ; ===========================================================================
 
 @type01:
@@ -121,7 +121,7 @@ Elev_Types:
 		addq.b	#1,obSubtype(a0) ; if yes, add 1 to type
 
 	@notstanding:
-		rts	
+		rts
 ; ===========================================================================
 
 @type02:
@@ -130,7 +130,7 @@ Elev_Types:
 		neg.w	d0
 		add.w	elev_origY(a0),d0
 		move.w	d0,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @type04:
@@ -138,7 +138,7 @@ Elev_Types:
 		move.w	$34(a0),d0
 		add.w	elev_origY(a0),d0
 		move.w	d0,obY(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @type06:
@@ -151,7 +151,7 @@ Elev_Types:
 		move.w	$34(a0),d0
 		add.w	elev_origX(a0),d0
 		move.w	d0,obX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @type08:
@@ -164,7 +164,7 @@ Elev_Types:
 		neg.w	d0
 		add.w	elev_origX(a0),d0
 		move.w	d0,obX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 @type09:
@@ -175,7 +175,7 @@ Elev_Types:
 		move.w	d0,obY(a0)
 		tst.b	obSubtype(a0)
 		beq.w	@typereset
-		rts	
+		rts
 ; ===========================================================================
 
 	@typereset:
@@ -225,7 +225,7 @@ loc_10CF0:
 		clr.b	obSubtype(a0)
 
 locret_10CFA:
-		rts	
+		rts
 ; End of function Elev_Move
 
 ; ===========================================================================
@@ -242,6 +242,11 @@ Elev_MakeMulti:	; Routine 6
 		move.b	#$E,obSubtype(a1)
 
 @chkdel:
+	if BugFixRenderBeforeInit=0
 		addq.l	#4,sp
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit>0
+		addq.l	#4,sp
+	endc
+		rts

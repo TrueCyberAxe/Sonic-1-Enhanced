@@ -33,6 +33,12 @@ Edge_Solid:	; Routine 2
 		bsr.w	Obj44_SolidWall
 
 Edge_Display:	; Routine 4
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

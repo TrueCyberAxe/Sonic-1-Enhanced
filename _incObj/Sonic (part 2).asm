@@ -13,6 +13,9 @@ loc_1380C:
 		bsr.w	Sonic_HurtStop
 		bsr.w	Sonic_LevelBound
 		bsr.w	Sonic_RecordPosition
+	if TweakFixHurtWaterPhystics>0
+	  bsr.w	Sonic_Water
+	endc
 		bsr.w	Sonic_Animate
 		bsr.w	Sonic_LoadGfx
 		jmp	(DisplaySprite).l
@@ -41,7 +44,7 @@ Sonic_HurtStop:
 		move.w	#$78,$30(a0)
 
 locret_13860:
-		rts	
+		rts
 ; End of function Sonic_HurtStop
 
 ; ---------------------------------------------------------------------------
@@ -60,10 +63,18 @@ Sonic_Death:	; Routine 6
 
 
 GameOver:
+	if BugFixDeathBoundary=0
 		move.w	(v_limitbtm2).w,d0
+	else
+		move.w	(v_screenposy).w,d0
+	endc
 		addi.w	#$100,d0
 		cmp.w	obY(a0),d0
+	if BugFixDeathBoundary=0
 		bcc.w	locret_13900
+	else
+		bge.w	locret_13900
+	endc
 		move.w	#-$38,obVelY(a0)
 		addq.b	#2,obRoutine(a0)
 		clr.b	(f_timecount).w	; stop time counter
@@ -95,7 +106,7 @@ loc_138D4:
 ; ===========================================================================
 
 locret_13900:
-		rts	
+		rts
 ; End of function GameOver
 
 ; ---------------------------------------------------------------------------
@@ -110,4 +121,4 @@ Sonic_ResetLevel:; Routine 8
 		move.w	#1,(f_restart).w ; restart the level
 
 	locret_13914:
-		rts	
+		rts

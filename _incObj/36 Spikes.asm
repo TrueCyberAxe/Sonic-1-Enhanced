@@ -79,23 +79,23 @@ Spik_Upright:
 		bpl.s	Spik_Display
 
 Spik_Hurt:
-		tst.b	(v_invinc).w	; is Sonic invincible?
-		bne.s	Spik_Display	; if yes, branch
+		tst.b	(v_invinc).w			; is Sonic invincible?
+		bne.s	Spik_Display			; if yes, branch
 		move.l	a0,-(sp)
 		movea.l	a0,a2
 		lea	(v_player).w,a0
 		cmpi.b	#4,obRoutine(a0)
 		bcc.s	loc_CF20
-	if Revision<>2
+	if Revision<2
 		move.l	obY(a0),d3
 		move.w	obVelY(a0),d0
 		ext.l	d0
 		asl.l	#8,d0
 	else
 		; This fixes the infamous "spike bug"
-		tst.w	flashtime(a0)	; Is Sonic flashing after being hurt?
-		bne.s	loc_CF20	; If so, skip getting hurt
-		jmp	(loc_E0).l	; This is a copy of the above code that was pushed aside for this
+		tst.w	flashtime(a0)			; Is Sonic flashing after being hurt?
+		bne.s	loc_CF20					; If so, skip getting hurt
+		jmp	(loc_E0).l					; This is a copy of the above code that was pushed aside for this
 loc_D5A2:
 	endif
 		sub.l	d0,d3
@@ -106,9 +106,15 @@ loc_CF20:
 		movea.l	(sp)+,a0
 
 Spik_Display:
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject,spik_origX(a0)
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Spik_Type0x:
@@ -133,7 +139,7 @@ Spik_Type01:
 		move.b	$34(a0),d0
 		add.w	spik_origY(a0),d0
 		move.w	d0,obY(a0)	; move the object vertically
-		rts	
+		rts
 ; ===========================================================================
 
 Spik_Type02:
@@ -142,7 +148,7 @@ Spik_Type02:
 		move.b	$34(a0),d0
 		add.w	spik_origX(a0),d0
 		move.w	d0,obX(a0)	; move the object horizontally
-		rts	
+		rts
 ; ===========================================================================
 
 Spik_Wait:
@@ -176,4 +182,4 @@ loc_CFC6:
 		move.w	#60,$38(a0)	; set time delay to 1 second
 
 locret_CFE6:
-		rts	
+		rts

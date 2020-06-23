@@ -117,7 +117,16 @@ LevSz_SonicPos:
 
 SetScreen:
 	LevSz_SkipStartPos:
-		subi.w	#160,d1		; is Sonic more than 160px from left edge?
+	if BugFixCameraFollow>0 || FeatureSpindash>0
+		clr.w (v_trackpos).w 		; reset Sonic's position tracking index
+		lea (v_tracksonic).w,a2 ; load the tracking array into a2
+		moveq #63,d2 						; begin a 64-step loop
+	@looppoint:
+		move.w d1,(a2)+ 				; fill in X
+		move.w d0,(a2)+ 				; fill in Y
+		dbf d2,@looppoint 			; loop
+	endc
+		subi.w	#160,d1					; is Sonic more than 160px from left edge?
 		bcc.s	SetScr_WithinLeft ; if yes, branch
 		moveq	#0,d1
 
@@ -219,11 +228,11 @@ BgScroll_GHZ:
 BgScroll_LZ:
 		asr.l	#1,d0
 		move.w	d0,(v_bgscreenposy).w
-		rts	
+		rts
 ; ===========================================================================
 
 BgScroll_MZ:
-		rts	
+		rts
 ; ===========================================================================
 
 BgScroll_SLZ:
@@ -231,7 +240,7 @@ BgScroll_SLZ:
 		addi.w	#$C0,d0
 		move.w	d0,(v_bgscreenposy).w
 		clr.l	(v_bgscreenposx).w
-		rts	
+		rts
 ; ===========================================================================
 
 BgScroll_SYZ:
@@ -243,7 +252,7 @@ BgScroll_SYZ:
 		addq.w	#1,d0
 		move.w	d0,(v_bgscreenposy).w
 		clr.l	(v_bgscreenposx).w
-		rts	
+		rts
 ; ===========================================================================
 
 BgScroll_SBZ:
@@ -251,7 +260,7 @@ BgScroll_SBZ:
 		asr.w	#3,d0
 		addq.w	#1,d0
 		move.w	d0,(v_bgscreenposy).w
-		rts	
+		rts
 ; ===========================================================================
 
 BgScroll_End:

@@ -80,7 +80,9 @@ SStom_Solid:	; Routine 2
 		move.w	#$20,d3
 		move.w	(sp)+,d4
 		bsr.w	SolidObject
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	SStom_ChkDel
 ; ===========================================================================
 
@@ -101,11 +103,17 @@ loc_BA8E:	; Routine 4
 		move.w	d0,obX(a0)
 
 SStom_Display:	; Routine 6
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 
 SStom_ChkDel:
-		out_of_range	DeleteObject,$3A(a0)
-		rts	
+			out_of_range	DeleteObject,$3A(a0)
+		if BugFixRenderBeforeInit=0 ; Bug 1 / Bug 2
+			rts
+		else
+			bra.w	DisplaySprite
+		endc
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -163,4 +171,4 @@ loc_BB3C:
 		neg.w	d0
 		add.w	$30(a0),d0
 		move.w	d0,obX(a0)
-		rts	
+		rts

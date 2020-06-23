@@ -1,7 +1,9 @@
 
 Bri_Platform:	; Routine 4
 		bsr.s	Bri_WalkOff
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Bri_ChkDel
 
 ; ---------------------------------------------------------------------------
@@ -31,5 +33,5 @@ loc_75B6:
 		bsr.w	Bri_MoveSonic
 
 locret_75BE:
-		rts	
+		rts
 ; End of function Bri_WalkOff

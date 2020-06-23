@@ -14,6 +14,9 @@ Sonic_Animate:
 		move.b	d0,obNextAni(a0) ; set to "no restart"
 		move.b	#0,obAniFrame(a0) ; reset animation
 		move.b	#0,obTimeFrame(a0) ; reset frame duration
+	if BugFixWalkJump=2
+		bclr    #5,obStatus(a0) ; clear pushing flag
+	endc
 
 	@do:
 		add.w	d0,d0
@@ -39,7 +42,7 @@ Sonic_Animate:
 		addq.b	#1,obAniFrame(a0) ; next frame number
 
 	@delay:
-		rts	
+		rts
 ; ===========================================================================
 
 @end_FF:
@@ -66,7 +69,7 @@ Sonic_Animate:
 		move.b	2(a1,d1.w),obAnim(a0) ; read next byte, run that animation
 
 	@end:
-		rts	
+		rts
 ; ===========================================================================
 
 @walkrunroll:
@@ -122,7 +125,7 @@ Sonic_Animate:
 		move.b	d2,obTimeFrame(a0) ; modify frame duration
 		bsr.w	@loadframe
 		add.b	d3,obFrame(a0)	; modify frame number
-		rts	
+		rts
 ; ===========================================================================
 
 @rolljump:
@@ -161,7 +164,7 @@ Sonic_Animate:
 
 	@negspeed:
 		addi.w	#$800,d2
-		bpl.s	@belowmax3	
+		bpl.s	@belowmax3
 		moveq	#0,d2
 
 	@belowmax3:

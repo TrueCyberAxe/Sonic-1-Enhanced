@@ -100,7 +100,7 @@ SonAni_Float4:	dc.b 3,	$3C, afChange, id_Walk
 		even
 
 id_Walk:	equ (ptr_Walk-Ani_Sonic)/2	; 0
-id_Run:		equ (ptr_Run-Ani_Sonic)/2	; 1
+id_Run:		equ (ptr_Run-Ani_Sonic)/2		; 1
 id_Roll:	equ (ptr_Roll-Ani_Sonic)/2	; 2
 id_Roll2:	equ (ptr_Roll2-Ani_Sonic)/2	; 3
 id_Push:	equ (ptr_Push-Ani_Sonic)/2	; 4

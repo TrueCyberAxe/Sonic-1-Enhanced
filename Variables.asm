@@ -347,3 +347,16 @@ v_creditsnum:	equ $FFFFFFF4	; credits index number (2 bytes)
 v_megadrive:	equ $FFFFFFF8	; Megadrive machine type
 f_debugmode:	equ $FFFFFFFA	; debug mode flag (sometimes 2 bytes)
 v_init:		equ $FFFFFFFC	; 'init' text string (4 bytes)
+
+; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
+; ------- Additional -------
+f_spindash:		 equ $29           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
+f_victory:     equ $FFFFF5C0     ; victory pose flag
+f_gogglecheck: equ $FFFFFFA0	   ; goggle flag move to FE2F?
+
+f_levelreload: equ $FFFFCF80     ; Reload Level Flag @TODO find unused byte in mem
+
+v_startscore:  equ $3A
+
+PLCQueue:      equ v_pal_buffer+4   			; start of PLC queue
+PLCQueueEnd:   equ v_screenposx-$20   		; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression

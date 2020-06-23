@@ -64,7 +64,9 @@ Plat_Solid:	; Routine 2
 Plat_Action:	; Routine 8
 		bsr.w	Plat_Move
 		bsr.w	Plat_Nudge
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Plat_ChkDel
 ; ===========================================================================
 
@@ -82,9 +84,10 @@ Plat_Action2:	; Routine 4
 		bsr.w	Plat_Nudge
 		move.w	(sp)+,d2
 		bsr.w	MvSonicOnPtfm2
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Plat_ChkDel
-
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -102,7 +105,7 @@ Plat_Nudge:
 		swap	d0
 		add.w	$2C(a0),d0
 		move.w	d0,obY(a0)
-		rts	
+		rts
 ; End of function Plat_Nudge
 
 ; ---------------------------------------------------------------------------
@@ -198,14 +201,14 @@ Plat_Move:
 		move.w	#30,$3A(a0)	; set time delay to 0.5	seconds
 
 	@type03_nomove:
-		rts	
+		rts
 
 	@type03_wait:
 		subq.w	#1,$3A(a0)	; subtract 1 from time
 		bne.s	@type03_nomove	; if time is > 0, branch
 		move.w	#32,$3A(a0)
 		addq.b	#1,obSubtype(a0) ; change to type 04 (falling)
-		rts	
+		rts
 ; ===========================================================================
 
 @type04:
@@ -240,7 +243,7 @@ Plat_Move:
 		move.b	#6,obRoutine(a0)
 
 	@locret_8074:
-		rts	
+		rts
 ; ===========================================================================
 
 @type07:
@@ -255,13 +258,13 @@ Plat_Move:
 		move.w	#60,$3A(a0)	; set time delay to 1 second
 
 	@type07_nomove:
-		rts	
+		rts
 
 	@type07_wait:
 		subq.w	#1,$3A(a0)	; subtract 1 from time delay
 		bne.s	@type07_nomove	; if time is > 0, branch
 		addq.b	#1,obSubtype(a0) ; change to type 08
-		rts	
+		rts
 ; ===========================================================================
 
 @type08:
@@ -273,7 +276,7 @@ Plat_Move:
 		clr.b	obSubtype(a0)	; change to type 00 (stop moving)
 
 	@type08_nostop:
-		rts	
+		rts
 ; ===========================================================================
 
 @type0A:
@@ -287,12 +290,16 @@ Plat_Move:
 
 @chgmotion:
 		move.b	(v_oscillate+$1A).w,$26(a0) ; update platform-movement variable
-		rts	
+		rts
 ; ===========================================================================
 
 Plat_ChkDel:
 		out_of_range.s	Plat_Delete,$32(a0)
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 2
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Plat_Delete:	; Routine 6

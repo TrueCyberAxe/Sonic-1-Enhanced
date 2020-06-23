@@ -76,14 +76,20 @@ loc_BDDE:
 		bchg	#1,obFrame(a0)
 
 But_Display:
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	But_Delete
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 But_Delete:
 		bsr.w	DeleteObject
-		rts	
+		rts
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -113,7 +119,7 @@ loc_BE4E:
 		moveq	#0,d0
 
 locret_BE5A:
-		rts	
+		rts
 ; ===========================================================================
 But_MZData:	dc.b $10, $10
 ; ===========================================================================
@@ -159,5 +165,5 @@ loc_BE9A:
 loc_BE9E:
 		move.w	(sp)+,d3
 		moveq	#1,d0
-		rts	
+		rts
 ; End of function But_MZBlock

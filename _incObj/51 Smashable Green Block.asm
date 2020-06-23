@@ -39,7 +39,7 @@ sonicAniFrame:	equ $32		; Sonic's current animation number
 		bne.s	@smash		; if yes, branch
 
 	@notspinning:
-		rts	
+		rts
 ; ===========================================================================
 
 @smash:
@@ -86,12 +86,21 @@ sonicAniFrame:	equ $32		; Sonic's current animation number
 		move.b	d2,obFrame(a1)
 
 Smab_Points:	; Routine 4
+	if BugFixRenderBeforeInit>0 ; Bug 6
+		addq.l  #4,sp
+	endc
 		bsr.w	SpeedToPos
 		addi.w	#$38,obVelY(a0)
+	if BugFixRenderBeforeInit=0 ; Bug 3
 		bsr.w	DisplaySprite
+	endc
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 3
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 Smab_Speeds:	dc.w -$200, -$200	; x-speed, y-speed
 		dc.w -$100, -$100

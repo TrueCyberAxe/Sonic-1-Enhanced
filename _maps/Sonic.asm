@@ -91,7 +91,14 @@ ptr_MS_Float6:	dc.w MS_Float6-Map_Sonic_internal
 ptr_MS_Injury:	dc.w MS_Injury-Map_Sonic_internal
 ptr_MS_GetAir:	dc.w MS_GetAir-Map_Sonic_internal
 ptr_MS_WaterSlide:dc.w MS_WaterSlide-Map_Sonic_internal
-
+	if FeatureSpindash>1
+ptr_MS_Spindash1:	dc.w MS_Spindash1-Map_Sonic
+ptr_MS_Spindash2:	dc.w MS_Spindash2-Map_Sonic
+ptr_MS_Spindash3:	dc.w MS_Spindash3-Map_Sonic
+ptr_MS_Spindash4:	dc.w MS_Spindash4-Map_Sonic
+ptr_MS_Spindash5:	dc.w MS_Spindash5-Map_Sonic
+ptr_MS_Spindash6:	dc.w MS_Spindash6-Map_Sonic
+	endc
 MS_Null:	dc.b 0
 MS_Stand:	dc.b 4			; standing
 		dc.b $EC, 8, 0,	0, $F0
@@ -440,4 +447,18 @@ MS_GetAir:	dc.b 3			; collecting bubble (LZ)
 MS_WaterSlide:	dc.b 2			; water	slide (LZ)
 		dc.b $F0, $F, 0, 0, $EC
 		dc.b $F8, 2, 0,	$10, $C
+	if FeatureSpindash>1
+	MS_Spindash1:	dc.b 1		; Spindash 1
+			dc.b	$F8, $F, 0, 0, $F4
+	MS_Spindash2:	dc.b 1		; Spindash 2
+			dc.b	$F8, $F, 0, 0, $F4
+	MS_Spindash3:	dc.b 1		; Spindash 3
+			dc.b	$F8, $F, 0, 0, $F4
+	MS_Spindash4:	dc.b 1		; Spindash 4
+			dc.b	$F8, $F, 0, 0, $F4
+	MS_Spindash5:	dc.b 1		; Spindash 5
+			dc.b	$F8, $F, 0, 0, $F4
+	MS_Spindash6:	dc.b 1		; Spindash 6
+			dc.b	$F8, $F, 0, 0, $F4
+	endc
 		even

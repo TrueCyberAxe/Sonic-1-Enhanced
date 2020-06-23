@@ -26,6 +26,12 @@ Rock_Solid:	; Routine 2
 		move.w	#$10,d3
 		move.w	obX(a0),d4
 		bsr.w	SolidObject
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

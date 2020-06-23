@@ -36,7 +36,7 @@ Pow_Move:	; Routine 2
 		bpl.w	Pow_Checks	; if not, branch
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)	; reduce object	speed
-		rts	
+		rts
 ; ===========================================================================
 
 Pow_Checks:
@@ -45,31 +45,35 @@ Pow_Checks:
 
 Pow_ChkEggman:
 		move.b	obAnim(a0),d0
-		cmpi.b	#1,d0		; does monitor contain Eggman?
+		cmpi.b	#1,d0								; does monitor contain Eggman?
 		bne.s	Pow_ChkSonic
-		rts			; Eggman monitor does nothing
+	if TweakFixMonitorEggman=0
+		rts													; Eggman monitor does nothing
+	else
+		bra		Spik_Hurt 						; Eggman monitor hits Sonic
+	endc
 ; ===========================================================================
 
 Pow_ChkSonic:
-		cmpi.b	#2,d0		; does monitor contain Sonic?
+		cmpi.b	#2,d0								; does monitor contain Sonic?
 		bne.s	Pow_ChkShoes
 
 	ExtraLife:
-		addq.b	#1,(v_lives).w	; add 1 to the number of lives you have
-		addq.b	#1,(f_lifecount).w ; update the lives counter
-		music	bgm_ExtraLife,1,0,0	; play extra life music
+		addq.b	#1,(v_lives).w			; add 1 to the number of lives you have
+		addq.b	#1,(f_lifecount).w 	; update the lives counter
+		music	bgm_ExtraLife,1,0,0		; play extra life music
 ; ===========================================================================
 
 Pow_ChkShoes:
-		cmpi.b	#3,d0		; does monitor contain speed shoes?
+		cmpi.b	#3,d0										; does monitor contain speed shoes?
 		bne.s	Pow_ChkShield
 
-		move.b	#1,(v_shoes).w	; speed up the BG music
+		move.b	#1,(v_shoes).w					; speed up the BG music
 		move.w	#$4B0,(v_player+$34).w	; time limit for the power-up
 		move.w	#$C00,(v_sonspeedmax).w ; change Sonic's top speed
 		move.w	#$18,(v_sonspeedacc).w	; change Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w	; change Sonic's deceleration
-		music	bgm_Speedup,1,0,0		; Speed	up the music
+		music	bgm_Speedup,1,0,0					; Speed	up the music
 ; ===========================================================================
 
 Pow_ChkShield:
@@ -106,7 +110,7 @@ Pow_ChkInvinc:
 ; ===========================================================================
 
 Pow_NoMusic:
-		rts	
+		rts
 ; ===========================================================================
 
 Pow_ChkRings:
@@ -129,9 +133,20 @@ Pow_ChkRings:
 ; ===========================================================================
 
 Pow_ChkS:
-		cmpi.b	#7,d0		; does monitor contain 'S'?
+		cmpi.b	#7,d0										; does monitor contain 'S'?
+	if TweakFixMonitorScubaGear=0
 		bne.s	Pow_ChkEnd
-		nop	
+	else
+		bne.s	Pow_ChkGoggles						; if not, branch to Goggle code
+	endc
+		nop
+
+	if TweakFixMonitorScubaGear>0
+Pow_ChkGoggles:
+		cmpi.b	#8,d0										; does monitor contain Goggles?
+		bne.s	Pow_ChkEnd								; if not, branch to Pow_ChkEnd
+		move.b	#1,(f_gogglecheck).w 		; move 1 to the goggle check
+	endc
 
 Pow_ChkEnd:
 		rts			; 'S' and goggles monitors do nothing
@@ -139,5 +154,12 @@ Pow_ChkEnd:
 
 Pow_Delete:	; Routine 4
 		subq.w	#1,obTimeFrame(a0)
-		bmi.w	DeleteObject	; delete after half a second
-		rts	
+	if BugFixRenderBeforeInit>0 ; Bug 6
+    bpl.s   @locret
+    addq.l  #4,sp
+  endc
+    bra.w   DeleteObject    ; delete after half a second
+  if BugFixRenderBeforeInit>0 ; Bug 6
+    @locret:
+  endc
+    rts

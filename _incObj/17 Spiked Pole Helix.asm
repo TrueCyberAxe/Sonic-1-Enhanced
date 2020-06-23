@@ -78,7 +78,9 @@ Hel_Build:
 
 Hel_Action:	; Routine 2, 4
 		bsr.w	Hel_RotateSpikes
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Hel_ChkDel
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
@@ -94,14 +96,18 @@ Hel_RotateSpikes:
 		move.b	#$84,obColType(a0) ; make object harmful
 
 locret_7DA6:
-		rts	
+		rts
 ; End of function Hel_RotateSpikes
 
 ; ===========================================================================
 
 Hel_ChkDel:
 		out_of_range	Hel_DelAll
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 2
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Hel_DelAll:
@@ -122,7 +128,7 @@ Hel_DelAll:
 
 Hel_Delete:	; Routine 6
 		bsr.w	DeleteObject
-		rts	
+		rts
 ; ===========================================================================
 
 Hel_Display:	; Routine 8

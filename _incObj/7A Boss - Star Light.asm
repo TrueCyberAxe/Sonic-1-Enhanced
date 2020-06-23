@@ -140,7 +140,7 @@ loc_18A36:
 		move.b	#$F,obColType(a0)
 
 locret_18A44:
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18A46:
@@ -149,7 +149,7 @@ loc_18A46:
 		move.b	#6,ob2ndRout(a0)
 		move.b	#$78,$3C(a0)
 		clr.w	obVelX(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 loc_18A5E:
@@ -317,7 +317,13 @@ loc_18BC6:
 
 loc_18BE0:
 		tst.b	obRender(a0)
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		bpl.w	Obj7A_Delete
+	else
+		bmi.w   loc_18BE8
+		addq.l  #4,sp
+		bra.w   Obj7A_Delete
+	endc
 
 loc_18BE8:
 		bsr.w	BossMove

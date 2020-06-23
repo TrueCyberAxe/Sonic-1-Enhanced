@@ -32,7 +32,7 @@ Mon_Main:	; Routine 0
 		beq.s	@notbroken	; if not, branch
 		move.b	#8,obRoutine(a0) ; run "Mon_Display" routine
 		move.b	#$B,obFrame(a0)	; use broken monitor frame
-		rts	
+		rts
 ; ===========================================================================
 
 	@notbroken:
@@ -74,15 +74,19 @@ Mon_Solid:	; Routine 2
 		bra.w	Mon_Animate
 ; ===========================================================================
 
-@normal:	; 2nd Routine 0
+@normal:	; 2nd Routine 0 ; loc_A1EC
 		move.w	#$1A,d1
 		move.w	#$F,d2
 		bsr.w	Mon_SolidSides
 		beq.w	loc_A25C
 		tst.w	obVelY(a1)
 		bmi.s	loc_A20A
-		cmpi.b	#id_Roll,obAnim(a1) ; is Sonic rolling?
-		beq.s	loc_A25C	; if yes, branch
+		cmpi.b	#id_Roll,obAnim(a1) 			; is Sonic rolling?
+		beq.s	loc_A25C										; if yes, branch
+	if FeatureSpindash>0
+		cmpi.b	#id_Spindash,obAnim(a1)		; is Sonic spin-dashing?
+		beq.s	loc_A25C										; if yes, branch
+	endc
 
 loc_A20A:
 		tst.w	d1
@@ -122,7 +126,17 @@ loc_A246:
 loc_A25C:
 		btst	#5,obStatus(a0)
 		beq.s	Mon_Animate
+
+	if BugFixWalkJump=1
+		cmpi.b	#id_Roll,obAnim(a1)		; is Sonic in his jumping/rolling animation?
+		beq.s	loc_A26A	; if so, branch
+		cmpi.b	#id_Drown,obAnim(a1)	; is Sonic in his drowning animation?
+		beq.s	loc_A26A	; if so, branch
+	endc
+
+	if BugFixWalkJump<2
 		move.w	#1,obAnim(a1)	; clear obAnim and set obNextAni to 1
+	endc
 
 loc_A26A:
 		bclr	#5,obStatus(a0)
@@ -133,9 +147,15 @@ Mon_Animate:	; Routine 6
 		bsr.w	AnimateSprite
 
 Mon_Display:	; Routine 8
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Mon_BreakOpen:	; Routine 4

@@ -15,14 +15,26 @@ Sonic_LoadGfx:
 		lea	(SonicDynPLC).l,a2 ; load PLC script
 		add.w	d0,d0
 		adda.w	(a2,d0.w),a2
+	if TweakSonic2LevelArtLoader=0
 		moveq	#0,d1
 		move.b	(a2)+,d1	; read "number of entries" value
 		subq.b	#1,d1
+	else
+		moveq	#0,d5
+		move.b	(a2)+,d5	; read "number of entries" value
+		subq.b	#1,d5
+	endc
 		bmi.s	@nochange	; if zero, branch
+	if TweakSonic2LevelArtLoader=0
 		lea	(v_sgfx_buffer).w,a3
 		move.b	#1,(f_sonframechg).w ; set flag for Sonic graphics DMA
+	else
+		move.w	#$F000,d4
+		move.l	#Art_Sonic,d6
+	endc
 
 	@readentry:
+	if TweakSonic2LevelArtLoader=0
 		moveq	#0,d2
 		move.b	(a2)+,d2
 		move.w	d2,d0
@@ -40,8 +52,26 @@ Sonic_LoadGfx:
 		dbf	d0,@loadtile	; repeat for number of tiles
 
 		dbf	d1,@readentry	; repeat for number of entries
+	else
+		moveq	#0,d1
+		move.b	(a2)+,d1
+		lsl.w	#8,d1
+		move.b	(a2)+,d1
+		move.w	d1,d3
+		lsr.w	#8,d3
+		andi.w	#$F0,d3
+		addi.w	#$10,d3
+		andi.w	#$FFF,d1
+		lsl.l	#5,d1
+		add.l	d6,d1
+		move.w	d4,d2
+		add.w	d3,d4
+		add.w	d3,d4
+		jsr	(QueueDMATransfer).l
+		dbf	d5,@readentry	; repeat for number of entries
+	endc
 
 	@nochange:
-		rts	
+		rts
 
 ; End of function Sonic_LoadGfx

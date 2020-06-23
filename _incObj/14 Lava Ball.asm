@@ -64,8 +64,13 @@ LBall_Action:	; Routine 2
 		bsr.w	AnimateSprite
 
 LBall_ChkDel:
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		out_of_range	DeleteObject
-		rts	
+	else
+		out_of_range	LBall_Delete
+  endc
+		rts
+
 ; ===========================================================================
 LBall_TypeIndex:dc.w LBall_Type00-LBall_TypeIndex, LBall_Type00-LBall_TypeIndex
 		dc.w LBall_Type00-LBall_TypeIndex, LBall_Type00-LBall_TypeIndex
@@ -89,7 +94,7 @@ loc_E41E:
 		bset	#1,obStatus(a0)
 
 locret_E430:
-		rts	
+		rts
 ; ===========================================================================
 ; lavaball type	04 flies up until it hits the ceiling
 
@@ -103,7 +108,7 @@ LBall_Type04:
 		move.w	#0,obVelY(a0)	; stop the object when it touches the ceiling
 
 locret_E452:
-		rts	
+		rts
 ; ===========================================================================
 ; lavaball type	05 falls down until it hits the	floor
 
@@ -117,7 +122,7 @@ LBall_Type05:
 		move.w	#0,obVelY(a0)	; stop the object when it touches the floor
 
 locret_E474:
-		rts	
+		rts
 ; ===========================================================================
 ; lavaball types 06-07 move sideways
 
@@ -132,7 +137,7 @@ LBall_Type06:
 		move.w	#0,obVelX(a0)	; stop object when it touches a	wall
 
 locret_E498:
-		rts	
+		rts
 ; ===========================================================================
 
 LBall_Type07:
@@ -146,12 +151,15 @@ LBall_Type07:
 		move.w	#0,obVelX(a0)	; stop object when it touches a	wall
 
 locret_E4BC:
-		rts	
+		rts
 ; ===========================================================================
 
 LBall_Type08:
-		rts	
+		rts
 ; ===========================================================================
 
 LBall_Delete:
+	if BugFixRenderBeforeInit>0 ; Bug 6
+		addq.l  #4,sp
+	endc
 		bra.w	DeleteObject

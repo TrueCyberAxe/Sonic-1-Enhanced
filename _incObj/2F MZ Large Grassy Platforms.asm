@@ -82,7 +82,9 @@ loc_AF8E:
 		bsr.w	SolidObject2F
 
 LGrass_Display:
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	LGrass_ChkDel
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
@@ -142,7 +144,7 @@ loc_AFF2:
 		move.w	lgrass_origY(a0),d1
 		sub.w	d0,d1
 		move.w	d1,obY(a0)	; update position on y-axis
-		rts	
+		rts
 ; ===========================================================================
 
 LGrass_Type05:
@@ -203,7 +205,7 @@ loc_B086:
 		dbf	d2,loc_B086
 
 locret_B09A:
-		rts	
+		rts
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -219,7 +221,7 @@ sub_B09C:
 		lsr.w	#6,d0
 		andi.w	#$7F,d0
 		move.b	d0,(a2)
-		rts	
+		rts
 ; End of function sub_B09C
 
 ; ===========================================================================
@@ -232,7 +234,11 @@ LGrass_ChkDel:
 
 loc_B0C6:
 		out_of_range	DeleteObject,lgrass_origX(a0)
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 2
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 LGrass_DelFlames:
@@ -258,7 +264,7 @@ loc_B0F4:
 		move.b	#0,$34(a0)
 
 locret_B116:
-		rts	
+		rts
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Collision data for large moving platforms (MZ)

@@ -94,6 +94,12 @@ Fan_Delay:	; Routine 2
 		move.b	d0,obFrame(a0)
 
 @chkdel:
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc

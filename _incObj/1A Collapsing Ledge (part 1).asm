@@ -64,11 +64,11 @@ Ledge_WalkOff:	; Routine $A
 ; ===========================================================================
 
 Ledge_Display:	; Routine 6
-		tst.b	ledge_timedelay(a0)	; has time delay reached zero?
-		beq.s	Ledge_TimeZero	; if yes, branch
-		tst.b	ledge_collapse_flag(a0)	; is ledge collapsing?
-		bne.w	loc_82D0	; if yes, branch
-		subq.b	#1,ledge_timedelay(a0) ; subtract 1 from time
+		tst.b	ledge_timedelay(a0)						; has time delay reached zero?
+		beq.s	Ledge_TimeZero								; if yes, branch
+		tst.b	ledge_collapse_flag(a0)				; is ledge collapsing?
+		bne.w	loc_82D0											; if yes, branch
+		subq.b	#1,ledge_timedelay(a0) 			; subtract 1 from time
 		bra.w	DisplaySprite
 ; ===========================================================================
 
@@ -89,17 +89,23 @@ loc_82FC:
 		move.b	#6,obRoutine(a0) ; run "Ledge_Display" routine
 
 locret_8308:
-		rts	
+		rts
 ; ===========================================================================
 
 Ledge_TimeZero:
 		bsr.w	ObjectFall
+	if BugFixRenderBeforeInit=0 ; Bug 3
 		bsr.w	DisplaySprite
+	endc
 		tst.b	obRender(a0)
 		bpl.s	Ledge_Delete
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 3
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 Ledge_Delete:	; Routine 8
 		bsr.w	DeleteObject
-		rts	
+		rts

@@ -245,7 +245,7 @@ out_of_range:	macro exit,pos
 
 music:		macro track,terminate,branch,byte
 		  if OptimiseSound=1
-			move.b	#track,(v_snddriver_ram+v_playsnd1).l
+			move.b	#track,(v_snddriver_ram+PlaySound).l ; Cyber Axe: replaced v_playsnd2 with PlaySound to fix compiling error
 		    if terminate=1
 			rts
 		    endc
@@ -273,7 +273,7 @@ music:		macro track,terminate,branch,byte
 
 sfx:		macro track,terminate,branch,byte
 		  if OptimiseSound=1
-			move.b	#track,(v_snddriver_ram+v_playsnd2).l
+			move.b	#track,(v_snddriver_ram+PlaySound_Special).l  ; Cyber Axe: replaced v_playsnd2 with PlaySound_Special to fix compiling error
 		    if terminate=1
 			rts
 		    endc

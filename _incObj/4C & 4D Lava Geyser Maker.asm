@@ -7,7 +7,11 @@ GeyserMaker:
 		move.b	obRoutine(a0),d0
 		move.w	GMake_Index(pc,d0.w),d1
 		jsr	GMake_Index(pc,d1.w)
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		bra.w	Geyser_ChkDel
+	else
+    addq.l  #4,sp
+  endc
 ; ===========================================================================
 GMake_Index:	dc.w GMake_Main-GMake_Index
 		dc.w GMake_Wait-GMake_Index
@@ -45,7 +49,7 @@ GMake_Wait:	; Routine 2
 		addq.b	#2,obRoutine(a0) ; if Sonic is within range, goto GMake_ChkType
 
 	@cancel:
-		rts	
+		rts
 ; ===========================================================================
 
 GMake_MakeLava:	; Routine 6
@@ -77,14 +81,14 @@ GMake_ChkType:	; Routine 4
 		tst.b	obSubtype(a0)	; is object type 00 (geyser) ?
 		beq.s	GMake_Display	; if yes, branch
 		addq.b	#2,obRoutine(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 GMake_Display:	; Routine 8
 		lea	(Ani_Geyser).l,a1
 		bsr.w	AnimateSprite
 		bsr.w	DisplaySprite
-		rts	
+		rts
 ; ===========================================================================
 
 GMake_Delete:	; Routine $A
@@ -92,7 +96,7 @@ GMake_Delete:	; Routine $A
 		move.b	#2,obRoutine(a0)
 		tst.b	obSubtype(a0)
 		beq.w	DeleteObject
-		rts	
+		rts
 
 
 ; ---------------------------------------------------------------------------
@@ -153,7 +157,7 @@ Geyser_Main:	; Routine 0
 
 	@fail:
 		dbf	d1,@loop
-		rts	
+		rts
 ; ===========================================================================
 
 @activate:
@@ -190,9 +194,21 @@ Geyser_Action:	; Routine 2
 		lea	(Ani_Geyser).l,a1
 		bsr.w	AnimateSprite
 
-Geyser_ChkDel:
+
+Geyser_ChkDel: ; XREF: GeyserMaker
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		out_of_range	DeleteObject
-		rts	
+	else
+		out_of_range	@delete
+	endc
+		rts
+
+	if BugFixRenderBeforeInit>0 ; Bug 6
+	@delete:
+    addq.l  #4,sp
+    bra.w   DeleteObject
+	endc
+
 ; ===========================================================================
 Geyser_Types:	dc.w Geyser_Type00-Geyser_Types
 		dc.w Geyser_Type01-Geyser_Types
@@ -208,7 +224,7 @@ Geyser_Type00:
 		move.b	#3,obAnim(a1)
 
 locret_EFDA:
-		rts	
+		rts
 ; ===========================================================================
 
 Geyser_Type01:
@@ -221,7 +237,7 @@ Geyser_Type01:
 		move.b	#1,obAnim(a1)
 
 locret_EFFA:
-		rts	
+		rts
 ; ===========================================================================
 
 loc_EFFC:	; Routine 4

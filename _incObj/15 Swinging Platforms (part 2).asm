@@ -73,14 +73,19 @@ loc_7BCE:
 		move.w	d4,obY(a1)
 		move.w	d5,obX(a1)
 		dbf	d6,loc_7BCE
-		rts	
+		rts
 ; End of function Swing_Move2
 
 ; ===========================================================================
 
 Swing_ChkDel:
 		out_of_range	Swing_DelAll,$3A(a0)
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 2
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
+
 ; ===========================================================================
 
 Swing_DelAll:
@@ -96,12 +101,12 @@ Swing_DelLoop:
 		movea.l	d0,a1
 		bsr.w	DeleteChild
 		dbf	d2,Swing_DelLoop ; repeat for length of	chain
-		rts	
+		rts
 ; ===========================================================================
 
 Swing_Delete:	; Routine 6, 8
 		bsr.w	DeleteObject
-		rts	
+		rts
 ; ===========================================================================
 
 Swing_Display:	; Routine $A

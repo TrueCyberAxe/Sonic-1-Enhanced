@@ -50,7 +50,7 @@ Bonus_Main:	; Routine 0
 
 	@chkdel:
 		out_of_range.s	@delete
-		rts	
+		rts
 
 	@delete:
 		jmp	(DeleteObject).l
@@ -59,7 +59,12 @@ Bonus_Main:	; Routine 0
 @points:	dc.w 0			; Bonus	points array
 		dc.w 1000
 		dc.w 100
+	if BugFixHiddenPoints=0
 		dc.w 1
+	else
+		dc.w 10
+	endc
+
 ; ===========================================================================
 
 Bonus_Display:	; Routine 2
@@ -68,5 +73,5 @@ Bonus_Display:	; Routine 2
 		out_of_range.s	Bonus_Display_Delete
 		jmp	(DisplaySprite).l
 
-Bonus_Display_Delete:	
+Bonus_Display_Delete:
 		jmp	(DeleteObject).l

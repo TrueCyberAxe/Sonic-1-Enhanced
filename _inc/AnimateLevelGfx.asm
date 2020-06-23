@@ -17,7 +17,7 @@ AnimateLevelGfx:
 		jmp	AniArt_Index(pc,d0.w)
 
 	@ispaused:
-		rts	
+		rts
 
 ; ===========================================================================
 AniArt_Index:	dc.w AniArt_GHZ-AniArt_Index, AniArt_none-AniArt_Index
@@ -102,7 +102,7 @@ AniArt_GHZ_Smallflower:
 		bsr.w	LoadTiles
 
 @end:
-		rts	
+		rts
 
 @sequence:	dc.b 0,	1, 2, 1
 ; ===========================================================================
@@ -139,7 +139,7 @@ AniArt_MZ_Lava:
 AniArt_MZ_Magma:
 		subq.b	#1,(v_lani1_time).w ; decrement timer
 		bpl.s	AniArt_MZ_Torch	; branch if not 0
-		
+
 		move.b	#1,(v_lani1_time).w ; time between each gfx change
 		moveq	#0,d0
 		move.b	(v_lani0_frame).w,d0 ; get surface lava frame number
@@ -165,7 +165,7 @@ AniArt_MZ_Magma:
 		jsr	(a3)
 		addq.w	#4,d3
 		dbf	d2,@loop
-		rts	
+		rts
 ; ===========================================================================
 
 AniArt_MZ_Torch:
@@ -174,7 +174,7 @@ AniArt_MZ_Torch:
 
 		subq.b	#1,(v_lani2_time).w ; decrement timer
 		bpl.w	@end		; branch if not 0
-		
+
 		move.b	#7,(v_lani2_time).w ; time to display each frame
 		lea	(Art_MzTorch).l,a1 ; load torch	patterns
 		moveq	#0,d0
@@ -188,7 +188,7 @@ AniArt_MZ_Torch:
 		bra.w	LoadTiles
 
 @end:
-		rts	
+		rts
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Animated pattern routine - Scrap Brain
@@ -200,7 +200,7 @@ AniArt_SBZ:
 
 		tst.b	(v_lani2_frame).w
 		beq.s	@smokepuff	; branch if counter hits 0
-		
+
 		subq.b	#1,(v_lani2_frame).w ; decrement counter
 		bra.s	@chk_smokepuff2
 ; ===========================================================================
@@ -208,7 +208,7 @@ AniArt_SBZ:
 @smokepuff:
 		subq.b	#1,(v_lani0_time).w ; decrement timer
 		bpl.s	@chk_smokepuff2 ; branch if not 0
-		
+
 		move.b	#7,(v_lani0_time).w ; time to display each frame
 		lea	(Art_SbzSmoke).l,a1 ; load smoke patterns
 		locVRAM	$8900
@@ -237,7 +237,7 @@ AniArt_SBZ:
 @chk_smokepuff2:
 		tst.b	(v_lani2_time).w
 		beq.s	@smokepuff2	; branch if counter hits 0
-		
+
 		subq.b	#1,(v_lani2_time).w ; decrement counter
 		bra.s	@end
 ; ===========================================================================
@@ -245,7 +245,7 @@ AniArt_SBZ:
 @smokepuff2:
 		subq.b	#1,(v_lani1_time).w ; decrement timer
 		bpl.s	@end		; branch if not 0
-		
+
 		move.b	#7,(v_lani1_time).w ; time to display each frame
 		lea	(Art_SbzSmoke).l,a1 ; load smoke patterns
 		locVRAM	$8A80
@@ -266,7 +266,7 @@ AniArt_SBZ:
 ; ===========================================================================
 
 @end:
-		rts	
+		rts
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Animated pattern routine - ending sequence
@@ -280,7 +280,7 @@ AniArt_Ending_BigFlower:
 
 		subq.b	#1,(v_lani1_time).w ; decrement timer
 		bpl.s	AniArt_Ending_SmallFlower ; branch if not 0
-		
+
 		move.b	#7,(v_lani1_time).w
 		lea	(Art_GhzFlower1).l,a1 ;	load big flower	patterns
 		lea	($FFFF9400).w,a2 ; load 2nd big flower from RAM
@@ -307,7 +307,7 @@ AniArt_Ending_SmallFlower:
 
 		subq.b	#1,(v_lani2_time).w ; decrement timer
 		bpl.s	AniArt_Ending_Flower3 ; branch if not 0
-		
+
 		move.b	#7,(v_lani2_time).w
 		move.b	(v_lani2_frame).w,d0
 		addq.b	#1,(v_lani2_frame).w ; increment frame counter
@@ -332,7 +332,7 @@ AniArt_Ending_Flower3:
 
 		subq.b	#1,(v_lani4_time).w ; decrement timer
 		bpl.s	AniArt_Ending_Flower4 ; branch if not 0
-		
+
 		move.b	#$E,(v_lani4_time).w
 		move.b	(v_lani4_frame).w,d0
 		addq.b	#1,(v_lani4_frame).w ; increment frame counter
@@ -355,7 +355,7 @@ AniArt_Ending_Flower4:
 
 		subq.b	#1,(v_lani5_time).w ; decrement timer
 		bpl.s	@end		; branch if not 0
-		
+
 		move.b	#$B,(v_lani5_time).w
 		move.b	(v_lani5_frame).w,d0
 		addq.b	#1,(v_lani5_frame).w ; increment frame counter
@@ -371,11 +371,11 @@ AniArt_Ending_Flower4:
 ; ===========================================================================
 
 @end:
-		rts	
+		rts
 ; ===========================================================================
 
 AniArt_none:
-		rts	
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to	transfer graphics to VRAM
@@ -399,7 +399,7 @@ LoadTiles:
 		move.l	(a1)+,(a6)
 		move.l	(a1)+,(a6)
 		dbf	d1,LoadTiles
-		rts	
+		rts
 ; End of function LoadTiles
 
 ; ===========================================================================
@@ -420,7 +420,7 @@ loc_1C3EE:
 		move.l	(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C3EE
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C3FA:
@@ -430,14 +430,14 @@ loc_1C3FA:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C3FA
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C410:
 		move.l	2(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C410
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C41E:
@@ -447,14 +447,14 @@ loc_1C41E:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C41E
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C434:
 		move.l	4(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C434
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C442:
@@ -464,14 +464,14 @@ loc_1C442:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C442
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C458:
 		move.l	6(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C458
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C466:
@@ -481,14 +481,14 @@ loc_1C466:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C466
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C47C:
 		move.l	8(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C47C
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C48A:
@@ -498,14 +498,14 @@ loc_1C48A:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C48A
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4A0:
 		move.l	$A(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4A0
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4AE:
@@ -515,14 +515,14 @@ loc_1C4AE:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4AE
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4C4:
 		move.l	$C(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4C4
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4D2:
@@ -532,7 +532,7 @@ loc_1C4D2:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4D2
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4E8:
@@ -540,7 +540,7 @@ loc_1C4E8:
 		move.w	0(a1),(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4E8
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C4FA:
@@ -550,7 +550,7 @@ loc_1C4FA:
 		move.l	d0,(a6)
 		lea	$10(a1),a1
 		dbf	d1,loc_1C4FA
-		rts	
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Animated pattern routine - giant ring
@@ -565,7 +565,7 @@ AniArt_GiantRing:
 
 		tst.w	(v_gfxbigring).w	; Is there any of the art left to load?
 		bne.s	@loadTiles		; If so, get to work
-		rts	
+		rts
 ; ===========================================================================
 ; loc_1C518:
 @loadTiles:

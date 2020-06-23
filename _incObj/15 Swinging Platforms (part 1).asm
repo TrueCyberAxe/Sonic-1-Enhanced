@@ -67,7 +67,11 @@ Swing_Main:	; Routine 0
 		subq.w	#1,d1
 
 @makechain:
+	if BugFixRenderBeforeInit=0 ; Bug 5
 		bsr.w	FindFreeObj
+	else
+		bsr.w	FindNextFreeObj
+	endc
 		bne.s	@fail
 		addq.b	#1,obSubtype(a0)
 		move.w	a1,d5
@@ -124,7 +128,9 @@ Swing_SetSolid:	; Routine 2
 
 Swing_Action:	; Routine $C
 		bsr.w	Swing_Move
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Swing_ChkDel
 ; ===========================================================================
 
@@ -139,7 +145,8 @@ Swing_Action2:	; Routine 4
 		move.b	obHeight(a0),d3
 		addq.b	#1,d3
 		bsr.w	MvSonicOnPtfm
+	if BugFixRenderBeforeInit=0 ; Bug 2
 		bsr.w	DisplaySprite
+	endc
 		bra.w	Swing_ChkDel
-
 		rts

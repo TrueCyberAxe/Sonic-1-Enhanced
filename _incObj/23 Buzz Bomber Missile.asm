@@ -37,7 +37,13 @@ Msl_Main:	; Routine 0
 ; ===========================================================================
 
 Msl_Animate:	; Routine 2
+	if BugFixRenderBeforeInit=0 ; Bug 6
 		bsr.s	Msl_ChkCancel
+	else
+		movea.l msl_parent(a0),a1 			; Cyber Axe: had to change parent to msl_parent (hopefully correct)
+		cmpi.b  #id_ExplosionItem,0(a1) ; has Buzz Bomber been destroyed?
+		beq.s   Msl_Delete  						; if yes, branch
+	endc
 		lea	(Ani_Missile).l,a1
 		bsr.w	AnimateSprite
 		bra.w	DisplaySprite
@@ -53,7 +59,7 @@ Msl_ChkCancel:
 		movea.l	msl_parent(a0),a1
 		cmpi.b	#id_ExplosionItem,0(a1) ; has Buzz Bomber been destroyed?
 		beq.s	Msl_Delete	; if yes, branch
-		rts	
+		rts
 ; End of function Msl_ChkCancel
 
 ; ===========================================================================
@@ -66,12 +72,18 @@ Msl_FromBuzz:	; Routine 4
 		bsr.w	SpeedToPos
 		lea	(Ani_Missile).l,a1
 		bsr.w	AnimateSprite
+	if BugFixRenderBeforeInit=0 ; Bug 4
 		bsr.w	DisplaySprite
+	endc
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0	; has object moved below the level boundary?
 		bcs.s	Msl_Delete	; if yes, branch
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 4
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 	@explode:
@@ -82,7 +94,7 @@ Msl_FromBuzz:	; Routine 4
 
 Msl_Delete:	; Routine 6
 		bsr.w	DeleteObject
-		rts	
+		rts
 ; ===========================================================================
 
 Msl_FromNewt:	; Routine 8
@@ -94,4 +106,4 @@ Msl_Animate2:
 		lea	(Ani_Missile).l,a1
 		bsr.w	AnimateSprite
 		bsr.w	DisplaySprite
-		rts	
+		rts

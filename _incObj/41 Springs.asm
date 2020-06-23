@@ -7,9 +7,15 @@ Springs:
 		move.b	obRoutine(a0),d0
 		move.w	Spring_Index(pc,d0.w),d1
 		jsr	Spring_Index(pc,d1.w)
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 Spring_Index:	dc.w Spring_Main-Spring_Index
 		dc.w Spring_Up-Spring_Index
@@ -60,7 +66,7 @@ Spring_Main:	; Routine 0
 loc_DB72:
 		andi.w	#$F,d0
 		move.w	Spring_Powers(pc,d0.w),spring_pow(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_Up:	; Routine 2
@@ -71,7 +77,7 @@ Spring_Up:	; Routine 2
 		bsr.w	SolidObject
 		tst.b	obSolid(a0)	; is Sonic on top of the spring?
 		bne.s	Spring_BounceUp	; if yes, branch
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_BounceUp:
@@ -94,7 +100,7 @@ Spring_AniUp:	; Routine 4
 Spring_ResetUp:	; Routine 6
 		move.b	#1,obNextAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) ; goto "Spring_Up" routine
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_LR:	; Routine 8
@@ -110,7 +116,7 @@ Spring_LR:	; Routine 8
 loc_DC0C:
 		btst	#5,obStatus(a0)
 		bne.s	Spring_BounceLR
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_BounceLR:
@@ -125,7 +131,17 @@ Spring_BounceLR:
 	Spring_Flipped:
 		move.w	#$F,$3E(a1)
 		move.w	obVelX(a1),obInertia(a1)
+	if BugFixSpringFaceWrongDirection=0
 		bchg	#0,obStatus(a1)
+	else
+		cmp.w   #0,x_vel(a1)
+		bmi.s   Face_Left    ; if Sonic is running left, branch
+		bclr    #0,status(a1)
+		bra.s   Face_cont
+	Face_Left:
+    bset    #0,status(a1)
+  Face_Cont: ; End of fix
+	endc
 		btst	#2,obStatus(a1)
 		bne.s	loc_DC56
 		move.b	#id_Walk,obAnim(a1)	; use walking animation
@@ -136,6 +152,9 @@ loc_DC56:
 		sfx	sfx_Spring,0,0,0	; play spring sound
 
 Spring_AniLR:	; Routine $A
+	if FeatureSpindash>0
+		clr.w ($FFFFC904).w	; clear screen delay counter
+	endc
 		lea	(Ani_Spring).l,a1
 		bra.w	AnimateSprite
 ; ===========================================================================
@@ -143,7 +162,7 @@ Spring_AniLR:	; Routine $A
 Spring_ResetLR:	; Routine $C
 		move.b	#2,obNextAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) ; goto "Spring_LR" routine
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_Dwn:	; Routine $E
@@ -163,7 +182,7 @@ loc_DCA4:
 		bmi.s	Spring_BounceDwn
 
 locret_DCAE:
-		rts	
+		rts
 ; ===========================================================================
 
 Spring_BounceDwn:
@@ -187,4 +206,4 @@ Spring_ResetDwn:
 		; Routine $12
 		move.b	#1,obNextAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) ; goto "Spring_Dwn" routine
-		rts	
+		rts

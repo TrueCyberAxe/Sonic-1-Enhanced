@@ -9,14 +9,26 @@ Signpost:
 		jsr	Sign_Index(pc,d1.w)
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
+	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
+	endc
 		out_of_range	DeleteObject
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 1
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
-Sign_Index:	dc.w Sign_Main-Sign_Index
+Sign_Index:
+		dc.w Sign_Main-Sign_Index
 		dc.w Sign_Touch-Sign_Index
 		dc.w Sign_Spin-Sign_Index
+	; if FeatureBetaVictoryAnimation=0
 		dc.w Sign_SonicRun-Sign_Index
+	; else
+	if FeatureBetaVictoryAnimation>0
+		dc.w GotThroughAct-Sign_Index
+	endc
 		dc.w Sign_Exit-Sign_Index
 
 spintime:	equ $30		; time for signpost to spin
@@ -36,15 +48,19 @@ Sign_Touch:	; Routine 2
 		move.w	(v_player+obX).w,d0
 		sub.w	obX(a0),d0
 		bcs.s	@notouch
-		cmpi.w	#$20,d0		; is Sonic within $20 pixels of	the signpost?
-		bcc.s	@notouch	; if not, branch
-		music	sfx_Signpost,0,0,0	; play signpost sound
-		clr.b	(f_timecount).w	; stop time counter
-		move.w	(v_limitright2).w,(v_limitleft2).w ; lock screen position
+		cmpi.w	#$20,d0																; is Sonic within $20 pixels of	the signpost?
+		bcc.s	@notouch																; if not, branch
+		music	sfx_Signpost,0,0,0											; play signpost sound
+		clr.b	(f_timecount).w													; stop time counter
+	if FeatureBetaVictoryAnimation>0
+		move.b  #1,(f_victory).w 											; Set victory animation flag
+		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
+	endc
+		move.w	(v_limitright2).w,(v_limitleft2).w 		; lock screen position
 		addq.b	#2,obRoutine(a0)
 
 	@notouch:
-		rts	
+		rts
 ; ===========================================================================
 
 Sign_Spin:	; Routine 4
@@ -84,7 +100,7 @@ Sign_Spin:	; Routine 4
 		move.b	#8,obActWid(a1)
 
 	@fail:
-		rts	
+		rts
 ; ===========================================================================
 Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 		dc.b	8,   8
@@ -97,12 +113,16 @@ Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 ; ===========================================================================
 
 Sign_SonicRun:	; Routine 6
-		tst.w	(v_debuguse).w	; is debug mode	on?
-		bne.w	locret_ECEE	; if yes, branch
+		tst.w	(v_debuguse).w								; is debug mode	on?
+		bne.w	locret_ECEE										; if yes, branch
+	if FeatureBetaVictoryAnimation=1 			; If we're set to 1 Allow the run and unset the victory jump flag
+		move.b  #0,(f_victory).w 						; Set victory animation flag
+		move.b  #0,(f_lockscreen).w 				; Prevent Sonic Leaving the Screen
+	endc
 		btst	#1,(v_player+obStatus).w
 		bne.s	loc_EC70
-		move.b	#1,(f_lockctrl).w ; lock controls
-		move.w	#btnR<<8,(v_jpadhold2).w ; make Sonic run to the right
+		move.b	#1,(f_lockctrl).w 					; lock controls
+		move.w	#btnR<<8,(v_jpadhold2).w 		; make Sonic run to the right
 
 	loc_EC70:
 		tst.b	(v_player).w
@@ -111,11 +131,14 @@ Sign_SonicRun:	; Routine 6
 		move.w	(v_limitright2).w,d1
 		addi.w	#$128,d1
 		cmp.w	d1,d0
+	if TweakUncompressedTitleCards=0
 		bcs.s	locret_ECEE
+	else
+		bcs.w	locret_ECEE
+	endc
 
 	loc_EC86:
 		addq.b	#2,obRoutine(a0)
-
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to	set up bonuses at the end of an	act
@@ -128,23 +151,34 @@ GotThroughAct:
 		tst.b	(v_objspace+$5C0).w
 		bne.s	locret_ECEE
 		move.w	(v_limitright2).w,(v_limitleft2).w
-		clr.b	(v_invinc).w	; disable invincibility
-		clr.b	(f_timecount).w	; stop time counter
+		clr.b	(v_invinc).w																		; disable invincibility
+		clr.b	(f_timecount).w																	; stop time counter
 		move.b	#id_GotThroughCard,(v_objspace+$5C0).w
+
+	if TweakUncompressedTitleCards=0
 		moveq	#plcid_TitleCard,d0
-		jsr	(NewPLC).l	; load title card patterns
+		jsr	(NewPLC).l																				; load title card patterns
+	else
+		move.l  a0,-(sp)            													; save object address to stack
+		move.l  #$70000002,(vdp_control_port)        					; set mode "VRAM Write to $B000"
+		lea Gra_TitleCard,a0        													; load title card patterns
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art lenght, in tiles
+		jsr LoadUncArt          															; load uncompressed art
+		move.l  (sp)+,a0            													; get object address from stack
+	endif ; if TweakUncompressedTitleCards=0
+
 		move.b	#1,(f_endactbonus).w
 		moveq	#0,d0
 		move.b	(v_timemin).w,d0
-		mulu.w	#60,d0		; convert minutes to seconds
+		mulu.w	#60,d0																				; convert minutes to seconds
 		moveq	#0,d1
 		move.b	(v_timesec).w,d1
-		add.w	d1,d0		; add up your time
-		divu.w	#15,d0		; divide by 15
+		add.w	d1,d0																						; add up your time
+		divu.w	#15,d0																				; divide by 15
 		moveq	#$14,d1
-		cmp.w	d1,d0		; is time 5 minutes or higher?
-		bcs.s	@hastimebonus	; if not, branch
-		move.w	d1,d0		; use minimum time bonus (0)
+		cmp.w	d1,d0																						; is time 5 minutes or higher?
+		bcs.s	@hastimebonus																		; if not, branch
+		move.w	d1,d0																					; use minimum time bonus (0)
 
 	@hastimebonus:
 		add.w	d0,d0
@@ -155,7 +189,7 @@ GotThroughAct:
 		sfx	bgm_GotThrough,0,0,0	; play "Sonic got through" music
 
 locret_ECEE:
-		rts	
+		rts
 ; End of function GotThroughAct
 
 ; ===========================================================================
@@ -164,4 +198,4 @@ TimeBonuses:	dc.w 5000, 5000, 1000, 500, 400, 400, 300, 300,	200, 200
 ; ===========================================================================
 
 Sign_Exit:	; Routine 8
-		rts	
+		rts

@@ -8,7 +8,7 @@
 DeformLayers:
 		tst.b	(f_nobgscroll).w
 		beq.s	@bgscroll
-		rts	
+		rts
 ; ===========================================================================
 
 	@bgscroll:
@@ -114,7 +114,7 @@ loc_6384:
 		add.l	d2,d3
 		swap	d3
 		dbf	d1,loc_6384
-		rts	
+		rts
 ; End of function Deform_GHZ
 
 ; ---------------------------------------------------------------------------
@@ -146,7 +146,7 @@ loc_63C6:
 		dbf	d1,loc_63C6
 		move.w	(v_waterpos1).w,d0
 		sub.w	(v_screenposy).w,d0
-		rts	
+		rts
 ; End of function Deform_LZ
 
 ; ---------------------------------------------------------------------------
@@ -190,7 +190,7 @@ loc_6402:
 loc_6426:
 		move.l	d0,(a1)+
 		dbf	d1,loc_6426
-		rts	
+		rts
 ; End of function Deform_MZ
 
 ; ---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ loc_6482:
 		move.l	d0,(a1)+
 		move.l	d0,(a1)+
 		dbf	d1,loc_6480
-		rts	
+		rts
 ; End of function Deform_SLZ
 
 
@@ -300,7 +300,7 @@ loc_64F0:
 loc_64FE:
 		move.w	d0,(a1)+
 		dbf	d1,loc_64FE
-		rts	
+		rts
 ; End of function Deform_SLZ_2
 
 ; ---------------------------------------------------------------------------
@@ -333,7 +333,7 @@ Deform_SYZ:
 loc_653C:
 		move.l	d0,(a1)+
 		dbf	d1,loc_653C
-		rts	
+		rts
 ; End of function Deform_SYZ
 
 ; ---------------------------------------------------------------------------
@@ -364,7 +364,7 @@ Deform_SBZ:
 loc_6576:
 		move.l	d0,(a1)+
 		dbf	d1,loc_6576
-		rts	
+		rts
 ; End of function Deform_SBZ
 
 ; ---------------------------------------------------------------------------
@@ -388,13 +388,13 @@ ScrollHoriz:
 		bpl.s	SH_Forward
 
 		bset	#2,(v_fg_scroll_flags).w ; screen moves backward
-		rts	
+		rts
 
 	SH_Forward:
 		bset	#3,(v_fg_scroll_flags).w ; screen moves forward
 
 locret_65B0:
-		rts	
+		rts
 ; End of function ScrollHoriz
 
 
@@ -405,11 +405,19 @@ MoveScreenHoriz:
 		move.w	(v_player+obX).w,d0
 		sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
 		subi.w	#144,d0		; is distance less than 144px?
+	if BugFixCameraFollow=0
 		bcs.s	SH_BehindMid	; if yes, branch
+	else
+		bmi.s	SH_BehindMid	; if yes, branch
+	endc
 		subi.w	#16,d0		; is distance more than 160px?
+	if BugFixCameraFollow=0
 		bcc.s	SH_AheadOfMid	; if yes, branch
+	else
+		bpl.s	SH_AheadOfMid	; if yes, branch
+	endc
 		clr.w	(v_scrshiftx).w
-		rts	
+		rts
 ; ===========================================================================
 
 SH_AheadOfMid:
@@ -429,10 +437,17 @@ SH_SetScreen:
 		asl.w	#8,d1
 		move.w	d0,(v_screenposx).w ; set new screen position
 		move.w	d1,(v_scrshiftx).w ; set distance for screen movement
-		rts	
+		rts
 ; ===========================================================================
 
 SH_BehindMid:
+	if BugFixCameraFollow>0
+		cmpi.w	#$FFF0,d0				; has the screen moved more than 16 pixels left?
+		bcc.s	Left_NoMax				; if not, branch
+		move.w	#$FFF0,d0				; set the maximum move distance to 16 pixels left
+
+Left_NoMax:
+	endc
 		add.w	(v_screenposx).w,d0
 		cmp.w	(v_limitleft2).w,d0
 		bgt.s	SH_SetScreen
@@ -487,7 +502,7 @@ loc_664A:
 
 loc_6656:
 		clr.w	(v_scrshifty).w
-		rts	
+		rts
 ; ===========================================================================
 
 loc_665C:
@@ -601,14 +616,14 @@ loc_6724:
 		sub.w	d4,d0
 		bpl.s	loc_6760
 		bset	#0,(v_fg_scroll_flags).w
-		rts	
+		rts
 ; ===========================================================================
 
 loc_6760:
 		bset	#1,(v_fg_scroll_flags).w
 
 locret_6766:
-		rts	
+		rts
 ; End of function ScrollVertical
 
 
@@ -644,21 +659,21 @@ loc_679C:
 		move.l	d0,d1
 		swap	d1
 		andi.w	#$10,d1
-		move.b	($FFFFF74D).w,d2
+		move.b	(v_bg1_yblock).w,d2
 		eor.b	d2,d1
 		bne.s	locret_67D0
-		eori.b	#$10,($FFFFF74D).w
+		eori.b	#$10,(v_bg1_yblock).w
 		sub.l	d3,d0
 		bpl.s	loc_67CA
 		bset	#0,(v_bg1_scroll_flags).w
-		rts	
+		rts
 ; ===========================================================================
 
 loc_67CA:
 		bset	#1,(v_bg1_scroll_flags).w
 
 locret_67D0:
-		rts	
+		rts
 ; End of function ScrollBlock1
 
 
@@ -677,21 +692,21 @@ ScrollBlock2:
 		move.l	d0,d1
 		swap	d1
 		andi.w	#$10,d1
-		move.b	($FFFFF74D).w,d2
+		move.b	(v_bg1_yblock).w,d2
 		eor.b	d2,d1
 		bne.s	locret_6812
-		eori.b	#$10,($FFFFF74D).w
+		eori.b	#$10,(v_bg1_yblock).w
 		sub.l	d3,d0
 		bpl.s	loc_680C
 		bset	#0,(v_bg1_scroll_flags).w
-		rts	
+		rts
 ; ===========================================================================
 
 loc_680C:
 		bset	#1,(v_bg1_scroll_flags).w
 
 locret_6812:
-		rts	
+		rts
 ; End of function ScrollBlock2
 
 
@@ -703,21 +718,21 @@ ScrollBlock3:
 		move.w	d0,(v_bgscreenposy).w
 		move.w	d0,d1
 		andi.w	#$10,d1
-		move.b	($FFFFF74D).w,d2
+		move.b	(v_bg1_yblock).w,d2
 		eor.b	d2,d1
 		bne.s	locret_6842
-		eori.b	#$10,($FFFFF74D).w
+		eori.b	#$10,(v_bg1_yblock).w
 		sub.w	d3,d0
 		bpl.s	loc_683C
 		bset	#0,(v_bg1_scroll_flags).w
-		rts	
+		rts
 ; ===========================================================================
 
 loc_683C:
 		bset	#1,(v_bg1_scroll_flags).w
 
 locret_6842:
-		rts	
+		rts
 ; End of function ScrollBlock3
 
 
@@ -733,10 +748,10 @@ ScrollBlock4:
 		add.l	d0,(v_bg2screenposx).w
 		move.w	(v_bg2screenposx).w,d0
 		andi.w	#$10,d0
-		move.b	($FFFFF74E).w,d1
+		move.b	(v_bg2_xblock).w,d1
 		eor.b	d1,d0
 		bne.s	locret_6884
-		eori.b	#$10,($FFFFF74E).w
+		eori.b	#$10,(v_bg2_xblock).w
 		move.w	(v_bg2screenposx).w,d0
 		sub.w	d2,d0
 		bpl.s	loc_687E
@@ -748,5 +763,5 @@ loc_687E:
 		bset	#3,(v_bg2_scroll_flags).w
 
 locret_6884:
-		rts	
+		rts
 ; End of function ScrollBlock4

@@ -106,20 +106,26 @@ loc_842E:
 		move.b	#6,obRoutine(a0) ; run "CFlo_Display" routine
 
 locret_843A:
-		rts	
+		rts
 ; ===========================================================================
 
 CFlo_TimeZero:
 		bsr.w	ObjectFall
+	if BugFixRenderBeforeInit=0 ; Bug 3
 		bsr.w	DisplaySprite
+	endc
 		tst.b	obRender(a0)
 		bpl.s	CFlo_Delete
-		rts	
+	if BugFixRenderBeforeInit=0 ; Bug 3
+		rts
+	else
+		bra.w	DisplaySprite
+	endc
 ; ===========================================================================
 
 CFlo_Delete:	; Routine 8
 		bsr.w	DeleteObject
-		rts	
+		rts
 ; ===========================================================================
 
 CFlo_Fragment:
