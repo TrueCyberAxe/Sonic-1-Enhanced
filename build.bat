@@ -9,8 +9,10 @@
 
 REM Compile ROM
 asm68k /k /p /o ae- sonic.asm, s1built.bin >errors.txt, , sonic.lst
-@FINDSTR /m "0 error(s)" errors.txt >NUL 2>&1 && IF NOT "%OUTPUT_PATH%"=="" IF EXIST "%OUTPUT_PATH%\" COPY /y s1built.bin "%OUTPUT_PATH%\Sonic 1 (Github).bin" >NUL 2>&1
 @TYPE errors.txt
 
 REM Fix ROM Header
 fixheadr.exe s1built.bin
+
+REM Copy ROM to output Folder
+@FINDSTR /m "0 error(s)" errors.txt >NUL 2>&1 && IF NOT "%OUTPUT_PATH%"=="" IF EXIST "%OUTPUT_PATH%\" COPY /y s1built.bin "%OUTPUT_PATH%\Sonic 1 (Github).bin" >NUL 2>&1
