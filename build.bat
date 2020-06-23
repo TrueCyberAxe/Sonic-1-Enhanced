@@ -4,6 +4,9 @@
 
 @SET OUTPUT_PATH=%~1
 
+@REM Echo a Seperator for easier console browsing
+@ECHO ==========================================================================
+
 @IF EXIST "errors.txt" DEL /q "errors.txt" 2>&1
 @IF EXIST s1built.bin move /Y s1built.bin s1built.prev.bin >NUL 2>&1
 
