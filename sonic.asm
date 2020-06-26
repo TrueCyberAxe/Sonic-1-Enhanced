@@ -123,10 +123,10 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; Left Align the Score
 
 ; Tweaks
-TweakFastLoadInit:									equ 0 ; Disable Some Initialization to load SEGA Logo Faster
-TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
-TweakBetterFadeEffects:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSegaLogoWhiteFade:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakFastLoadInit:									equ 1 ; Disable Some Initialization to load SEGA Logo Faster
+TweakMathOptimizations:							equ 1 ; Replace Maths with Bit Shifts and other CPU GEMs
+TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakSegaLogoWhiteFade:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 
 TweakBetterBonusControlRestore:			equ 0 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
@@ -147,25 +147,28 @@ TweakUseRecompresedAssets						equ 0 ; All Nemesis files recompressed with KENSh
 TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
-TweakLevelCompressionMode:					equ 0 ; 0 = Original Nemesis, 1 = Kosinski, 2 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
-TweakFastLevelLoading:							equ 1 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
-TweakFastLevelLoading2:							equ 1 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakLevelCompressionMode:					equ 0 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
+TweakFastLevelLoading:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakFastLevelLoading2:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
 ; Casing Graphic Glitches
 TweakFastLevelReload:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/#post-958087
 TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-707238
 
 ; Feature
-FeatureUpdateHeader: 								equ 0 ; Updates the name to fix the spacing and adds a comment to the rom header
-FeatureSkipChecksum: 								equ 0 ; Get to the SEGA Logo Faster by removing Security Checksum
-FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
+FeatureUpdateHeader: 								equ 1 ; Updates the name to fix the spacing and adds a comment to the rom header
+FeatureSkipChecksum: 								equ 1 ; Get to the SEGA Logo Faster by removing Security Checksum
+FeatureSkipSEGALogo: 								equ 1 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
+FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
+
 FeatureLevelSelectOnC:							equ 0 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
 FeatureCodeCleanup:									equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code
+
+; Major
 FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
 FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when Falling, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
 FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
 FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
-FeatureCentreTitleScreen:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 
 ; Non Default Features some people may want to use
 FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1
@@ -193,6 +196,31 @@ TweakDontLoadLevelTilePatterns: equ 1
 TweakDontLoadLevelTilePatterns: equ 1
 	endc
 
+	if TweakLevelCompressionMode<1
+TweakMergedArt:											equ 1
+	else
+TweakMergedArt:											equ 1
+	endc
+
+	if TweakFastLevelLoading2=0
+		if TweakLevelCompressionMode<2
+TweakNonNemesisLoad: equ 0
+		else
+TweakNonNemesisLoad: equ 1
+		endc
+	else
+TweakNonNemesisLoad: equ 1
+	endc
+
+	if TweakFastLevelLoading2=0
+		if TweakLevelCompressionMode<2
+TweakEnhancedPLCQueue: equ 0
+		else
+TweakEnhancedPLCQueue: equ 1
+		endc
+	else
+TweakEnhancedPLCQueue: equ 1
+	endc
 
 ; ===========================================================================
 
@@ -1528,7 +1556,7 @@ locret_16DA:
 
 loc_16DC:
 		lea	(v_plc_buffer).w,a0
-	if TweakFastLevelLoading2=0 || TweakLevelCompressionMode<3
+	if TweakNonNemesisLoad=0
 		moveq	#$15,d0
 	else
 		moveq   #((PLCQueueEnd-4-v_pal_buffer)/4)-1,d0  			; length of the PLC queue RAM
@@ -1571,7 +1599,7 @@ QuickPLC:
 
 		include	"_inc\Enigma Decompression.asm"
 		include	"_inc\Kosinski Decompression.asm"
-	if TweakLevelCompressionMode=3
+	if TweakLevelCompressionMode>2
 		include	"_inc\COMPER Decompression.asm"
 	endc
 	if TweakUncompressedTitleCards>0
@@ -2335,7 +2363,7 @@ PalLoad4_Water:
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-	if TweakSonic2LevelArtLoader>0 || FeatureSpindash>0
+	if TweakEnhancedPLCQueue>0
 
 ; ---------------------------------------------------------------------------
 ; Subroutine for queueing VDP commands (seems to only queue transfers to VRAM),
@@ -2433,7 +2461,7 @@ ProcessDMAQueue_Done:
 		rts
 ; End of function ProcessDMAQueue
 
-	endc ; if TweakSonic2LevelArtLoader>0 || FeatureSpindash>0
+	endc ; if TweakEnhancedPLCQueue>0
 
 ; ===========================================================================
 
@@ -2655,12 +2683,12 @@ GM_Title:
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		lea	(v_16x16).w,a1
-		lea	(Blk16_GHZ).l,a0 ; load	GHZ 16x16 mappings
+		lea	(Blk16_TITLE).l,a0 ; load	GHZ 16x16 mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
 	if TweakUncompressedChunkMapping=0
-		lea	(Blk256_GHZ).l,a0 ; load GHZ 256x256 mappings
+		lea	(Blk256_TITLE).l,a0 ; load GHZ 256x256 mappings
 		lea	(v_256x256).l,a1
 		bsr.w	KosDec
 	endc ; if TweakUncompressedChunkMapping=0
@@ -2688,11 +2716,7 @@ GM_Title:
 
 		locVRAM	0
 
-	; if TweakDontLoadLevelTilePatterns=0
-	;	lea	(Gra_GHZ_1st).l,a0 					; load GHZ patterns for Title Screen
-	;else
 		lea	(Gra_Title).l,a0 						; load GHZ patterns for Title Screen
-;	endc
 
 	if TweakLevelCompressionMode<2
 		bsr.w	NemDec
@@ -4574,7 +4598,7 @@ End_LoadData:
 		enable_ints
 		lea	(Gra_EndFlowers).l,a0 						;	load extra flower patterns
 		lea	($FFFF9400).w,a1 									; RAM address to buffer the patterns
-	if TweakLevelCompressionMode<2
+	if TweakLevelCompressionMode<3
 		bsr.w	KosDec
 	else
 		bsr.w	CompDec
@@ -6042,48 +6066,49 @@ LoadZoneTiles:
 	; ---------------------------------------------------------------------------
 
 	; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
-	if TweakLevelCompressionMode>0
+	if TweakLevelCompressionMode>1
 	LoadLevelArt:
     move.w  d0,-(sp)        										; store level ID to stack
     lsl.w   #2,d0           										; shift 2 bits left
     move.l  LLA_ArtList(pc,d0.w),a0 						; get correct entry from art file list
     move.l  #$40000000,d4       								; set "VRAM Write to $0000"
 
-		if TweakLevelCompressionMode=1
+		if TweakLevelCompressionMode<3
 			bsr.w   KosDec 	    											; load Kosinski compressed art
 		else
 	    bsr.w   CompDec     											; load COMPER compressed art
 		endc
 
 		; workaround for GHZ's secondary art
-		if TweakFastLevelLoading=0
-			cmpi.b  #0,id_GHZ.w     										; is GHZ?
-			bne.s   LLA_End         										; if not, don't load art
-			lea Gra_GHZ_2nd,a0      										; get GHZ 2nd patterns
-			move.l  #$79A00000,d4   										; set "VRAM Write to $39A0"
-			if TweakLevelCompressionMode=1
-				bsr.w   KosDec 	    											; load Kosinski compressed art
-			else
-		    bsr.w   CompDec     											; load COMPER compressed art
-			endc
-
-		LLA_End:
-	    move.w  (sp)+,d0        										; get old level ID from stack again
-	    rts             														; return to subroutine
-
-			LLA_ArtList:    dc.l Gra_GHZ_1st, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
-		else
-			LLA_ArtList:    dc.l Gra_GHZ, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ 		 ; list of art patterns used in levels
-		endc ; if TweakFastLevelLoading=0
-	endc ; if TweakLevelCompressionMode>0
+		; if TweakFastLevelLoading=0
+		; 	cmpi.b  #0,id_GHZ.w     										; is GHZ?
+		; 	bne.s   LLA_End         										; if not, don't load art
+		; 	lea Gra_GHZ,a0      												; get GHZ 2nd patterns
+		; 	move.l  #$79A00000,d4   										; set "VRAM Write to $39A0"
+		;
+		; 	if TweakLevelCompressionMode<3
+		; 		bsr.w   KosDec 	    											; load Kosinski compressed art
+		; 	else
+		;     bsr.w   CompDec     											; load COMPER compressed art
+		; 	endc
+		;
+		; LLA_End:
+	  ;   move.w  (sp)+,d0        										; get old level ID from stack again
+	  ;   rts             														; return to subroutine
+		;
+		; 	LLA_ArtList:    dc.l Gra_Title, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
+		; else
+			LLA_ArtList:    dc.l Gra_GHZ, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
+		; endc ; if TweakFastLevelLoading=0
+	endc ; if TweakLevelCompressionMode>1
 
 LevelDataLoad: ; MainLoadBlockLoad
 		moveq	#0,d0																	; quickly clear d0
 		move.b	(v_zone).w,d0												; get level ID
 
-	if TweakLevelCompressionMode>0
+	if TweakLevelCompressionMode>1
 		bsr.s   LoadLevelArt        								; load level tiles
-	endc ; if TweakLevelCompressionMode>0
+	endc ; if TweakLevelCompressionMode>1
 
 		lsl.w	#4,d0																	; shift level ID left by 4 bits
 		lea	(LevelHeaders).l,a2
@@ -9708,10 +9733,12 @@ Nem_Cater:				incbin	"artnem\Enemy Caterkiller.bin"
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
 	if TweakUncompressedTitleCards=0
-		if TweakLevelCompressionMode<2
+		if TweakLevelCompressionMode=0
 Gra_TitleCard:		incbin	"artnem\Title Cards.bin"
+		elseif TweakLevelCompressionMode=1
+Gra_TitleCard:		incbin	"artnem\Recompressed\Title Cards.bin"
 		elseif TweakLevelCompressionMode=2
-Gra_TitleCard:		incbin	"artkos\Title Cards.bin"
+Gra_TitleCard:		incbin	"artkos\Recompressed\Title Cards.bin"
 		else
 Gra_TitleCard:		incbin	"artcom\Title Cards.bin"
 		endc
@@ -9719,7 +9746,7 @@ Gra_TitleCard:		incbin	"artcom\Title Cards.bin"
 Gra_TitleCard:		incbin	"artunc\Decompressed\Title Cards.bin"
 	endc
 Gra_TitleCard_End:
-  even
+  	even
 Nem_Hud:					incbin	"artnem\HUD.bin"	; HUD (rings, time, score)
 		even
 Nem_Lives:				incbin	"artnem\HUD - Life Counter Icon.bin"

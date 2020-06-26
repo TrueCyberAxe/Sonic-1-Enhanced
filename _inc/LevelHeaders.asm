@@ -25,9 +25,7 @@ lhead:	macro plc1,lvlgfx,plc2,sixteen,twofivesix,music,pal
 	lhead	plcid_SBZ,	Gra_SBZ,			plcid_SBZ2,	Blk16_SBZ,	Blk256_SBZ,	bgm_SBZ,	palid_SBZ1	; Scrap Brain
 
 	zonewarning LevelHeaders,$10
-	; if TweakSonic2LevelArtLoader=0 && TweakFastLoading=0
 	lhead	0,					Gra_GHZ,			0,					Blk16_GHZ,	Blk256_GHZ,	bgm_SBZ,	palid_Ending							; Ending
-	; endc
 	even
 
 ;	* music and level gfx are actually set elsewhere, so these values are useless

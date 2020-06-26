@@ -79,8 +79,12 @@ PLC_GameOver:	dc.w ((PLC_GameOverend-PLC_GameOver-2)/6)-1
 ; Pattern load cues - Green Hill
 ; ---------------------------------------------------------------------------
 PLC_GHZ:	dc.w ((PLC_GHZ2-PLC_GHZ-2)/6)-1
+	if TweakMergedArt=0
 		plcm	Gra_Title, 0		; GHZ main patterns
 		plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
+	elseif TweakLevelCompressionMode=1
+		plcm	Gra_GHZ, 0		; GHZ main patterns
+	endc
 		plcm	Nem_Stalk, $6B00	; flower stalk
 		plcm	Nem_PplRock, $7A00	; purple rock
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
@@ -104,7 +108,9 @@ PLC_GHZ2:	dc.w ((PLC_GHZ2end-PLC_GHZ2-2)/6)-1
 ; Pattern load cues - Labyrinth
 ; ---------------------------------------------------------------------------
 PLC_LZ:		dc.w ((PLC_LZ2-PLC_LZ-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_LZ,0		; LZ main patterns
+	endc
 		plcm	Nem_LzBlock1, $3C00	; block
 		plcm	Nem_LzBlock2, $3E00	; blocks
 		plcm	Nem_Splash, $4B20	; waterfalls and splash
@@ -122,10 +128,9 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 		plcm	Nem_LzDoor2, $7CC0	; large	horizontal door
 		plcm	Nem_LzWheel, $7EC0	; wheel
 		plcm	Nem_Gargoyle, $5D20	; gargoyle head
-		if Revision=0
+	if Revision=0 || Revision>2
 		plcm	Nem_LzSonic, $8800	; Sonic	holding	his breath
-		else
-		endc
+	endc
 		plcm	Nem_LzPlatfm, $89E0	; rising platform
 		plcm	Nem_Orbinaut, $8CE0	; orbinaut enemy
 		plcm	Nem_Jaws, $90C0		; jaws enemy
@@ -139,7 +144,9 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 ; Pattern load cues - Marble
 ; ---------------------------------------------------------------------------
 PLC_MZ:		dc.w ((PLC_MZ2-PLC_MZ-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_MZ,0		; MZ main patterns
+	endc
 		plcm	Nem_MzMetal, $6000	; metal	blocks
 		plcm	Nem_MzFire, $68A0	; fireballs
 		plcm	Nem_Swing, $7000	; swinging platform
@@ -161,7 +168,9 @@ PLC_MZ2:	dc.w ((PLC_MZ2end-PLC_MZ2-2)/6)-1
 ; Pattern load cues - Star Light
 ; ---------------------------------------------------------------------------
 PLC_SLZ:	dc.w ((PLC_SLZ2-PLC_SLZ-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_SLZ,0		; SLZ main patterns
+	endc
 		plcm	Nem_Bomb, $8000		; bomb enemy
 		plcm	Nem_Orbinaut, $8520	; orbinaut enemy
 		plcm	Nem_MzFire, $9000	; fireballs
@@ -183,7 +192,9 @@ PLC_SLZ2:	dc.w ((PLC_SLZ2end-PLC_SLZ2-2)/6)-1
 ; Pattern load cues - Spring Yard
 ; ---------------------------------------------------------------------------
 PLC_SYZ:	dc.w ((PLC_SYZ2-PLC_SYZ-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_SYZ,0		; SYZ main patterns
+	endc
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
 		plcm	Nem_Buzz, $8880		; buzz bomber enemy
 		plcm	Nem_Yadrin, $8F60	; yadrin enemy
@@ -203,7 +214,9 @@ PLC_SYZ2:	dc.w ((PLC_SYZ2end-PLC_SYZ2-2)/6)-1
 ; Pattern load cues - Scrap Brain
 ; ---------------------------------------------------------------------------
 PLC_SBZ:	dc.w ((PLC_SBZ2-PLC_SBZ-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_SBZ,0		; SBZ main patterns
+	endc
 		plcm	Nem_Stomper, $5800	; moving platform and stomper
 		plcm	Nem_SbzDoor1, $5D00	; door
 		plcm	Nem_Girder, $5E00	; girder
@@ -235,7 +248,9 @@ PLC_SBZ2:	dc.w ((PLC_SBZ2end-PLC_SBZ2-2)/6)-1
 ; Pattern load cues - title card
 ; ---------------------------------------------------------------------------
 PLC_TitleCard:	dc.w ((PLC_TitleCardend-PLC_TitleCard-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_TitleCard, $B000
+	endc
 	PLC_TitleCardend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - act 3 boss
@@ -260,11 +275,10 @@ PLC_Signpost:	dc.w ((PLC_Signpostend-PLC_Signpost-2)/6)-1
 ; Pattern load cues - beta special stage warp effect
 ; ---------------------------------------------------------------------------
 PLC_Warp:
-		if Revision=0
+	if Revision=0 || Revision>2
 		dc.w ((PLC_Warpend-PLC_Warp-2)/6)-1
 		plcm	Nem_Warp, $A820
-		else
-		endc
+	endc
 	PLC_Warpend:
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - special stage
@@ -344,16 +358,17 @@ PLC_SSResult:dc.w ((PLC_SpeStResultend-PLC_SSResult-2)/6)-1
 ; Pattern load cues - ending sequence
 ; ---------------------------------------------------------------------------
 PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
+	if TweakLevelCompressionMode<2
 		plcm	Gra_Title,0		; GHZ main patterns
 		plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
+	endc
 		plcm	Nem_Stalk, $6B00	; flower stalk
 		plcm	Gra_EndFlower, $7400	; flowers
 		plcm	Gra_EndEm, $78A0	; emeralds
 		plcm	Gra_EndSonic, $7C20	; Sonic
-		if Revision=0
+	if Revision=0 || Revision>2
 		plcm	Nem_EndEggman, $A480	; Eggman's death ((unused)
-		else
-		endc
+	endc
 		plcm	Nem_Rabbit, $AA60	; rabbit
 		plcm	Nem_Chicken, $ACA0	; chicken
 		plcm	Nem_BlackBird, $AE60	; blackbird
