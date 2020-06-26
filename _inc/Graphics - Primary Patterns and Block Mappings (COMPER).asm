@@ -1,22 +1,44 @@
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
-Blk16_GHZ:		incbin	"map16\GHZ.bin"
+	if TweakMergedArt=0
+Blk16_TITLE:
+	else
+Blk16_TITLE:		incbin	"map16\GHZ.bin"
 		even
 Gra_Title:		incbin	"artcom\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
-	if TweakFastLevelLoading=0
+		if TweakUncompressedChunkMapping=0
+Blk256_TITLE:		incbin	"map256\GHZ.bin"
+		else
+Blk256_TITLE:		incbin	"map256\Uncompressed\GHZ.bin"
+		endc ; if TweakUncompressedChunkMapping=0
+	endc ; if TweakMergedArt>0
+; ---------------------------------------------------------------------------
+; Green Hill Zone
+; ---------------------------------------------------------------------------
+Blk16_GHZ:		incbin	"map16\GHZ.bin"
+		even
+	if TweakMergedArt=0
+Gra_Title:		incbin	"artcom\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
+		even
 Gra_GHZ:			incbin	"artcom\Recompressed\8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
 Gra_GHZ:	  	incbin	"artcom\Recompressed\8x8 - GHZ.bin"	; GHZ combined patterns
 	endc ; if TweakFastLoading>0
 		even
+	if TweakMergedArt=0
+Blk256_TITLE:
+	endc
 	if TweakUncompressedChunkMapping=0
 Blk256_GHZ:		incbin	"map256\GHZ.bin"
 	else
 Blk256_GHZ:		incbin	"map256\Uncompressed\GHZ.bin"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
+; ---------------------------------------------------------------------------
+; Labyrinth Zone
+; ---------------------------------------------------------------------------
 Blk16_LZ:			incbin	"map16\LZ.bin"
 		even
 Gra_LZ:				incbin	"artcom\Recompressed\8x8 - LZ.bin"	; LZ primary patterns
@@ -27,6 +49,9 @@ Blk256_LZ:		incbin	"map256\LZ.bin"
 Blk256_LZ:		incbin	"map256\Uncompressed\LZ.bin"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
+; ---------------------------------------------------------------------------
+; Marble Zone
+; ---------------------------------------------------------------------------
 Blk16_MZ:			incbin	"map16\MZ.bin"
 		even
 Gra_MZ:				incbin	"artcom\Recompressed\8x8 - MZ.bin"	; MZ primary patterns
@@ -46,6 +71,9 @@ Blk256_MZ:
 		endc
 	endc ; if TweakUncompressedChunkMapping=0
 		even
+; ---------------------------------------------------------------------------
+; Star Light Zone
+; ---------------------------------------------------------------------------
 Blk16_SLZ:		incbin	"map16\SLZ.bin"
 		even
 Gra_SLZ:			incbin	"artcom\Recompressed\8x8 - SLZ.bin"	; SLZ primary patterns
@@ -56,6 +84,9 @@ Blk256_SLZ:		incbin	"map256\SLZ.bin"
 Blk256_SLZ:		incbin	"map256\Uncompressed\SLZ.bin"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
+; ---------------------------------------------------------------------------
+; Spring Yard Zone
+; ---------------------------------------------------------------------------
 Blk16_SYZ:		incbin	"map16\SYZ.bin"
 		even
 Gra_SYZ:			incbin	"artcom\Recompressed\8x8 - SYZ.bin"	; SYZ primary patterns
@@ -66,6 +97,9 @@ Blk256_SYZ:		incbin	"map256\SYZ.bin"
 Blk256_SYZ:		incbin	"map256\Uncompressed\SYZ.bin"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
+; ---------------------------------------------------------------------------
+; Scrap Brain Zone
+; ---------------------------------------------------------------------------
 Blk16_SBZ:		incbin	"map16\SBZ.bin"
 		even
 Gra_SBZ:			incbin	"artcom\Recompressed\8x8 - SBZ.bin"	; SBZ primary patterns
