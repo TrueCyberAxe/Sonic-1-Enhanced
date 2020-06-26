@@ -31,29 +31,29 @@ OptimiseSound:	equ 0	; change to 1 to optimise sound queuing (Fixed by Cyber Axe
 ; Revision 2 Onwards Fixes the Spike Bug
 
 ; Bug Fixes Not Inluded in Other Revisions
-BugFixDemoPlayback:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
-BugFixPatternLoadCueRaceCondition: 	equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
-BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
-BugFixHiddenPoints:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
-BugFixDeleteScatteredRings:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
-BugFixScatteredRingsTimer:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
-BugFixWalkJump:											equ 1 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
-BugFixDrowningTimer:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
-BugFixDeathBoundary:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
-BugFixCameraFollow:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
-BugFixSongFadeRestoration:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
-BugFixBlinkingHUD:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
-BugFixLevelSelectCorruption:				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
-BugFixRememberSprite:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
-BugFixSoundDriverBugs:							equ 1 ; Uncommenting of code in ; Sound_ChkValue:
-BugFixCaterkillerDeath:							equ 1  ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
-BugFixGameOverFlicker:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
-BugFixSpringFaceWrongDirection:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
-BugFixTooFastToLive:								equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
-BugFixFallOffFinalZone:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
-BugFixRollerGlitch:									equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
+BugFixDemoPlayback:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
+BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
+BugFixTitleScreenPressStart: 				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
+BugFixHiddenPoints:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
+BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
+BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
+BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
+BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
+BugFixDeathBoundary:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
+BugFixCameraFollow:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+BugFixSongFadeRestoration:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
+BugFixBlinkingHUD:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
+BugFixLevelSelectCorruption:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
+BugFixRememberSprite:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
+BugFixSoundDriverBugs:							equ 0 ; Uncommenting of code in ; Sound_ChkValue:
+BugFixCaterkillerDeath:							equ 0  ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+BugFixGameOverFlicker:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
+BugFixSpringFaceWrongDirection:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
+BugFixTooFastToLive:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
+BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
+BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
-BugFixRenderBeforeInit:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
+BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 
 ; Re-implement 1D Unused Switch
@@ -123,10 +123,10 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; Left Align the Score
 
 ; Tweaks
-TweakFastLoadInit:									equ 1 ; Disable Some Initialization to load SEGA Logo Faster
+TweakFastLoadInit:									equ 0 ; Disable Some Initialization to load SEGA Logo Faster
 TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
-TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSegaLogoWhiteFade:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakBetterFadeEffects:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakSegaLogoWhiteFade:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 
 TweakBetterBonusControlRestore:			equ 0 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
@@ -148,20 +148,20 @@ TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakLevelCompressionMode:					equ 0 ; 0 = Original Nemesis, 1 = Kosinski, 2 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
-TweakFastLevelLoading:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
-TweakFastLevelLoading2:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakFastLevelLoading:							equ 1 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakFastLevelLoading2:							equ 1 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
 ; Casing Graphic Glitches
 TweakFastLevelReload:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/#post-958087
 TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-707238
 
 ; Feature
-FeatureUpdateHeader: 								equ 1 ; Updates the name to fix the spacing and adds a comment to the rom header
-FeatureSkipChecksum: 								equ 1 ; Get to the SEGA Logo Faster by removing Security Checksum
-FeatureSkipSEGALogo: 								equ 1 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
-FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
-FeatureCodeCleanup:									equ 1 ; Modify Certain Code to Remove Duplicate or Redundant code
-FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+FeatureUpdateHeader: 								equ 0 ; Updates the name to fix the spacing and adds a comment to the rom header
+FeatureSkipChecksum: 								equ 0 ; Get to the SEGA Logo Faster by removing Security Checksum
+FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
+FeatureLevelSelectOnC:							equ 0 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
+FeatureCodeCleanup:									equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code
+FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
 FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when Falling, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
 FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
 FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.

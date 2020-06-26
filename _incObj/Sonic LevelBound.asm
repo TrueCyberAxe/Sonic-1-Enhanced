@@ -60,8 +60,8 @@ Sonic_LevelBound:
 		move.w	#(id_LZ<<8)+3,(v_zone).w ; set level to SBZ3 (LZ4)
 	if BugFixFallOffFinalZone>0 || FeatureSpindash>0
 	@dontkill:
-		rts
 	endc
+		rts
 
 	if BugFixFallOffFinalZone>0
 	@next:

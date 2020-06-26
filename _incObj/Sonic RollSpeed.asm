@@ -67,7 +67,7 @@ loc_131CC:
 		subq.w	#2,(v_lookshift).w
 
 	@cont2:
-endc
+	endc
 		move.b	obAngle(a0),d0
 		jsr	(CalcSine).l
 		muls.w	obInertia(a0),d0

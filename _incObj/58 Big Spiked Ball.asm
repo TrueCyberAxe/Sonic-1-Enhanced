@@ -79,7 +79,7 @@ BBall_Move:	; Routine 2
 ; ===========================================================================
 
 @type02:
-	if TweakRemoveReduntantCode>0
+	if TweakRemoveReduntantCode=0
 		if TweakMathOptimizations=0
 			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
 		else
@@ -91,7 +91,7 @@ BBall_Move:	; Routine 2
 		btst	#0,obStatus(a0)
 		beq.s	@noflip2
 		neg.w	d0
-	if TweakRemoveReduntantCode>0
+	if TweakRemoveReduntantCode=0
 		addi.w	#$80,d0																; add $80 to osc value <-HEY why is this not $60?
 	endc
 
