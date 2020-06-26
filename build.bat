@@ -11,6 +11,7 @@
 @IF EXIST s1built.bin move /Y s1built.bin s1built.prev.bin >NUL 2>&1
 
 REM Compile ROM
+@ECHO Reference - Checksum: Rev0 = 264A, Rev1 = AFC7, Rev2 = 2F9C - Size 6FEFF / 7FFFF
 asm68k /k /p /o ae- sonic.asm, s1built.bin >errors.txt, , sonic.lst
 @TYPE errors.txt
 
