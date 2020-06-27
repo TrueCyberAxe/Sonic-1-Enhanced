@@ -6,7 +6,7 @@ Blk16_TITLE:
 	else
 Blk16_TITLE:		incbin	"map16\GHZ.bin"
 		even
-Gra_Title:		incbin	"artkos\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
+Gra_Title:			incbin	"artkos\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
 		if TweakUncompressedChunkMapping=0
 Blk256_TITLE:		incbin	"map256\GHZ.bin"
