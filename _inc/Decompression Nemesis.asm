@@ -45,7 +45,7 @@ loc_146A:
 		move.w	#$10,d6	; set initial shift value
 		bsr.s	NemDec_ProcessCompressedData
 		movem.l	(sp)+,d0-a1/a3-a5
-		rts	
+		rts
 ; End of function NemDec
 
 ; ---------------------------------------------------------------------------
@@ -141,7 +141,7 @@ NemPCD_WriteRowToVDP_XOR:
 		subq.w	#1,a5
 		move.w	a5,d4
 		bne.s	NemPCD_NewRow
-		rts	
+		rts
 ; ===========================================================================
 
 NemPCD_WriteRowToRAM:
@@ -149,7 +149,7 @@ NemPCD_WriteRowToRAM:
 		subq.w	#1,a5
 		move.w	a5,d4
 		bne.s	NemPCD_NewRow
-		rts	
+		rts
 ; ===========================================================================
 NemPCD_WriteRowToRAM_XOR:
 		eor.l	d4,d2
@@ -157,7 +157,7 @@ NemPCD_WriteRowToRAM_XOR:
 		subq.w	#1,a5
 		move.w	a5,d4
 		bne.s	NemPCD_NewRow
-		rts	
+		rts
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 ; ---------------------------------------------------------------------------
@@ -181,7 +181,7 @@ NemBCT_Loop:
 		move.b	(a0)+,d0	; read next byte
 		cmpi.b	#$80,d0	; sign bit being set signifies a new palette index
 		bcc.s	NemBCT_ChkEnd	; a bmi could have been used instead of a compare and bcc
-		
+
 		move.b	d0,d1
 		andi.w	#$F,d7	; get palette index
 		andi.w	#$70,d1	; get repeat count for palette index
