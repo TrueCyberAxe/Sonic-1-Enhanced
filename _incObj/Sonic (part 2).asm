@@ -31,7 +31,11 @@ Sonic_HurtStop:
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0
+	if BugFixHurtDeathBoundary=0
 		bcs.w	KillSonic
+	else
+		blt.w	KillSonic
+	endc
 		bsr.w	Sonic_Floor
 		btst	#1,obStatus(a0)
 		bne.s	locret_13860
