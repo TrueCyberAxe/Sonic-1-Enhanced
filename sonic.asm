@@ -2765,11 +2765,11 @@ GM_Title:
 	else
 		if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		elseif TweakLevelCompressionMode=2
-			bsr.w	KosDec
+		; elseif TweakLevelCompressionMode=2 ; @NOTE needs proper implementation
+		; 	bsr.w	KosDec
 		else
 			; bsr.w CompDec
-			bsr.w	LoadCompArt
+			bsr.w	LoadCompArt ; @NOTE Doesnt work
 		endc
 	endc
 
@@ -3391,13 +3391,13 @@ Level_ClrStuff:
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000
 		lea	(Gra_TitleCard).l,a0 																					; load title card patterns
-		if TweakLevelCompressionMode<2
+		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		elseif TweakLevelCompressionMode=2
-			bsr.w	KosDec
-		else
-			bsr.w	CompDec
-		endc
+		; elseif TweakLevelCompressionMode=2
+		; 	bsr.w	KosDec
+		; else
+		; 	bsr.w	CompDec
+		; endc
 	else ; Uncompressed Level Code by Aurora Fields - Fixes Title Card Corruption in Github Disassembly (however has a slightly animation bug with act number, happens with original title card code too)
 		locVRAM	$B000,vdp_control_port
 		lea	Gra_TitleCard,a0 																							; load title card patterns
@@ -3434,13 +3434,13 @@ GM_Level:
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000
 		lea	(Gra_TitleCard).l,a0 																					; load title card patterns
-		if TweakLevelCompressionMode<2
+		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		elseif TweakLevelCompressionMode=2
-			bsr.w	KosDec
-		else
-			bsr.w	CompDec
-		endc
+		; elseif TweakLevelCompressionMode=2
+		; 	bsr.w	KosDec
+		; else
+		; 	bsr.w	CompDec
+		; endc
 	else
 		locVRAM	$B000,vdp_control_port
 		lea	Gra_TitleCard,a0 																							; load title card patterns
@@ -4118,13 +4118,13 @@ loc_47D4:
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000
 		lea	(Gra_TitleCard).l,a0 ; load title card patterns
-		if TweakLevelCompressionMode<2
+		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		elseif TweakLevelCompressionMode=2
-			bsr.w	KosDec
-		else
-			bsr.w	CompDec
-		endc
+		; elseif TweakLevelCompressionMode=2
+		; 	bsr.w	KosDec
+		; else
+		; 	bsr.w	CompDec
+		; endc
 	else
 		;locVRAM	$B000,vdp_control_port												; set mode "VRAM Write to $B000"
 		move.l  #$70000002,($C00004)
@@ -4502,13 +4502,13 @@ GM_Continue:
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000
 		lea	(Gra_TitleCard).l,a0 ; load title card patterns
-		if TweakLevelCompressionMode<2
+		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		elseif TweakLevelCompressionMode=2
-			bsr.w	KosDec
-		else
-			bsr.w	CompDec
-		endc
+		; elseif TweakLevelCompressionMode=2
+		; 	bsr.w	KosDec
+		; else
+		; 	bsr.w	CompDec
+		; endc
 	else
 		locVRAM	$B000,vdp_control_port
 		lea	Gra_TitleCard,a0 																	; load title card patterns
@@ -9946,11 +9946,11 @@ Gra_EndEggman:
 	endc ; if Revision=0 || Revision>2
 	even
 
-	if TweakLevelCompressionMode<2
+	if TweakLevelCompressionMode<3
 Gra_EndFlowers:	incbin	"artkos\Flowers at Ending.bin" ; ending sequence animated flowers
 	else
 Gra_EndFlowers:	incbin	"artcom\Flowers at Ending.bin" ; ending sequence animated flowers
-	endc ; if TweakLevelCompressionMode<2
+	endc ; if TweakLevelCompressionMode<3
 
 	even
 Gra_EndFlower:	incbin	"artnem\Ending - Flowers.bin"
