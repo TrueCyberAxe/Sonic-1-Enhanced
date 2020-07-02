@@ -9,7 +9,7 @@ v_lvllayout:	equ $FFFFA400	; level and background layouts ($400 bytes)
 v_bgscroll_buffer:	equ	$FFFFA800	; background scroll buffer ($200 bytes)
 v_ngfx_buffer:	equ $FFFFAA00	; Nemesis graphics decompression buffer ($200 bytes)
 v_spritequeue:	equ $FFFFAC00	; sprite display queue, in order of priority ($400 bytes)
-v_16x16:		equ $FFFFB000	; 16x16 tile mappings
+v_16x16:		equ $FFFFB000	; 16x16 tile mappings (MainCharacter in Sonic 2)
 
 v_sgfx_buffer:	equ $FFFFC800	; buffered Sonic graphics ($17 cells) ($2E0 bytes)
 v_tracksonic:	equ $FFFFCB00	; position tracking data for Sonic ($100 bytes)
@@ -142,6 +142,7 @@ v_ptrnemcode:	equ $FFFFF6E0	; pointer for nemesis decompression code ($1502 or $
 f_plc_execute:	equ $FFFFF6F8	; flag set for pattern load cue execution (2 bytes)
 
 v_screenposx:	equ $FFFFF700	; screen position x (2 bytes)
+v_screenposx_coarse: equ $FFFFF7DA ; (Camera_X_pos - 128) / 256
 v_screenposy:	equ $FFFFF704	; screen position y (2 bytes)
 v_bgscreenposx:	equ $FFFFF708	; background screen position x (2 bytes)
 v_bgscreenposy:	equ $FFFFF70C	; background screen position y (2 bytes)
@@ -358,5 +359,4 @@ f_levelreload: equ $FFFFCF80     ; Reload Level Flag @TODO find unused byte in m
 
 v_startscore:  equ $3A
 
-PLCQueue:      equ v_pal_buffer+4   			; start of PLC queue
-PLCQueueEnd:   equ v_screenposx-$20   		; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression
+; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.

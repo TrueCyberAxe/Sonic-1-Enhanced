@@ -368,10 +368,12 @@ fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
 
 ; ------- Additional -------
-; fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)>>1	; $58
-; fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)>>1	; $59
-; fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)>>1	; $5A
-; fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)>>1	; $5B
-; fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)>>1	; $5C
-; fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)>>1	; $5D
-; fr_victory:	  equ $5E
+fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)>>1	; $58
+fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)>>1	; $59
+fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)>>1	; $5A
+fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)>>1	; $5B
+fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)>>1	; $5C
+fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)>>1	; $5D
+fr_victory:	  equ $5E
+
+max_ring_scatter: equ $20 ; 32
