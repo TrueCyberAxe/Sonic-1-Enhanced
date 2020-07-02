@@ -16,9 +16,9 @@ van_time:	equ $30		; time for Sonic to disappear
 ; ===========================================================================
 
 Van_Main:	; Routine 0
-		tst.l	(v_plc_buffer).w ; are pattern load cues empty?
+		tst.l	PLCQueueAdr.w ; are pattern load cues empty?
 		beq.s	@isempty	; if yes, branch
-		rts	
+		rts
 
 	@isempty:
 		addq.b	#2,obRoutine(a0)
@@ -53,4 +53,4 @@ Van_LoadSonic:	; Routine 4
 		jmp	(DeleteObject).l
 
 	@wait:
-		rts	
+		rts
