@@ -79,7 +79,7 @@ PLC_GameOver:	dc.w ((PLC_GameOverend-PLC_GameOver-2)/6)-1
 ; Pattern load cues - Green Hill
 ; ---------------------------------------------------------------------------
 PLC_GHZ:	dc.w ((PLC_GHZ2-PLC_GHZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		if TweakMergedArt=0
 			plcm	Gra_Title, 0		; GHZ main patterns
 			plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
@@ -110,7 +110,7 @@ PLC_GHZ2:	dc.w ((PLC_GHZ2end-PLC_GHZ2-2)/6)-1
 ; Pattern load cues - Labyrinth
 ; ---------------------------------------------------------------------------
 PLC_LZ:		dc.w ((PLC_LZ2-PLC_LZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_LZ,0		; LZ main patterns
 	endc
 		plcm	Nem_LzBlock1, $3C00	; block
@@ -146,7 +146,7 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 ; Pattern load cues - Marble
 ; ---------------------------------------------------------------------------
 PLC_MZ:		dc.w ((PLC_MZ2-PLC_MZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_MZ,0		; MZ main patterns
 	endc
 		plcm	Nem_MzMetal, $6000	; metal	blocks
@@ -170,7 +170,7 @@ PLC_MZ2:	dc.w ((PLC_MZ2end-PLC_MZ2-2)/6)-1
 ; Pattern load cues - Star Light
 ; ---------------------------------------------------------------------------
 PLC_SLZ:	dc.w ((PLC_SLZ2-PLC_SLZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SLZ,0		; SLZ main patterns
 	endc
 		plcm	Nem_Bomb, $8000		; bomb enemy
@@ -194,7 +194,7 @@ PLC_SLZ2:	dc.w ((PLC_SLZ2end-PLC_SLZ2-2)/6)-1
 ; Pattern load cues - Spring Yard
 ; ---------------------------------------------------------------------------
 PLC_SYZ:	dc.w ((PLC_SYZ2-PLC_SYZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SYZ,0		; SYZ main patterns
 	endc
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
@@ -216,7 +216,7 @@ PLC_SYZ2:	dc.w ((PLC_SYZ2end-PLC_SYZ2-2)/6)-1
 ; Pattern load cues - Scrap Brain
 ; ---------------------------------------------------------------------------
 PLC_SBZ:	dc.w ((PLC_SBZ2-PLC_SBZ-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SBZ,0		; SBZ main patterns
 	endc
 		plcm	Nem_Stomper, $5800	; moving platform and stomper
@@ -250,7 +250,7 @@ PLC_SBZ2:	dc.w ((PLC_SBZ2end-PLC_SBZ2-2)/6)-1
 ; Pattern load cues - title card
 ; ---------------------------------------------------------------------------
 PLC_TitleCard:	dc.w ((PLC_TitleCardend-PLC_TitleCard-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_TitleCard, $B000
 	endc
 	PLC_TitleCardend:
@@ -360,7 +360,7 @@ PLC_SSResult:dc.w ((PLC_SpeStResultend-PLC_SSResult-2)/6)-1
 ; Pattern load cues - ending sequence
 ; ---------------------------------------------------------------------------
 PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
-	if TweakNonNemesisLoad=0
+	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_Title,0		; GHZ main patterns
 		plcm	Gra_GHZ, $39A0	; GHZ secondary	patterns
 	endc
