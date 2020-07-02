@@ -5,7 +5,7 @@
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
 
-Sonic_LoadGfx:
+Sonic_LoadGfx: ; LoadSonicDynPLC
 		moveq	#0,d0
 		move.b	obFrame(a0),d0	; load frame number
 		cmp.b	(v_sonframenum).w,d0 ; has frame changed?
@@ -15,7 +15,8 @@ Sonic_LoadGfx:
 		lea	(SonicDynPLC).l,a2 ; load PLC script
 		add.w	d0,d0
 		adda.w	(a2,d0.w),a2
-	if TweakSonic2LevelArtLoader=0
+
+	if FeatureEnhancedPLCQueue=0
 		moveq	#0,d1
 		move.b	(a2)+,d1	; read "number of entries" value
 		subq.b	#1,d1
@@ -23,18 +24,19 @@ Sonic_LoadGfx:
 		moveq	#0,d5
 		move.b	(a2)+,d5	; read "number of entries" value
 		subq.b	#1,d5
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
+
 		bmi.s	@nochange	; if zero, branch
-	if TweakSonic2LevelArtLoader=0
+	if FeatureEnhancedPLCQueue=0
 		lea	(v_sgfx_buffer).w,a3
 		move.b	#1,(f_sonframechg).w ; set flag for Sonic graphics DMA
 	else
 		move.w	#$F000,d4
 		move.l	#Art_Sonic,d6
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
 
 	@readentry:
-	if TweakSonic2LevelArtLoader=0
+	if FeatureEnhancedPLCQueue=0
 		moveq	#0,d2
 		move.b	(a2)+,d2
 		move.w	d2,d0
@@ -69,7 +71,7 @@ Sonic_LoadGfx:
 		add.w	d3,d4
 		jsr	(QueueDMATransfer).l
 		dbf	d5,@readentry	; repeat for number of entries
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochange:
 		rts
