@@ -42,9 +42,15 @@ Pow_Move:	; Routine 2
 Pow_Checks:
 		addq.b	#2,obRoutine(a0)
 		move.w	#29,obTimeFrame(a0) ; display icon for half a second
+	if BugFixInvincibilityDelayDeath>0
+		move.b	obAnim(a0),d0
+		bra Pow_ChkInvinc
+	endc
 
 Pow_ChkEggman:
+	if BugFixInvincibilityDelayDeath=0
 		move.b	obAnim(a0),d0
+	endc
 		cmpi.b	#1,d0								; does monitor contain Eggman?
 		bne.s	Pow_ChkSonic
 	if TweakFixMonitorEggman=0
@@ -78,7 +84,11 @@ Pow_ChkShoes:
 
 Pow_ChkShield:
 		cmpi.b	#4,d0		; does monitor contain a shield?
+	if BugFixInvincibilityDelayDeath=0
 		bne.s	Pow_ChkInvinc
+	else
+		bne.s	Pow_ChkRings
+	endc
 
 		move.b	#1,(v_shield).w	; give Sonic a shield
 		move.b	#id_ShieldItem,(v_objspace+$180).w ; load shield object ($38)
@@ -87,10 +97,14 @@ Pow_ChkShield:
 
 Pow_ChkInvinc:
 		cmpi.b	#5,d0		; does monitor contain invincibility?
+	if BugFixInvincibilityDelayDeath=0
 		bne.s	Pow_ChkRings
+	else
+		bne.s	Pow_ChkEggman
+	endc
 
-		move.b	#1,(v_invinc).w	; make Sonic invincible
-		move.w	#$4B0,(v_player+$32).w ; time limit for the power-up
+		move.b	#1,(v_invinc).w										 ; make Sonic invincible
+		move.w	#$4B0,(v_player+$32).w 						 ; time limit for the power-up
 		move.b	#id_ShieldItem,(v_objspace+$200).w ; load stars object ($3801)
 		move.b	#1,(v_objspace+$200+obAnim).w
 		move.b	#id_ShieldItem,(v_objspace+$240).w ; load stars object ($3802)
@@ -99,13 +113,15 @@ Pow_ChkInvinc:
 		move.b	#3,(v_objspace+$280+obAnim).w
 		move.b	#id_ShieldItem,(v_objspace+$2C0).w ; load stars object ($3804)
 		move.b	#4,(v_objspace+$2C0+obAnim).w
+
 		tst.b	(f_lockscreen).w ; is boss mode on?
 		bne.s	Pow_NoMusic	; if yes, branch
-		if Revision=0
-		else
+
+		if Revision>0
 			cmpi.w	#$C,(v_air).w
 			bls.s	Pow_NoMusic
 		endc
+
 		music	bgm_Invincible,1,0,0 ; play invincibility music
 ; ===========================================================================
 
