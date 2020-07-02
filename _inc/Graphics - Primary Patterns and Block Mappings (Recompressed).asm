@@ -2,7 +2,7 @@
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
 	if TweakMergedArt=0
-Blk16_TITLE:
+Blk16_TITLE:		incbin	"map16\GHZ.bin"
 	else
 Blk16_TITLE:		incbin	"map16\GHZ.bin"
 		even
@@ -13,7 +13,8 @@ Blk256_TITLE:		incbin	"map256\GHZ.bin"
 		else
 Blk256_TITLE:		incbin	"map256\Uncompressed\GHZ.bin"
 		endc ; if TweakUncompressedChunkMapping=0
-	endc ; if TweakMergedArt>0
+	endc ; if TweakMergedArt=0
+		even
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
