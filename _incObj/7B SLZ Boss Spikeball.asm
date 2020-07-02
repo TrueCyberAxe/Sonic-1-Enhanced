@@ -9,10 +9,14 @@ BossSpikeball:
 		jsr	Obj7B_Index(pc,d0.w)
 		move.w	$30(a0),d0
 		andi.w	#$FF80,d0
-		move.w	(v_screenposx).w,d1
+	if TweakSonic2OffScreenDeletionCode=0
+		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#$80,d1
 		andi.w	#$FF80,d1
-		sub.w	d1,d0
+		sub.w	d1,d0 ; approx distance between object and screen
+	else
+		sub.w (v_screenposx_coarse).w,d0
+	endc
 		bmi.w	Obj7A_Delete
 		cmpi.w	#$280,d0
 		bhi.w	Obj7A_Delete

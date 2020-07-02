@@ -9,10 +9,14 @@ Seesaw:
 		jsr	See_Index(pc,d1.w)
 		move.w	see_origX(a0),d0
 		andi.w	#$FF80,d0
-		move.w	(v_screenposx).w,d1
+	if TweakSonic2OffScreenDeletionCode=0
+		move.w	(v_screenposx).w,d1 		; get screen position
 		subi.w	#$80,d1
 		andi.w	#$FF80,d1
-		sub.w	d1,d0
+		sub.w	d1,d0 										; approx distance between object and screen
+	else
+		sub.w (v_screenposx_coarse).w,d0
+	endc
 		bmi.w	DeleteObject
 		cmpi.w	#$280,d0
 		bhi.w	DeleteObject
@@ -28,7 +32,7 @@ See_Index:	dc.w See_Main-See_Index
 see_origX:	equ $30		; original x-axis position
 see_origY:	equ $34		; original y-axis position
 see_speed:	equ $38		; speed of collision
-see_frame:	equ $3A		; 
+see_frame:	equ $3A		;
 see_parent:	equ $3C		; RAM address of parent object
 ; ===========================================================================
 
@@ -73,7 +77,7 @@ See_Slope:	; Routine 2
 		move.w	obVelY(a1),see_speed(a0)
 		move.w	#$30,d1
 		jsr	(SlopeObject).l
-		rts	
+		rts
 ; ===========================================================================
 
 See_Slope2:	; Routine 4
@@ -89,7 +93,7 @@ See_Slope2:	; Routine 4
 		move.w	#$30,d1
 		move.w	obX(a0),d2
 		jsr	(SlopeObject2).l
-		rts	
+		rts
 ; ===========================================================================
 
 See_ChkSide:
@@ -123,7 +127,7 @@ See_ChgFrame:
 		bset	#0,obRender(a0)
 
 	@noflip:
-		rts	
+		rts
 ; ===========================================================================
 
 See_Spikeball:	; Routine 6
@@ -197,7 +201,7 @@ loc_1185C:
 		move.w	d2,obX(a0)
 		clr.w	obY+2(a0)
 		clr.w	obX+2(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 See_SpikeFall:	; Routine $A
@@ -211,7 +215,7 @@ See_SpikeFall:	; Routine $A
 		bsr.w	ObjectFall
 
 locret_11898:
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1189A:
@@ -262,7 +266,7 @@ loc_1192C:
 		subq.b	#2,obRoutine(a0)
 
 locret_11938:
-		rts	
+		rts
 ; ===========================================================================
 See_Speeds:	dc.w -8, -$1C, -$2F, -$1C, -8
 
