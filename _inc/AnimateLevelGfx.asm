@@ -6,8 +6,10 @@
 
 
 AnimateLevelGfx:
-		tst.w	(f_pause).w	; is the game paused?
-		bne.s	@ispaused	; if yes, branch
+	if FeatureMusicWhilePaused=0
+		tst.w	(f_pause).w							; is the game paused?
+		bne.s	@ispaused								; if yes, branch
+	endc
 		lea	(vdp_data_port).l,a6
 		bsr.w	AniArt_GiantRing
 		moveq	#0,d0

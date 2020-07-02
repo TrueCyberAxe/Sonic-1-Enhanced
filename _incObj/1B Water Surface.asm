@@ -45,8 +45,10 @@ Surf_Action:	; Routine 2
 ; ===========================================================================
 
 @stopped:
+	if FeatureAnimateWhilePaused=0
 		tst.w	(f_pause).w	; is the game paused?
 		bne.s	@display	; if yes, branch
+	endc
 		move.b	#0,surf_freeze(a0) ; resume animation
 		subq.b	#3,obFrame(a0)	; use normal frames
 
