@@ -40,13 +40,14 @@ BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG
 BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
 BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
 BugFixDeathBoundary:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
+BugFixHurtDeathBoundary:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
 BugFixCameraFollow:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 BugFixSongFadeRestoration:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 BugFixBlinkingHUD:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
 BugFixLevelSelectCorruption:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
 BugFixRememberSprite:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 BugFixSoundDriverBugs:							equ 0 ; Uncommenting of code in ; Sound_ChkValue:
-BugFixCaterkillerDeath:							equ 0  ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+BugFixCaterkillerDeath:							equ 0 ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
 BugFixGameOverFlicker:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
 BugFixSpringFaceWrongDirection:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
 BugFixTooFastToLive:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
@@ -55,7 +56,9 @@ BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
 BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
-
+BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
+BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -77,6 +80,8 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; @TODO Fix bug - Labyrinth Missing signpost
 ; @TODO Fix bug - Labyrinth 255 lives glitch
 
+; @TODO Recompress https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/#post-767170
+
 ; @TODO Own Noticed Glitch - Starlight Zone Glitch on Fade In
 ; @TODO Own Noticed Glitch - Fix bug when you roll into the right of an object like the rocks either side of the bridge in GHZ
 ; @TODO Own Noticed Glitch - Fix Being able to die after hitting invinciblity monitor before the sparkles appear
@@ -86,6 +91,7 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; @TODO fix Sonic 2 Art Loader / Compression Mode graphic Glitches either caused by QueueDMATransfer or tool that compressed / decompressed the graphics
 ; @TODO update the Sonic CD style spindash so it is not hovering in the air and so it speeds up
 ; @TODO Sonic 2 Spin Dash sound rev
+; @TODO Prevent Pause Death on End Level Screen and Special Stage
 
 ; Features to Add
 ; @TODO implement Sonic CD Run Charge, but since this is Sonic 1 dont go faster than max run speed and just use regular run animation
@@ -101,7 +107,6 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; https://info.sonicretro.org/SCHG_How-to:Port_Sonic_3%27s_Sound_Driver_to_Sonic_1 and https://info.sonicretro.org/SCHG_How-to:Port_Sonic_3%27s_Sound_Driver_to_Sonic_1:_Part_2
 
 ; https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2_Level_Select_to_Sonic_1
-; Restore the Beta Victory Animation
 
 ; Possible Features
 ; Time attack https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
@@ -123,10 +128,10 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 ; Left Align the Score
 
 ; Tweaks
-TweakFastLoadInit:									equ 1 ; Disable Some Initialization to load SEGA Logo Faster
-TweakMathOptimizations:							equ 1 ; Replace Maths with Bit Shifts and other CPU GEMs
-TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSegaLogoWhiteFade:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakFastLoadInit:									equ 0 ; Disable Some Initialization to load SEGA Logo Faster
+TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
+TweakBetterFadeEffects:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakSegaLogoWhiteFade:							equ 0 ; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 
 TweakBetterBonusControlRestore:			equ 0 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
@@ -135,92 +140,93 @@ TweakRemoveSpeedCap:								equ 0 ; Based on https://info.sonicretro.org/SCHG_Ho
 TweakFixHurtWaterPhystics:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
 TweakFixMonitorEggman:							equ 0 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
 TweakFixMonitorScubaGear:	  				equ 0 ; Fixes the Scuba Gear Monitor
-
 TweakFasterObjectMove:							equ 0 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
 
-TweakRemoveReduntantCode:						equ 0 ; Should cause some performance improvments by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
-TweakUseRecompresedAssets						equ 0 ; All Nemesis files recompressed with KENSharp, all Kos files recompressed with Kosinski+ KENSharp
-
+TweakSonic2OffScreenDeletionCode:		equ 0 ; Faster Code from Sonic 2 - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-941555
+TweakFasterRingScatter:							equ 0 ; Faster Scatter - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
+TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwater -  - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
+; TweakUseRecompresedAssets						equ 1 ; All Nemesis files recompressed with KENSharp, all Kos files recompressed with Kosinski+ KENSharp
 ; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
 
 ; Art and Level Tweaks
-TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
+TweakSonic2LevelArtLoader:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
-TweakLevelCompressionMode:					equ 0 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
-TweakFastLevelLoading:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
-TweakFastLevelLoading2:							equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+
+TweakImproovedDecompression:				equ 0 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
+TweakLevelCompressionMode:					equ 2 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
+TweakNoWaitingonPLCForLevelTiles:		equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
+TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Screen
 
 ; Casing Graphic Glitches
 TweakFastLevelReload:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/#post-958087
 TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-707238
+TweakSlowDucking:										equ 0 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
 
 ; Feature
-FeatureUpdateHeader: 								equ 1 ; Updates the name to fix the spacing and adds a comment to the rom header
-FeatureSkipChecksum: 								equ 1 ; Get to the SEGA Logo Faster by removing Security Checksum
-FeatureSkipSEGALogo: 								equ 1 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
-FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
+FeatureUpdateHeader: 								equ 0 ; Updates the name to fix the spacing and adds a comment to the rom header
+FeatureSkipChecksum: 								equ 0 ; Get to the SEGA Logo Faster by removing Security Checksum
+FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
+FeatureCentreTitleScreen:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
+; @TODO Move Press Start Accordingly too
 
 FeatureLevelSelectOnC:							equ 0 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
-FeatureCodeCleanup:									equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code
+
+TweakRemoveReduntantCode:						equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code, should cause some performance improvments by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
+
+FeatureAnimateWhilePaused:					equ 0 ; Animated Background while paused - Need to fix waterfalls, need to fix HUD, need to test LZ Water
+FeatureMusicWhilePaused:						equ 0
+FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
 
 ; Major
 FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
-FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when Falling, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
+FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
 FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
 FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
+FeatureElectricShockAnimation:			equ 0 ; When you get hit with Electricity use the Electric Hit Animation
 
 ; Non Default Features some people may want to use
 FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1
 
+;BugFixPauseOnSecialStageResults:		equ 1
 ; ============================================================================
 
-	if TweakFastLevelReload=0
-		if TweakFastLevelLoading=0
-TweakUncompressedTitleCards: equ 0
-		else
-TweakUncompressedTitleCards: equ 1
-		endc
-	else
-TweakUncompressedTitleCards: equ 1
-	endc
-
-
-	if TweakSonic2LevelArtLoader=0
-		if TweakLevelCompressionMode<2
-TweakDontLoadLevelTilePatterns: equ 0
-		else
-TweakDontLoadLevelTilePatterns: equ 1
-		endc
-	else
-TweakDontLoadLevelTilePatterns: equ 1
-	endc
-
-	if TweakLevelCompressionMode<1
+	if TweakUncompressedChunkMapping>0
+TweakMergedArt:											equ 1
+	elseif TweakLevelCompressionMode>1
 TweakMergedArt:											equ 1
 	else
-TweakMergedArt:											equ 1
+TweakMergedArt:											equ 0
 	endc
 
-	if TweakFastLevelLoading2=0
-		if TweakLevelCompressionMode<2
-TweakNonNemesisLoad: equ 0
-		else
-TweakNonNemesisLoad: equ 1
-		endc
+	if TweakLevelCompressionMode<2
+TweakNonNemesisLevelArtLoad: equ 0
+	elseif TweakSonic2LevelArtLoader=0
+TweakNonNemesisLevelArtLoad: equ 0
 	else
-TweakNonNemesisLoad: equ 1
+TweakNonNemesisLevelArtLoad: equ 1
 	endc
 
-	if TweakFastLevelLoading2=0
-		if TweakLevelCompressionMode<2
-TweakEnhancedPLCQueue: equ 0
-		else
-TweakEnhancedPLCQueue: equ 1
-		endc
+	if TweakSonic2LevelArtLoader>0
+FeatureEnhancedPLCQueue: equ 1
+	elseif FeatureSpindash>0
+FeatureEnhancedPLCQueue: equ 1
 	else
-TweakEnhancedPLCQueue: equ 1
+FeatureEnhancedPLCQueue: equ 0
 	endc
+
+; ===========================================================================
+; PLC Queue Enhancement
+; ===========================================================================
+	if TweakNoWaitingonPLCForLevelTiles=0
+PLCQueueAdr:    equ v_plc_buffer      ; beginning of RAM allocated for PLC
+	else
+PLCQueueAdr:    equ v_pal_buffer      ; beginning of RAM allocated for PLC
+	endc
+
+PLCQueue:       equ PLCQueueAdr+4     ; start of PLC queue
+PLCQueueEnd:    equ v_ptrnemcode      ; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression
 
 ; ===========================================================================
 
@@ -326,7 +332,7 @@ Checksum: dc.w $0
 		dc.b "J               " 		; I/O support
 RomStartLoc:	dc.l StartOfRom		; Start address of ROM
 RomEndLoc:		dc.l EndOfRom-1		; End address of ROM
-RamStartLoc:	dc.l $FF0000			; Start address of RAM
+RamStartLoc:	dc.l v_256x256			; Start address of RAM
 RamEndLoc:		dc.l $FFFFFF			; End address of RAM
 SRAMSupport:
 	if EnableSRAM=0
@@ -535,7 +541,7 @@ CheckSumCheck:
 		move.l	#'init',(v_init).w 			; set flag so checksum won't run again
 
 GameInit:
-		lea	($FF0000).l,a6
+		lea	(v_256x256).l,a6
 		moveq	#0,d7
 		move.w	#$3F7F,d6
 	@clearRAM:
@@ -881,12 +887,13 @@ VBla_08:
 @waterabove:
 		writeCRAM	v_pal_water,$80,0
 
-	@waterbelow:
+	@waterbelow: ; loc_CD4
 		move.w	(v_hbla_hreg).w,(a5)
 
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
-	if TweakSonic2LevelArtLoader=0
+
+	if FeatureEnhancedPLCQueue=0
 		tst.b	(f_sonframechg).w 								; has Sonic's sprite changed?
 		beq.s	@nochg														; if not, branch
 
@@ -894,9 +901,10 @@ VBla_08:
 		move.b	#0,(f_sonframechg).w
 	else
 		jsr	(ProcessDMAQueue).l
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
+
  	;  #$83,(v_vdp_buffer2).w
-	; @NOTE Queue system tutorial wanted me to remove move	#$83,($FFFFF640).w and jsr	Process_DMA but they dont exist
+	; @NOTE spindash Queue system tutorial wanted me to remove move	#$83,($FFFFF640).w and jsr	Process_DMA but they dont exist
 	@nochg:
 		startZ80
 		movem.l	(v_screenposx).w,d0-d7
@@ -905,8 +913,10 @@ VBla_08:
 		movem.l	d0-d1,(v_fg_scroll_flags_dup).w
 		cmpi.b	#96,(v_hbla_line).w
 		bhs.s	Demo_Time
+	; if FeatureEnhancedPLCQueue=0 <----- This Line???
 		move.b	#1,($FFFFF64F).w
 		addq.l	#4,sp
+	; endc ; if FeatureEnhancedPLCQueue=0
 		bra.w	VBla_Exit
 
 ; ---------------------------------------------------------------------------
@@ -940,7 +950,8 @@ VBla_0A:
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		startZ80
 		bsr.w	PalCycle_SS
-	if TweakSonic2LevelArtLoader=0
+
+	if FeatureEnhancedPLCQueue=0
 		tst.b	(f_sonframechg).w 								; has Sonic's sprite changed?
 		beq.s	@nochg														; if not, branch
 
@@ -948,7 +959,7 @@ VBla_0A:
 		move.b	#0,(f_sonframechg).w
 	else
 		jsr	(ProcessDMAQueue).l
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochg:
 		tst.w	(v_demolength).w	; is there time left on the demo?
@@ -976,7 +987,8 @@ VBla_0C:
 		move.w	(v_hbla_hreg).w,(a5)
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
-	if TweakSonic2LevelArtLoader=0
+
+	if FeatureEnhancedPLCQueue=0
 		tst.b	(f_sonframechg).w 								; has Sonic's sprite changed?
 		beq.s	@nochg														; if not, branch
 
@@ -984,7 +996,7 @@ VBla_0C:
 		move.b	#0,(f_sonframechg).w
 	else
 		jsr	(ProcessDMAQueue).l
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochg:
 		startZ80
@@ -1020,7 +1032,8 @@ VBla_16:
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		startZ80
-	if TweakSonic2LevelArtLoader=0
+
+	if FeatureEnhancedPLCQueue=0
 		tst.b	(f_sonframechg).w 								; has Sonic's sprite changed?
 		beq.s	@nochg														; if not, branch
 
@@ -1028,7 +1041,7 @@ VBla_16:
 		move.b	#0,(f_sonframechg).w
 	else
 		jsr	(ProcessDMAQueue).l
-	endc
+	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochg:
 		tst.w	(v_demolength).w
@@ -1345,7 +1358,11 @@ TilemapToVRAM:
 		rts
 ; End of function TilemapToVRAM
 
-		include	"_inc\Nemesis Decompression.asm"
+	if TweakImproovedDecompression=0
+		include	"_inc\Decompression Nemesis.asm"
+	else
+		include	"_inc\Decompression Nemesis (Improved).asm"
+	endc
 
 
 ; ---------------------------------------------------------------------------
@@ -1365,7 +1382,7 @@ AddPLC:
 		add.w	d0,d0
 		move.w	(a1,d0.w),d0
 		lea	(a1,d0.w),a1		; jump to relevant PLC
-		lea	(v_plc_buffer).w,a2 ; PLC buffer space
+		lea	PLCQueueAdr.w,a2 ; PLC buffer space
 
 	@findspace:
 		tst.l	(a2)		; is space available in RAM?
@@ -1409,7 +1426,7 @@ NewPLC:
 		move.w	(a1,d0.w),d0
 		lea	(a1,d0.w),a1	; jump to relevant PLC
 		bsr.s	ClearPLC	; erase any data in PLC buffer space
-		lea	(v_plc_buffer).w,a2
+		lea	PLCQueueAdr.w,a2
 		move.w	(a1)+,d0	; get length of PLC
 		bmi.s	@skip		; if it's negative, skip the next loop
 
@@ -1433,12 +1450,9 @@ NewPLC:
 
 
 ClearPLC:
-		lea	(v_plc_buffer).w,a2 ; PLC buffer space in RAM
-	if TweakFastLevelLoading2=0
-		moveq	#$1F,d0	; bytesToLcnt(v_plc_buffer_end-v_plc_buffer)
-	else
-		moveq #(((PLCQueueEnd+$20)-v_pal_buffer)/4)-1,d0   ; length of the PLC RAM
-	endif
+		lea	PLCQueueAdr.w,a2 ; PLC buffer space in RAM
+
+		moveq #((v_screenposx-PLCQueueAdr)/4)-1,d0   ; length of the PLC RAM
 
 	@loop:
 		clr.l	(a2)+
@@ -1454,11 +1468,11 @@ ClearPLC:
 
 
 RunPLC:
-		tst.l	(v_plc_buffer).w
+		tst.l	PLCQueueAdr.w
 		beq.s	Rplc_Exit
 		tst.w	(f_plc_execute).w
 		bne.s	Rplc_Exit
-		movea.l	(v_plc_buffer).w,a0
+		movea.l	PLCQueueAdr.w,a0
 		lea	(NemPCD_WriteRowToVDP).l,a3
 		lea	(v_ngfx_buffer).w,a1
 		move.w	(a0)+,d2
@@ -1476,7 +1490,7 @@ loc_160E:
 		move.b	(a0)+,d5
 		moveq	#$10,d6
 		moveq	#0,d0
-		move.l	a0,(v_plc_buffer).w
+		move.l	a0,PLCQueueAdr.w
 		move.l	a3,(v_ptrnemcode).w
 		move.l	d0,($FFFFF6E4).w
 		move.l	d0,($FFFFF6E8).w
@@ -1500,8 +1514,8 @@ sub_1642:
 		beq.w	locret_16DA
 		move.w	#9,($FFFFF6FA).w
 		moveq	#0,d0
-		move.w	($FFFFF684).w,d0
-		addi.w	#$120,($FFFFF684).w
+		move.w	PLCQueue.w,d0
+		addi.w	#$120,PLCQueue.w
 		bra.s	loc_1676
 ; End of function sub_1642
 
@@ -1515,8 +1529,8 @@ ProcessDPLC2:
 		beq.s	locret_16DA
 		move.w	#3,($FFFFF6FA).w
 		moveq	#0,d0
-		move.w	($FFFFF684).w,d0
-		addi.w	#$60,($FFFFF684).w
+		move.w	PLCQueue.w,d0
+		addi.w	#$60,PLCQueue.w
 
 loc_1676:
 		lea	(vdp_control_port).l,a4
@@ -1526,7 +1540,7 @@ loc_1676:
 		swap	d0
 		move.l	d0,(a4)
 		subq.w	#4,a4
-		movea.l	(v_plc_buffer).w,a0
+		movea.l	PLCQueueAdr.w,a0
 		movea.l	(v_ptrnemcode).w,a3
 		move.l	($FFFFF6E4).w,d0
 		move.l	($FFFFF6E8).w,d1
@@ -1542,7 +1556,7 @@ loc_16AA:
 		beq.s	loc_16DC
 		subq.w	#1,($FFFFF6FA).w
 		bne.s	loc_16AA
-		move.l	a0,(v_plc_buffer).w
+		move.l	a0,PLCQueueAdr.w
 		move.l	a3,(v_ptrnemcode).w
 		move.l	d0,($FFFFF6E4).w
 		move.l	d1,($FFFFF6E8).w
@@ -1555,17 +1569,26 @@ locret_16DA:
 ; ===========================================================================
 
 loc_16DC:
-		lea	(v_plc_buffer).w,a0
-	if TweakNonNemesisLoad=0
-		moveq	#$15,d0
-	else
-		moveq   #((PLCQueueEnd-4-v_pal_buffer)/4)-1,d0  			; length of the PLC queue RAM
-	endif
+		lea	PLCQueueAdr.w,a0
+	if BugFixPatternLoadCueShifting>0
+		lea 6(a0),a1
+	endc
+		moveq   #((PLCQueueEnd-4-PLCQueue)/4)-1,d0  			; length of the PLC queue RAM
 
 
 loc_16E2:
+	if BugFixPatternLoadCueShifting=0
 		move.l	6(a0),(a0)+
+	else
+		move.l  (a1)+,(a0)+
+		move.w  (a1)+,(a0)+
+	endc
 		dbf	d0,loc_16E2
+	if BugFixPatternLoadCueShifting>0
+		moveq   #0,d0
+		move.l  d0,(a0)+    ; clear the last cue to avoid overcopying it
+		move.w  d0,(a0)+    ;
+	endc
 		rts
 ; End of function ProcessDPLC2
 
@@ -1597,10 +1620,14 @@ QuickPLC:
 		rts
 ; End of function QuickPLC
 
-		include	"_inc\Enigma Decompression.asm"
-		include	"_inc\Kosinski Decompression.asm"
+		include	"_inc\Decompression Enigma.asm"
+	if TweakImproovedDecompression=0
+		include	"_inc\Decompression Kosinski.asm"
+	else
+		include	"_inc\Decompression Kosinski (Improved).asm"
+	endc
 	if TweakLevelCompressionMode>2
-		include	"_inc\COMPER Decompression.asm"
+		include	"_inc\Decompression COMPER.asm"
 	endc
 	if TweakUncompressedTitleCards>0
 		include	"_inc\Uncompressed Art.asm"
@@ -2363,8 +2390,6 @@ PalLoad4_Water:
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-	if TweakEnhancedPLCQueue>0
-
 ; ---------------------------------------------------------------------------
 ; Subroutine for queueing VDP commands (seems to only queue transfers to VRAM),
 ; to be issued the next time ProcessDMAQueue is called.
@@ -2380,6 +2405,7 @@ PalLoad4_Water:
 
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
+	if FeatureEnhancedPLCQueue>0
 ; sub_144E: DMA_68KtoVRAM: QueueCopyToVRAM: QueueVDPCommand: Add_To_DMA_Queue:
 QueueDMATransfer:
 		movea.l	($FFFFC8FC).w,a1
@@ -2461,7 +2487,7 @@ ProcessDMAQueue_Done:
 		rts
 ; End of function ProcessDMAQueue
 
-	endc ; if TweakEnhancedPLCQueue>0
+	endc ; if FeatureEnhancedPLCQueue>0
 
 ; ===========================================================================
 
@@ -2518,13 +2544,16 @@ GM_Sega:
 		sfx	bgm_Stop,0,1,1 ; stop music
 		bsr.w	ClearPLC
 
-	if TweakSegaLogoWhiteFade>0 && TweakBetterFadeEffects>0
+	if TweakBetterFadeEffects>0
 		bsr.w PaletteWhiteOut
-	 	lea	(vdp_control_port).l,a6
+ 		lea	(vdp_control_port).l,a6
+	elseif TweakSegaLogoWhiteFade>1
+		bsr.w PaletteWhiteOut
+ 		lea	(vdp_control_port).l,a6
 	elseif TweakFastLoadInit=0
 		bsr.w	PaletteFadeOut
 		lea	(vdp_control_port).l,a6
-	endc ; if TweakSegaLogoWhiteFade>0 && TweakBetterFadeEffects>0
+	endc ; if TweakBetterFadeEffects=0
 
 		move.w	#$8004,(a6)	; use 8-colour mode
 		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
@@ -2540,12 +2569,12 @@ GM_Sega:
 		locVRAM	0
 		lea	(Nem_SegaLogo).l,a0 ; load Sega	logo patterns
 		bsr.w	NemDec
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		lea	(Eni_SegaLogo).l,a0 ; load Sega	logo mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
-		copyTilemap	$FF0000,$E510,$17,7
+		copyTilemap	v_256x256,$E510,$17,7
 		copyTilemap	$FF0180,$C000,$27,$1B
 
 		if Revision>0
@@ -2555,8 +2584,18 @@ GM_Sega:
 		endc
 
 	@loadpal:
+	if TweakSegaLogoWhiteFade<>1
 		moveq	#palid_SegaBG,d0
-		bsr.w	PalLoad2	; load Sega logo palette
+		bsr.w	PalLoad2							; load Sega logo palette
+	else
+		lea (v_pal_dry_dup).l,a3
+	  moveq #$3F,d7
+
+  @loop:
+    move.w #cWhite,(a3)+    		; move data to RAM
+    dbf d7,@loop
+    bsr.w PaletteFadeIn 				; added to allow fade in
+	endc
 		move.w	#-$A,(v_pcyc_num).w
 		move.w	#0,(v_pcyc_time).w
 		move.w	#0,(v_pal_buffer+$12).w
@@ -2613,10 +2652,10 @@ GM_Title:
 		move.w	#$8004,(a6)	; 8-colour mode
 		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
 		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
-		move.w	#$9001,(a6)	; 64-cell hscroll size
-		move.w	#$9200,(a6)	; window vertical position
+		move.w	#$9001,(a6)								; 64-cell hscroll size
+		move.w	#$9200,(a6)								; window vertical position
 		move.w	#$8B03,(a6)
-		move.w	#$8720,(a6)	; set background colour (palette line 2, entry 0)
+		move.w	#$8720,(a6)								; set background colour (palette line 2, entry 0)
 		clr.b	(f_wtr_state).w
 		bsr.w	ClearScreen
 
@@ -2626,20 +2665,20 @@ GM_Title:
 
 	Tit_ClrObj1:
 		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrObj1	; fill object space ($D000-$EFFF) with 0
+		dbf	d1,Tit_ClrObj1								; fill object space ($D000-$EFFF) with 0
 
 		locVRAM	0
-		lea	(Nem_JapNames).l,a0 ; load Japanese credits
+		lea	(Nem_JapNames).l,a0 					; load Japanese credits
 		bsr.w	NemDec
 		locVRAM	$14C0
-		lea	(Gra_CreditText).l,a0 ;	load alphabet
+		lea	(Gra_CreditText).l,a0 				;	load alphabet
 		bsr.w	NemDec
-		lea	($FF0000).l,a1
-		lea	(Eni_JapNames).l,a0 ; load mappings for	Japanese credits
+		lea	(v_256x256).l,a1
+		lea	(Eni_JapNames).l,a0 					; load mappings for	Japanese credits
 		move.w	#0,d0
 		bsr.w	EniDec
 
-		copyTilemap	$FF0000,$C000,$27,$1B
+		copyTilemap	v_256x256,$C000,$27,$1B
 
 		lea	(v_pal_dry_dup).w,a1
 		moveq	#cBlack,d0
@@ -2647,9 +2686,9 @@ GM_Title:
 
 	Tit_ClrPal:
 		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrPal	; fill palette with 0 (black)
+		dbf	d1,Tit_ClrPal									; fill palette with 0 (black)
 
-		moveq	#palid_Sonic,d0	; load Sonic's palette
+		moveq	#palid_Sonic,d0							; load Sonic's palette
 		bsr.w	PalLoad1
 		move.b	#id_CreditsText,(v_objspace+$80).w ; load "SONIC TEAM PRESENTS" object
 		jsr	(ExecuteObjects).l
@@ -2657,38 +2696,41 @@ GM_Title:
 		bsr.w	PaletteFadeIn
 		disable_ints
 		locVRAM	$4000
-		lea	(Nem_TitleFg).l,a0 ; load title	screen patterns
+		lea	(Nem_TitleFg).l,a0 						; load title	screen patterns
 		bsr.w	NemDec
 		locVRAM	$6000
-		lea	(Nem_TitleSonic).l,a0 ;	load Sonic title screen	patterns
+		lea	(Nem_TitleSonic).l,a0 				;	load Sonic title screen	patterns
 		bsr.w	NemDec
 		locVRAM	$A200
-		lea	(Nem_TitleTM).l,a0 ; load "TM" patterns
+		lea	(Nem_TitleTM).l,a0 						; load "TM" patterns
 		bsr.w	NemDec
 		lea	(vdp_data_port).l,a6
 		locVRAM	$D000,4(a6)
-		lea	(Art_Text).l,a5	; load level select font
+		lea	(Art_Text).l,a5								; load level select font
 		move.w	#$28F,d1
 
 	Tit_LoadText:
 		move.w	(a5)+,(a6)
-		dbf	d1,Tit_LoadText	; load level select font
+		dbf	d1,Tit_LoadText								; load level select font
 
-		move.b	#0,(v_lastlamp).w ; clear lamppost counter
-		move.w	#0,(v_debuguse).w ; disable debug item placement mode
-		move.w	#0,(f_demo).w	; disable debug mode
-		move.w	#0,($FFFFFFEA).w ; unused variable
-		move.w	#(id_GHZ<<8),(v_zone).w	; set level to GHZ (00)
-		move.w	#0,(v_pcyc_time).w ; disable palette cycling
+		move.b	#0,(v_lastlamp).w 				; clear lamppost counter
+		move.w	#0,(v_debuguse).w					; disable debug item placement mode
+		move.w	#0,(f_demo).w							; disable debug mode
+		move.w	#0,($FFFFFFEA).w 					; unused variable
+		move.w	#(id_GHZ<<8),(v_zone).w		; set level to GHZ (00)
+		move.w	#0,(v_pcyc_time).w 				; disable palette cycling
+	if BugFixDrownLockTitleScreen>0
+		move.b	#0,(f_nobgscroll).w 			; clear scroll lock
+	endc
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		lea	(v_16x16).w,a1
-		lea	(Blk16_TITLE).l,a0 ; load	GHZ 16x16 mappings
+		lea	(Blk16_TITLE).l,a0 						; load	GHZ 16x16 mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
 	if TweakUncompressedChunkMapping=0
-		lea	(Blk256_TITLE).l,a0 ; load GHZ 256x256 mappings
+		lea	(Blk256_TITLE).l,a0 					; load GHZ 256x256 mappings
 		lea	(v_256x256).l,a1
 		bsr.w	KosDec
 	endc ; if TweakUncompressedChunkMapping=0
@@ -2704,7 +2746,7 @@ GM_Title:
 		move.w	#$6000,d2
 		bsr.w	DrawChunks
 		lea	(v_256x256).l,a1
-		lea	(Eni_Title).l,a0 						; load title screen mappings
+		lea	(Eni_Title).l,a0 							; load title screen mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
@@ -2716,20 +2758,26 @@ GM_Title:
 
 		locVRAM	0
 
-		lea	(Gra_Title).l,a0 						; load GHZ patterns for Title Screen
+		lea	(Gra_Title).l,a0 							; load GHZ patterns for Title Screen
 
-	if TweakLevelCompressionMode<2
+	if TweakTitleCompress=0
 		bsr.w	NemDec
-	elseif TweakLevelCompressionMode=2
-		bsr.w	KosDec
 	else
-		bsr.w	CompDec
+		if TweakLevelCompressionMode<2
+			bsr.w	NemDec
+		elseif TweakLevelCompressionMode=2
+			bsr.w	KosDec
+		else
+			; bsr.w CompDec
+			bsr.w	LoadCompArt
+		endc
 	endc
-		moveq	#palid_Title,d0						; load title screen palette
+
+		moveq	#palid_Title,d0							; load title screen palette
 		bsr.w	PalLoad1
-		sfx	bgm_Title,0,1,1							; play title screen music
-		move.b	#0,(f_debugmode).w 			; disable debug mode
-		move.w	#$178,(v_demolength).w 	; run title screen for $178 frames
+		sfx	bgm_Title,0,1,1								; play title screen music
+		move.b	#0,(f_debugmode).w 				; disable debug mode
+		move.w	#$178,(v_demolength).w 		; run title screen for $178 frames
 		lea	(v_objspace+$80).w,a1
 		moveq	#0,d0
 
@@ -2744,18 +2792,18 @@ GM_Title:
 		dbf	d1,Tit_ClrObj2
 
 		move.b	#id_TitleSonic,(v_objspace+$40).w ; load big Sonic object
-		move.b	#id_PSBTM,(v_objspace+$80).w ; load "PRESS START BUTTON" object
+		move.b	#id_PSBTM,(v_objspace+$80).w 			; load "PRESS START BUTTON" object
 
 		if Revision=0
 		else
-			tst.b   (v_megadrive).w	; is console Japanese?
-			bpl.s   @isjap		; if yes, branch
+			tst.b   (v_megadrive).w									; is console Japanese?
+			bpl.s   @isjap													; if yes, branch
 		endc
 
-		move.b	#id_PSBTM,(v_objspace+$C0).w ; load "TM" object
+		move.b	#id_PSBTM,(v_objspace+$C0).w 			; load "TM" object
 		move.b	#3,(v_objspace+$C0+obFrame).w
 	@isjap:
-		move.b	#id_PSBTM,(v_objspace+$100).w ; load object which hides part of Sonic
+		move.b	#id_PSBTM,(v_objspace+$100).w 		; load object which hides part of Sonic
 		move.b	#2,(v_objspace+$100+obFrame).w
 		jsr	(ExecuteObjects).l
 		bsr.w	DeformLayers
@@ -2777,13 +2825,17 @@ Tit_MainLoop:
 		jsr	(BuildSprites).l
 		bsr.w	PCycle_Title
 		bsr.w	RunPLC
+	if FeatureLevelSelectOnC>0
+		btst	#bitC,(v_jpadpress1).w 							; is button C pressed?
+		bne.w	Tit_LoadLevelSelect									; if so, branch
+	endc
 		move.w	(v_objspace+obX).w,d0
 		addq.w	#2,d0
-		move.w	d0,(v_objspace+obX).w ; move Sonic to the right
-		cmpi.w	#$1C00,d0	; has Sonic object passed $1C00 on x-axis?
-		blo.s	Tit_ChkRegion	; if not, branch
-	if FeatureCodeCleanup=0
-		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
+		move.w	d0,(v_objspace+obX).w 						; move Sonic to the right
+		cmpi.w	#$1C00,d0													; has Sonic object passed $1C00 on x-axis?
+		blo.s	Tit_ChkRegion												; if not, branch
+	if TweakRemoveReduntantCode=0
+		move.b	#id_Sega,(v_gamemode).w 					; go to Sega screen
 		rts
 	else
 		bsr.w	SS_ToSegaScreen
@@ -2850,6 +2902,8 @@ Tit_ChkLevSel:
 		beq.w	PlayLevel	; if not, play level
 		btst	#bitA,(v_jpadhold1).w ; check if A is pressed
 		beq.w	PlayLevel	; if not, play level
+
+Tit_LoadLevelSelect:
 	if BugFixLevelSelectCorruption>0
 		move.b	#4,(v_vbla_routine).w
 		bsr.w	WaitForVBla
@@ -2897,7 +2951,7 @@ LevelSelect:
 		bsr.w	WaitForVBla
 		bsr.w	LevSelControls
 		bsr.w	RunPLC
-		tst.l	(v_plc_buffer).w
+		tst.l	PLCQueueAdr.w
 		bne.s	LevelSelect
 		andi.b	#btnABC+btnStart,(v_jpadpress1).w ; is A, B, C, or Start pressed?
 		beq.s	LevelSelect	; if not, branch
@@ -3076,7 +3130,7 @@ loc_33B6:
 		move.w	d0,(v_objspace+obX).w
 		cmpi.w	#$1C00,d0
 		blo.s	loc_33E4
-	if FeatureCodeCleanup=0
+	if TweakRemoveReduntantCode=0
 		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
 		rts
 	else
@@ -3157,7 +3211,7 @@ LevSel_Down:
 		btst	#bitDn,d1	; is down pressed?
 		beq.s	LevSel_Refresh	; if not, branch
 		addq.w	#1,d0		; move down 1 selection
-		cmpi.w	#$15,d0
+		cmpi.w	#$15,d0 ; 	#((v_ptrnemcode-4-(v_plc_buffer+4))/4)-1,d0
 		blo.s	LevSel_Refresh
 		moveq	#0,d0		; if selection moves above $14,	jump to	selection 0
 
@@ -3334,9 +3388,27 @@ Level_ClrStuff:
 	; 	clr.w (f_victory).w
 	; endc
 
-	  jsr    (Hud_Base).l
+	if TweakUncompressedTitleCards=0
+		locVRAM	$B000
+		lea	(Gra_TitleCard).l,a0 																					; load title card patterns
+		if TweakLevelCompressionMode<2
+			bsr.w	NemDec
+		elseif TweakLevelCompressionMode=2
+			bsr.w	KosDec
+		else
+			bsr.w	CompDec
+		endc
+	else ; Uncompressed Level Code by Aurora Fields - Fixes Title Card Corruption in Github Disassembly (however has a slightly animation bug with act number, happens with original title card code too)
+		locVRAM	$B000,vdp_control_port
+		lea	Gra_TitleCard,a0 																							; load title card patterns
+		; @TODO change this to work like the uncompressed chunk code
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0							; the title card art length in tiles
+		jsr LoadUncArt          																					; load uncompressed art
+	endc ; if TweakUncompressedTitleCards=0
+
+	 	jsr    (Hud_Base).l
 	  bra.w    Level_ClrRam
-	endc
+	endc ; if TweakFastLevelReload>0
 
 GM_Level:
 		bset	#7,(v_gamemode).w 																					; add $80 to screen mode (for pre level sequence)
@@ -3373,7 +3445,7 @@ GM_Level:
 		locVRAM	$B000,vdp_control_port
 		lea	Gra_TitleCard,a0 																							; load title card patterns
 		; @TODO change this to work like the uncompressed chunk code
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0							; the title card art length, in tiles
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0							; the title card art length in tiles
 		jsr LoadUncArt          																					; load uncompressed art
 	endc ; if TweakUncompressedTitleCards=0
 
@@ -3404,10 +3476,10 @@ Level_ClrRam:
 		lea	($FFFFF628).w,a1
 		moveq	#0,d0
 
-	if TweakFastLevelLoading2=0
-		move.w	#$15,d1
+	if TweakNoWaitingonPLCForLevelTiles=0
+		move.w  #((PLCQueueEnd-4-PLCQueue)/4)-1,d1 												; length of the PLC queue RAM
 	else
-		move.w  #((v_pal_buffer-$FFFFF628)/4)-1,d1
+		move.w  #((PLCQueueAdr-$FFFFF628)/4)-1,d1
 	endif
 
 	Level_ClrVars1:
@@ -3442,13 +3514,17 @@ Level_ClrRam:
 		move.w	#$8720,(a6)																								; set background colour (line 3; colour 0)
 		move.w	#$8A00+223,(v_hbla_hreg).w 																; set palette change position (for water)
 		move.w	(v_hbla_hreg).w,(a6)
-	if TweakSonic2LevelArtLoader>0
+
+	if FeatureEnhancedPLCQueue>0
+		; ResetDMAQueue
 		clr.w	(v_sgfx_buffer).w
-		move.l	#v_sgfx_buffer,($FFFFC8FC).w
-	endc
+		move.l	#v_sgfx_buffer,(v_sgfx_buffer+$FC).w
+	endc ; if FeatureEnhancedPLCQueue>0
+
 	if FeatureBetaVictoryAnimation>0
 		clr.w (f_victory).w
-	endc
+	endc ; if FeatureBetaVictoryAnimation>0
+
 		cmpi.b	#id_LZ,(v_zone).w 																				; is level LZ?
 		bne.s	Level_LoadPal																								; if not, branch
 
@@ -3507,8 +3583,8 @@ Level_GetBgm:
 		move.b	(a1,d0.w),d0
 		bsr.w	PlaySound																										; play music
 		move.b	#id_TitleCard,(v_objspace+$80).w 													; load title card object
-	if TweakFastLevelLoading2>0
-	  ; move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
+	if TweakNoWaitingonPLCForLevelTiles>0
+	  move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
 	endc
 
 Level_TtlCardLoop:
@@ -3518,19 +3594,15 @@ Level_TtlCardLoop:
 		jsr	(BuildSprites).l																							; display sprites
 		bsr.w	RunPLC																											; put PLC data to RAM
 
-	if TweakFastLevelLoading2=0
 		move.w	(v_objspace+$108).w,d0
 		cmp.w	(v_objspace+$130).w,d0 																			; has title card sequence finished?
 		bne.s	Level_TtlCardLoop 																					; if not, branch
 
-		tst.l	(v_plc_buffer).w 																						; are there any items in the pattern load cue?
+	if TweakNoWaitingonPLCForLevelTiles=0
+		tst.l	PLCQueueAdr.w 																							; are there any items in the pattern load cue?
 	else
-		move.w  ($FFFFD100+8).w,d0
-		cmp.w   ($FFFFD100+$30).w,d0    ; has title card sequence finished?
-		bne.s   Level_TtlCardLoop       ; if not, branch
-
-		move.w  ($FFFFD0C0+8).w,d0  																			; fix for FZ crash and title card issue
-		cmp.w   ($FFFFD0C0+$30).w,d0    																	; has title card sequence finished?
+		move.w  (v_objspace+$C08).w,d0  																	; fix for FZ crash and title card issue
+		cmp.w   (v_objspace+$C30).w,d0    																; has title card sequence finished?
 		bne.s   Level_TtlCardLoop       																	; if not, branch
 
 		subi.w  #1,v_framecount.w      																		; substract 1 from timer
@@ -3538,7 +3610,7 @@ Level_TtlCardLoop:
 		bne.s	Level_TtlCardLoop 																					; if yes, branch / if timer is not 0, branch
 		jsr	(Hud_Base).l																									; load basic HUD gfx
 
-	Level_SkipTtlCard:
+	Level_SkipTtlCard: ; loc_3946
 	if TweakFastLevelReload>0
 		move.b    #1,(f_levelreload).w
 	endc
@@ -3547,7 +3619,7 @@ Level_TtlCardLoop:
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		bset	#2,(v_fg_scroll_flags).w
-	if TweakSonic2LevelArtLoader>0
+	if TweakNonNemesisLevelArtLoad>0
 		bsr.w	LoadZoneTiles																								; load level art
 	endc
 		bsr.w	LevelDataLoad 																							; load block mappings and palettes
@@ -3722,7 +3794,7 @@ Level_ChkDemo:
 		beq.s	Level_EndDemo	; if not, branch
 		cmpi.b	#id_Demo,(v_gamemode).w
 		beq.w	Level_MainLoop	; if mode is 8 (demo), branch
-	if FeatureCodeCleanup=0
+	if TweakRemoveReduntantCode=0
 		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
 		rts
 	else
@@ -3735,7 +3807,7 @@ Level_EndDemo:
 		bne.s	Level_FadeDemo	; if mode is 8 (demo), branch
 		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
 		tst.w	(f_demo).w	; is demo mode on & not ending sequence?
-	if TweakSegaLogoWhiteFade=0
+	if TweakSegaLogoWhiteFade<2
 		bpl.s	Level_FadeDemo	; if yes, branch
 	else
 		bpl.w	SS_ToSegaScreen	; if yes, branch
@@ -4054,17 +4126,21 @@ loc_47D4:
 			bsr.w	CompDec
 		endc
 	else
-		locVRAM	$B000,vdp_control_port												; set mode "VRAM Write to $B000"
+		;locVRAM	$B000,vdp_control_port												; set mode "VRAM Write to $B000"
+		move.l  #$70000002,($C00004)
 		lea	Gra_TitleCard,a0 																	; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length, in tiles
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length in tiles
 		jsr LoadUncArt          															; load uncompressed art
 	endif ; if TweakUncompressedTitleCards=0
 
 		jsr	(Hud_Base).l
-	if TweakSonic2LevelArtLoader>0
+
+	if FeatureEnhancedPLCQueue>0
+		; ResetDMAQueue
 		clr.w	(v_sgfx_buffer).w
-		move.l	#v_sgfx_buffer,($FFFFC8FC).w
-	endc
+		move.l	#v_sgfx_buffer,(v_sgfx_buffer+$FC).w
+	endc ; if FeatureEnhancedPLCQueue>0
+
 		enable_ints
 		moveq	#palid_SSResult,d0
 		bsr.w	PalLoad2	; load results screen palette
@@ -4097,7 +4173,7 @@ SS_NormalExit:
 		bsr.w	RunPLC
 		tst.w	(f_restart).w
 		beq.s	SS_NormalExit
-		tst.l	(v_plc_buffer).w
+		tst.l	PLCQueueAdr.w
 		bne.s	SS_NormalExit
 		sfx	sfx_EnterSS,0,1,0 ; play special stage exit sound
 		bsr.w	PaletteWhiteOut
@@ -4122,7 +4198,7 @@ SS_ToLevel:	cmpi.b	#id_Level,(v_gamemode).w
 
 
 SS_BGLoad:
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		lea	(Eni_SSBg1).l,a0 ; load	mappings for the birds and fish
 		move.w	#$4051,d0
 		bsr.w	EniDec
@@ -4147,7 +4223,7 @@ loc_48CE:
 		bne.s	loc_48E2
 		cmpi.w	#6,d7
 		bne.s	loc_48F2
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 
 loc_48E2:
 		movem.l	d0-d4,-(sp)
@@ -4171,16 +4247,16 @@ loc_48F2:
 loc_491C:
 		adda.w	#$80,a2
 		dbf	d7,loc_48BE
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		lea	(Eni_SSBg2).l,a0 ; load	mappings for the clouds
 		move.w	#$4000,d0
 		bsr.w	EniDec
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		move.l	#$40000003,d0
 		moveq	#$3F,d1
 		moveq	#$1F,d2
 		bsr.w	TilemapToVRAM
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		move.l	#$50000003,d0
 		moveq	#$3F,d1
 		moveq	#$3F,d2
@@ -4436,7 +4512,7 @@ GM_Continue:
 	else
 		locVRAM	$B000,vdp_control_port
 		lea	Gra_TitleCard,a0 																	; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length, in tiles
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length in tiles
 		jsr LoadUncArt          ; load uncompressed art
 	endc ; if TweakUncompressedTitleCards=0
 
@@ -4493,7 +4569,7 @@ loc_4DF2:
 		bhs.s	Cont_MainLoop
 		tst.w	(v_demolength).w
 		bne.w	Cont_MainLoop
-	if FeatureCodeCleanup=0
+	if TweakRemoveReduntantCode=0
 		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
 		rts
 	else
@@ -4537,10 +4613,10 @@ GM_Ending:
 		lea	($FFFFF628).w,a1
 		moveq	#0,d0
 
-	if TweakFastLevelLoading2=0
-		move.w	#$15,d1
+	if TweakNoWaitingonPLCForLevelTiles=0
+		move.w  #((PLCQueueEnd-4-PLCQueue)/4)-1,d1 												; length of the PLC queue RAM
 	else
-		move.w  #((v_pal_buffer-$FFFFF628)/4)-1,d1
+		move.w  #((PLCQueueAdr-$FFFFF628)/4)-1,d1
 	endif
 
 	End_ClrRam1:
@@ -4589,7 +4665,7 @@ End_LoadData:
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		bset	#2,(v_fg_scroll_flags).w
-	if TweakSonic2LevelArtLoader>0
+	if TweakNonNemesisLevelArtLoad>0
 		bsr.w	LoadZoneTiles										; load level art
 	endc
 		bsr.w	LevelDataLoad
@@ -4842,7 +4918,7 @@ Cred_WaitLoop:
 		bsr.w	RunPLC
 		tst.w	(v_demolength).w ; have 2 seconds elapsed?
 		bne.s	Cred_WaitLoop	; if not, branch
-		tst.l	(v_plc_buffer).w ; have level gfx finished decompressing?
+		tst.l	PLCQueueAdr.w ; have level gfx finished decompressing?
 		bne.s	Cred_WaitLoop	; if not, branch
 		cmpi.w	#9,(v_creditsnum).w ; have the credits finished?
 		beq.w	TryAgainEnd	; if yes, branch
@@ -4961,13 +5037,13 @@ TryAg_MainLoop:
 		jsr	(ExecuteObjects).l
 		jsr	(BuildSprites).l
 		andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
-	if FeatureCodeCleanup=0
+	if TweakRemoveReduntantCode=0
 		bne.s	TryAg_Exit	; if yes, branch
 	else
 		bne.w	SS_ToSegaScreen	; if yes, branch
 	endc
 		tst.w	(v_demolength).w ; has 30 seconds elapsed?
-	if FeatureCodeCleanup=0
+	if TweakRemoveReduntantCode=0
 		beq.s	TryAg_Exit	; if yes, branch
 	else
 		beq.w	SS_ToSegaScreen	; if yes, branch
@@ -5253,8 +5329,7 @@ locret_69F2:
 ; Essentially, this draws everything that isn't scroll block 1
 ; sub_69F4:
 DrawBGScrollBlock2:
-		if Revision=0
-
+	if Revision=0
 		tst.b	(a2)
 		beq.w	locret_6A80
 		bclr	#2,(a2)
@@ -5312,6 +5387,7 @@ locret_6A80:
 
 ; ===========================================================================
 
+	if TweakRemoveReduntantCode=0
 ; Abandoned unused scroll block code.
 ; This would have drawn a scroll block that started at 208 pixels down, and was 48 pixels long.
 		tst.b	(a2)
@@ -5330,6 +5406,7 @@ locret_6A80:
 		moveq	#-16,d5
 		moveq	#3-1,d6	; Draw only three rows
 		bsr.w	DrawBlocks_TB_2
+	endc ; if TweakRemoveReduntantCode=0
 
 loc_6AAC:
 		bclr	#3,(a2)
@@ -5349,9 +5426,7 @@ loc_6AAC:
 
 locret_6AD6:
 		rts
-
-		else
-
+	else ; if Revision=0
 			tst.b	(a2)
 			beq.w	locj_6DF2
 			cmpi.b	#id_SBZ,(v_zone).w
@@ -5704,7 +5779,8 @@ DrawFlipXY:
 
 ; ===========================================================================
 ; unused garbage
-		if Revision=0
+	if Revision=0
+	if TweakRemoveReduntantCode=0
 ; This is interesting. It draws a block, but not before
 ; incrementing its palette lines by 1. This may have been
 ; a debug function to discolour mirrored tiles, to test
@@ -5727,7 +5803,8 @@ DrawFlipXY:
 		add.w	d5,d4
 		move.w	d4,(a6)
 		rts
-		endc
+	endc ; if TweakRemoveReduntantCode=0
+	endc ; if Revision=0
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -6028,8 +6105,15 @@ LoadZoneTiles:
 															; The auto increment is pointless as a2 is overwritten later, and nothing reads from a2 before then
 		andi.l	#$FFFFFF,d0   	 	; Filter out the first byte, which contains the first PLC ID, leaving the address of the zone's art in d0
 		movea.l	d0,a0							; Load the address of the zone's art into a0 (source)
-		lea	($FF0000).l,a1				; Load v_256x256/StartOfRAM (in this context, an art buffer) into a1 (destination)
-		bsr.w	CompDec							; Decompress a0 to a1 (Kosinski compression)
+		lea	(v_256x256).l,a1				; Load v_256x256/StartOfRAM (in this context, an art buffer) into a1 (destination)
+
+	if TweakLevelCompressionMode<2
+		bsr.w	NemDec
+	elseif TweakLevelCompressionMode=2
+		bsr.w	KosDec							; Decompress a0 to a1 (Kosinski compression)
+	else
+		bsr.w	CompDec							; Decompress a0 to a1 (COMPER compression)
+	endc
 
 		move.w	a1,d3							; Move a word of a1 to d3, note that a1 doesn't exactly contain the address of v_256x256/StartOfRAM anymore, after KosDec, a1 now contains v_256x256/StartOfRAM + the size of the file decompressed to it, d3 now contains the length of the file that was decompressed
 		move.w	d3,d7							; Move d3 to d7, for use in seperate calculations
@@ -6059,95 +6143,108 @@ LoadZoneTiles:
 
 		rts
 	; End of function LoadZoneTiles
-	endc
+	; else ; if TweakSonic2LevelArtLoader>0
+	endc ; if TweakSonic2LevelArtLoader>0
 
 	; ---------------------------------------------------------------------------
 	; Subroutine to load level art patterns
 	; ---------------------------------------------------------------------------
 
 	; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
-	if TweakLevelCompressionMode>1
-	LoadLevelArt:
-    move.w  d0,-(sp)        										; store level ID to stack
-    lsl.w   #2,d0           										; shift 2 bits left
-    move.l  LLA_ArtList(pc,d0.w),a0 						; get correct entry from art file list
-    move.l  #$40000000,d4       								; set "VRAM Write to $0000"
-
-		if TweakLevelCompressionMode<3
-			bsr.w   KosDec 	    											; load Kosinski compressed art
-		else
-	    bsr.w   CompDec     											; load COMPER compressed art
-		endc
-
-		; workaround for GHZ's secondary art
-		; if TweakFastLevelLoading=0
-		; 	cmpi.b  #0,id_GHZ.w     										; is GHZ?
-		; 	bne.s   LLA_End         										; if not, don't load art
-		; 	lea Gra_GHZ,a0      												; get GHZ 2nd patterns
-		; 	move.l  #$79A00000,d4   										; set "VRAM Write to $39A0"
-		;
-		; 	if TweakLevelCompressionMode<3
-		; 		bsr.w   KosDec 	    											; load Kosinski compressed art
-		; 	else
-		;     bsr.w   CompDec     											; load COMPER compressed art
-		; 	endc
-		;
-		; LLA_End:
-	  ;   move.w  (sp)+,d0        										; get old level ID from stack again
-	  ;   rts             														; return to subroutine
-		;
-		; 	LLA_ArtList:    dc.l Gra_Title, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
-		; else
-			LLA_ArtList:    dc.l Gra_GHZ, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
-		; endc ; if TweakFastLevelLoading=0
-	endc ; if TweakLevelCompressionMode>1
+	; if TweakNoWaitingonPLCForLevelTiles>0
+; 	if TweakLevelCompressionMode>1
+; LoadCompArt:
+;     lea v_256x256.l,a1    			; get address of compdec buffer
+; 		if TweakLevelCompressionMode=2
+; 			bsr.w KosDec 	    			; decompress Kosinski art
+; 		else
+;     	bsr.w CompDec     			; decompress COMPER art
+; 		endc
+;
+;     lea v_256x256.l,a3    			; get address of compdec buffer again
+;     lea vdp_data_port.l,a6    ; get VDP data port
+;
+;     move.l  a1,d0       			; move end address to d0
+;     sub.l   a3,d0       			; substract the compdec buffer address from d0
+;     lsr.l   #2,d0       			; shift 2 bits to right (as we transfer longword per loop)
+;     subq.l  #1,d0       			; substract 1 from d0 because of dbf
+;
+;     move    #$2700,sr   			; disable interrupts
+;     move.l  d4,4(a6)    			; set VDP transfer mode
+;
+; 	@loop:
+; 	  move.l  (a3)+,(a6)  			; transfer next longword
+;     dbf d0,@loop    					; loop until d0 = 0
+;     move    #$2300,sr   			; enable interrupts
+;     rts
+;
+; LoadLevelArt:
+;     move.w  d0,-(sp)        										; store level ID to stack
+;     lsl.w   #2,d0           										; shift 2 bits left
+;     move.l  LLA_ArtList(pc,d0.w),a0 						; get correct entry from art file list
+;     move.l  #$40000000,d4       								; set "VRAM Write to $0000"
+;
+; 		bsr.w   LoadCompArt   											; load alternate compressed art
+;
+; 		move.w  (sp)+,d0        										; get old level ID from stack again
+; 		rts             														; return to subroutine
+;
+; 		LLA_ArtList:    dc.l Gra_GHZ, Gra_LZ, Gra_MZ, Gra_SLZ, Gra_SYZ, Gra_SBZ ; list of art patterns used in levels
+; 	endc ; if TweakLevelCompressionMode>1
+; 	; endc ; if TweakSonic2LevelArtLoader=0
 
 LevelDataLoad: ; MainLoadBlockLoad
-		moveq	#0,d0																	; quickly clear d0
-		move.b	(v_zone).w,d0												; get level ID
+		moveq	#0,d0																		; quickly clear d0
+		move.b	(v_zone).w,d0													; get level ID
 
-	if TweakLevelCompressionMode>1
-		bsr.s   LoadLevelArt        								; load level tiles
-	endc ; if TweakLevelCompressionMode>1
+		; @TODO Fix
+	; ; if TweakSonic2LevelArtLoader=0
+	; 	if TweakLevelCompressionMode>1
+	; 		bsr.s   LoadLevelArt        							; load level tiles
+	; 	endc ; if TweakLevelCompressionMode>1
+	; ; endc ; if TweakSonic2LevelArtLoader=0
 
-		lsl.w	#4,d0																	; shift level ID left by 4 bits
+		lsl.w	#4,d0																		; shift level ID left by 4 bits
 		lea	(LevelHeaders).l,a2
 		lea	(a2,d0.w),a2
 		move.l	a2,-(sp)
 		addq.l	#4,a2
 		movea.l	(a2)+,a0
-		lea	(v_16x16).w,a1													; RAM address for 16x16 mappings
+		lea	(v_16x16).w,a1														; RAM address for 16x16 mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 		movea.l	(a2)+,a0
 
+		; @NOTE is this correct?
 	if TweakUncompressedChunkMapping>0
-		tst.b	(v_zone).w														; are we in Green Hill Zone?
-		beq.s	@no_dec																; if yes, branch
-		cmpi.b	#6,(v_zone).w 											; are we in the ending sequence?
-		beq.s	@no_dec																; if yes, branch
+		if TweakMergedArt=0 ;
+			tst.b	(v_zone).w															; are we in Green Hill Zone?
+			beq.s	@no_dec																	; if yes, branch
+			cmpi.b	#6,(v_zone).w 												; are we in the ending sequence?
+			beq.s	@no_dec																	; if yes, branch
+		endc ; if TweakMergedArt=0
 	endc ; if TweakUncompressedChunkMapping>0
 
-		lea	(v_256x256).l,a1												; RAM address for 256x256 mappings
+	if TweakUncompressedChunkMapping=0
+		;lea	(Blk256_TITLE).l,a0 										; load GHZ 256x256 mappings
+		lea	(v_256x256).l,a1													; RAM address for 256x256 mappings
 		bsr.w	KosDec
+	endc ; if TweakUncompressedChunkMapping=0
 
-	if TweakUncompressedChunkMapping>0
 	@no_dec:
-	endc ; if TweakUncompressedChunkMapping>0
-
 		bsr.w	LevelLayoutLoad
 		move.w	(a2)+,d0
 		move.w	(a2),d0
 		andi.w	#$FF,d0
-		cmpi.w	#(id_LZ<<8)+3,(v_zone).w ; is level SBZ3 (LZ4) ?
-		bne.s	@notSBZ3	; if not, branch
-		moveq	#palid_SBZ3,d0	; use SB3 palette
+		cmpi.w	#(id_LZ<<8)+3,(v_zone).w 							; is level SBZ3 (LZ4) ?
+		bne.s	@notSBZ3																; if not, branch
+		moveq	#palid_SBZ3,d0													; use SB3 palette
 
 	@notSBZ3:
-		cmpi.w	#(id_SBZ<<8)+1,(v_zone).w ; is level SBZ2?
-		beq.s	@isSBZorFZ	; if yes, branch
-		cmpi.w	#(id_SBZ<<8)+2,(v_zone).w ; is level FZ?
-		bne.s	@normalpal	; if not, branch
+		cmpi.w	#(id_SBZ<<8)+1,(v_zone).w 						; is level SBZ2?
+		beq.s	@isSBZorFZ															; if yes, branch
+		cmpi.w	#(id_SBZ<<8)+2,(v_zone).w 						; is level FZ?
+		bne.s	@normalpal															; if not, branch
 
 	@isSBZorFZ:
 		moveq	#palid_SBZ2,d0	; use SBZ2/FZ palette
@@ -7521,6 +7618,12 @@ loc_D976:
 		move.w	#-1,(v_opl_screen).w
 
 OPL_Next:
+	if TweakSonic2OffScreenDeletionCode>0
+		move.w (v_screenposx).w,d1
+		subi.w #$80,d1
+		andi.w #$FF80,d1
+		move.w d1,(v_screenposx_coarse).w
+	endc
 		lea	(v_objstate).w,a2
 		moveq	#0,d2
 		move.w	(v_screenposx).w,d6
@@ -7986,6 +8089,8 @@ loc_12EA6:
 ; ---------------------------------------------------------------------------
 ; Unused subroutine to squash Sonic
 ; ---------------------------------------------------------------------------
+	if TweakRemoveReduntantCode=0
+Sonic_Squash:
 		move.b	obAngle(a0),d0
 		addi.b	#$20,d0
 		andi.b	#$C0,d0
@@ -7993,10 +8098,11 @@ loc_12EA6:
 		bsr.w	Sonic_DontRunOnWalls
 		tst.w	d1
 		bpl.s	locret_13302
-		move.w	#0,obInertia(a0) ; stop Sonic moving
+		move.w	#0,obInertia(a0) 				; stop Sonic moving
 		move.w	#0,obVelX(a0)
 		move.w	#0,obVelY(a0)
-		move.b	#id_Warp3,obAnim(a0) ; use "warping" animation
+		move.b	#id_Warp3,obAnim(a0) 		; use "warping" animation
+	endc
 
 locret_13302:
 		rts
@@ -8820,7 +8926,7 @@ loc_1B1C0:
 		dbf	d7,loc_1B19E
 
 		move.w	(sp)+,d5
-		lea	($FF0000).l,a0
+		lea	(v_256x256).l,a0
 		moveq	#0,d0
 		move.w	(v_screenposy).w,d0
 		divu.w	#$18,d0
@@ -9260,7 +9366,7 @@ SS_LoadData:
 		lea	($FF4000).l,a1
 		move.w	#0,d0
 		jsr	(EniDec).l
-		lea	($FF0000).l,a1
+		lea	(v_256x256).l,a1
 		move.w	#$FFF,d0
 
 SS_ClrRAM3:
