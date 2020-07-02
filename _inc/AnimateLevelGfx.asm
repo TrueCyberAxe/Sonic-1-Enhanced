@@ -6,7 +6,7 @@
 
 
 AnimateLevelGfx:
-	if FeatureMusicWhilePaused=0
+	if FeatureAnimateWhilePaused=0
 		tst.w	(f_pause).w							; is the game paused?
 		bne.s	@ispaused								; if yes, branch
 	endc
