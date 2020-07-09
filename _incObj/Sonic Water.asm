@@ -29,7 +29,11 @@ Sonic_Water:
 		asr	obVelY(a0)
 		asr	obVelY(a0)	; slow Sonic
 		beq.s	@exit		; branch if Sonic stops moving
+	if FeatureSpindash<2
 		move.b	#id_Splash,(v_objspace+$300).w ; load splash object
+	else
+		move.w  #$100,($FFFFD1DC).w    			 	 ; set the spin dash dust animation to splash
+	endc
 		sfx	sfx_Splash,1,0,0	 ; play splash sound
 ; ===========================================================================
 

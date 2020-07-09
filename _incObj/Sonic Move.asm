@@ -257,6 +257,10 @@ loc_130BA:
 		move.b	#id_Stop,obAnim(a0) 					; use "stopping" animation
 		bclr	#0,obStatus(a0)
 		sfx	sfx_Skid,0,0,0										; play stopping sound
+	if FeatureSpindash>1
+		move.b  #6,($FFFFD1E4).w    					; set the spin dash dust routine to skid dust
+		move.b  #$15,($FFFFD1DA).w
+	endc
 
 locret_130E8:
 		rts
@@ -307,7 +311,11 @@ loc_13120:
 		move.b	#id_Stop,obAnim(a0) 					; use "stopping" animation
 		bset	#0,obStatus(a0)
 		sfx	sfx_Skid,0,0,0										; play stopping sound
-
+	if FeatureSpindash>1
+		move.b  #6,($FFFFD1E4).w    					; set the spin dash dust routine to skid dust
+		move.b  #$15,($FFFFD1DA).w
+	endc
+	
 locret_1314E:
 		rts
 ; End of function Sonic_MoveRight
