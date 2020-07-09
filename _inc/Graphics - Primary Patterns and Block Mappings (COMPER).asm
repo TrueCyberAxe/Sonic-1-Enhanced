@@ -2,7 +2,7 @@
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
 	if TweakMergedArt=0
-Blk16_TITLE:		incbin	"map16\GHZ.bin"
+Blk16_TITLE:
 	else
 Blk16_TITLE:		incbin	"map16\GHZ.bin"
 		even
@@ -17,24 +17,24 @@ Blk256_TITLE:		incbin	"map256\GHZ.bin"
 		else
 Blk256_TITLE:		incbin	"map256\Uncompressed\GHZ.bin"
 		endc ; if TweakUncompressedChunkMapping=0
-	endc ; if TweakMergedArt=0
 		even
+	endc ; if TweakMergedArt=0
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
 Blk16_GHZ:		incbin	"map16\GHZ.bin"
 		even
 	if TweakMergedArt=0
-Gra_Title:		incbin	"artcom\8x8 - GHZ1.bin"	; GHZ primary patterns
+Gra_Title:		incbin	"artnem\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
-Gra_GHZ:			incbin	"artcom\8x8 - GHZ2.bin"	; GHZ secondary patterns
+Gra_GHZ:			incbin	"artcom\Recompressed\8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
-Gra_GHZ:	  	incbin	"artcom\8x8 - GHZ.bin"	; GHZ combined patterns
-	endc ; if TweakFastLoading>0
+Gra_GHZ:	  	incbin	"artcom\Recompressed\8x8 - GHZ.bin"	; GHZ combined patterns
+	endc ; if TweakMergedArt=0
 		even
 	if TweakMergedArt=0
 Blk256_TITLE:
-	endc
+	endc ; if TweakMergedArt=0
 	if TweakUncompressedChunkMapping=0
 Blk256_GHZ:		incbin	"map256\GHZ.bin"
 	else
@@ -46,7 +46,7 @@ Blk256_GHZ:		incbin	"map256\Uncompressed\GHZ.bin"
 ; ---------------------------------------------------------------------------
 Blk16_LZ:			incbin	"map16\LZ.bin"
 		even
-Gra_LZ:				incbin	"artcom\8x8 - LZ.bin"	; LZ primary patterns
+Gra_LZ:				incbin	"artcom\Recompressed\8x8 - LZ.bin"	; LZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
 Blk256_LZ:		incbin	"map256\LZ.bin"
@@ -59,7 +59,7 @@ Blk256_LZ:		incbin	"map256\Uncompressed\LZ.bin"
 ; ---------------------------------------------------------------------------
 Blk16_MZ:			incbin	"map16\MZ.bin"
 		even
-Gra_MZ:				incbin	"artcom\8x8 - MZ.bin"	; MZ primary patterns
+Gra_MZ:				incbin	"artcom\Recompressed\8x8 - MZ.bin"	; MZ primary patterns
 		even
 Blk256_MZ:
 	if Revision=0
@@ -81,7 +81,7 @@ Blk256_MZ:
 ; ---------------------------------------------------------------------------
 Blk16_SLZ:		incbin	"map16\SLZ.bin"
 		even
-Gra_SLZ:			incbin	"artcom\8x8 - SLZ.bin"	; SLZ primary patterns
+Gra_SLZ:			incbin	"artcom\Recompressed\8x8 - SLZ.bin"	; SLZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
 Blk256_SLZ:		incbin	"map256\SLZ.bin"
@@ -94,7 +94,7 @@ Blk256_SLZ:		incbin	"map256\Uncompressed\SLZ.bin"
 ; ---------------------------------------------------------------------------
 Blk16_SYZ:		incbin	"map16\SYZ.bin"
 		even
-Gra_SYZ:			incbin	"artcom\8x8 - SYZ.bin"	; SYZ primary patterns
+Gra_SYZ:			incbin	"artcom\Recompressed\8x8 - SYZ.bin"	; SYZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
 Blk256_SYZ:		incbin	"map256\SYZ.bin"
@@ -107,7 +107,7 @@ Blk256_SYZ:		incbin	"map256\Uncompressed\SYZ.bin"
 ; ---------------------------------------------------------------------------
 Blk16_SBZ:		incbin	"map16\SBZ.bin"
 		even
-Gra_SBZ:			incbin	"artcom\8x8 - SBZ.bin"	; SBZ primary patterns
+Gra_SBZ:			incbin	"artcom\Recompressed\8x8 - SBZ.bin"	; SBZ primary patterns
 		even
 Blk256_SBZ:
 	if Revision=0

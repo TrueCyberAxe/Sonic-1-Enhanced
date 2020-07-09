@@ -2,7 +2,7 @@
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
 	if TweakMergedArt=0
-Blk16_TITLE:		incbin	"map16\GHZ.bin"
+Blk16_TITLE:
 	else
 Blk16_TITLE:		incbin	"map16\GHZ.bin"
 		even
@@ -17,24 +17,24 @@ Blk256_TITLE:		incbin	"map256\GHZ.bin"
 		else
 Blk256_TITLE:		incbin	"map256\Uncompressed\GHZ.bin"
 		endc ; if TweakUncompressedChunkMapping=0
-	endc ; if TweakMergedArt=0
 		even
+	endc ; if TweakMergedArt=0
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
 Blk16_GHZ:		incbin	"map16\GHZ.bin"
 		even
 	if TweakMergedArt=0
-Gra_Title:		incbin	"artkos\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
+Gra_Title:		incbin	"artnem\Recompressed\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
 Gra_GHZ:			incbin	"artkos\Recompressed\8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
 Gra_GHZ:	  	incbin	"artkos\Recompressed\8x8 - GHZ.bin"	; GHZ combined patterns
-	endc ; if TweakFastLoading>0
+	endc ; if TweakMergedArt=0
 		even
 	if TweakMergedArt=0
 Blk256_TITLE:
-	endc
+	endc ; if TweakMergedArt=0
 	if TweakUncompressedChunkMapping=0
 Blk256_GHZ:		incbin	"map256\GHZ.bin"
 	else
