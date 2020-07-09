@@ -58,7 +58,7 @@ BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -1570,11 +1570,12 @@ locret_16DA:
 
 loc_16DC:
 		lea	PLCQueueAdr.w,a0
-	if BugFixPatternLoadCueShifting>0
-		lea 6(a0),a1
-	endc
+	if BugFixPatternLoadCueShifting=0
 		moveq   #((PLCQueueEnd-4-PLCQueue)/4)-1,d0  			; length of the PLC queue RAM
-
+	else
+		lea 6(a0),a1
+		moveq   #$E,d0      ; do $F cues
+	endc
 
 loc_16E2:
 	if BugFixPatternLoadCueShifting=0
