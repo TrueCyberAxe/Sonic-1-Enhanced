@@ -59,6 +59,7 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixMonitorBugs:									equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -154,7 +155,7 @@ TweakSonic2LevelArtLoader:					equ 1 ; Based on https://info.sonicretro.org/SCHG
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
-TweakImproovedDecompression:				equ 0 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
+TweakImproovedDecompression:				equ 1 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
 TweakLevelCompressionMode:					equ 2 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
 TweakNoWaitingonPLCForLevelTiles:		equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Screen
@@ -180,7 +181,7 @@ FeatureMusicWhilePaused:						equ 0
 FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
 
 ; Major
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
 FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
 FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
 FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
@@ -227,6 +228,9 @@ PLCQueueAdr:    equ v_pal_buffer      ; beginning of RAM allocated for PLC
 
 PLCQueue:       equ PLCQueueAdr+4     ; start of PLC queue
 PLCQueueEnd:    equ v_ptrnemcode      ; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression
+
+; FFFFF6E0 - FFFFF650
+; #((PLCQueueEnd-4-PLCQueue)/4)-1,d0
 
 ; ===========================================================================
 
@@ -6106,7 +6110,7 @@ LoadZoneTiles:
 															; The auto increment is pointless as a2 is overwritten later, and nothing reads from a2 before then
 		andi.l	#$FFFFFF,d0   	 	; Filter out the first byte, which contains the first PLC ID, leaving the address of the zone's art in d0
 		movea.l	d0,a0							; Load the address of the zone's art into a0 (source)
-		lea	(v_256x256).l,a1				; Load v_256x256/StartOfRAM (in this context, an art buffer) into a1 (destination)
+		lea	(v_256x256).l,a1			; Load v_256x256/StartOfRAM (in this context, an art buffer) into a1 (destination)
 
 	if TweakLevelCompressionMode<2
 		bsr.w	NemDec

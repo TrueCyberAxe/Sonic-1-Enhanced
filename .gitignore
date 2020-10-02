@@ -1,8 +1,6 @@
-SonED2 Projects/temp.dat
-SonED2 v1.0x Projects/temp.dat
-SonLVL INI Files/dllcache
-SonLVL INI Files/SonLVL.log
-sonic.lst
+*/temp.dat
+*/dllcache
+*/SonLVL.log
 errors.txt
-s1built.bin
-s1built.prev.bin
+s1*.bin
+*.lst

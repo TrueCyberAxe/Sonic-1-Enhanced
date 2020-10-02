@@ -28,10 +28,10 @@ Mon_Main:	; Routine 0
 		moveq	#0,d0
 		move.b	obRespawnNo(a0),d0
 		bclr	#7,2(a2,d0.w)
-		btst	#0,2(a2,d0.w)	; has monitor been broken?
-		beq.s	@notbroken	; if not, branch
-		move.b	#8,obRoutine(a0) ; run "Mon_Display" routine
-		move.b	#$B,obFrame(a0)	; use broken monitor frame
+		btst	#0,2(a2,d0.w)								; has monitor been broken?
+		beq.s	@notbroken									; if not, branch
+		move.b	#8,obRoutine(a0) 					; run "Mon_Display" routine
+		move.b	#$B,obFrame(a0)						; use broken monitor frame
 		rts
 ; ===========================================================================
 
@@ -39,9 +39,9 @@ Mon_Main:	; Routine 0
 		move.b	#$46,obColType(a0)
 		move.b	obSubtype(a0),obAnim(a0)
 
-Mon_Solid:	; Routine 2
-		move.b	ob2ndRout(a0),d0 ; is monitor set to fall?
-		beq.s	@normal		; if not, branch
+Mon_Solid:														; Routine 2
+		move.b	ob2ndRout(a0),d0 					; is monitor set to fall?
+		beq.s	@normal											; if not, branch
 		subq.b	#2,d0
 		bne.s	@fall
 
@@ -50,20 +50,28 @@ Mon_Solid:	; Routine 2
 		move.b	obActWid(a0),d1
 		addi.w	#$B,d1
 		bsr.w	ExitPlatform
-		btst	#3,obStatus(a1) ; is Sonic on top of the monitor?
-		bne.w	@ontop		; if yes, branch
+		btst	#3,obStatus(a1) 						; is Sonic on top of the monitor?
+		bne.w	@ontop											; if yes, branch
 		clr.b	ob2ndRout(a0)
 		bra.w	Mon_Animate
 ; ===========================================================================
 
 	@ontop:
+	if BugFixMonitorBugs>0 							; Super Transformation Bug when Pushing
+		addq.b    #pushing_bit_delta,d6
+		btst    d6,status(a0)    					; check if we're pushing
+		beq.s    @skip
+		bclr    #5,status(a1)    					; clear 'pushing' bit
+		bclr    d6,status(a0)    					; clear object's 'pushing' bit
+	@skip
+	endc
 		move.w	#$10,d3
 		move.w	obX(a0),d2
 		bsr.w	MvSonicOnPtfm
 		bra.w	Mon_Animate
 ; ===========================================================================
 
-@fall:		; 2nd Routine 4
+@fall:																; 2nd Routine 4
 		bsr.w	ObjectFall
 		jsr	(ObjFloorDist).l
 		tst.w	d1
@@ -74,7 +82,11 @@ Mon_Solid:	; Routine 2
 		bra.w	Mon_Animate
 ; ===========================================================================
 
-@normal:	; 2nd Routine 0 ; loc_A1EC
+@normal:															; 2nd Routine 0 ; loc_A1EC
+	if BugFixMonitorBugs>0 							; Fix Errors on uphill slopes
+		btst  #1,obStatus(a0)
+		beq.s loc_A25C
+	endc
 		move.w	#$1A,d1
 		move.w	#$F,d2
 		bsr.w	Mon_SolidSides
@@ -128,14 +140,14 @@ loc_A25C:
 		beq.s	Mon_Animate
 
 	if BugFixWalkJump=1
-		cmpi.b	#id_Roll,obAnim(a1)		; is Sonic in his jumping/rolling animation?
-		beq.s	loc_A26A	; if so, branch
-		cmpi.b	#id_Drown,obAnim(a1)	; is Sonic in his drowning animation?
-		beq.s	loc_A26A	; if so, branch
+		cmpi.b	#id_Roll,obAnim(a1)				; is Sonic in his jumping/rolling animation?
+		beq.s	loc_A26A										; if so, branch
+		cmpi.b	#id_Drown,obAnim(a1)			; is Sonic in his drowning animation?
+		beq.s	loc_A26A										; if so, branch
 	endc
 
 	if BugFixWalkJump<2
-		move.w	#1,obAnim(a1)	; clear obAnim and set obNextAni to 1
+		move.w	#1,obAnim(a1)							; clear obAnim and set obNextAni to 1
 	endc
 
 loc_A26A:
@@ -147,23 +159,46 @@ Mon_Animate:	; Routine 6
 		bsr.w	AnimateSprite
 
 Mon_Display:	; Routine 8
-	if BugFixRenderBeforeInit=0 ; Bug 1
+	if BugFixRenderBeforeInit=0 				; Bug 1
 		bsr.w	DisplaySprite
 	endc
 		out_of_range	DeleteObject
-	if BugFixRenderBeforeInit=0 ; Bug 1
+	if BugFixRenderBeforeInit=0 				; Bug 1
 		rts
 	else
 		bra.w	DisplaySprite
 	endc
 ; ===========================================================================
 
+	if BugFixMonitorBugs>0 							; Spindash Roll to Walk when Spindashing Next to Monitor
+Mon_CheckRelease:
+		btst d6,obStatus(a0)    					; if we're standing on the object
+		beq.s @skip
+		bset #1,obStatus(a1)    					; set 'in air' bit
+		bclr #3,obStatus(a1)    					; clear 'should not fall' bit
+		@skip
+		addq.b #pushing_bit_delta,d6
+		btst d6,obStatus(a0)    					; if we're pushing against the object
+		beq.s @skip
+		bclr #5,obStatus(a1)    					; clear 'pushing' bit
+		@skip
+		rts
+	endc
+
 Mon_BreakOpen:	; Routine 4
+	if BugFixMonitorBugs>0 							; Spindash Roll to Walk when Spindashing Next to Monitor
+		moveq #p1_standing_bit,d6
+		lea (MainCharacter).w,a1
+		bsr.s Mon_CheckRelease    				; Release player 1 -  d6 = p1 standing bit, a1 = player 1 address
+		moveq #p2_standing_bit,d6
+		lea (Sidekick).w,a1
+		bsr.s Mon_CheckRelease    				; Release player 2 - d6 = p2 standing bit, a1 = player 2 address
+	endc
 		addq.b	#2,obRoutine(a0)
 		move.b	#0,obColType(a0)
 		bsr.w	FindFreeObj
 		bne.s	Mon_Explode
-		move.b	#id_PowerUp,0(a1) ; load monitor contents object
+		move.b	#id_PowerUp,0(a1) 				; load monitor contents object
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		move.b	obAnim(a0),obAnim(a1)
@@ -171,8 +206,8 @@ Mon_BreakOpen:	; Routine 4
 Mon_Explode:
 		bsr.w	FindFreeObj
 		bne.s	@fail
-		move.b	#id_ExplosionItem,0(a1) ; load explosion object
-		addq.b	#2,obRoutine(a1) ; don't create an animal
+		move.b	#id_ExplosionItem,0(a1) 	; load explosion object
+		addq.b	#2,obRoutine(a1) 					; don't create an animal
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 
@@ -181,5 +216,5 @@ Mon_Explode:
 		moveq	#0,d0
 		move.b	obRespawnNo(a0),d0
 		bset	#0,2(a2,d0.w)
-		move.b	#9,obAnim(a0)	; set monitor type to broken
+		move.b	#9,obAnim(a0)							; set monitor type to broken
 		bra.w	DisplaySprite
