@@ -58,8 +58,8 @@ BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
-BugFixMonitorBugs:									equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
+BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -150,7 +150,7 @@ TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwat
 ; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
 
 ; Art and Level Tweaks
-TweakSonic2LevelArtLoader:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
+TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
@@ -932,10 +932,10 @@ VBla_08:
 		movem.l	d0-d1,(v_fg_scroll_flags_dup).w
 		cmpi.b	#96,(v_hbla_line).w
 		bhs.s	Demo_Time
-	; if FeatureEnhancedPLCQueue=0 <----- This Line???
+	if FeatureEnhancedPLCQueue=0 ; <----- Something wrong with this Line???
 		move.b	#1,($FFFFF64F).w
 		addq.l	#4,sp
-	; endc ; if FeatureEnhancedPLCQueue=0
+	endc ; if FeatureEnhancedPLCQueue=0
 		bra.w	VBla_Exit
 
 ; ---------------------------------------------------------------------------
@@ -10137,11 +10137,12 @@ byte_69B84:	dc.b 0,	0, 0, 0
 
 Level_SYZ1:	incbin	"levels\syz1.bin"
 		even
-Level_SYZbg:	if Revision=0
+Level_SYZbg:
+	if Revision=0
 		incbin	"levels\syzbg.bin"
-		else
+	else
 		incbin	"levels\syzbg (JP1).bin"
-		endc
+	endc
 		even
 byte_69C7E:	dc.b 0,	0, 0, 0
 Level_SYZ2:	incbin	"levels\syz2.bin"
@@ -10228,25 +10229,28 @@ ObjPos_GHZ1:	incbin	"objpos\ghz1.bin"
 		even
 ObjPos_GHZ2:	incbin	"objpos\ghz2.bin"
 		even
-ObjPos_GHZ3:	if Revision=0
+ObjPos_GHZ3:
+	if Revision=0
 		incbin	"objpos\ghz3.bin"
-		else
+	else
 		incbin	"objpos\ghz3 (JP1).bin"
-		endc
+	endc
 		even
-ObjPos_LZ1:	if Revision=0
+ObjPos_LZ1:
+	if Revision=0
 		incbin	"objpos\lz1.bin"
-		else
+	else
 		incbin	"objpos\lz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_LZ2:	incbin	"objpos\lz2.bin"
 		even
-ObjPos_LZ3:	if Revision=0
+ObjPos_LZ3:
+	if Revision=0
 		incbin	"objpos\lz3.bin"
-		else
+	else
 		incbin	"objpos\lz3 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_SBZ3:	incbin	"objpos\sbz3.bin"
 		even
@@ -10262,11 +10266,12 @@ ObjPos_LZ3pf1:	incbin	"objpos\lz3pf1.bin"
 		even
 ObjPos_LZ3pf2:	incbin	"objpos\lz3pf2.bin"
 		even
-ObjPos_MZ1:	if Revision=0
+ObjPos_MZ1:
+	if Revision=0
 		incbin	"objpos\mz1.bin"
-		else
+	else
 		incbin	"objpos\mz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_MZ2:	incbin	"objpos\mz2.bin"
 		even
@@ -10282,17 +10287,19 @@ ObjPos_SYZ1:	incbin	"objpos\syz1.bin"
 		even
 ObjPos_SYZ2:	incbin	"objpos\syz2.bin"
 		even
-ObjPos_SYZ3:	if Revision=0
+ObjPos_SYZ3:
+	if Revision=0
 		incbin	"objpos\syz3.bin"
-		else
+	else
 		incbin	"objpos\syz3 (JP1).bin"
-		endc
+	endc
 		even
-ObjPos_SBZ1:	if Revision=0
+ObjPos_SBZ1:
+	if Revision=0
 		incbin	"objpos\sbz1.bin"
-		else
+	else
 		incbin	"objpos\sbz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_SBZ2:	incbin	"objpos\sbz2.bin"
 		even
