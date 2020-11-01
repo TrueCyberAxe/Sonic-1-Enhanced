@@ -59,6 +59,8 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
+
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -201,19 +203,35 @@ TweakMergedArt:											equ 0
 	endc
 
 	if TweakLevelCompressionMode<2
-TweakNonNemesisLevelArtLoad: equ 0
+TweakNonNemesisLevelArtLoad: 				equ 0
 	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: equ 0
+TweakNonNemesisLevelArtLoad: 				equ 0
 	else
-TweakNonNemesisLevelArtLoad: equ 1
+TweakNonNemesisLevelArtLoad: 				equ 1
 	endc
 
 	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: equ 1
+FeatureEnhancedPLCQueue: 						equ 1
 	elseif FeatureSpindash>0
-FeatureEnhancedPLCQueue: equ 1
+FeatureEnhancedPLCQueue: 						equ 1
 	else
-FeatureEnhancedPLCQueue: equ 0
+FeatureEnhancedPLCQueue: 						equ 0
+	endc
+
+	if Revision=0
+FeatureEnableUnusedArt: 						equ 1
+	elseif Revision>2
+FeatureEnableUnusedArt: 						equ 1
+	else
+FeatureEnableUnusedArt: 						equ 0
+	endc
+
+	if BugFixCameraFollow>0
+FixCameraFollow: equ 1
+	elseif FeatureSpindash>0
+FixCameraFollow: equ 1
+	else
+FixCameraFollow: equ 0
 	endc
 
 ; ===========================================================================

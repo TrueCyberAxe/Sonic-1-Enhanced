@@ -117,7 +117,7 @@ LevSz_SonicPos:
 
 SetScreen:
 	LevSz_SkipStartPos:
-	if BugFixCameraFollow>0 || FeatureSpindash>0
+	if FixCameraFollow>0
 		clr.w (v_trackpos).w 		; reset Sonic's position tracking index
 		lea (v_tracksonic).w,a2 ; load the tracking array into a2
 		moveq #63,d2 						; begin a 64-step loop

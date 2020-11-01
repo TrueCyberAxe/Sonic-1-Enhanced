@@ -130,7 +130,7 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 		plcm	Nem_LzDoor2, $7CC0	; large	horizontal door
 		plcm	Nem_LzWheel, $7EC0	; wheel
 		plcm	Nem_Gargoyle, $5D20	; gargoyle head
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 		plcm	Nem_LzSonic, $8800	; Sonic	holding	his breath
 	endc
 		plcm	Nem_LzPlatfm, $89E0	; rising platform
@@ -277,7 +277,7 @@ PLC_Signpost:	dc.w ((PLC_Signpostend-PLC_Signpost-2)/6)-1
 ; Pattern load cues - beta special stage warp effect
 ; ---------------------------------------------------------------------------
 PLC_Warp:
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 		dc.w ((PLC_Warpend-PLC_Warp-2)/6)-1
 		plcm	Nem_Warp, $A820
 	endc
@@ -368,7 +368,7 @@ PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
 		plcm	Gra_EndFlower, $7400	; flowers
 		plcm	Gra_EndEm, $78A0	; emeralds
 		plcm	Gra_EndSonic, $7C20	; Sonic
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 		plcm	Nem_EndEggman, $A480	; Eggman's death ((unused)
 	endc
 		plcm	Nem_Rabbit, $AA60	; rabbit
