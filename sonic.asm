@@ -58,7 +58,7 @@ BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 
 ; Re-implement 1D Unused Switch
@@ -151,13 +151,13 @@ TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwat
 ; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
 
 ; Art and Level Tweaks
-TweakSonic2LevelArtLoader:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
+TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
 TweakImproovedDecompression:				equ 0 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
-TweakLevelCompressionMode:					equ 2 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
+TweakLevelCompressionMode:					equ 0 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
 TweakNoWaitingonPLCForLevelTiles:		equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Screen
 
@@ -9604,26 +9604,19 @@ Art_Sonic:	incbin	"artunc\Sonic.bin"	; Sonic
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
-	if Revision=0
+	if FeatureEnableUnusedArt>0
 Nem_Smoke:			incbin	"artnem\Unused - Smoke.bin"
 		even
 Nem_SyzSparkle:	incbin	"artnem\Unused - SYZ Sparkles.bin"
 		even
-	endc ; if Revision=0
-
-	if Revision>2
-Nem_Smoke:			incbin	"artnem\Unused - Smoke.bin"
-		even
-Nem_SyzSparkle:	incbin	"artnem\Unused - SYZ Sparkles.bin"
-		even
-	endc ; if Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 
 Nem_Shield:			incbin	"artnem\Shield.bin"
 		even
 Nem_Stars:			incbin	"artnem\Invincibility Stars.bin"
 		even
 
-	if Revision=0
+	if FeatureEnableUnusedArt>0
 Nem_LzSonic:		incbin	"artnem\Unused - LZ Sonic.bin" ; Sonic holding his breath
 		even
 Nem_UnkFire:		incbin	"artnem\Unused - Fireball.bin" ; unused fireball
@@ -9632,18 +9625,7 @@ Nem_Warp:				incbin	"artnem\Unused - SStage Flash.bin" ; entry to special stage 
 		even
 Nem_Goggle:			incbin	"artnem\Unused - Goggles.bin" ; unused goggles
 		even
-	endc ; if Revision=0
-
-	if Revision>2
-Nem_LzSonic:		incbin	"artnem\Unused - LZ Sonic.bin" ; Sonic holding his breath
-		even
-Nem_UnkFire:		incbin	"artnem\Unused - Fireball.bin" ; unused fireball
-		even
-Nem_Warp:				incbin	"artnem\Unused - SStage Flash.bin" ; entry to special stage flash
-		even
-Nem_Goggle:			incbin	"artnem\Unused - Goggles.bin" ; unused goggles
-		even
-	endc ; if Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 
 Map_SSWalls:	include	"_maps\SS Walls.asm"
 
@@ -9975,12 +9957,9 @@ Gra_EndSonic:		incbin	"artnem\Ending - Sonic.bin"
 Gra_TryAgain:		incbin	"artnem\Ending - Try Again.bin"
 	even
 Gra_EndEggman:
-	if Revision=0
+	if FeatureEnableUnusedArt>0
 								incbin	"artnem\Unused - Eggman Ending.bin" ; Eggman Exploding?
-	endc ; if Revision=0
-	if Revision>2
-								incbin	"artnem\Unused - Eggman Ending.bin" ; Eggman Exploding?
-	endc ; Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 	even
 
 	if TweakLevelCompressionMode<3
