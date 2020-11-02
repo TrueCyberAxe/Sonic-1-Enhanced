@@ -13,6 +13,9 @@
 	include	"Variables.asm"
 	include	"Macros.asm"
 
+Debug:          equ 1
+EnhancedDebug:  equ 1
+
 EnableSRAM:			equ 0	; change to 1 to enable SRAM
 BackupSRAM:			equ 1
 AddressSRAM:		equ 3	; 0 = odd+even; 2 = even only; 3 = odd only
@@ -3665,10 +3668,12 @@ Level_TtlCardLoop:
 		move.b	#id_HUD,(v_objspace+$40).w 																; load HUD object
 
 Level_ChkDebug:
+	if Debug=0
 		tst.b	(f_debugcheat).w 																						; has debug cheat been entered?
 		beq.s	Level_ChkWater																							; if not, branch
 		btst	#bitA,(v_jpadhold1).w 																			; is A button held?
 		beq.s	Level_ChkWater																							; if not, branch
+	endc
 		move.b	#1,(f_debugmode).w 																				; enable debug mode
 
 Level_ChkWater:
