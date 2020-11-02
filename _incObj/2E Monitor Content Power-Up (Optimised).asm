@@ -43,7 +43,7 @@ Pow_ChkS:
 		move.b	#id_ShieldItem,(v_objspace+$2C0).w 	; load stars object ($3804)
 		move.b	#4,(v_objspace+$2C0+obAnim).w
 
-		move.b	#1,(v_shoes).w											; speed up the BG music
+		move.b	#1,(v_shoes).w											; Set Sonic Super Speed Flag
 		move.w	#$4B0,(v_player+$34).w							; time limit for the power-up
 		move.w	#$C00,(v_sonspeedmax).w 						; change Sonic's top speed
 		move.w	#$18,(v_sonspeedacc).w							; change Sonic's acceleration
@@ -84,7 +84,7 @@ Pow_ChkShoes:
 		cmpi.b	#3,d0																; does monitor contain speed shoes?
 		bne.s	Pow_ChkShield
 
-		move.b	#1,(v_shoes).w											; speed up the BG music
+		move.b	#1,(v_shoes).w											; Set Sonic Super Speed Flag
 		move.w	#$4B0,(v_player+$34).w							; time limit for the power-up
 		move.w	#$C00,(v_sonspeedmax).w 						; change Sonic's top speed
 		move.w	#$18,(v_sonspeedacc).w							; change Sonic's acceleration
