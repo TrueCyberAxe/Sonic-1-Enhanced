@@ -141,9 +141,6 @@ TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestor
 TweakFixUnderwaterRingPhysics:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Scattered_Rings_Underwater_Physics
 TweakRemoveSpeedCap:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Remove_the_Speed_Cap
 TweakFixHurtWaterPhystics:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
-TweakFixMonitorEggman:							equ 0 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
-TweakFixMonitorScubaGear:	  				equ 0 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
-TweakFixMonitorSuper:	  	    			equ 0 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
 TweakFasterObjectMove:							equ 0 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
 
 TweakSonic2OffScreenDeletionCode:		equ 0 ; Faster Code from Sonic 2 - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-941555
@@ -175,13 +172,17 @@ FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Tea
 FeatureCentreTitleScreen:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 ; @TODO Move Press Start Accordingly too
 
-FeatureLevelSelectOnC:							equ 0 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
+FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
 
 TweakRemoveReduntantCode:						equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code, should cause some performance improvments by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
 
 FeatureAnimateWhilePaused:					equ 0 ; Animated Background while paused - Need to fix waterfalls, need to fix HUD, need to test LZ Water
 FeatureMusicWhilePaused:						equ 0
 FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
+
+FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
+FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
+FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
 
 ; Major
 FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
@@ -4746,7 +4747,7 @@ End_LoadSonic:
 		move.b	#1,(f_scorecount).w
 		move.b	#1,(f_ringcount).w
 		move.b	#0,(f_timecount).w
-	if TweakFixMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear>0
 		move.b	#0,(f_gogglecheck).w 					; move 0 to the goggle check
 	endc
 		move.w	#1800,(v_demolength).w

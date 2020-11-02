@@ -29,7 +29,7 @@ Pow_ChkInvinc:
 Pow_ChkS:
 		cmpi.b	#7,d0																; does monitor contain 'S'?
 		bne.s	Pow_ChkEggman													; if not, branch to Goggle code
-	if TweakFixMonitorSuper=0
+	if FeatureRestoreMonitorSuper=0
 		nop
 	else
 		move.b	#1,(v_invinc).w										 	; make Sonic invincible
@@ -65,7 +65,7 @@ Pow_ChkEggman:
 		cmpi.b	#1,d0																; does monitor contain Eggman?
 		bne.s	Pow_ChkSonic
 
-	if TweakFixMonitorEggman=0
+	if FeatureRestoreMonitorEggman=0
 		rts																					; Eggman monitor does nothing
 	else
 		bra		Spik_Hurt 														; Eggman monitor hits Sonic
@@ -118,7 +118,7 @@ Pow_ChkRings:
 		music	sfx_Ring,1,0,0												; play ring sound
 ; ===========================================================================
 Pow_ChkGoggles:
-	if TweakFixMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear>0
 		cmpi.b	#8,d0																; does monitor contain Goggles?
 		bne.s	Pow_ChkEnd														; if not, branch to Pow_ChkEnd
 		move.b	#1,(f_gogglecheck).w 								; move 1 to the goggle check

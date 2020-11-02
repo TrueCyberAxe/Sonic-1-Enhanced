@@ -262,7 +262,7 @@ React_ChkHurt:
 
 
 HurtSonic:
-	if TweakFixMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear>0
 		tst.b	(f_gogglecheck).w						; does Sonic have a Goggle Flag?
 	endc
 		tst.b	(v_shield).w								; does Sonic have a shield?
@@ -276,7 +276,7 @@ HurtSonic:
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 
-	if TweakFixMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear>0
 	@hasscuba:
 		move.b	#0,(f_gogglecheck).w 			; move 0 to the goggle check
 	endc

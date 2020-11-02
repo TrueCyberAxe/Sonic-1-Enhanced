@@ -221,7 +221,7 @@ Drown_Countdown:; Routine $A
 		sfx	sfx_Warning,0,0,0	; play "ding-ding" warning sound
 
 @reduceair:
-	if TweakFixMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear>0
 		tst.b	(f_gogglecheck).w				; was a goggle monitor broken?
 		bne	@gotomakenum							; if yes, branch
 	endc
