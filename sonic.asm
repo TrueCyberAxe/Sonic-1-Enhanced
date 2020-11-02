@@ -228,11 +228,11 @@ FeatureEnableUnusedArt: 						equ 0
 	endc
 
 	if BugFixCameraFollow>0
-FixCameraFollow: equ 1
+FixCameraFollow: 										equ 1
 	elseif FeatureSpindash>0
-FixCameraFollow: equ 1
+FixCameraFollow: 										equ 1
 	else
-FixCameraFollow: equ 0
+FixCameraFollow: 										equ 0
 	endc
 
 ; ===========================================================================
