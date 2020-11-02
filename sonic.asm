@@ -58,7 +58,9 @@ BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
+
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -149,13 +151,13 @@ TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwat
 ; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
 
 ; Art and Level Tweaks
-TweakSonic2LevelArtLoader:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
+TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
 ; Uncompressed Chunks need fixing
 TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
 TweakImproovedDecompression:				equ 0 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
-TweakLevelCompressionMode:					equ 2 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
+TweakLevelCompressionMode:					equ 0 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
 TweakNoWaitingonPLCForLevelTiles:		equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Screen
 
@@ -192,29 +194,45 @@ FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SC
 ;BugFixPauseOnSecialStageResults:		equ 1
 ; ============================================================================
 
-	if TweakUncompressedChunkMapping>0
-TweakMergedArt:											equ 1
-	elseif TweakLevelCompressionMode>1
-TweakMergedArt:											equ 1
-	else
+; 	if TweakUncompressedChunkMapping>0
+; TweakMergedArt:											equ 1
+; 	elseif TweakLevelCompressionMode>1
+; TweakMergedArt:											equ 1
+; 	else
 TweakMergedArt:											equ 0
-	endc
+	; endc
 
-	if TweakLevelCompressionMode<2
-TweakNonNemesisLevelArtLoad: equ 0
-	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: equ 0
-	else
-TweakNonNemesisLevelArtLoad: equ 1
-	endc
+	; if TweakLevelCompressionMode<2
+TweakNonNemesisLevelArtLoad: 				equ 0
+; 	elseif TweakSonic2LevelArtLoader=0
+; TweakNonNemesisLevelArtLoad: 				equ 0
+; 	else
+; TweakNonNemesisLevelArtLoad: 				equ 1
+; 	endc
 
-	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: equ 1
-	elseif FeatureSpindash>0
-FeatureEnhancedPLCQueue: equ 1
-	else
-FeatureEnhancedPLCQueue: equ 0
-	endc
+; 	if TweakSonic2LevelArtLoader>0
+; FeatureEnhancedPLCQueue: 						equ 1
+; 	elseif FeatureSpindash>0
+; FeatureEnhancedPLCQueue: 						equ 1
+; 	else
+FeatureEnhancedPLCQueue: 						equ 0
+	; endc
+
+; 	if Revision=0
+; FeatureEnableUnusedArt: 						equ 1
+; 	elseif Revision>2
+; FeatureEnableUnusedArt: 						equ 1
+; 	else
+FeatureEnableUnusedArt: 						equ 0
+	; endc
+
+; 	if BugFixCameraFollow>0
+; FixCameraFollow: equ 1
+; 	elseif FeatureSpindash>0
+; FixCameraFollow: equ 1
+; 	else
+FixCameraFollow: equ 0
+	; endc
 
 ; ===========================================================================
 ; PLC Queue Enhancement
@@ -913,10 +931,10 @@ VBla_08:
 		movem.l	d0-d1,(v_fg_scroll_flags_dup).w
 		cmpi.b	#96,(v_hbla_line).w
 		bhs.s	Demo_Time
-	; if FeatureEnhancedPLCQueue=0 <----- This Line???
+	if FeatureEnhancedPLCQueue=0 ; <----- Something wrong with this Line???
 		move.b	#1,($FFFFF64F).w
 		addq.l	#4,sp
-	; endc ; if FeatureEnhancedPLCQueue=0
+	endc ; if FeatureEnhancedPLCQueue=0
 		bra.w	VBla_Exit
 
 ; ---------------------------------------------------------------------------
@@ -1276,13 +1294,13 @@ ClearScreen:
 		bne.s	@wait2
 
 		move.w	#$8F02,(a5)
-		if Revision=0
+	if Revision=0
 		move.l	#0,(v_scrposy_dup).w
 		move.l	#0,(v_scrposx_dup).w
-		else
+	else
 		clr.l	(v_scrposy_dup).w
 		clr.l	(v_scrposx_dup).w
-		endc
+	endc
 
 		lea	(v_spritetablebuffer).w,a1
 		moveq	#0,d0
@@ -2793,14 +2811,13 @@ GM_Title:
 		dbf	d1,Tit_ClrObj2
 
 		move.b	#id_TitleSonic,(v_objspace+$40).w ; load big Sonic object
-		move.b	#id_PSBTM,(v_objspace+$80).w ; load "PRESS START BUTTON" object
+		move.b	#id_PSBTM,(v_objspace+$80).w 			; load "PRESS START BUTTON" object
 		;clr.b	(v_objspace+$80+obRoutine).w ; The 'Mega Games 10' version of Sonic 1 added this line, to fix the 'PRESS START BUTTON' object not appearing
 
-		if Revision=0
-		else
-			tst.b   (v_megadrive).w									; is console Japanese?
-			bpl.s   @isjap													; if yes, branch
-		endc
+	if Revision>0
+		tst.b   (v_megadrive).w									; is console Japanese?
+		bpl.s   @isjap													; if yes, branch
+	endc
 
 		move.b	#id_PSBTM,(v_objspace+$C0).w 			; load "TM" object
 		move.b	#3,(v_objspace+$C0+obFrame).w
@@ -3103,11 +3120,12 @@ LevSel_Ptrs:
 ; ---------------------------------------------------------------------------
 ; Level	select codes
 ; ---------------------------------------------------------------------------
-LevSelCode_J:	if Revision=0
+LevSelCode_J:
+	if Revision=0
 		dc.b btnUp,btnDn,btnL,btnR,0,$FF
-		else
+	else
 		dc.b btnUp,btnDn,btnDn,btnDn,btnL,btnR,0,$FF
-		endc
+	endc
 		even
 
 LevSelCode_US:	dc.b btnUp,btnDn,btnL,btnR,0,$FF
@@ -3171,8 +3189,7 @@ Demo_Level:
 		move.w	d0,(v_rings).w	; clear rings
 		move.l	d0,(v_time).w	; clear time
 		move.l	d0,(v_score).w	; clear score
-		if Revision=0
-		else
+		if Revision>0
 			move.l	#5000,(v_scorelife).w ; extra life is awarded at 50000 points
 		endc
 		rts
@@ -3352,11 +3369,12 @@ LevSel_ChgLine:
 ; ---------------------------------------------------------------------------
 ; Level	select menu text
 ; ---------------------------------------------------------------------------
-LevelMenuText:	if Revision=0
+LevelMenuText:
+	if Revision=0
 		incbin	"misc\Level Select Text.bin"
-		else
+	else
 		incbin	"misc\Level Select Text (JP1).bin"
-		endc
+	endc
 		even
 ; ---------------------------------------------------------------------------
 ; Music	playlist
@@ -3755,11 +3773,10 @@ Level_MainLoop:
 		bsr.w	MoveSonicInDemo
 		bsr.w	LZWaterFeatures
 		jsr	(ExecuteObjects).l
-		if Revision=0
-		else
-			tst.w   (f_restart).w
-			bne     GM_Level
-		endc
+	if Revision>0
+		tst.w   (f_restart).w
+		bne     GM_Level
+	endc
 		tst.w	(v_debuguse).w	; is debug mode being used?
 		bne.s	Level_DoScroll	; if yes, branch
 		cmpi.b	#6,(v_player+obRoutine).w ; has Sonic just died?
@@ -3779,11 +3796,10 @@ Level_MainLoop:
 
 		cmpi.b	#id_Demo,(v_gamemode).w
 		beq.s	Level_ChkDemo	; if mode is 8 (demo), branch
-		if Revision=0
+	if Revision=0
 		tst.w	(f_restart).w	; is the level set to restart?
 		bne.w	GM_Level	; if yes, branch
-		else
-		endc
+	endc
 		cmpi.b	#id_Level,(v_gamemode).w
 		beq.w	Level_MainLoop	; if mode is $C (level), branch
 		rts
@@ -4077,11 +4093,11 @@ SS_MainLoop:
 		beq.w	SS_MainLoop	; if yes, branch
 
 		tst.w	(f_demo).w	; is demo mode on?
-		if Revision=0
+	if Revision=0
 		bne.w	SS_ToSegaScreen	; if yes, branch
-		else
+	else
 		bne.w	SS_ToLevel
-		endc
+	endc
 		move.b	#id_Level,(v_gamemode).w ; set screen mode to $0C (level)
 		cmpi.w	#(id_SBZ<<8)+3,(v_zone).w ; is level number higher than FZ?
 		blo.s	SS_Finish	; if not, branch
@@ -5084,13 +5100,13 @@ Demo_EndSBZ2:	incbin	"demodata\Ending - SBZ2.bin"
 Demo_EndGHZ2:	incbin	"demodata\Ending - GHZ2.bin"
 		even
 
-		if Revision=0
+	if Revision=0
 		include	"_inc\LevelSizeLoad & BgScrollSpeed.asm"
 		include	"_inc\DeformLayers.asm"
-		else
+	else
 		include	"_inc\LevelSizeLoad & BgScrollSpeed (JP1).asm"
 		include	"_inc\DeformLayers (JP1).asm"
-		endc
+	endc
 
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
@@ -5205,12 +5221,12 @@ DrawBGScrollBlock1:
 		bsr.w	Calc_VRAM_Pos
 		moveq	#-16,d4
 		moveq	#-16,d5
-		if Revision=0
+	if Revision=0
 		moveq	#(512/16)-1,d6	 ; Draw entire row of plane
 		bsr.w	DrawBlocks_LR_2
-		else
+	else
 			bsr.w	DrawBlocks_LR
-		endc
+	endc
 
 loc_6972:
 		bclr	#1,(a2)
@@ -5221,17 +5237,17 @@ loc_6972:
 		bsr.w	Calc_VRAM_Pos
 		move.w	#224,d4
 		moveq	#-16,d5
-		if Revision=0
+	if Revision=0
 		moveq	#(512/16)-1,d6
 		bsr.w	DrawBlocks_LR_2
-		else
-			bsr.w	DrawBlocks_LR
-		endc
+	else
+		bsr.w	DrawBlocks_LR
+	endc
 
 loc_698E:
 		bclr	#2,(a2)
 
-		if Revision=0
+	if Revision=0
 		beq.s	loc_69BE
 		; Draw new tiles on the left
 		moveq	#-16,d4
@@ -5820,16 +5836,16 @@ DrawFlipXY:
 ; a1 = Address of block
 ; DrawBlocks:
 GetBlockData:
-		if Revision=0
+	if Revision=0
 		lea	(v_16x16).w,a1
 		add.w	4(a3),d4	; Add camera Y coordinate to relative coordinate
 		add.w	(a3),d5		; Add camera X coordinate to relative coordinate
-		else
-			add.w	(a3),d5
+	else
+		add.w	(a3),d5
 	GetBlockData_2:
-			add.w	4(a3),d4
-			lea	(v_16x16).w,a1
-		endc
+		add.w	4(a3),d4
+		lea	(v_16x16).w,a1
+	endc
 		; Turn Y coordinate into index into level layout
 		move.w	d4,d3
 		lsr.w	#1,d3
@@ -5918,14 +5934,14 @@ locret_6C1E:
 ; d5 = Relative X coordinate
 ; Returns VDP command in d0
 Calc_VRAM_Pos:
-		if Revision=0
+	if Revision=0
 		add.w	4(a3),d4	; Add camera Y coordinate
 		add.w	(a3),d5		; Add camera X coordinate
-		else
-			add.w	(a3),d5
+	else
+		add.w	(a3),d5
 	Calc_VRAM_Pos_2:
-			add.w	4(a3),d4
-		endc
+		add.w	4(a3),d4
+	endc
 		; Floor the coordinates to the nearest pair of tiles (the size of a block).
 		; Also note that this wraps the value to the size of the plane:
 		; The plane is 64*8 wide, so wrap at $100, and it's 32*8 tall, so wrap at $200
@@ -5982,17 +5998,16 @@ LoadTilesFromStart:
 		lea	(v_bgscreenposx).w,a3
 		lea	(v_lvllayout+$40).w,a4
 		move.w	#$6000,d2
-		if Revision=0
-		else
-			tst.b	(v_zone).w
-			beq.w	Draw_GHz_Bg
-			cmpi.b	#id_MZ,(v_zone).w
-			beq.w	Draw_Mz_Bg
-			cmpi.w	#(id_SBZ<<8)+0,(v_zone).w
-			beq.w	Draw_SBz_Bg
-			cmpi.b	#id_EndZ,(v_zone).w
-			beq.w	Draw_GHz_Bg
-		endc
+	if Revision>0
+		tst.b	(v_zone).w
+		beq.w	Draw_GHz_Bg
+		cmpi.b	#id_MZ,(v_zone).w
+		beq.w	Draw_Mz_Bg
+		cmpi.w	#(id_SBZ<<8)+0,(v_zone).w
+		beq.w	Draw_SBz_Bg
+		cmpi.b	#id_EndZ,(v_zone).w
+		beq.w	Draw_GHz_Bg
+	endc
 ; End of function LoadTilesFromStart
 
 
@@ -6829,11 +6844,11 @@ Map_Missile:	include	"_maps\Buzz Bomber Missile.asm"
 		include	"_incObj\7C Ring Flash.asm"
 
 		include	"_anim\Rings.asm"
-		if Revision=0
+	if Revision=0
 Map_Ring:	include	"_maps\Rings.asm"
-		else
+	else
 Map_Ring:		include	"_maps\Rings (JP1).asm"
-		endc
+	endc
 Map_GRing:	include	"_maps\Giant Ring.asm"
 Map_Flash:	include	"_maps\Ring Flash.asm"
 		include	"_incObj\26 Monitor.asm"
@@ -8147,17 +8162,16 @@ ResumeMusic:
 		move.w	#bgm_SBZ,d0	; play SBZ music
 
 	@notsbz:
-		if Revision=0
-		else
-			tst.b	(v_invinc).w ; is Sonic invincible?
-			beq.s	@notinvinc ; if not, branch
-			move.w	#bgm_Invincible,d0
+	if Revision>0
+		tst.b	(v_invinc).w ; is Sonic invincible?
+		beq.s	@notinvinc ; if not, branch
+		move.w	#bgm_Invincible,d0
 	@notinvinc:
-			tst.b	(f_lockscreen).w ; is Sonic at a boss?
-			beq.s	@playselected ; if not, branch
-			move.w	#bgm_Boss,d0
+		tst.b	(f_lockscreen).w ; is Sonic at a boss?
+		beq.s	@playselected ; if not, branch
+		move.w	#bgm_Boss,d0
 	@playselected:
-		endc
+	endc
 
 		jsr	(PlaySound).l
 
@@ -9590,19 +9604,19 @@ Art_Sonic:	incbin	"artunc\Sonic.bin"	; Sonic
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 Nem_Smoke:			incbin	"artnem\Unused - Smoke.bin"
 		even
 Nem_SyzSparkle:	incbin	"artnem\Unused - SYZ Sparkles.bin"
 		even
-	endc ; if Revision=0 || Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 
 Nem_Shield:			incbin	"artnem\Shield.bin"
 		even
 Nem_Stars:			incbin	"artnem\Invincibility Stars.bin"
 		even
 
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 Nem_LzSonic:		incbin	"artnem\Unused - LZ Sonic.bin" ; Sonic holding his breath
 		even
 Nem_UnkFire:		incbin	"artnem\Unused - Fireball.bin" ; unused fireball
@@ -9611,7 +9625,7 @@ Nem_Warp:				incbin	"artnem\Unused - SStage Flash.bin" ; entry to special stage 
 		even
 Nem_Goggle:			incbin	"artnem\Unused - Goggles.bin" ; unused goggles
 		even
-	endc ; if Revision=0 || Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 
 Map_SSWalls:	include	"_maps\SS Walls.asm"
 
@@ -9943,9 +9957,9 @@ Gra_EndSonic:		incbin	"artnem\Ending - Sonic.bin"
 Gra_TryAgain:		incbin	"artnem\Ending - Try Again.bin"
 	even
 Gra_EndEggman:
-	if Revision=0 || Revision>2
+	if FeatureEnableUnusedArt>0
 								incbin	"artnem\Unused - Eggman Ending.bin" ; Eggman Exploding?
-	endc ; if Revision=0 || Revision>2
+	endc ; if FeatureEnableUnusedArt>0
 	even
 
 	if TweakLevelCompressionMode<3
@@ -9999,15 +10013,15 @@ SS_3:		incbin	"sslayout\3.bin"
 		even
 SS_4:		incbin	"sslayout\4.bin"
 		even
-		if Revision=0
+	if Revision=0
 SS_5:		incbin	"sslayout\5.bin"
 		even
 SS_6:		incbin	"sslayout\6.bin"
-		else
-	SS_5:		incbin	"sslayout\5 (JP1).bin"
-			even
-	SS_6:		incbin	"sslayout\6 (JP1).bin"
-		endc
+	else
+SS_5:		incbin	"sslayout\5 (JP1).bin"
+		even
+SS_6:		incbin	"sslayout\6 (JP1).bin"
+	endc
 		even
 ; ---------------------------------------------------------------------------
 ; Animated uncompressed graphics
@@ -10124,11 +10138,12 @@ byte_69B84:	dc.b 0,	0, 0, 0
 
 Level_SYZ1:	incbin	"levels\syz1.bin"
 		even
-Level_SYZbg:	if Revision=0
+Level_SYZbg:
+	if Revision=0
 		incbin	"levels\syzbg.bin"
-		else
+	else
 		incbin	"levels\syzbg (JP1).bin"
-		endc
+	endc
 		even
 byte_69C7E:	dc.b 0,	0, 0, 0
 Level_SYZ2:	incbin	"levels\syz2.bin"
@@ -10215,25 +10230,28 @@ ObjPos_GHZ1:	incbin	"objpos\ghz1.bin"
 		even
 ObjPos_GHZ2:	incbin	"objpos\ghz2.bin"
 		even
-ObjPos_GHZ3:	if Revision=0
+ObjPos_GHZ3:
+	if Revision=0
 		incbin	"objpos\ghz3.bin"
-		else
+	else
 		incbin	"objpos\ghz3 (JP1).bin"
-		endc
+	endc
 		even
-ObjPos_LZ1:	if Revision=0
+ObjPos_LZ1:
+	if Revision=0
 		incbin	"objpos\lz1.bin"
-		else
+	else
 		incbin	"objpos\lz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_LZ2:	incbin	"objpos\lz2.bin"
 		even
-ObjPos_LZ3:	if Revision=0
+ObjPos_LZ3:
+	if Revision=0
 		incbin	"objpos\lz3.bin"
-		else
+	else
 		incbin	"objpos\lz3 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_SBZ3:	incbin	"objpos\sbz3.bin"
 		even
@@ -10249,11 +10267,12 @@ ObjPos_LZ3pf1:	incbin	"objpos\lz3pf1.bin"
 		even
 ObjPos_LZ3pf2:	incbin	"objpos\lz3pf2.bin"
 		even
-ObjPos_MZ1:	if Revision=0
+ObjPos_MZ1:
+	if Revision=0
 		incbin	"objpos\mz1.bin"
-		else
+	else
 		incbin	"objpos\mz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_MZ2:	incbin	"objpos\mz2.bin"
 		even
@@ -10269,17 +10288,19 @@ ObjPos_SYZ1:	incbin	"objpos\syz1.bin"
 		even
 ObjPos_SYZ2:	incbin	"objpos\syz2.bin"
 		even
-ObjPos_SYZ3:	if Revision=0
+ObjPos_SYZ3:
+	if Revision=0
 		incbin	"objpos\syz3.bin"
-		else
+	else
 		incbin	"objpos\syz3 (JP1).bin"
-		endc
+	endc
 		even
-ObjPos_SBZ1:	if Revision=0
+ObjPos_SBZ1:
+	if Revision=0
 		incbin	"objpos\sbz1.bin"
-		else
+	else
 		incbin	"objpos\sbz1 (JP1).bin"
-		endc
+	endc
 		even
 ObjPos_SBZ2:	incbin	"objpos\sbz2.bin"
 		even
@@ -10301,11 +10322,11 @@ ObjPos_End:	incbin	"objpos\ending.bin"
 		even
 ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
 
-		if Revision=0
+	if Revision=0
 		dcb.b $62A,$FF
-		else
+	else
 		dcb.b $63C,$FF
-		endc
+	endc
 		;dcb.b ($10000-(*%$10000))-(EndOfRom-SoundDriver),$FF
 
 SoundDriver:	include "s1.sounddriver.asm"
