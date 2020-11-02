@@ -66,6 +66,9 @@ BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/
 ; @todo port from sonic 2 code
 BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 
+; @TODO Fix Bug when going too fast at ghz 1 slope checkpoint causing death
+; @TODO Reset Camera location when entering DEBUG MODE
+
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -188,6 +191,8 @@ FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on http
 FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
 FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
 
+FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
+
 ; Major
 FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
 																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
@@ -246,6 +251,14 @@ FixCameraFollow: 										equ 0
 OptimizeMonitorOrder:								equ 0
 	else
 OptimizeMonitorOrder: 							equ 1
+	endc
+
+	if FeatureSonicCDExtendedCamera>0
+FixCameraFollowBug: 								equ 1
+  elseif BugFixCameraFollow>0
+BugFixCameraFollow: 								equ 1
+	else
+BugFixCameraFollow: 								equ 0
 	endc
 ; ===========================================================================
 ; PLC Queue Enhancement
@@ -7980,11 +7993,19 @@ Sonic_Control:	; Routine 2
 		tst.w	(f_debugmode).w											; is debug cheat enabled?
 		beq.s	loc_12C58														; if not, branch
 	endc
+	if FeatureSonicCDExtendedCamera>0
+		bsr.s Sonic_PanCamera
+	endc
+
 		btst	#bitB,(v_jpadpress1).w 							; is button B pressed?
 		beq.s	loc_12C58														; if not, branch
 		move.w	#1,(v_debuguse).w 								; change Sonic into a ring/item
 		clr.b	(f_lockctrl).w
 		rts
+
+	if FeatureSonicCDExtendedCamera>0
+		include "_incObj\Sonic_PanCamera.asm"
+	endc
 ; ===========================================================================
 
 loc_12C58:

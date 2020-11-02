@@ -402,27 +402,46 @@ locret_65B0:
 
 
 MoveScreenHoriz:
-		move.w	(v_player+obX).w,d0
-		sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
+	move.w	(v_player+obX).w,d0
+	sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
+	if FeatureSonicCDExtendedCamera=0
 		subi.w	#144,d0		; is distance less than 144px?
-	if BugFixCameraFollow=0
-		bcs.s	SH_BehindMid	; if yes, branch
 	else
-		bmi.s	SH_BehindMid	; if yes, branch
+		sub.w (v_camera_pan).w,d0       ; Horizontal camera pan value
+		beq.s SH_ProperlyFramed
 	endc
+	
+	if FixCameraFollowBug=0
+		bcs.s	SH_BehindMid							; if yes, branch
+	else
+		bmi.s	SH_BehindMid							; if yes, branch
+	endc ; if FixCameraFollowBug=0
+
+	if FeatureSonicCDExtendedCamera>0
+		bra.s SH_AheadOfMid    					; branch
+	endc ; if FeatureSonicCDExtendedCamera=0
+
+	if FeatureSonicCDExtendedCamera=0
 		subi.w	#16,d0		; is distance more than 160px?
-	if BugFixCameraFollow=0
-		bcc.s	SH_AheadOfMid	; if yes, branch
-	else
-		bpl.s	SH_AheadOfMid	; if yes, branch
-	endc
+		if FixCameraFollowBug=0
+			bcc.s	SH_AheadOfMid	; if yes, branch
+		else
+			bpl.s	SH_AheadOfMid	; if yes, branch
+		endc ; if FixCameraFollowBug=0
+	endc ; if FeatureSonicCDExtendedCamera=0
+
+SH_ProperlyFramed:
 		clr.w	(v_scrshiftx).w
 		rts
 ; ===========================================================================
 
 SH_AheadOfMid:
 		cmpi.w	#16,d0		; is Sonic within 16px of middle area?
-		bcs.s	SH_Ahead16	; if yes, branch
+	if FeatureSonicCDExtendedCamera=0
+		bcs.s	SH_Ahead16		; if yes, branch
+	else
+		blt.s SH_Ahead16    ; if yes, branch
+	endc
 		move.w	#16,d0		; set to 16 if greater
 
 	SH_Ahead16:
@@ -441,13 +460,18 @@ SH_SetScreen:
 ; ===========================================================================
 
 SH_BehindMid:
-	if BugFixCameraFollow>0
-		cmpi.w	#$FFF0,d0				; has the screen moved more than 16 pixels left?
-		bcc.s	Left_NoMax				; if not, branch
-		move.w	#$FFF0,d0				; set the maximum move distance to 16 pixels left
-
-Left_NoMax:
+	if FeatureSonicCDExtendedCamera>0
+		cmpi.w #-16,d0       ; is Sonic within 16px of middle area?
+		bge.s  SH_Behind16    ; if no, branch
+		move.w #-16,d0       ; set to -16 if less
 	endc
+	if FixCameraFollowBug>0
+		cmpi.w #$FFF0,d0				; has the screen moved more than 16 pixels left?
+		bcc.s	 SH_Behind16				; if not, branch
+		move.w #$FFF0,d0				; set the maximum move distance to 16 pixels left
+	endc
+
+SH_Behind16:
 		add.w	(v_screenposx).w,d0
 		cmp.w	(v_limitleft2).w,d0
 		bgt.s	SH_SetScreen
