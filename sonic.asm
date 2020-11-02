@@ -182,7 +182,8 @@ FeatureMusicWhilePaused:						equ 0
 FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
 
 ; Major
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+                                          ; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
 FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
 FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
 FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
@@ -194,45 +195,45 @@ FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SC
 ;BugFixPauseOnSecialStageResults:		equ 1
 ; ============================================================================
 
-; 	if TweakUncompressedChunkMapping>0
-; TweakMergedArt:											equ 1
-; 	elseif TweakLevelCompressionMode>1
-; TweakMergedArt:											equ 1
-; 	else
+	if TweakUncompressedChunkMapping>0
+TweakMergedArt:											equ 1
+	elseif TweakLevelCompressionMode>1
+TweakMergedArt:											equ 1
+	else
 TweakMergedArt:											equ 0
-	; endc
+	endc
 
-	; if TweakLevelCompressionMode<2
+	if TweakLevelCompressionMode<2
 TweakNonNemesisLevelArtLoad: 				equ 0
-; 	elseif TweakSonic2LevelArtLoader=0
-; TweakNonNemesisLevelArtLoad: 				equ 0
-; 	else
-; TweakNonNemesisLevelArtLoad: 				equ 1
-; 	endc
+	elseif TweakSonic2LevelArtLoader=0
+TweakNonNemesisLevelArtLoad: 				equ 0
+	else
+TweakNonNemesisLevelArtLoad: 				equ 1
+	endc
 
-; 	if TweakSonic2LevelArtLoader>0
-; FeatureEnhancedPLCQueue: 						equ 1
-; 	elseif FeatureSpindash>0
-; FeatureEnhancedPLCQueue: 						equ 1
-; 	else
+	if TweakSonic2LevelArtLoader>0
+FeatureEnhancedPLCQueue: 						equ 1
+	elseif FeatureSpindash>0
+FeatureEnhancedPLCQueue: 						equ 1
+	else
 FeatureEnhancedPLCQueue: 						equ 0
-	; endc
+	endc
 
-; 	if Revision=0
-; FeatureEnableUnusedArt: 						equ 1
-; 	elseif Revision>2
-; FeatureEnableUnusedArt: 						equ 1
-; 	else
+	if Revision=0
+FeatureEnableUnusedArt: 						equ 1
+	elseif Revision>2
+FeatureEnableUnusedArt: 						equ 1
+	else
 FeatureEnableUnusedArt: 						equ 0
-	; endc
+	endc
 
-; 	if BugFixCameraFollow>0
-; FixCameraFollow: equ 1
-; 	elseif FeatureSpindash>0
-; FixCameraFollow: equ 1
-; 	else
-FixCameraFollow: equ 0
-	; endc
+	if BugFixCameraFollow>0
+FixCameraFollow: 										equ 1
+	elseif FeatureSpindash>0
+FixCameraFollow: 										equ 1
+	else
+FixCameraFollow: 										equ 0
+	endc
 
 ; ===========================================================================
 ; PLC Queue Enhancement
