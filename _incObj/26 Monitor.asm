@@ -63,7 +63,7 @@ Mon_Solid:														; Routine 2
 		beq.s    @skip
 		bclr    #5,status(a1)    					; clear 'pushing' bit
 		bclr    d6,status(a0)    					; clear object's 'pushing' bit
-	@skip
+	@skip:
 	endc
 		move.w	#$10,d3
 		move.w	obX(a0),d2
@@ -173,15 +173,16 @@ Mon_Display:	; Routine 8
 	if BugFixMonitorBugs>0 							; Spindash Roll to Walk when Spindashing Next to Monitor
 Mon_CheckRelease:
 		btst d6,obStatus(a0)    					; if we're standing on the object
-		beq.s @skip
+		beq.s @skip1
 		bset #1,obStatus(a1)    					; set 'in air' bit
 		bclr #3,obStatus(a1)    					; clear 'should not fall' bit
-		@skip
+	@skip1:
+
 		addq.b #pushing_bit_delta,d6
 		btst d6,obStatus(a0)    					; if we're pushing against the object
-		beq.s @skip
+		beq.s @skip2
 		bclr #5,obStatus(a1)    					; clear 'pushing' bit
-		@skip
+	@skip2:
 		rts
 	endc
 

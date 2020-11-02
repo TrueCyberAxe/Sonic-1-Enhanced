@@ -360,3 +360,6 @@ f_levelreload: equ $FFFFCF80     ; Reload Level Flag @TODO find unused byte in m
 v_startscore:  equ $3A
 
 ; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.
+
+bit_in_air:    equ 1
+bit_pushing:   equ 5
