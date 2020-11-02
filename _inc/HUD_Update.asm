@@ -10,81 +10,85 @@ hudVRAM:	macro loc
 
 
 HUD_Update:
-		tst.w	(f_debugmode).w	; is debug mode	on?
-		bne.w	HudDebug	; if yes, branch
-		tst.b	(f_scorecount).w ; does the score need updating?
-		beq.s	@chkrings	; if not, branch
+	if EnhancedDebug=0
+		tst.w	(f_debugmode).w										; is debug mode	on?
+	else
+		tst.w	(v_debuguse).w										; is debug mode	on?
+	endc
+		bne.w	HudDebug													; if yes, branch
+		tst.b	(f_scorecount).w 									; does the score need updating?
+		beq.s	@chkrings													; if not, branch
 
 		clr.b	(f_scorecount).w
-		hudVRAM	$DC80		; set VRAM address
-		move.l	(v_score).w,d1	; load score
+		hudVRAM	$DC80														; set VRAM address
+		move.l	(v_score).w,d1									; load score
 		bsr.w	Hud_Score
 
 	@chkrings:
-		tst.b	(f_ringcount).w	; does the ring	counter	need updating?
-		beq.s	@chktime	; if not, branch
+		tst.b	(f_ringcount).w										; does the ring	counter	need updating?
+		beq.s	@chktime													; if not, branch
 		bpl.s	@notzero
-		bsr.w	Hud_LoadZero	; reset rings to 0 if Sonic is hit
+		bsr.w	Hud_LoadZero											; reset rings to 0 if Sonic is hit
 
 	@notzero:
 		clr.b	(f_ringcount).w
-		hudVRAM	$DF40		; set VRAM address
+		hudVRAM	$DF40														; set VRAM address
 		moveq	#0,d1
-		move.w	(v_rings).w,d1	; load number of rings
+		move.w	(v_rings).w,d1									; load number of rings
 		bsr.w	Hud_Rings
 
 	@chktime:
-		tst.b	(f_timecount).w	; does the time	need updating?
-		beq.s	@chklives	; if not, branch
-		tst.w	(f_pause).w	; is the game paused?
-		bne.s	@chklives	; if yes, branch
+		tst.b	(f_timecount).w										; does the time	need updating?
+		beq.s	@chklives													; if not, branch
+		tst.w	(f_pause).w												; is the game paused?
+		bne.s	@chklives													; if yes, branch
 		lea	(v_time).w,a1
-		cmpi.l	#(9*$10000)+(59*$100)+59,(a1)+ ; is the time 9:59:59?
-		beq.s	TimeOver	; if yes, branch
+		cmpi.l	#(9*$10000)+(59*$100)+59,(a1)+ 	; is the time 9:59:59?
+		beq.s	TimeOver													; if yes, branch
 
-		addq.b	#1,-(a1)	; increment 1/60s counter
-		cmpi.b	#60,(a1)	; check if passed 60
+		addq.b	#1,-(a1)												; increment 1/60s counter
+		cmpi.b	#60,(a1)												; check if passed 60
 		bcs.s	@chklives
 		move.b	#0,(a1)
-		addq.b	#1,-(a1)	; increment second counter
-		cmpi.b	#60,(a1)	; check if passed 60
+		addq.b	#1,-(a1)												; increment second counter
+		cmpi.b	#60,(a1)												; check if passed 60
 		bcs.s	@updatetime
 		move.b	#0,(a1)
-		addq.b	#1,-(a1)	; increment minute counter
-		cmpi.b	#9,(a1)		; check if passed 9
+		addq.b	#1,-(a1)												; increment minute counter
+		cmpi.b	#9,(a1)													; check if passed 9
 		bcs.s	@updatetime
-		move.b	#9,(a1)		; keep as 9
+		move.b	#9,(a1)													; keep as 9
 
 	@updatetime:
 		hudVRAM	$DE40
 		moveq	#0,d1
-		move.b	(v_timemin).w,d1 ; load	minutes
+		move.b	(v_timemin).w,d1 								; load	minutes
 		bsr.w	Hud_Mins
 		hudVRAM	$DEC0
 		moveq	#0,d1
-		move.b	(v_timesec).w,d1 ; load	seconds
+		move.b	(v_timesec).w,d1 								; load	seconds
 		bsr.w	Hud_Secs
 
 	@chklives:
-		tst.b	(f_lifecount).w ; does the lives counter need updating?
-		beq.s	@chkbonus	; if not, branch
+		tst.b	(f_lifecount).w 									; does the lives counter need updating?
+		beq.s	@chkbonus													; if not, branch
 		clr.b	(f_lifecount).w
 		bsr.w	Hud_Lives
 
 	@chkbonus:
-		tst.b	(f_endactbonus).w ; do time/ring bonus counters need updating?
-		beq.s	@finish		; if not, branch
+		tst.b	(f_endactbonus).w 								; do time/ring bonus counters need updating?
+		beq.s	@finish														; if not, branch
 		clr.b	(f_endactbonus).w
 		locVRAM	$AE00
 		moveq	#0,d1
-		move.w	(v_timebonus).w,d1 ; load time bonus
+		move.w	(v_timebonus).w,d1 							; load time bonus
 		bsr.w	Hud_TimeRingBonus
 		moveq	#0,d1
-		move.w	(v_ringbonus).w,d1 ; load ring bonus
+		move.w	(v_ringbonus).w,d1 							; load ring bonus
 		bsr.w	Hud_TimeRingBonus
 
 	@finish:
-		rts	
+		rts
 ; ===========================================================================
 
 TimeOver:
@@ -93,47 +97,47 @@ TimeOver:
 		movea.l	a0,a2
 		bsr.w	KillSonic
 		move.b	#1,(f_timeover).w
-		rts	
+		rts
 ; ===========================================================================
 
 HudDebug:
 		bsr.w	HudDb_XY
-		tst.b	(f_ringcount).w	; does the ring	counter	need updating?
-		beq.s	@objcounter	; if not, branch
+		tst.b	(f_ringcount).w										; does the ring	counter	need updating?
+		beq.s	@objcounter												; if not, branch
 		bpl.s	@notzero
-		bsr.w	Hud_LoadZero	; reset rings to 0 if Sonic is hit
+		bsr.w	Hud_LoadZero											; reset rings to 0 if Sonic is hit
 
 	@notzero:
 		clr.b	(f_ringcount).w
-		hudVRAM	$DF40		; set VRAM address
+		hudVRAM	$DF40														; set VRAM address
 		moveq	#0,d1
-		move.w	(v_rings).w,d1	; load number of rings
+		move.w	(v_rings).w,d1									; load number of rings
 		bsr.w	Hud_Rings
 
 	@objcounter:
 		hudVRAM	$DEC0		; set VRAM address
 		moveq	#0,d1
-		move.b	(v_spritecount).w,d1 ; load "number of objects" counter
+		move.b	(v_spritecount).w,d1 						; load "number of objects" counter
 		bsr.w	Hud_Secs
-		tst.b	(f_lifecount).w ; does the lives counter need updating?
-		beq.s	@chkbonus	; if not, branch
+		tst.b	(f_lifecount).w 									; does the lives counter need updating?
+		beq.s	@chkbonus													; if not, branch
 		clr.b	(f_lifecount).w
 		bsr.w	Hud_Lives
 
 	@chkbonus:
-		tst.b	(f_endactbonus).w ; does the ring/time bonus counter need updating?
-		beq.s	@finish		; if not, branch
+		tst.b	(f_endactbonus).w 								; does the ring/time bonus counter need updating?
+		beq.s	@finish														; if not, branch
 		clr.b	(f_endactbonus).w
-		locVRAM	$AE00		; set VRAM address
+		locVRAM	$AE00														; set VRAM address
 		moveq	#0,d1
-		move.w	(v_timebonus).w,d1 ; load time bonus
+		move.w	(v_timebonus).w,d1 							; load time bonus
 		bsr.w	Hud_TimeRingBonus
 		moveq	#0,d1
-		move.w	(v_ringbonus).w,d1 ; load ring bonus
+		move.w	(v_ringbonus).w,d1 							; load ring bonus
 		bsr.w	Hud_TimeRingBonus
 
 	@finish:
-		rts	
+		rts
 ; End of function HUD_Update
 
 ; ---------------------------------------------------------------------------
@@ -182,7 +186,7 @@ loc_1C852:
 loc_1C858:
 		dbf	d2,loc_1C842
 
-		rts	
+		rts
 ; ===========================================================================
 
 loc_1C85E:
@@ -243,7 +247,7 @@ loc_1C8B2:
 		swap	d1
 		dbf	d6,HudDb_XYLoop	; repeat 7 more	times
 
-		rts	
+		rts
 ; End of function HudDb_XY2
 
 ; ---------------------------------------------------------------------------
@@ -318,6 +322,6 @@ loc_1C92C:
 		addi.l	#$400000,d0
 		dbf	d6,Hud_ScoreLoop
 
-		rts	
+		rts
 
 ; End of function Hud_Score

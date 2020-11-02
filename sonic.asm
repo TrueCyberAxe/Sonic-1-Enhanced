@@ -13,8 +13,8 @@
 	include	"Variables.asm"
 	include	"Macros.asm"
 
-Debug:          equ 1
-EnhancedDebug:  equ 1
+Debug:          equ 1 ; Debug Mode Always Enabled
+EnhancedDebug:  equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 
 EnableSRAM:			equ 0	; change to 1 to enable SRAM
 BackupSRAM:			equ 1
@@ -57,7 +57,8 @@ BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
 BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
-BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
+BugFixFZDebugCreditTransition:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
+BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
@@ -3710,8 +3711,8 @@ Level_LoadObj:
 		move.w	d0,(v_framecount).w
 		bsr.w	OscillateNumInit
 		move.b	#1,(f_scorecount).w ; update score counter
-		move.b	#1,(f_ringcount).w ; update rings counter
-		move.b	#1,(f_timecount).w ; update time counter
+		move.b	#1,(f_ringcount).w  ; update rings counter
+		move.b	#1,(f_timecount).w  ; update time counter
 		move.w	#0,(v_btnpushtime1).w
 		lea	(DemoDataPtr).l,a1 ; load demo data
 		moveq	#0,d0
@@ -4723,8 +4724,10 @@ End_LoadData:
 		tst.b   (f_debugcheat).w 							; has debug cheat been entered?
     beq.s   End_LoadSonic  								; if not, branch
 	endc
+	if Debug=0
 		btst	#bitA,(v_jpadhold1).w 					; is button A pressed?
 		beq.s	End_LoadSonic										; if not, branch
+	endc
 		move.b	#1,(f_debugmode).w 						; enable debug mode
 
 End_LoadSonic:
@@ -7973,23 +7976,25 @@ Sonic_Main:	; Routine 0
 		move.w	#$80,(v_sonspeeddec).w ; Sonic's deceleration
 
 Sonic_Control:	; Routine 2
-		tst.w	(f_debugmode).w	; is debug cheat enabled?
-		beq.s	loc_12C58	; if not, branch
-		btst	#bitB,(v_jpadpress1).w ; is button B pressed?
-		beq.s	loc_12C58	; if not, branch
-		move.w	#1,(v_debuguse).w ; change Sonic into a ring/item
+	if Debug=0
+		tst.w	(f_debugmode).w											; is debug cheat enabled?
+		beq.s	loc_12C58														; if not, branch
+	endc
+		btst	#bitB,(v_jpadpress1).w 							; is button B pressed?
+		beq.s	loc_12C58														; if not, branch
+		move.w	#1,(v_debuguse).w 								; change Sonic into a ring/item
 		clr.b	(f_lockctrl).w
 		rts
 ; ===========================================================================
 
 loc_12C58:
-		tst.b	(f_lockctrl).w	; are controls locked?
-		bne.s	loc_12C64	; if yes, branch
-		move.w	(v_jpadhold1).w,(v_jpadhold2).w ; enable joypad control
+		tst.b	(f_lockctrl).w											; are controls locked?
+		bne.s	loc_12C64														; if yes, branch
+		move.w	(v_jpadhold1).w,(v_jpadhold2).w 	; enable joypad control
 
 loc_12C64:
-		btst	#0,(f_lockmulti).w ; are controls locked?
-		bne.s	loc_12C7E	; if yes, branch
+		btst	#0,(f_lockmulti).w 									; are controls locked?
+		bne.s	loc_12C7E														; if yes, branch
 		moveq	#0,d0
 		move.b	obStatus(a0),d0
 		andi.w	#6,d0

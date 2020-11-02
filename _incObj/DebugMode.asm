@@ -13,6 +13,11 @@ Debug_Index:	dc.w Debug_Main-Debug_Index
 ; ===========================================================================
 
 Debug_Main:	; Routine 0
+	if BugFixDebugMomentum>0
+		clr.w   (v_objspace+$14).w ; Clear Inertia
+		clr.w   (v_objspace+$12).w ; Clear X/Y Speed
+		clr.w   (v_objspace+$10).w ; Clear X/Y Speed
+	endc
 		addq.b	#2,(v_debuguse).w
 		move.w	(v_limittop2).w,(v_limittopdb).w ; buffer level x-boundary
 		move.w	(v_limitbtm1).w,(v_limitbtmdb).w ; buffer level y-boundary
@@ -172,7 +177,7 @@ Debug_ChgItem:
 		move.b	(v_debugitem).w,d0
 		lsl.w	#3,d0
 		move.b	4(a2,d0.w),obSubtype(a1)
-		rts	
+		rts
 ; ===========================================================================
 
 @backtonormal:
@@ -180,6 +185,11 @@ Debug_ChgItem:
 		beq.s	@stayindebug	; if not, branch
 		moveq	#0,d0
 		move.w	d0,(v_debuguse).w ; deactivate debug mode
+	if EnhancedDebug>0
+		bsr.w   Hud_Base
+		move.b	#1,(f_scorecount).w ; update score counter
+		move.b	#1,(f_ringcount).w  ; update rings counter
+	endc
 		move.l	#Map_Sonic,(v_player+obMap).w
 		move.w	#$780,(v_player+obGfx).w
 		move.b	d0,(v_player+obAnim).w
@@ -199,7 +209,7 @@ Debug_ChgItem:
 		bset	#1,(v_player+obStatus).w
 
 	@stayindebug:
-		rts	
+		rts
 ; End of function Debug_Control
 
 
@@ -213,5 +223,5 @@ Debug_ShowItem:
 		move.l	(a2,d0.w),obMap(a0) ; load mappings for item
 		move.w	6(a2,d0.w),obGfx(a0) ; load VRAM setting for item
 		move.b	5(a2,d0.w),obFrame(a0) ; load frame number for item
-		rts	
+		rts
 ; End of function Debug_ShowItem
