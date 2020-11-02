@@ -60,7 +60,7 @@ BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixFZDebugCreditTransition:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
-BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+BugFixInvincibilityDelayDeath:			equ 1 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 
 ; @todo port from sonic 2 code

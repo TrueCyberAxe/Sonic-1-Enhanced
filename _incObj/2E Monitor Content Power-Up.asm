@@ -59,5 +59,4 @@ Pow_Delete:	; Routine 4
 
     @locret:
   endc
-
     rts

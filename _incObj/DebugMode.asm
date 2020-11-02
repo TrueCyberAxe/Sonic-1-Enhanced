@@ -185,11 +185,13 @@ Debug_ChgItem:
 		beq.s	@stayindebug	; if not, branch
 		moveq	#0,d0
 		move.w	d0,(v_debuguse).w ; deactivate debug mode
+
 	if EnhancedDebug>0
 		bsr.w   Hud_Base
 		move.b	#1,(f_scorecount).w ; update score counter
 		move.b	#1,(f_ringcount).w  ; update rings counter
 	endc
+	
 		move.l	#Map_Sonic,(v_player+obMap).w
 		move.w	#$780,(v_player+obGfx).w
 		move.b	d0,(v_player+obAnim).w
