@@ -194,45 +194,45 @@ FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SC
 ;BugFixPauseOnSecialStageResults:		equ 1
 ; ============================================================================
 
-	if TweakUncompressedChunkMapping>0
-TweakMergedArt:											equ 1
-	elseif TweakLevelCompressionMode>1
-TweakMergedArt:											equ 1
-	else
+; 	if TweakUncompressedChunkMapping>0
+; TweakMergedArt:											equ 1
+; 	elseif TweakLevelCompressionMode>1
+; TweakMergedArt:											equ 1
+; 	else
 TweakMergedArt:											equ 0
-	endc
+	; endc
 
-	if TweakLevelCompressionMode<2
+	; if TweakLevelCompressionMode<2
 TweakNonNemesisLevelArtLoad: 				equ 0
-	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: 				equ 0
-	else
-TweakNonNemesisLevelArtLoad: 				equ 1
-	endc
+; 	elseif TweakSonic2LevelArtLoader=0
+; TweakNonNemesisLevelArtLoad: 				equ 0
+; 	else
+; TweakNonNemesisLevelArtLoad: 				equ 1
+; 	endc
 
-	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: 						equ 1
-	elseif FeatureSpindash>0
-FeatureEnhancedPLCQueue: 						equ 1
-	else
+; 	if TweakSonic2LevelArtLoader>0
+; FeatureEnhancedPLCQueue: 						equ 1
+; 	elseif FeatureSpindash>0
+; FeatureEnhancedPLCQueue: 						equ 1
+; 	else
 FeatureEnhancedPLCQueue: 						equ 0
-	endc
+	; endc
 
-	if Revision=0
-FeatureEnableUnusedArt: 						equ 1
-	elseif Revision>2
-FeatureEnableUnusedArt: 						equ 1
-	else
+; 	if Revision=0
+; FeatureEnableUnusedArt: 						equ 1
+; 	elseif Revision>2
+; FeatureEnableUnusedArt: 						equ 1
+; 	else
 FeatureEnableUnusedArt: 						equ 0
-	endc
+	; endc
 
-	if BugFixCameraFollow>0
-FixCameraFollow: equ 1
-	elseif FeatureSpindash>0
-FixCameraFollow: equ 1
-	else
+; 	if BugFixCameraFollow>0
+; FixCameraFollow: equ 1
+; 	elseif FeatureSpindash>0
+; FixCameraFollow: equ 1
+; 	else
 FixCameraFollow: equ 0
-	endc
+	; endc
 
 ; ===========================================================================
 ; PLC Queue Enhancement
