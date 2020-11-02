@@ -60,6 +60,7 @@ BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/i
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
+
 ; Re-implement 1D Unused Switch
 ; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
 
@@ -203,36 +204,37 @@ TweakMergedArt:											equ 0
 	endc
 
 	if TweakLevelCompressionMode<2
-TweakNonNemesisLevelArtLoad: equ 0
+TweakNonNemesisLevelArtLoad: 				equ 0
 	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: equ 0
+TweakNonNemesisLevelArtLoad: 				equ 0
 	else
-TweakNonNemesisLevelArtLoad: equ 1
+TweakNonNemesisLevelArtLoad: 				equ 1
 	endc
 
 	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: equ 1
+FeatureEnhancedPLCQueue: 						equ 1
 	elseif FeatureSpindash>0
-FeatureEnhancedPLCQueue: equ 1
+FeatureEnhancedPLCQueue: 						equ 1
 	else
-FeatureEnhancedPLCQueue: equ 0
+FeatureEnhancedPLCQueue: 						equ 0
 	endc
 
 	if Revision=0
-FeatureEnableUnusedArt: equ 1
+FeatureEnableUnusedArt: 						equ 1
 	elseif Revision>2
-FeatureEnableUnusedArt: equ 1
+FeatureEnableUnusedArt: 						equ 1
 	else
-FeatureEnableUnusedArt: equ 0
+FeatureEnableUnusedArt: 						equ 0
 	endc
 
 	if BugFixCameraFollow>0
-FixCameraFollow: equ 1
+FixCameraFollow: 										equ 1
 	elseif FeatureSpindash>0
-FixCameraFollow: equ 1
+FixCameraFollow: 										equ 1
 	else
-FixCameraFollow: equ 0
+FixCameraFollow: 										equ 0
 	endc
+
 ; ===========================================================================
 ; PLC Queue Enhancement
 ; ===========================================================================
@@ -399,6 +401,7 @@ SkipSecurity:
 		moveq	#0,d0											; clear d0
 		movea.l	d0,a6										; clear a6
 		move.l	a6,usp									; set usp to $0
+
 		moveq	#$17,d1
 VDPInitLoop:
 		move.b	(a5)+,d5								; add $8000 to value
@@ -2812,14 +2815,13 @@ GM_Title:
 		dbf	d1,Tit_ClrObj2
 
 		move.b	#id_TitleSonic,(v_objspace+$40).w ; load big Sonic object
-
 		move.b	#id_PSBTM,(v_objspace+$80).w 			; load "PRESS START BUTTON" object
-		;clr.b	(v_objspace+$80+obRoutine).w      ; The 'Mega Games 10' version of Sonic 1 added this line, to fix the 'PRESS START BUTTON' object not appearing
+		;clr.b	(v_objspace+$80+obRoutine).w ; The 'Mega Games 10' version of Sonic 1 added this line, to fix the 'PRESS START BUTTON' object not appearing
 
-		if Revision>0
-			tst.b   (v_megadrive).w									; is console Japanese?
-			bpl.s   @isjap													; if yes, branch
-		endc
+	if Revision>0
+		tst.b   (v_megadrive).w									; is console Japanese?
+		bpl.s   @isjap													; if yes, branch
+	endc
 
 		move.b	#id_PSBTM,(v_objspace+$C0).w 			; load "TM" object
 		move.b	#3,(v_objspace+$C0+obFrame).w
@@ -3122,11 +3124,12 @@ LevSel_Ptrs:
 ; ---------------------------------------------------------------------------
 ; Level	select codes
 ; ---------------------------------------------------------------------------
-LevSelCode_J:	if Revision=0
+LevSelCode_J:
+	if Revision=0
 		dc.b btnUp,btnDn,btnL,btnR,0,$FF
-		else
+	else
 		dc.b btnUp,btnDn,btnDn,btnDn,btnL,btnR,0,$FF
-		endc
+	endc
 		even
 
 LevSelCode_US:	dc.b btnUp,btnDn,btnL,btnR,0,$FF
@@ -3370,11 +3373,12 @@ LevSel_ChgLine:
 ; ---------------------------------------------------------------------------
 ; Level	select menu text
 ; ---------------------------------------------------------------------------
-LevelMenuText:	if Revision=0
+LevelMenuText:
+	if Revision=0
 		incbin	"misc\Level Select Text.bin"
-		else
+	else
 		incbin	"misc\Level Select Text (JP1).bin"
-		endc
+	endc
 		even
 ; ---------------------------------------------------------------------------
 ; Music	playlist
@@ -3773,10 +3777,12 @@ Level_MainLoop:
 		bsr.w	MoveSonicInDemo
 		bsr.w	LZWaterFeatures
 		jsr	(ExecuteObjects).l
-		if Revision>0
-			tst.w   (f_restart).w
-			bne     GM_Level
-		endc
+    
+	if Revision>0
+		tst.w   (f_restart).w
+		bne     GM_Level
+	endc
+  
 		tst.w	(v_debuguse).w	; is debug mode being used?
 		bne.s	Level_DoScroll	; if yes, branch
 		cmpi.b	#6,(v_player+obRoutine).w ; has Sonic just died?
@@ -5405,26 +5411,26 @@ locret_6A80:
 
 ; ===========================================================================
 
-		if TweakRemoveReduntantCode=0
+if TweakRemoveReduntantCode=0
 ; Abandoned unused scroll block code.
 ; This would have drawn a scroll block that started at 208 pixels down, and was 48 pixels long.
-			tst.b	(a2)
-			beq.s	locret_6AD6
-			bclr	#2,(a2)
-			beq.s	loc_6AAC
-			; Draw new tiles on the left
-			move.w	#224-16,d4	; Note that full screen coverage is normally 224+16+16. This is exactly three blocks less.
-			move.w	4(a3),d1
-			andi.w	#-16,d1
-			sub.w	d1,d4
-			move.w	d4,-(sp)
-			moveq	#-16,d5
-			bsr.w	Calc_VRAM_Pos_Unknown
-			move.w	(sp)+,d4
-			moveq	#-16,d5
-			moveq	#3-1,d6	; Draw only three rows
-			bsr.w	DrawBlocks_TB_2
-		endc ; if TweakRemoveReduntantCode=0
+		tst.b	(a2)
+		beq.s	locret_6AD6
+		bclr	#2,(a2)
+		beq.s	loc_6AAC
+		; Draw new tiles on the left
+		move.w	#224-16,d4	; Note that full screen coverage is normally 224+16+16. This is exactly three blocks less.
+		move.w	4(a3),d1
+		andi.w	#-16,d1
+		sub.w	d1,d4
+		move.w	d4,-(sp)
+		moveq	#-16,d5
+		bsr.w	Calc_VRAM_Pos_Unknown
+		move.w	(sp)+,d4
+		moveq	#-16,d5
+		moveq	#3-1,d6	; Draw only three rows
+		bsr.w	DrawBlocks_TB_2
+	endc ; if TweakRemoveReduntantCode=0
 
 loc_6AAC:
 		bclr	#3,(a2)
@@ -5459,7 +5465,8 @@ locret_6AD6:
 		moveq	#-16,d5
 		moveq	#3-1,d6		; Draw three rows... could this be a repurposed version of the above unused code?
 		bsr.w	DrawBlocks_TB_2
-	locj_6DD2:
+
+locj_6DD2:
 		bclr	#1,(a2)
 		beq.s	locj_6DF2
 		; Draw new tiles on the right
@@ -5477,6 +5484,7 @@ locret_6AD6:
 		dc.b $00,$00,$00,$00,$00,$06,$06,$06,$06,$06,$06,$06,$06,$06,$06,$04
 		dc.b $04,$04,$04,$04,$04,$04,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02
 		dc.b $02,$00
+
 ;===============================================================================
 	Draw_SBz:
 		moveq	#-16,d4
@@ -5796,32 +5804,32 @@ DrawFlipXY:
 
 ; ===========================================================================
 ; unused garbage
-	if Revision=0
-		if TweakRemoveReduntantCode=0
+  if Revision=0
+	if TweakRemoveReduntantCode=0
 ; This is interesting. It draws a block, but not before
 ; incrementing its palette lines by 1. This may have been
 ; a debug function to discolour mirrored tiles, to test
 ; if they're loading properly.
-			rts
-			move.l	d0,(a5)
-			move.w	#$2000,d5
-			move.w	(a1)+,d4
-			add.w	d5,d4
-			move.w	d4,(a6)
-			move.w	(a1)+,d4
-			add.w	d5,d4
-			move.w	d4,(a6)
-			add.l	d7,d0
-			move.l	d0,(a5)
-			move.w	(a1)+,d4
-			add.w	d5,d4
-			move.w	d4,(a6)
-			move.w	(a1)+,d4
-			add.w	d5,d4
-			move.w	d4,(a6)
-			rts
-		endc ; if TweakRemoveReduntantCode=0
-	endc ; if Revision=0
+		rts
+		move.l	d0,(a5)
+		move.w	#$2000,d5
+		move.w	(a1)+,d4
+		add.w	d5,d4
+		move.w	d4,(a6)
+		move.w	(a1)+,d4
+		add.w	d5,d4
+		move.w	d4,(a6)
+		add.l	d7,d0
+		move.l	d0,(a5)
+		move.w	(a1)+,d4
+		add.w	d5,d4
+		move.w	d4,(a6)
+		move.w	(a1)+,d4
+		add.w	d5,d4
+		move.w	d4,(a6)
+		rts
+	endc ; if TweakRemoveReduntantCode=0
+  endc ; if Revision=0
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
@@ -10012,15 +10020,15 @@ SS_3:		incbin	"sslayout\3.bin"
 		even
 SS_4:		incbin	"sslayout\4.bin"
 		even
-		if Revision=0
+	if Revision=0
 SS_5:		incbin	"sslayout\5.bin"
 		even
 SS_6:		incbin	"sslayout\6.bin"
-		else
-	SS_5:		incbin	"sslayout\5 (JP1).bin"
-			even
-	SS_6:		incbin	"sslayout\6 (JP1).bin"
-		endc
+	else
+SS_5:		incbin	"sslayout\5 (JP1).bin"
+		even
+SS_6:		incbin	"sslayout\6 (JP1).bin"
+	endc
 		even
 ; ---------------------------------------------------------------------------
 ; Animated uncompressed graphics
@@ -10321,11 +10329,11 @@ ObjPos_End:	incbin	"objpos\ending.bin"
 		even
 ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
 
-		if Revision=0
+	if Revision=0
 		dcb.b $62A,$FF
-		else
+	else
 		dcb.b $63C,$FF
-		endc
+	endc
 		;dcb.b ($10000-(*%$10000))-(EndOfRom-SoundDriver),$FF
 
 SoundDriver:	include "s1.sounddriver.asm"
