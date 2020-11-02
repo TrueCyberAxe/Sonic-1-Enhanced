@@ -26,8 +26,15 @@ PauseGame:
 Pause_StopGame:
 		move.w	#1,(f_pause).w													; freeze time
 	if FeatureMusicWhilePaused=0
-		move.b	#1,(v_snddriver_ram+f_pausemusic).w 		; pause music
-	endc
+		if FeatureUseSonic2SoundDriver=0
+			move.b	#1,(v_snddriver_ram+f_pausemusic).w 		; pause music
+		else
+			stopZ80
+			waitZ80
+			move.b  #MusID_Pause,(Z80_RAM+zAbsVar.StopMusic).l  ; pause music
+			startZ80
+		endc # if FeatureUseSonic2SoundDriver=0
+	endc # if FeatureMusicWhilePaused=0
 
 Pause_Loop:
 		move.b	#$10,(v_vbla_routine).w
@@ -75,8 +82,15 @@ Pause_ChkStart:
 
 Pause_EndMusic:
 	if FeatureMusicWhilePaused=0
-		move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; unpause the music
-	endc
+		if FeatureUseSonic2SoundDriver=0
+			move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; unpause the music
+		else
+			stopZ80
+      waitZ80
+      move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+      startZ80
+		endc ; if FeatureUseSonic2SoundDriver=0
+	endc ; if FeatureMusicWhilePaused=0
 
 Unpause:
 		move.w	#0,(f_pause).w													; unpause the game
@@ -87,6 +101,15 @@ Pause_DoNothing:
 
 Pause_SlowMo:
 		move.w	#1,(f_pause).w
-		move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; Unpause the music
+		if FeatureMusicWhilePaused=0
+			if FeatureUseSonic2SoundDriver=0
+				move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; unpause the music
+			else
+				stopZ80
+	      waitZ80
+	      move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+	      startZ80
+			endc ; if FeatureUseSonic2SoundDriver=0
+		endc ; if FeatureMusicWhilePaused=0
 		rts
 ; End of function PauseGame

@@ -365,3 +365,19 @@ v_startscore:  equ $3A
 
 bit_in_air:    equ 1
 bit_pushing:   equ 5
+
+
+; ===========================================================================
+; PLC Queue Enhancement
+; ===========================================================================
+	if TweakNoWaitingonPLCForLevelTiles=0
+PLCQueueAdr:    equ v_plc_buffer      ; beginning of RAM allocated for PLC
+	else
+PLCQueueAdr:    equ v_pal_buffer      ; beginning of RAM allocated for PLC
+	endc
+
+PLCQueue:       equ PLCQueueAdr+4     ; start of PLC queue
+PLCQueueEnd:    equ v_ptrnemcode      ; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression
+
+; FFFFF6E0 - FFFFF650
+; #((PLCQueueEnd-4-PLCQueue)/4)-1,d0

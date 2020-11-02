@@ -9,10 +9,6 @@
 ; any code based on the work done by the community is given the sources below.
 
 ; ===========================================================================
-	include	"Constants.asm"
-	include	"Variables.asm"
-	include	"Macros.asm"
-
 Debug:          equ 1 ; Debug Mode Always Enabled
 EnhancedDebug:  equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 
@@ -28,185 +24,8 @@ ZoneCount:			equ 6	; discrete zones are: GHZ, MZ, SYZ, LZ, SLZ, and SBZ
 
 OptimiseSound:	equ 0	; change to 1 to optimise sound queuing (Fixed by Cyber Axe)
 
-; Bug Fixes
-; Revision 1 Onwards Fixes the Level Select Order and Holding buttons during the attract mode and ending demo sequences will not cause Sonic to miss jumps. (https://tcrf.net/Sonic_the_Hedgehog_(Genesis)#REV01.2FJapanese_Version)
-; Revision 2 Onwards Fixes the Spike Bug
-
-; Bug Fixes Not Inluded in Other Revisions
-BugFixDemoPlayback:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
-BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
-BugFixTitleScreenPressStart: 				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
-BugFixHiddenPoints:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
-BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
-BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
-BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
-BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
-BugFixDeathBoundary:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
-BugFixHurtDeathBoundary:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
-BugFixCameraFollow:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
-BugFixSongFadeRestoration:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
-BugFixBlinkingHUD:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
-BugFixLevelSelectCorruption:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
-BugFixRememberSprite:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
-BugFixSoundDriverBugs:							equ 0 ; Uncommenting of code in ; Sound_ChkValue:
-BugFixCaterkillerDeath:							equ 0 ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
-BugFixGameOverFlicker:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
-BugFixSpringFaceWrongDirection:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
-BugFixTooFastToLive:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
-BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
-BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
-; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
-BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
-BugFixFZDebugCreditTransition:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
-BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
-BugFixInvincibilityDelayDeath:			equ 1 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
-
-; @todo port from sonic 2 code
-BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
-
-; @TODO Fix Bug when going too fast at ghz 1 slope checkpoint causing death
-; @TODO Reset Camera location when entering DEBUG MODE
-
-; Re-implement 1D Unused Switch
-; Bug Fix for Final Zone should be a colission map invisible barrier to prevent fall off
-
-; http://info.sonicretro.org/SCHG_How-to:Port_S3K_Priority_Manager_into_Sonic_2 -- https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-757917
-; https://forums.sonicretro.org/index.php?threads/sonic-1-mega-pcm-driver.29057/
-
-; Bug Fixes to add
-; https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-716304
-; RetroKoH posted about http://sonicresearch.org/forums/index.php?showtopic=3422 what is it?
-
-; @TODO Bugs needing fixed https://info.sonicretro.org/Sonic_the_Hedgehog_(16-bit)/Bugs#General_bugs
-; @TODO Fix bug - "Zipping"
-; @TODO Fix bug - Missing percussion after 1-Up music (potentially fixed)
-; @TODO Fix bug - Life counter can't handle 3-digit numbers
-; @TODO Fix bug - Time counter doesn't flash if has at least one ring
-; @TODO Fix bug - Continuous invincibility music
-; @TODO Fix bug - Marble Zone Duck through solid walls
-; @TODO Fix bug - Labyrinth Corrupt bonus graphics
-; @TODO Fix bug - Labyrinth Missing signpost
-; @TODO Fix bug - Labyrinth 255 lives glitch
-
-; @TODO Recompress https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/#post-767170
-
-; @TODO Own Noticed Glitch - Starlight Zone Glitch on Fade In
-; @TODO Own Noticed Glitch - Fix bug when you roll into the right of an object like the rocks either side of the bridge in GHZ
-; @TODO Own Noticed Glitch - Fix Being able to die after hitting invinciblity monitor before the sparkles appear
-; @TODO Own Noticed Glitch - May be specific to the Air Roll however if you press jump just as you hit a sping you dont get the spring sound but still get the spring bonus height and animation
-
-; @TODO implement Spindust properly, implement Sonic 2 Spindash Sound Effect
-; @TODO fix Sonic 2 Art Loader / Compression Mode graphic Glitches either caused by QueueDMATransfer or tool that compressed / decompressed the graphics
-; @TODO update the Sonic CD style spindash so it is not hovering in the air and so it speeds up
-; @TODO Sonic 2 Spin Dash sound rev
-; @TODO Prevent Pause Death on End Level Screen and Special Stage
-
-; Features to Add
-; @TODO implement Sonic CD Run Charge, but since this is Sonic 1 dont go faster than max run speed and just use regular run animation
-; @TODO implement Sonic CD Run Charge with complete Sonic CD style animations and speed
-; @TODO implement underwater mask when scuba monitor is active, also remove the scuba flag when hit by enemy make it act like shield
-; @TODO implement sonic holding breath when underwater unused sprite
-; @TODO implement Sonic JAMs Easy Mode
-; @TODO edit Air Roll so you can only roll when falling (more in fitting with the spirit of the game)
-; @TODO all possible updates from Sonic Jam
-
-; https://info.sonicretro.org/SCHG_How-to:Port_Flamewing%27s_Sonic_3_%26_Knuckles_Sound_Driver
-; https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2_Final_Sound_Driver_to_Sonic_1
-; https://info.sonicretro.org/SCHG_How-to:Port_Sonic_3%27s_Sound_Driver_to_Sonic_1 and https://info.sonicretro.org/SCHG_How-to:Port_Sonic_3%27s_Sound_Driver_to_Sonic_1:_Part_2
-
-; https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2_Level_Select_to_Sonic_1
-
-; Possible Features
-; Time attack https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
-; Turn enemy to rings power https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-758191
-
-; Stuff to Implement for Hacks
-; https://info.sonicretro.org/SCHG_How-to:Dynamic_Collision_system_in_Sonic_1
-; https://info.sonicretro.org/SCHG_How-to:Dynamic_Special_Stage_Walls_system
-; https://info.sonicretro.org/SCHG_How-to:Enigma_Credits_in_Sonic_1
-; https://info.sonicretro.org/SCHG_How-to:Expand_the_music_index_from_$94_to_$9F
-; https://info.sonicretro.org/SCHG_How-to:Expand_the_music_index_to_start_at_$00_instead_of_$80
-; https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
-; https://info.sonicretro.org/SCHG_How-to:Play_different_songs_on_different_acts
-; https://info.sonicretro.org/SCHG_How-to:Separate_title_art_from_GHZ/make_GHZ_load_alternate_art
-; https://info.sonicretro.org/SCHG_How-to:Sonic_2_(Simon_Wai_Prototype)_Level_Select_in_Sonic_1
-; https://info.sonicretro.org/SCHG_How-to:Use_Dynamic_Palettes_in_Sonic_1
-; https://info.sonicretro.org/SCHG_How-to:Use_Dynamic_Tilesets_in_Sonic_1
-
-; Left Align the Score
-
-; Tweaks
-TweakFastLoadInit:									equ 0 ; Disable Some Initialization to load SEGA Logo Faster
-TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
-TweakBetterFadeEffects:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSegaLogoWhiteFade:							equ 0 ; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-
-TweakBetterBonusControlRestore:			equ 0 ; Restore unused Bonus Stage Controls
-TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
-TweakFixUnderwaterRingPhysics:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Scattered_Rings_Underwater_Physics
-TweakRemoveSpeedCap:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Remove_the_Speed_Cap
-TweakFixHurtWaterPhystics:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
-TweakFasterObjectMove:							equ 0 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
-
-TweakSonic2OffScreenDeletionCode:		equ 0 ; Faster Code from Sonic 2 - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-941555
-TweakFasterRingScatter:							equ 0 ; Faster Scatter - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
-TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwater -  - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
-; TweakUseRecompresedAssets						equ 1 ; All Nemesis files recompressed with KENSharp, all Kos files recompressed with Kosinski+ KENSharp
-; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
-
-; Art and Level Tweaks
-TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1
-; Uncompressed Chunks need fixing
-TweakUncompressedChunkMapping:			equ 0 ; Loads chunks from ROM like later games and frees up more ram - Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
-TweakUncompressedTitleCards:				equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
-
-TweakImproovedDecompression:				equ 0 ; Improved Decompression Algorithms - Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
-TweakLevelCompressionMode:					equ 0 ; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER - Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
-TweakNoWaitingonPLCForLevelTiles:		equ 0 ; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode - Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
-TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Screen
-
-; Casing Graphic Glitches
-TweakFastLevelReload:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/#post-958087
-TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-707238
-TweakSlowDucking:										equ 0 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
-
-; Feature
-FeatureUpdateHeader: 								equ 0 ; Updates the name to fix the spacing and adds a comment to the rom header
-FeatureSkipChecksum: 								equ 0 ; Get to the SEGA Logo Faster by removing Security Checksum
-FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
-FeatureCentreTitleScreen:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
-; @TODO Move Press Start Accordingly too
-
-FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
-
-TweakRemoveReduntantCode:						equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code, should cause some performance improvments by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
-
-FeatureAnimateWhilePaused:					equ 0 ; Animated Background while paused - Need to fix waterfalls, need to fix HUD, need to test LZ Water
-FeatureMusicWhilePaused:						equ 0
-FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
-
-FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
-FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
-FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
-
-FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
-
-; Major
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
-																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
-FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
-FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
-FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
-FeatureElectricShockAnimation:			equ 0 ; When you get hit with Electricity use the Electric Hit Animation
-
-; Non Default Features some people may want to use
-FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1
-FeatureDisableSpecialStageRotation: equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-non-rotating-special-stages.6074/
-;BugFixPauseOnSecialStageResults:		equ 1
+	include "Features.asm"
 ; ============================================================================
-
 	if TweakUncompressedChunkMapping>0
 TweakMergedArt:											equ 1
 	elseif TweakLevelCompressionMode>1
@@ -260,21 +79,10 @@ BugFixCameraFollow: 								equ 1
 	else
 BugFixCameraFollow: 								equ 0
 	endc
-; ===========================================================================
-; PLC Queue Enhancement
-; ===========================================================================
-	if TweakNoWaitingonPLCForLevelTiles=0
-PLCQueueAdr:    equ v_plc_buffer      ; beginning of RAM allocated for PLC
-	else
-PLCQueueAdr:    equ v_pal_buffer      ; beginning of RAM allocated for PLC
-	endc
 
-PLCQueue:       equ PLCQueueAdr+4     ; start of PLC queue
-PLCQueueEnd:    equ v_ptrnemcode      ; end of PLC queue, start of equates for PLC, for example last state of Nemesis decompression
-
-; FFFFF6E0 - FFFFF650
-; #((PLCQueueEnd-4-PLCQueue)/4)-1,d0
-
+	include	"Constants.asm"
+	include	"Variables.asm"
+	include	"Macros.asm"
 ; ===========================================================================
 
 StartOfRom:
@@ -481,7 +289,8 @@ SkipSetup:
 		bra.s	GameProgram								; begin game
 
 ; ===========================================================================
-SetupValues:	dc.w $8000						; VDP register start number
+SetupValues:
+		dc.w $8000											; VDP register start number
 		dc.w $3FFF											; size of RAM/4
 		dc.w $100												; VDP register diff
 
@@ -871,8 +680,10 @@ VBla_00:
 
 	@notPAL:
 		move.w	#1,(f_hbla_pal).w ; set HBlank flag
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		tst.b	(f_wtr_state).w	; is water above top of screen?
 		bne.s	@waterabove 	; if yes, branch
 
@@ -884,7 +695,9 @@ VBla_00:
 
 	@waterbelow:
 		move.w	(v_hbla_hreg).w,(a5)
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		bra.w	VBla_Music
 ; ===========================================================================
 
@@ -892,6 +705,21 @@ VBla_02:
 		bsr.w	sub_106E
 
 VBla_14:
+	if FeatureUseSonic2SoundDriver>0
+		move.b  (v_vbla_count+3).w,d0
+		andi.w  #$F,d0
+		bne.s   @skipread
+
+	if TweakRemoveUselessZ80Commands=0
+		stopZ80
+		waitZ80
+	endc
+		bsr.w   ReadJoypads
+	if TweakRemoveUselessZ80Commands=0
+		startZ80
+	endc
+	@skipread:
+	endc
 		tst.w	(v_demolength).w
 		beq.w	@end
 		subq.w	#1,(v_demolength).w
@@ -922,8 +750,10 @@ VBla_10:
 		beq.w	VBla_0A		; if yes, branch
 
 VBla_08:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		bsr.w	ReadJoypads
 		tst.b	(f_wtr_state).w
 		bne.s	@waterabove
@@ -953,7 +783,9 @@ VBla_08:
  	;  #$83,(v_vdp_buffer2).w
 	; @NOTE spindash Queue system tutorial wanted me to remove move	#$83,($FFFFF640).w and jsr	Process_DMA but they dont exist
 	@nochg:
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		movem.l	(v_screenposx).w,d0-d7
 		movem.l	d0-d7,(v_screenposx_dup).w
 		movem.l	(v_fg_scroll_flags).w,d0-d1
@@ -989,13 +821,17 @@ Demo_Time:
 ; ===========================================================================
 
 VBla_0A:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		bsr.w	ReadJoypads
 		writeCRAM	v_pal_dry,$80,0
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		bsr.w	PalCycle_SS
 
 	if FeatureEnhancedPLCQueue=0
@@ -1018,8 +854,10 @@ VBla_0A:
 ; ===========================================================================
 
 VBla_0C:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		bsr.w	ReadJoypads
 		tst.b	(f_wtr_state).w
 		bne.s	@waterabove
@@ -1046,7 +884,9 @@ VBla_0C:
 	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochg:
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		movem.l	(v_screenposx).w,d0-d7
 		movem.l	d0-d7,(v_screenposx_dup).w
 		movem.l	(v_fg_scroll_flags).w,d0-d1
@@ -1072,13 +912,17 @@ VBla_12:
 ; ===========================================================================
 
 VBla_16:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		bsr.w	ReadJoypads
 		writeCRAM	v_pal_dry,$80,0
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 
 	if FeatureEnhancedPLCQueue=0
 		tst.b	(f_sonframechg).w 								; has Sonic's sprite changed?
@@ -1102,8 +946,10 @@ VBla_16:
 
 
 sub_106E:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		bsr.w	ReadJoypads
 		tst.b	(f_wtr_state).w ; is water above top of screen?
 		bne.s	@waterabove	; if yes, branch
@@ -1116,7 +962,9 @@ sub_106E:
 	@waterbelow:
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		rts
 ; End of function sub_106E
 
@@ -1194,13 +1042,17 @@ loc_119E:
 
 
 JoypadInit:
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
+	endc
 		moveq	#$40,d0
 		move.b	d0,($A10009).l	; init port 1 (joypad 1)
 		move.b	d0,($A1000B).l	; init port 2 (joypad 2)
 		move.b	d0,($A1000D).l	; init port 3 (expansion/extra)
+	if TweakRemoveUselessZ80Commands=0
 		startZ80
+	endc
 		rts
 ; End of function JoypadInit
 
@@ -1358,11 +1210,14 @@ ClearScreen:
 
 SoundDriverLoad:
 		nop
+	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		resetZ80
+	endc
 		lea	(Kos_Z80).l,a0	; load sound driver
 		lea	(z80_ram).l,a1	; target Z80 RAM
 		bsr.w	KosDec		; decompress
+	if TweakRemoveUselessZ80Commands=0
 		resetZ80a
 		nop
 		nop
@@ -1370,6 +1225,7 @@ SoundDriverLoad:
 		nop
 		resetZ80
 		startZ80
+	endc
 		rts
 ; End of function SoundDriverLoad
 
@@ -2589,7 +2445,11 @@ WaitForVBla:
 ; Sega screen
 ; ---------------------------------------------------------------------------
 GM_Sega:
+	if FeatureUseSonic2SoundDriver=0
 		sfx	bgm_Stop,0,1,1 ; stop music
+	else
+		music	bgm_Stop,0,1,1 ; stop music
+	endc
 		bsr.w	ClearPLC
 
 	if TweakBetterFadeEffects>0
@@ -2669,12 +2529,24 @@ Sega_WaitPal:
 		bne.s	Sega_WaitPal
 
 		sfx	sfx_Sega,0,1,1	; play "SEGA" sound
+	if FeatureUseSonic2SoundDriver=0
 		move.b	#$14,(v_vbla_routine).w
+	else
+		move.b	#$2,(v_vbla_routine).w
+	endc
 		bsr.w	WaitForVBla
+	if FeatureUseSonic2SoundDriver=0
 		move.w	#$1E,(v_demolength).w
+	else
+		move.w	#$B4,(v_demolength).w
+	endc
 
 Sega_WaitEnd:
+	if FeatureUseSonic2SoundDriver=0
 		move.b	#2,(v_vbla_routine).w
+	else
+		move.b	#$14,(v_vbla_routine).w
+	endc
 		bsr.w	WaitForVBla
 		tst.w	(v_demolength).w
 		beq.s	Sega_GotoTitle
@@ -2691,7 +2563,11 @@ Sega_GotoTitle:
 ; ---------------------------------------------------------------------------
 
 GM_Title:
+	if FeatureUseSonic2SoundDriver=0
 		sfx	bgm_Stop,0,1,1 ; stop music
+	else
+		music	bgm_Stop,0,1,1 ; stop music
+	endc
 		bsr.w	ClearPLC
 		bsr.w	PaletteFadeOut
 		disable_ints
@@ -3001,27 +2877,52 @@ LevelSelect:
 		bsr.w	RunPLC
 		tst.l	PLCQueueAdr.w
 		bne.s	LevelSelect
-		andi.b	#btnABC+btnStart,(v_jpadpress1).w ; is A, B, C, or Start pressed?
-		beq.s	LevelSelect	; if not, branch
+
+	if TweakNavigationLevelSelect=0
+		andi.b	#btnABC+btnStart,(v_jpadpress1).w 		; is A, B, C, or Start pressed?
+	else
+		andi.b	#btnB+btnStart,(v_jpadpress1).w 			; is B or Start pressed?
+	endc
+
+		beq.s	LevelSelect															; if not, branch
 		move.w	(v_levselitem).w,d0
-		cmpi.w	#$14,d0		; have you selected item $14 (sound test)?
-		bne.s	LevSel_Level_SS	; if not, go to	Level/SS subroutine
+		cmpi.w	#$14,d0																; have you selected item $14 (sound test)?
+
+	if TweakNavigationLevelSelect=0
+		bne.s	LevSel_Level_SS													; if not, go to	Level/SS subroutine
+	else
+		beq.s   @checkB             									; if so, branch
+		andi.b  #btnStart,(v_jpadpress1).w  					; is start pressed?
+		beq.s   LevelSelect         									; if not, branch
+		bra.s   LevSel_Level_SS         							; if so, go to  Level/SS subroutine
+
+	@checkB:
+		andi.b  #btnB,(v_jpadpress1).w  							; is B pressed?
+		beq.s   LevelSelect     											; if not, branch
+
+	@soundtest:
+	endc
+
 		move.w	(v_levselsound).w,d0
+	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
-		tst.b	(f_creditscheat).w ; is Japanese Credits cheat on?
-		beq.s	LevSel_NoCheat	; if not, branch
-		cmpi.w	#$9F,d0		; is sound $9F being played?
-		beq.s	LevSel_Ending	; if yes, branch
-		cmpi.w	#$9E,d0		; is sound $9E being played?
-		beq.s	LevSel_Credits	; if yes, branch
+	endc
+		tst.b	(f_creditscheat).w 											; is Japanese Credits cheat on?
+		beq.s	LevSel_NoCheat													; if not, branch
+		cmpi.w	#$9F,d0																; is sound $9F being played?
+		beq.s	LevSel_Ending														; if yes, branch
+		cmpi.w	#$9E,d0																; is sound $9E being played?
+		beq.s	LevSel_Credits													; if yes, branch
 
 LevSel_NoCheat:
-		; This is a workaround for a bug, see Sound_ChkValue for more.
-		; Once you've fixed the bugs there, comment these four instructions out
-		cmpi.w	#bgm__Last+1,d0	; is sound $80-$93 being played?
-		blo.s	LevSel_PlaySnd	; if yes, branch
-		cmpi.w	#sfx__First,d0	; is sound $94-$9F being played?
-		blo.s	LevelSelect	; if yes, branch
+; This is a workaround for a bug, see Sound_ChkValue for more.
+; Once you've fixed the bugs there, comment these four instructions out
+	if FeatureUseSonic2SoundDriver=0
+		cmpi.w	#bgm__Last+1,d0												; is sound $80-$93 being played?
+		blo.s	LevSel_PlaySnd													; if yes, branch
+		cmpi.w	#sfx__First,d0												; is sound $94-$9F being played?
+		blo.s	LevelSelect															; if yes, branch
+	endc
 
 LevSel_PlaySnd:
 		bsr.w	PlaySound_Special
@@ -3029,14 +2930,14 @@ LevSel_PlaySnd:
 ; ===========================================================================
 
 LevSel_Ending:
-		move.b	#id_Ending,(v_gamemode).w ; set screen mode to $18 (Ending)
-		move.w	#(id_EndZ<<8),(v_zone).w ; set level to 0600 (Ending)
+		move.b	#id_Ending,(v_gamemode).w 						; set screen mode to $18 (Ending)
+		move.w	#(id_EndZ<<8),(v_zone).w 							; set level to 0600 (Ending)
 		rts
 ; ===========================================================================
 
 LevSel_Credits:
-		move.b	#id_Credits,(v_gamemode).w ; set screen mode to $1C (Credits)
-		sfx	bgm_Credits,0,1,1 ; play credits music
+		move.b	#id_Credits,(v_gamemode).w 						; set screen mode to $1C (Credits)
+		sfx	bgm_Credits,0,1,1 												; play credits music
 		move.w	#0,(v_creditsnum).w
 		rts
 ; ===========================================================================
@@ -3058,7 +2959,7 @@ LevSel_Level_SS:
 		move.l	d0,(v_time).w										; clear time
 		move.l	d0,(v_score).w									; clear score
 	if TweakConsistantLevelSelectClear>0
-		move.l d0,(v_startscore).w 						; clear start score
+		move.l d0,(v_startscore).w 							; clear start score
 		move.b d0,(v_continues).w 							; clear continues
 		;move.b d0,(v_lastspecial).w 						; clear special stage number
 		;move.b d0,(v_emeralds).w 							; clear emeralds
@@ -3270,29 +3171,56 @@ LevSel_Refresh:
 ; ===========================================================================
 
 LevSel_SndTest:
-		cmpi.w	#$14,(v_levselitem).w ; is item $14 selected?
-		bne.s	LevSel_NoMove	; if not, branch
+		cmpi.w	#$14,(v_levselitem).w 			; is item $14 selected?
+		bne.s	LevSel_NoMove									; if not, branch
 		move.b	(v_jpadpress1).w,d1
-		andi.b	#btnR+btnL,d1	; is left/right	pressed?
-		beq.s	LevSel_NoMove	; if not, branch
+
+	if FeatureUseSonic2SoundDriver=0
+		andi.b	#btnR+btnL,d1								; is left/right	pressed?
+	else ; @TODO Add dedicated Navigation Variable
+		andi.b	#btnA+btnC+btnR+btnL,d1			; is left/right	pressed?
+	endc
+
+		beq.s	LevSel_NoMove									; if not, branch
 		move.w	(v_levselsound).w,d0
-		btst	#bitL,d1	; is left pressed?
-		beq.s	LevSel_Right	; if not, branch
-		subq.w	#1,d0		; subtract 1 from sound	test
+		btst	#bitL,d1											; is left pressed?
+		beq.s	LevSel_Right									; if not, branch
+		subq.w	#1,d0												; subtract 1 from sound	test
+	if FeatureUseSonic2SoundDriver=0
 		bhs.s	LevSel_Right
-		moveq	#$4F,d0		; if sound test	moves below 0, set to $4F
+		moveq	#$4F,d0												; if sound test	moves below 0, set to $4F
+	endc
 
 LevSel_Right:
-		btst	#bitR,d1	; is right pressed?
-		beq.s	LevSel_Refresh2	; if not, branch
-		addq.w	#1,d0		; add 1	to sound test
+		btst	#bitR,d1											; is right pressed?
+		beq.s	LevSel_Refresh2								; if not, branch
+		addq.w	#1,d0												; add 1	to sound test
+
+	if TweakNavigationLevelSelect=0
 		cmpi.w	#$50,d0
 		blo.s	LevSel_Refresh2
-		moveq	#0,d0		; if sound test	moves above $4F, set to	0
+	else
+LevSel_ButtonA:
+    btst    #bitA,d1    								; is A pressed?
+    beq.s   LevSel_ButtonC 							; if not, branch
+    addi.b  #$10,d0    									; add $10 to sound test
+    bcc.s   LevSel_ButtonC  						; did the addition overflow?
+    moveq   #0,d0       								; if so, set value to $00
+
+LevSel_ButtonC:
+    btst    #bitC,d1    								; is C pressed?
+    beq.s   LevSel_Refresh2 						; if not, branch
+    subi.b  #$10,d0     								; subtract $10 from sound test
+    bcc.s   LevSel_Refresh2
+    cmpi.b  #$F0,d0
+    beq.s   LevSel_Refresh2 						; do not set to 0 if already at 0
+	endc
+
+		moveq	#0,d0													; if sound test	moves above $4F, set to	0
 
 LevSel_Refresh2:
-		move.w	d0,(v_levselsound).w ; set sound test number
-		bsr.w	LevSelTextLoad	; refresh text
+		move.w	d0,(v_levselsound).w 				; set sound test number
+		bsr.w	LevSelTextLoad								; refresh text
 
 LevSel_NoMove:
 		rts
@@ -3346,7 +3274,9 @@ LevSelTextLoad:
 LevSel_DrawSnd:
 		locVRAM	$EC30		; sound test position on screen
 		move.w	(v_levselsound).w,d0
+	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
+	endc
 		move.b	d0,d2
 		lsr.b	#4,d0
 		bsr.w	LevSel_ChgSnd	; draw 1st digit
@@ -4651,7 +4581,11 @@ Map_ContScr:	include	"_maps\Continue Screen.asm"
 ; ---------------------------------------------------------------------------
 
 GM_Ending:
+	if FeatureUseSonic2SoundDriver=0
 		sfx	bgm_Stop,0,1,1 ; stop music
+	else
+		music	bgm_Stop,0,1,1 ; stop music
+	endc
 		bsr.w	PaletteFadeOut
 
 		lea	(v_objspace).w,a1
@@ -10375,7 +10309,12 @@ ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
 	endc
 		;dcb.b ($10000-(*%$10000))-(EndOfRom-SoundDriver),$FF
 
-SoundDriver:	include "s1.sounddriver.asm"
+SoundDriver:
+	if FeatureUseSonic2SoundDriver=0
+		include "s1.sounddriver.asm"
+	else
+		include "s2.sounddriver.asm"
+	endc
 
 ; end of 'ROM'
 		even
