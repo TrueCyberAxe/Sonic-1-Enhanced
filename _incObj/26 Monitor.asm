@@ -181,7 +181,7 @@ Mon_CheckRelease:
 		addq.b #pushing_bit_delta,d6
 		btst d6,obStatus(a0)    					; if we're pushing against the object
 		beq.s @skip2
-		bclr #is_pushing,obStatus(a1)    					; clear 'pushing' bit
+		bclr #is_pushing,obStatus(a1)     ; clear 'pushing' bit
 	@skip2:
 		rts
 	endc
