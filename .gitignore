@@ -1,8 +1,11 @@
+desktop.ini
+
 */temp.dat
 */dllcache
 */SonLVL.log
+
 errors.txt
+
 s1*.bin
 *.lst
-desktop.ini
-test.bat
+test.*
