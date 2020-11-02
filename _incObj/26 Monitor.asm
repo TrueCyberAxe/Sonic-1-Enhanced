@@ -61,7 +61,7 @@ Mon_Solid:														; Routine 2
 		addq.b    #pushing_bit_delta,d6
 		btst    d6,status(a0)    					; check if we're pushing
 		beq.s    @skip
-		bclr    #5,status(a1)    					; clear 'pushing' bit
+		bclr    #is_pushing,status(a1)    					; clear 'pushing' bit
 		bclr    d6,status(a0)    					; clear object's 'pushing' bit
 	@skip:
 	endc
@@ -181,7 +181,7 @@ Mon_CheckRelease:
 		addq.b #pushing_bit_delta,d6
 		btst d6,obStatus(a0)    					; if we're pushing against the object
 		beq.s @skip2
-		bclr #5,obStatus(a1)    					; clear 'pushing' bit
+		bclr #is_pushing,obStatus(a1)    					; clear 'pushing' bit
 	@skip2:
 		rts
 	endc

@@ -75,7 +75,9 @@ Obj09_Display:
 		jsr	(SpeedToPos).l
 		bsr.w	SS_FixCamera
 		move.w	(v_ssangle).w,d0
+	if FeatureDisableSpecialStageRotation=0
 		add.w	(v_ssrotate).w,d0
+	endc
 		move.w	d0,(v_ssangle).w
 		jsr	(Sonic_Animate).l
 		rts

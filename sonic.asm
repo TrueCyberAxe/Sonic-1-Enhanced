@@ -193,7 +193,7 @@ FeatureElectricShockAnimation:			equ 0 ; When you get hit with Electricity use t
 
 ; Non Default Features some people may want to use
 FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1
-
+FeatureDisableSpecialStageRotation: equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-non-rotating-special-stages.6074/
 ;BugFixPauseOnSecialStageResults:		equ 1
 ; ============================================================================
 
