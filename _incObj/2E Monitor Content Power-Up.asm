@@ -8,7 +8,8 @@ PowerUp:
 		jsr	Pow_Index(pc,d1.w)
 		bra.w	DisplaySprite
 ; ===========================================================================
-Pow_Index:	dc.w Pow_Main-Pow_Index
+Pow_Index:
+		dc.w Pow_Main-Pow_Index
 		dc.w Pow_Move-Pow_Index
 		dc.w Pow_Delete-Pow_Index
 ; ===========================================================================
@@ -51,7 +52,7 @@ Pow_Delete:	; Routine 4
 		subq.w	#1,obTimeFrame(a0)
 
 	if BugFixRenderBeforeInit=0 ; Bug 6
-		bmi.w	DeleteObject	; delete after half a second
+		bmi.w	DeleteObject			; delete after half a second
 	else
     bpl.s   @locret
     addq.l  #4,sp

@@ -2453,15 +2453,17 @@ GM_Sega:
 		bsr.w	ClearPLC
 
 	if TweakBetterFadeEffects>0
-		bsr.w PaletteWhiteOut
- 		lea	(vdp_control_port).l,a6
-	elseif TweakSegaLogoWhiteFade>1
-		bsr.w PaletteWhiteOut
- 		lea	(vdp_control_port).l,a6
+		if TweakSegaLogoWhiteFade>1
+			bsr.w PaletteWhiteOut
+			lea	(vdp_control_port).l,a6
+		else
+			bsr.w	PaletteFadeOut
+			lea	(vdp_control_port).l,a6
+		endc
 	elseif TweakFastLoadInit=0
 		bsr.w	PaletteFadeOut
 		lea	(vdp_control_port).l,a6
-	endc ; if TweakBetterFadeEffects=0
+	endc ; @TODO fix
 
 		move.w	#$8004,(a6)	; use 8-colour mode
 		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
@@ -2492,10 +2494,7 @@ GM_Sega:
 		endc
 
 	@loadpal:
-	if TweakSegaLogoWhiteFade<>1
-		moveq	#palid_SegaBG,d0
-		bsr.w	PalLoad2							; load Sega logo palette
-	else
+	if TweakSegaLogoWhiteFade=1
 		lea (v_pal_dry_dup).l,a3
 	  moveq #$3F,d7
 
@@ -2503,6 +2502,9 @@ GM_Sega:
     move.w #cWhite,(a3)+    		; move data to RAM
     dbf d7,@loop
     bsr.w PaletteFadeIn 				; added to allow fade in
+	else
+		moveq	#palid_SegaBG,d0
+		bsr.w	PalLoad2							; load Sega logo palette
 	endc
 		move.w	#-$A,(v_pcyc_num).w
 		move.w	#0,(v_pcyc_time).w
@@ -2947,7 +2949,7 @@ LevSel_Level_SS:
 		move.w  (v_zone).w,d0
 	endc
 		add.w	d0,d0
-		move.w	LevSel_Ptrs(pc,d0.w),d0 				; load level number
+		; move.w	LevSel_Ptrs(pc,d0.w),d0 				; load level number
 		bmi.w	LevelSelect
 		cmpi.w	#id_SS*$100,d0									; check	if level is 0700 (Special Stage)
 		bne.s	LevSel_Level											; if not, branch

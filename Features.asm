@@ -2,11 +2,40 @@
 ; Revision 1 Onwards Fixes the Level Select Order and Holding buttons during the attract mode and ending demo sequences will not cause Sonic to miss jumps. (https://tcrf.net/Sonic_the_Hedgehog_(Genesis)#REV01.2FJapanese_Version)
 ; Revision 2 Onwards Fixes the Spike Bug
 
+; Feature
+FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
+FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
+FeatureSkipChecksum: 								equ 1 ; Get to the SEGA Logo Faster by removing Security Checksum
+FeatureSkipSEGALogo: 								equ 1 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
+FeatureUpdateHeader: 								equ 1 ; Updates the name to fix the spacing and adds a comment to the rom header
+
+; Major Feature
+FeatureAirRoll:											equ 1 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
+FeatureBetaVictoryAnimation:				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
+FeatureElectricShockAnimation:			equ 1 ; When you get hit with Electricity use the Electric Hit Animation
+FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
+FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
+FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
+FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
+FeatureUseJapaneseUpdates:					equ 1 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
+FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
+; Tweaks
+TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakFastLoadInit:									equ 1 ; Disable Some Initialization to load SEGA Logo Faster
+TweakSegaLogoWhiteFade:							equ 2 ; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
+TweakSlowDucking:										equ 1 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
+
+BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+BugFixDemoPlayback:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
+BugFixHiddenPoints:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
+BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
+
+; ============================================================
+
 ; Bug Fixes Not Inluded in Other Revisions
-BugFixDemoPlayback:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
+
 BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
-BugFixTitleScreenPressStart: 				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
-BugFixHiddenPoints:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
 BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
 BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
@@ -27,10 +56,10 @@ BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/ind
 BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
 BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
-BugFixFZDebugCreditTransition:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
-BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
-BugFixInvincibilityDelayDeath:			equ 1 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+
 BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 
 ; @todo port from sonic 2 code
@@ -109,11 +138,8 @@ BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/i
 
 ; Left Align the Score
 
-; Tweaks
-TweakFastLoadInit:									equ 0 ; Disable Some Initialization to load SEGA Logo Faster
+
 TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
-TweakBetterFadeEffects:							equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSegaLogoWhiteFade:							equ 0 ; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 
 TweakBetterBonusControlRestore:			equ 0 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 0 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
@@ -142,19 +168,11 @@ TweakTitleCompress:									equ 0 ; 0 to Keep using Nemesis Art on the Title Scr
 ; Casing Graphic Glitches
 TweakFastLevelReload:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/#post-958087
 TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-707238
-TweakSlowDucking:										equ 0 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
 
 TweakRemoveUselessZ80Commands:      equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
-TweakNavigationLevelSelect:         equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
+TweakNavigationLevelSelect:         equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
 
-; Feature
-FeatureUpdateHeader: 								equ 0 ; Updates the name to fix the spacing and adds a comment to the rom header
-FeatureSkipChecksum: 								equ 0 ; Get to the SEGA Logo Faster by removing Security Checksum
-FeatureSkipSEGALogo: 								equ 0 ; Press start to Skip SEGA Logo and Sonic Team - Partially Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_SEGA_Sound
-FeatureCentreTitleScreen:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 ; @TODO Move Press Start Accordingly too
-
-FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
 
 TweakRemoveReduntantCode:						equ 0 ; Modify Certain Code to Remove Duplicate or Redundant code, should cause some performance improvments by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
 
@@ -162,21 +180,7 @@ FeatureAnimateWhilePaused:					equ 0 ; Animated Background while paused - Need t
 FeatureMusicWhilePaused:						equ 0
 FeatureSonicCDPauseRestartLevel:		equ 0 ; Reloads Level like in Sonic CD when you press a button while paused - Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
 
-FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
-FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
-FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
-
-FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
-
 FeatureUseSonic2SoundDriver:        equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
-
-; Major
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
-																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
-FeatureAirRoll:											equ 0 ; 0 = Off, 1 = Roll when not in Spring Jump Animation, 2 = Roll when going Up from spring Curl into a ball when in a jump like in the GG and NGP Sonic Games - https://info.sonicretro.org/SCHG_How-to:Add_the_Air_Roll/Flying_Spin_Attack
-FeatureBetaVictoryAnimation:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Restore_the_Beta_Victory_Animation
-FeatureUseJapaneseUpdates:					equ 0 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
-FeatureElectricShockAnimation:			equ 0 ; When you get hit with Electricity use the Electric Hit Animation
 
 ; Non Default Features some people may want to use
 FeatureRetainRingsBetweenActs:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1

@@ -68,7 +68,9 @@ SolidObject71:
 
 	@stand:
 		move.w	d4,d2
-	if TweakFasterRingScatter=0
+	if FeatureRestoreMonitorSuper>0
+		jsr	MvSonicOnPtfm
+	elseif TweakFasterRingScatter=0
 		bsr.w	MvSonicOnPtfm
 	else
 		jsr	MvSonicOnPtfm

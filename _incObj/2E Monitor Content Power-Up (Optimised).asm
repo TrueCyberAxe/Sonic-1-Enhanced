@@ -5,6 +5,7 @@ Pow_ChkInvinc:
 		cmpi.b	#5,d0																; does monitor contain invincibility?
 		bne.s Pow_ChkS															; if not, branch to S Monitor Code
 
+Pow_InvincibleActivate:
 		move.b	#1,(v_invinc).w										 	; make Sonic invincible
 		move.w	#$4B0,(v_player+$32).w 						 	; time limit for the power-up
 		move.b	#id_ShieldItem,(v_objspace+$200).w 	; load stars object ($3801)
@@ -32,32 +33,8 @@ Pow_ChkS:
 	if FeatureRestoreMonitorSuper=0
 		nop
 	else
-		move.b	#1,(v_invinc).w										 	; Set Sonic Invincible Flag
-		move.w	#$4B0,(v_player+$32).w 						 	; time limit for the power-up
-
-		move.w	#$C00,(v_sonspeedmax).w 						; change Sonic's top speed
-		move.w	#$18,(v_sonspeedacc).w							; change Sonic's acceleration
-		move.w	#$80,(v_sonspeeddec).w							; change Sonic's deceleration
-
-		move.b	#id_ShieldItem,(v_objspace+$200).w 	; load stars object ($3801)
-		move.b	#1,(v_objspace+$200+obAnim).w
-		move.b	#id_ShieldItem,(v_objspace+$240).w 	; load stars object ($3802)
-		move.b	#2,(v_objspace+$240+obAnim).w
-		move.b	#id_ShieldItem,(v_objspace+$280).w 	; load stars object ($3803)
-		move.b	#3,(v_objspace+$280+obAnim).w
-		move.b	#id_ShieldItem,(v_objspace+$2C0).w 	; load stars object ($3804)
-		move.b	#4,(v_objspace+$2C0+obAnim).w
-
-		tst.b	(f_lockscreen).w 											; is boss mode on?
-		bne.w	Pow_ChkEnd														; if yes, branch
-
-	if Revision>0
-		cmpi.w	#$C,(v_air).w
-		bls.w	Pow_ChkEnd
-	endc
-
-		music	bgm_Speedup,0,0,0											; Speed	up the music
-		music	bgm_Invincible,1,0,0
+		bsr.w Pow_ShoesActivate
+		jmp Pow_InvincibleActivate
 	endc
 ; ===========================================================================
 Pow_ChkEggman:
@@ -83,6 +60,7 @@ Pow_ChkShoes:
 		cmpi.b	#3,d0																; does monitor contain speed shoes?
 		bne.s	Pow_ChkShield
 
+Pow_ShoesActivate:
 		move.b	#1,(v_shoes).w											; Set Sonic Super Speed Flag
 		move.w	#$4B0,(v_player+$34).w							; time limit for the power-up
 		move.w	#$C00,(v_sonspeedmax).w 						; change Sonic's top speed
