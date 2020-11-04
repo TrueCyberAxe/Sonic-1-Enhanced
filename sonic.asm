@@ -9,8 +9,9 @@
 ; any code based on the work done by the community is given the sources below.
 
 ; ===========================================================================
-Debug:          equ 1 ; Debug Mode Always Enabled
-EnhancedDebug:  equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+Debug:          		equ 1 ; Debug Mode Always Enabled
+EnhancedDebug:  		equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+EnhancedDebugMenu: 	equ 0
 
 EnableSRAM:			equ 0	; change to 1 to enable SRAM
 BackupSRAM:			equ 1
@@ -78,6 +79,18 @@ FixCameraFollowBug: 								equ 1
 FixCameraFollowBug: 								equ 1
 	else
 FixCameraFollowBug: 								equ 0
+	endc
+
+	if EnhancedDebugMenu>0
+ExtendedMenu: 											equ 1
+	else
+ExtendedMenu: 											equ 0
+	endc
+
+	if ExtendedMenu>0
+AsciiMenu: 													equ 1
+	else
+AsciiMenu: 													equ 0
 	endc
 
 	include	"Constants.asm"
@@ -606,14 +619,17 @@ ShowErrorValue:
 
 ErrorWaitForC:
 		bsr.w	ReadJoypads
-		cmpi.b	#btnC,(v_jpadpress1).w ; is button C pressed?
-		bne.w	ErrorWaitForC	; if not, branch
+		cmpi.b	#btnC,(v_jpadpress1).w 								; is button C pressed?
+		bne.w	ErrorWaitForC														; if not, branch
 		rts
 ; End of function ErrorWaitForC
 
 ; ===========================================================================
-
-Art_Text:	incbin	"artunc\menutext.bin" ; text used in level select and debug mode
+	if AsciiMenu=0
+Art_Text:	incbin	"artunc\menutext.bin" 					; text used in level select and debug mode
+	else
+Art_Text:	incbin	"artunc\menutext - ascii.bin" 	; text used in level select and debug mode
+	endc ; if ExtendedMenu=0
 		even
 
 ; ===========================================================================
@@ -2402,7 +2418,11 @@ ProcessDMAQueue_Done:
 ; ---------------------------------------------------------------------------
 Pal_SegaBG:	incbin	"palette\Sega Background.bin"
 Pal_Title:	incbin	"palette\Title Screen.bin"
+	if AsciiMenu=0
 Pal_LevelSel:	incbin	"palette\Level Select.bin"
+	else
+Pal_LevelSel:	incbin	"palette\Level Select - S2 Font.bin"
+	endc ; if ExtendedMenu=0
 Pal_Sonic:	incbin	"palette\Sonic.bin"
 Pal_GHZ:	incbin	"palette\Green Hill Zone.bin"
 Pal_LZ:		incbin	"palette\Labyrinth Zone.bin"
@@ -2751,15 +2771,22 @@ Tit_MainLoop:
 		jsr	(BuildSprites).l
 		bsr.w	PCycle_Title
 		bsr.w	RunPLC
+
 	if FeatureLevelSelectOnC>0
 		btst	#bitC,(v_jpadpress1).w 							; is button C pressed?
-		bne.w	Tit_LoadLevelSelect									; if so, branch
-	endc
+		if ExtendedMenu=0
+			bne.w	Tit_LoadLevelSelect									; if so, branch
+		else
+			bne.w	Tit_LoadLevelSelect									; if so, branch
+		endc ; if ExtendedMenu=0
+	endc ; if FeatureLevelSelectOnC>0
+
 		move.w	(v_objspace+obX).w,d0
 		addq.w	#2,d0
 		move.w	d0,(v_objspace+obX).w 						; move Sonic to the right
 		cmpi.w	#$1C00,d0													; has Sonic object passed $1C00 on x-axis?
 		blo.s	Tit_ChkRegion												; if not, branch
+
 	if TweakRemoveReduntantCode=0
 		move.b	#id_Sega,(v_gamemode).w 					; go to Sega screen
 		rts
@@ -2888,10 +2915,15 @@ LevelSelect:
 
 		beq.s	LevelSelect															; if not, branch
 		move.w	(v_levselitem).w,d0
+
+	if ExtendedMenu>0
+		tst.b (LevelSelectRam)
+	  beq SkipLSelect
+	endc ; if ExtendedMenu>0
 		cmpi.w	#$14,d0																; have you selected item $14 (sound test)?
 
 	if TweakNavigationLevelSelect=0
-		bne.s	LevSel_Level_SS													; if not, go to	Level/SS subroutine
+		bne.w	LevSel_Level_SS													; if not, go to	Level/SS subroutine
 	else
 		beq.s   @checkB             									; if so, branch
 		andi.b  #btnStart,(v_jpadpress1).w  					; is start pressed?
@@ -2904,12 +2936,22 @@ LevelSelect:
 
 	@soundtest:
 	endc
+	if ExtendedMenu>0
+		bra JapCredits
+	endc ; if ExtendedMenu>0
 
 		move.w	(v_levselsound).w,d0
 
 	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
 	endc
+
+	if ExtendedMenu>0
+	SkipLSelect:
+		cmpi.w #$14,d0  ; have you selected item $14 (sound test)?
+		bne.w Option_Level_SS ; if not, skip the pointers, return to LevelSelect
+	JapCredits:
+	endc ; if ExtendedMenu=0
 
 		tst.b	(f_creditscheat).w 											; is Japanese Credits cheat on?
 		beq.s	LevSel_NoCheat													; if not, branch
@@ -2918,6 +2960,21 @@ LevelSelect:
 		cmpi.w	#$9E,d0																; is sound $9E being played?
 		beq.s	LevSel_Credits													; if yes, branch
 
+		if ExtendedMenu>0
+LevSel_TheLevelSelect:
+  cmpi.b #1,(LevelSelectRam)
+  beq LevSel_NoMove
+  cmpi.w #$02,(v_levselitem).w ; is item $14 selected?
+  bne LevSel_SndTest ; if not, branch
+  move.b (v_jpadpress1).w,d1
+  andi.b #btnStart,d1  ; is left/right pressed?
+  beq.w LevSel_NoMove
+
+  Move.b #1,(LevelSelectRam)
+  jsr GM_Title
+  rts
+	endc ; if ExtendedMenu>0
+
 LevSel_NoCheat:
 ; This is a workaround for a bug, see Sound_ChkValue for more.
 ; Once you've fixed the bugs there, comment these four instructions out
@@ -2925,12 +2982,12 @@ LevSel_NoCheat:
 		cmpi.w	#bgm__Last+1,d0												; is sound $80-$93 being played?
 		blo.s	LevSel_PlaySnd													; if yes, branch
 		cmpi.w	#sfx__First,d0												; is sound $94-$9F being played?
-		blo.s	LevelSelect															; if yes, branch
+		blo.w	LevelSelect															; if yes, branch
 	endc
 
 LevSel_PlaySnd:
 		bsr.w	PlaySound_Special
-		bra.s	LevelSelect
+		bra.w	LevelSelect
 ; ===========================================================================
 
 LevSel_Ending:
@@ -2974,11 +3031,25 @@ LevSel_Level_SS:
 		move.l	#5000,(v_scorelife).w 					; extra life is awarded at 50000 points
 	endc
 		rts
+
+	if ExtendedMenu>0
+Option_Level_SS:   ; Levsel_Level_SS loads Level Select Pointers, this jumps back to LevelSelect
+	jmp LevelSelect
+	endc ; if ExtendedMenu>0
+
 ; ===========================================================================
 
 LevSel_Level:
+	if ExtendedMenu>0
+		tst.b (LevelSelectRam)
+	  beq Option_Level_SS   ; XREF: LevSel_Level_SS
+	endc ; if ExtendedMenu>0
 		andi.w	#$3FFF,d0
 		move.w	d0,(v_zone).w							; set level number
+	if ExtendedMenu>0
+		bne LevelSelect
+		move.w d0,($FFFFFE10).w ; set level number
+	endc ; if ExtendedMenu>0
 
 PlayLevel:
 		move.b	#id_Level,(v_gamemode).w 	; set screen mode to $0C (level)
@@ -3143,34 +3214,42 @@ Demo_Levels:	incbin	"misc\Demo Level Order - Intro.bin"
 
 LevSelControls:
 		move.b	(v_jpadpress1).w,d1
-		andi.b	#btnUp+btnDn,d1	; is up/down pressed and held?
-		bne.s	LevSel_UpDown	; if yes, branch
-		subq.w	#1,(v_levseldelay).w ; subtract 1 from time to next move
-		bpl.s	LevSel_SndTest	; if time remains, branch
+		andi.b	#btnUp+btnDn,d1							; is up/down pressed and held?
+		bne.s	LevSel_UpDown									; if yes, branch
+		subq.w	#1,(v_levseldelay).w 				; subtract 1 from time to next move
+	if ExtendedMenu=0
+		bpl.s	LevSel_SndTest								; if time remains, branch
+	else
+		bpl.w	LevSel_CharOk									; if time remains, branch
+	endc ; if ExtendedMenu=0
 
 LevSel_UpDown:
-		move.w	#$B,(v_levseldelay).w ; reset time delay
+		move.w	#$B,(v_levseldelay).w 			; reset time delay
 		move.b	(v_jpadhold1).w,d1
-		andi.b	#btnUp+btnDn,d1	; is up/down pressed?
-		beq.s	LevSel_SndTest	; if not, branch
+		andi.b	#btnUp+btnDn,d1							; is up/down pressed?
+	if ExtendedMenu=0
+		beq.s	LevSel_SndTest								; if time remains, branch
+	else
+		beq.w	LevSel_CharOk									; if time remains, branch
+	endc ; if ExtendedMenu=0
 		move.w	(v_levselitem).w,d0
-		btst	#bitUp,d1	; is up	pressed?
-		beq.s	LevSel_Down	; if not, branch
-		subq.w	#1,d0		; move up 1 selection
+		btst	#bitUp,d1											; is up	pressed?
+		beq.s	LevSel_Down										; if not, branch
+		subq.w	#1,d0												; move up 1 selection
 		bhs.s	LevSel_Down
-		moveq	#$14,d0		; if selection moves below 0, jump to selection	$14
+		moveq	#$14,d0												; if selection moves below 0, jump to selection	$14
 
 LevSel_Down:
-		btst	#bitDn,d1	; is down pressed?
-		beq.s	LevSel_Refresh	; if not, branch
-		addq.w	#1,d0		; move down 1 selection
-		cmpi.w	#$15,d0 ; 	#((v_ptrnemcode-4-(v_plc_buffer+4))/4)-1,d0
+		btst	#bitDn,d1											; is down pressed?
+		beq.s	LevSel_Refresh								; if not, branch
+		addq.w	#1,d0												; move down 1 selection
+		cmpi.w	#$15,d0 										; #((v_ptrnemcode-4-(v_plc_buffer+4))/4)-1,d0
 		blo.s	LevSel_Refresh
-		moveq	#0,d0		; if selection moves above $14,	jump to	selection 0
+		moveq	#0,d0													; if selection moves above $14,	jump to	selection 0
 
 LevSel_Refresh:
-		move.w	d0,(v_levselitem).w ; set new selection
-		bsr.w	LevSelTextLoad	; refresh text
+		move.w	d0,(v_levselitem).w 				; set new selection
+		bsr.w	LevSelTextLoad								; refresh text
 		rts
 ; ===========================================================================
 
@@ -3238,20 +3317,43 @@ LevSel_NoMove:
 
 
 LevSelTextLoad:
-
-	textpos:	= ($40000000+(($E210&$3FFF)<<16)+(($E210&$C000)>>14))
+		cmpi.b #1,(LevelselectRam) 								; Is this the level select?
+		beq LevSelLoad   													; if so, load level select text
+		lea (ExtendedMenuText).l,a1 								; Load the Option text
+		bra TextRead   														; continue here
+		LevSelLoad: lea (LevelMenuText).l,a1 			; load level select text
+TextRead:
+		textpos: = ($40000000+(($E210&$3FFF)<<16)+(($E210&$C000)>>14))
 					; $E210 is a VRAM address
 
 		lea	(LevelMenuText).l,a1
 		lea	(vdp_data_port).l,a6
-		move.l	#textpos,d4	; text position on screen
-		move.w	#$E680,d3	; VRAM setting (4th palette, $680th tile)
-		moveq	#$14,d1		; number of lines of text
+		move.l	#textpos,d4												; text position on screen
+		move.w	#$E680,d3													; VRAM setting (4th palette, $680th tile)
+		moveq	#$14,d1															; number of lines of text
 
-	LevSel_DrawAll:
+LevSel_DrawAll:
+		move.l d4,4(a6)
+		bsr.w LevSel_ChgLine
+		addi.l #$800000,d4
+		dbf d1,LevSel_DrawAll
+		moveq #0,d0
+		move.w ($FFFFFF82).w,d0
+		move.w d0,d1
+		move.l #$62100003,d4
+		lsl.w #7,d0
+		swap d0
+		add.l d0,d4
+		cmpi.b #1,(LevelselectRam)
+		beq LevSelLoad2
+		lea (ExtendedMenuText).l,a1
+		bra TextRead2
+LevSelLoad2:
+		lea (LevelMenuText).l,a1
+TextRead2:
 		move.l	d4,4(a6)
-		bsr.w	LevSel_ChgLine	; draw line of text
-		addi.l	#$800000,d4	; jump to next line
+		bsr.w	LevSel_ChgLine											; draw line of text
+		addi.l	#$800000,d4												; jump to next line
 		dbf	d1,LevSel_DrawAll
 
 		moveq	#0,d0
@@ -3267,16 +3369,16 @@ LevSelTextLoad:
 		add.w	d1,d1
 		add.w	d0,d1
 		adda.w	d1,a1
-		move.w	#$C680,d3	; VRAM setting (3rd palette, $680th tile)
+		move.w	#$C680,d3													; VRAM setting (3rd palette, $680th tile)
 		move.l	d4,4(a6)
-		bsr.w	LevSel_ChgLine	; recolour selected line
+		bsr.w	LevSel_ChgLine											; recolour selected line
 		move.w	#$E680,d3
 		cmpi.w	#$14,(v_levselitem).w
 		bne.s	LevSel_DrawSnd
 		move.w	#$C680,d3
 
 LevSel_DrawSnd:
-		locVRAM	$EC30		; sound test position on screen
+		locVRAM	$EC30															; sound test position on screen
 		move.w	(v_levselsound).w,d0
 	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
@@ -3297,7 +3399,11 @@ LevSel_ChgSnd:
 		andi.w	#$F,d0
 		cmpi.b	#$A,d0		; is digit $A-$F?
 		blo.s	LevSel_Numb	; if not, branch
+	if ExtendedMenu=0
 		addi.b	#7,d0		; use alpha characters
+	else
+		addi.b	#4,d0		; use alpha characters
+	endc ; if ExtendedMenu=0
 
 	LevSel_Numb:
 		add.w	d3,d0
@@ -3322,8 +3428,16 @@ LevSel_ChgLine:
 
 
 	LevSel_CharOk:
-		add.w	d3,d0		; combine char with VRAM setting
-		move.w	d0,(a6)		; send to VRAM
+	if ExtendedMenu>0
+		cmp.w #$40, d0    			; Check for $40 (End of ASCII number area)
+		blt.s @notText   				; If this is not an ASCII text character, branch
+		sub.w #$3,d0        		; Subtract an extra 3 (Compensate for missing characters in the font)
+
+	@notText:
+		sub.w #$30,d0        		; Subtract #$33 (Convert to S2 font from ASCII)
+	endc ; if ExtendedMenu=0
+		add.w	d3,d0							; combine char with VRAM setting
+		move.w	d0,(a6)					; send to VRAM
 		dbf	d2,LevSel_LineLoop
 		rts
 ; End of function LevSel_ChgLine
@@ -3333,12 +3447,62 @@ LevSel_ChgLine:
 ; Level	select menu text
 ; ---------------------------------------------------------------------------
 LevelMenuText:
-	if Revision=0
-		incbin	"misc\Level Select Text.bin"
+	if AsciiMenu=0
+		if Revision=0
+			incbin	"misc\Level Select Text.bin"
+		else
+			incbin	"misc\Level Select Text (JP1).bin"
+		endc
 	else
-		incbin	"misc\Level Select Text (JP1).bin"
+		dc.b    "GREEN HILL ZONE  STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "MARBLE ZONE      STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "STAR LIGHT ZONE  STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "LABYRINTH        STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "SPRING YARD ZONE STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "SCRAP BRAIN ZONE STAGE 1"
+		dc.b    "                 STAGE 2"
+		dc.b    "                 STAGE 3"
+		dc.b    "FINAL ZONE              "
+		dc.b    "SPECIAL STAGE           "
+		dc.b    "SOUND TEST              "
 	endc
 		even
+
+ExtendedMenuText:
+	if ExtendedMenu>0
+		dc.b    "CHARACTER               " ; Character Change
+		dc.b    "DEBUGGER                " ; Activate Debug Mode
+		dc.b    "LEVEL SELECT            " ; This is to switch to the level select
+		dc.b    "START                   " ; just start the game
+		dc.b    "NULL                    " ; This on down..
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    "
+		dc.b    "NULL                    " ; .. Here does nothing yet.
+		dc.b    "SOUND TEST              "
+		even
+	endc
 ; ---------------------------------------------------------------------------
 ; Music	playlist
 ; ---------------------------------------------------------------------------

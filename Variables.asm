@@ -370,6 +370,7 @@ v_peelout:  equ $3A ; @TODO Conflict with 3A in peelout?
 bit_in_air:    equ 1
 bit_pushing:   equ 5
 
+LevelSelectRam:   equ $FFFFF5C1
 
 ; ===========================================================================
 ; PLC Queue Enhancement
