@@ -34,6 +34,7 @@ Pow_ChkS:
 		nop
 	else
 		bsr.w Pow_ShoesActivate
+		jsr	(PlaySound_Special).l										; Ensure Music is Sped Up
 		jmp Pow_InvincibleActivate
 	endc
 ; ===========================================================================
