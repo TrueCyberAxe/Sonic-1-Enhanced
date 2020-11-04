@@ -167,6 +167,14 @@ Debug_ChgItem:
 		beq.s	@backtonormal	; if not, branch
 		jsr	(FindFreeObj).l
 		bne.s	@backtonormal
+
+	if EnhancedDebug>0
+		; Fix Object State for Rings and Monitors
+		move.b  #0,(v_objstate+2).w
+		move.w  obX(a0),obX(a1)
+		move.w  obY(a0),obY(a1)
+	endc ; if EnhancedDebug>0
+
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		move.b	4(a0),0(a1)	; create object
@@ -191,7 +199,7 @@ Debug_ChgItem:
 		move.b	#1,(f_scorecount).w ; update score counter
 		move.b	#1,(f_ringcount).w  ; update rings counter
 	endc
-	
+
 		move.l	#Map_Sonic,(v_player+obMap).w
 		move.w	#$780,(v_player+obGfx).w
 		move.b	d0,(v_player+obAnim).w
