@@ -2906,9 +2906,11 @@ LevelSelect:
 	endc
 
 		move.w	(v_levselsound).w,d0
+
 	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
 	endc
+
 		tst.b	(f_creditscheat).w 											; is Japanese Credits cheat on?
 		beq.s	LevSel_NoCheat													; if not, branch
 		cmpi.w	#$9F,d0																; is sound $9F being played?
@@ -2949,7 +2951,7 @@ LevSel_Level_SS:
 		move.w  (v_zone).w,d0
 	endc
 		add.w	d0,d0
-		; move.w	LevSel_Ptrs(pc,d0.w),d0 				; load level number
+		move.w	LevSel_Ptrs(pc,d0.w),d0 				; load level number
 		bmi.w	LevelSelect
 		cmpi.w	#id_SS*$100,d0									; check	if level is 0700 (Special Stage)
 		bne.s	LevSel_Level											; if not, branch

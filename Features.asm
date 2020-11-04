@@ -8,6 +8,9 @@
 ; @TODO find what is slowing down sonic when right is pressed (possibly a scrolling issue)
 ; @TODO fix bumpers so they put you in the right direction, hitting the bumper thatfaces the pinball bumper is an examble of it flipping you backwards
 
+; @TODO Port Sonic CD Sprites like reverse balancing
+; @TODO Port Mega CD BIOS Sprites
+
 ; Feature
 FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
@@ -27,12 +30,12 @@ FeatureUseJapaneseUpdates:					equ 1 ; Any updates exclusive to being played on 
 
 FeatureSuperPeelout:							  equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/basic-questions-and-answers-thread.1155/page-287#post-84061
 FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+TweakSlowDucking:										equ 1 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
 																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
 ; Tweaks
 TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 TweakFastLoadInit:									equ 1 ; Disable Some Initialization to load SEGA Logo Faster
 TweakSegaLogoWhiteFade:							equ 2 ; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
-TweakSlowDucking:										equ 1 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
 
 BugFixDebugMomentum:                equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 BugFixDemoPlayback:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
@@ -40,6 +43,11 @@ BugFixHiddenPoints:									equ 1 ; Based on https://info.sonicretro.org/SCHG_Ho
 BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 
 ; ============================================================
+
+BugFixTooFastToLive:								equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
+BugFixInvincibilityDelayDeath:			equ 1 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+BugFixCameraFollow:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+
 
 ; Bug Fixes Not Inluded in Other Revisions
 
@@ -51,7 +59,6 @@ BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicre
 BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
 BugFixDeathBoundary:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
 BugFixHurtDeathBoundary:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
-BugFixCameraFollow:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 BugFixSongFadeRestoration:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 BugFixBlinkingHUD:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
 BugFixLevelSelectCorruption:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
@@ -60,14 +67,12 @@ BugFixSoundDriverBugs:							equ 0 ; Uncommenting of code in ; Sound_ChkValue:
 BugFixCaterkillerDeath:							equ 0 ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
 BugFixGameOverFlicker:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
 BugFixSpringFaceWrongDirection:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
-BugFixTooFastToLive:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
 BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
 BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
 BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
 BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
-BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 
 
 ; @todo port from sonic 2 code
