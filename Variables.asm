@@ -354,12 +354,16 @@ v_init:		equ $FFFFFFFC	; 'init' text string (4 bytes)
 ; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
 ; ------- Additional -------
 f_spindash:		 equ $29           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
+f_superpeelout: equ $39
 f_victory:     equ $FFFFF5C0     ; victory pose flag
 f_gogglecheck: equ $FFFFFFA0	   ; goggle flag move to FE2F?
 
 f_levelreload: equ $FFFFCF80     ; Reload Level Flag @TODO find unused byte in mem
 
-v_startscore:  equ $3A
+v_startscore:  equ $3A ; @TODO Conflict with 3A in spindash and peelout?
+v_spindash:  equ $3A ; @TODO Conflict with 3A in spindash?
+v_peelout:  equ $3A ; @TODO Conflict with 3A in peelout?
+
 
 ; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.
 

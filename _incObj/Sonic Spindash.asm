@@ -6,14 +6,22 @@
 Sonic_SpinDash:
     tst.b	f_spindash(a0)			     ; already Spin Dashing?
     bne.s	loc2_1AC8E		           ; if set, branch
+
     cmpi.b	#id_duck,obAnim(a0)		 ; is anim duck
     bne.s	locret2_1AC8C		         ; if not, return
+
     move.b	(v_jpadpress2).w,d0	   ; read controller
     andi.b	#$70,d0			           ; pressing A/B/C ?
     beq.w	locret2_1AC8C		         ; if not, return
+
     move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
     move.w	#$BE,d0			           ; spin sound ($E0 in s2)
   	jsr	(PlaySound_Special).l	     ; play spin sound
+
+  if FeatureSpindash=1
+    move.w   #$0F00,obInertia(a0)              ; Set Sonic's speed
+  endc
+
   	addq.l	#4,sp			             ; Add 4 bytes to the stack return address to skip Sonic_Jump on next rts to Obj01_MdNormal, preventing conflicts with button presses.
   	move.b	#1,f_spindash(a0)		   ; set Spin Dash flag
   	move.w	#0,$3A(a0)		         ; set charge count to 0
@@ -30,35 +38,41 @@ locret2_1AC8C:
 
 ;---------------------------------------------------------------------------
 loc2_1AC8E:
-    move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
-    move.b	(v_jpadhold2).w,d0	   ; read controller
-    btst	#1,d0			               ; check down button
-    bne.w	loc2_1AD30		           ; if set, branch
-    move.b	#$E,$16(a0)		         ; $16(a0) is height/2
-    move.b	#7,$17(a0)		         ; $17(a0) is width/2
-    move.b	#id_roll,obAnim(a0)		 ; set animation to roll
-    addq.w	#5,$C(a0)		           ; $C(a0) is Y coordinate
-    move.b	#0,f_spindash(a0)		   ; clear Spin Dash flag
+    move.b #id_Spindash,obAnim(a0)             ; set Spin Dash anim (9 in s2)
+  if FeatureSpindash=1
+    move.w   #$C00,obInertia(a0)                ; Set Sonic's speed to Maximum Run Speed
+  endc
+
+    move.b	(v_jpadhold2).w,d0	               ; read controller
+    btst	#1,d0			                           ; check down button
+    bne.w	loc2_1AD30		                       ; if set, branch
+
+    move.b	#$E,$16(a0)		                     ; $16(a0) is height/2
+    move.b	#7,$17(a0)		                     ; $17(a0) is width/2
+    move.b	#id_roll,obAnim(a0)		             ; set animation to roll
+
+    addq.w	#5,$C(a0)		                       ; $C(a0) is Y coordinate
+    move.b	#0,f_spindash(a0)		               ; clear Spin Dash flag
     moveq	#0,d0
-    move.b	$3A(a0),d0		         ; copy charge count
-    add.w	d0,d0			               ; double it
+    move.b	$3A(a0),d0		                     ; copy charge count
+    add.w	d0,d0			                           ; double it
     move.w	Dash_Speeds(pc,d0.w),obInertia(a0) ; get normal speed
-    move.w	obInertia(a0),d0		   ; get inertia
-    subi.w	#$800,d0		           ; subtract $800
-    add.w	d0,d0			               ; double it
-    andi.w	#$1F00,d0		           ; mask it against $1F00
-    neg.w	d0			                 ; negate it
-    addi.w	#$2000,d0		           ; add $2000
-    move.w	d0,($FFFFC904).w	     ; move to $C904 - Horizontal scroll delay Fix - was move.w	d0,($FFFFEED0).w	; move to $EED0
-    btst	#0,$22(a0)		           ; is sonic facing right?
-    beq.s	loc2_1ACF4		           ; if not, branch
-    neg.w	obInertia(a0)			       ; negate inertia
+    move.w	obInertia(a0),d0		               ; get inertia
+    subi.w	#$800,d0		                       ; subtract $800
+    add.w	d0,d0			                           ; double it
+    andi.w	#$1F00,d0		                       ; mask it against $1F00
+    neg.w	d0			                             ; negate it
+    addi.w	#$2000,d0		                       ; add $2000
+    move.w	d0,($FFFFC904).w	                 ; move to $C904 - Horizontal scroll delay Fix - was move.w	d0,($FFFFEED0).w	; move to $EED0
+    btst	#0,$22(a0)		                       ; is sonic facing right?
+    beq.s	loc2_1ACF4		                       ; if not, branch
+    neg.w	obInertia(a0)			                   ; negate inertia
 
 loc2_1ACF4:
-    bset	#2,$22(a0)		           ; set unused (in s1) flag
-    move.b	#0,($FFFFD11C).w	     ; clear $D11C (smoke)
-    move.w	#$BC,d0			           ; spin release sound
-    jsr	(PlaySound_Special).l	     ; play it!
+    bset	#2,$22(a0)		                       ; set unused (in s1) flag
+    move.b	#0,($FFFFD11C).w	                 ; clear $D11C (smoke)
+    move.w	#$BC,d0			                       ; spin release sound
+    jsr	(PlaySound_Special).l	                 ; play it!
 		bra.s loc2_1AD78
 
 ;===========================================================================
@@ -87,11 +101,9 @@ loc2_1AD48:
     move.b	(v_jpadpress2).w,d0	   ; read controller
     andi.b	#$70,d0			           ; pressing A/B/C?
     beq.w	loc2_1AD78		           ; if not, branch
-  if FeatureSpindash=0
-		move.w #$1F00,$1C(a0)          ; reset spdsh animation
-  else ; Spindash Reving
-    move.w	#$BE,d0			           ; was $E0 in sonic 2
-  endc ; @TODO check this is the correct place for this endc
+  if FeatureSpindash>1
+    move.w	#$BE,d0			           ; Spindash Reving was $E0 in sonic 2
+  endc                             ; @TODO check this is the correct place for this endc
     jsr	(PlaySound_Special).l	     ; play charge sound
     addi.w	#$200,$3A(a0)		       ; increase charge count
     cmpi.w	#$800,$3A(a0)		       ; check if it's maxed
@@ -116,7 +128,7 @@ rts
 
 ; End of subroutine Sonic_SpinDash
 
-  if FeatureSpindash>2
+  if FeatureSpindash>1
 SpinDash_dust:
 Sprite_1DD20:				; DATA XREF: ROM:0001600C?o
 		moveq	#0,d0

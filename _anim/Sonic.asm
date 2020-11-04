@@ -134,12 +134,16 @@ id_Drown:	equ (ptr_Drown-Ani_Sonic)/2	; $17
 id_Death:	equ (ptr_Death-Ani_Sonic)/2	; $18
 id_Shrink:	equ (ptr_Shrink-Ani_Sonic)/2	; $19
 id_Hurt:	equ (ptr_Hurt-Ani_Sonic)/2	; $1A
-id_WaterSlide:	equ (ptr_WaterSlide-Ani_Sonic)/2 ; $1B
-id_Null:	equ (ptr_Null-Ani_Sonic)/2	; $1C
-id_Float3:	equ (ptr_Float3-Ani_Sonic)/2	; $1D
-id_Float4:	equ (ptr_Float4-Ani_Sonic)/2	; $1E
+id_WaterSlide:		equ (ptr_WaterSlide-Ani_Sonic)/2 	; $1B
+id_Null:					equ (ptr_Null-Ani_Sonic)/2				; $1C
+id_Float3:				equ (ptr_Float3-Ani_Sonic)/2			; $1D
+id_Float4:				equ (ptr_Float4-Ani_Sonic)/2			; $1E
+
 	if FeatureSpindash=1
-id_Spindash:	equ id_Roll2
+id_Spindash:			equ id_Roll2
 	else
-id_Spindash:	equ (ptr_Spindash-Ani_Sonic)/2	; $1F
+id_Spindash:			equ (ptr_Spindash-Ani_Sonic)/2	; $1F
 	endc
+
+id_PeeloutCharge:	equ id_Run
+id_Dash:					equ id_Run

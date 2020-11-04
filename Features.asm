@@ -2,6 +2,12 @@
 ; Revision 1 Onwards Fixes the Level Select Order and Holding buttons during the attract mode and ending demo sequences will not cause Sonic to miss jumps. (https://tcrf.net/Sonic_the_Hedgehog_(Genesis)#REV01.2FJapanese_Version)
 ; Revision 2 Onwards Fixes the Spike Bug
 
+; @TODO unroll when git finish goal
+; @TODO fix super peelout bug pushing when beside colidable
+; @TODO set the animation for peelout and spindash to maximum
+; @TODO find what is slowing down sonic when right is pressed (possibly a scrolling issue)
+; @TODO fix bumpers so they put you in the right direction, hitting the bumper thatfaces the pinball bumper is an examble of it flipping you backwards
+
 ; Feature
 FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
@@ -18,7 +24,9 @@ FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based 
 FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
 FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 FeatureUseJapaneseUpdates:					equ 1 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+
+FeatureSuperPeelout:							  equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/basic-questions-and-answers-thread.1155/page-287#post-84061
+FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
 																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
 ; Tweaks
 TweakBetterFadeEffects:							equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
@@ -35,6 +43,7 @@ BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SC
 
 ; Bug Fixes Not Inluded in Other Revisions
 
+BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
 BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
@@ -60,7 +69,6 @@ BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/
 BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
 
-BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 
 ; @todo port from sonic 2 code
 BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/

@@ -8,6 +8,7 @@ Pow_ChkInvinc:
 Pow_InvincibleActivate:
 		move.b	#1,(v_invinc).w										 	; make Sonic invincible
 		move.w	#$4B0,(v_player+$32).w 						 	; time limit for the power-up
+		
 		move.b	#id_ShieldItem,(v_objspace+$200).w 	; load stars object ($3801)
 		move.b	#1,(v_objspace+$200+obAnim).w
 		move.b	#id_ShieldItem,(v_objspace+$240).w 	; load stars object ($3802)
@@ -18,14 +19,17 @@ Pow_InvincibleActivate:
 		move.b	#4,(v_objspace+$2C0+obAnim).w
 
 		tst.b	(f_lockscreen).w 											; is boss mode on?
-		bne.w	Pow_ChkEnd														; if yes, branch
+		bne.w	Pow_NoMusic													; if yes, branch
 
 	if Revision>0
 		cmpi.w	#$C,(v_air).w
-		bls.w	Pow_ChkEnd
+		bls.w	Pow_NoMusic
 	endc
 
-		music	bgm_Invincible,1,0,0 									; play invincibility music
+		music	bgm_Invincible,1,0,0
+
+Pow_NoMusic:
+		rts
 ; ===========================================================================
 Pow_ChkS:
 		cmpi.b	#7,d0																; does monitor contain 'S'?

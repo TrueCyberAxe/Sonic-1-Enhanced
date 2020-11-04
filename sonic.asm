@@ -75,9 +75,9 @@ OptimizeMonitorOrder: 							equ 1
 	if FeatureSonicCDExtendedCamera>0
 FixCameraFollowBug: 								equ 1
   elseif BugFixCameraFollow>0
-BugFixCameraFollow: 								equ 1
+FixCameraFollowBug: 								equ 1
 	else
-BugFixCameraFollow: 								equ 0
+FixCameraFollowBug: 								equ 0
 	endc
 
 	include	"Constants.asm"
@@ -8013,6 +8013,9 @@ Sonic_MdNormal:
 	if FeatureSpindash>0
 		bsr.w Sonic_SpinDash
 	endc
+	if FeatureSuperPeelout>0
+		bsr.w Sonic_Peelout
+	endc
 		bsr.w	Sonic_Jump
 		bsr.w	Sonic_SlopeResist
 		bsr.w	Sonic_Move
@@ -8082,6 +8085,9 @@ loc_12EA6:
 		include	"_incObj\Sonic JumpDirection.asm"
 	if FeatureSpindash>0
 		include "_incObj\Sonic Spindash.asm"
+	endc
+	if FeatureSuperPeelout>0
+		include "_incObj\Sonic SuperPeelout.asm"
 	endc
 
 ; ===========================================================================
