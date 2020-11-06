@@ -2799,8 +2799,8 @@ Tit_MainLoop:
 	endc
 
 	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)>0
-		tst.b	(v_jpadhold1).w 										; check if Start is pressed
-		beq.w	Tit_MainLoop												; if not, branch
+		btst	#bitStart,(v_jpadhold1).w						; check if Start is pressed
+		bmi.w	GotoDemo														; if so, branch
 
 		btst	#bitC,(v_jpadhold1).w 							; is button C pressed?
 		if ExtendedMenu=0
