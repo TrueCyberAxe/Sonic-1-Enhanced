@@ -9,14 +9,14 @@
 ; any code based on the work done by the community is given the sources below.
 
 ; ===========================================================================
-Original: 							equ 1
+Original: 							equ 0
 
 	if Original=1
 Debug:          				equ 0 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
 	else
-Debug:          				equ 1 ; Debug Mode Always Enabled
+Debug:          				equ 0 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
 	endc
@@ -2794,16 +2794,19 @@ Tit_MainLoop:
 		bsr.w	RunPLC
 
 	if EnhancedDebug>0
-		andi.b	#btnA,(v_jpadpress1).w 						; is A button pressed?
-		bne.w	GotoDemo														; if yes, branch
+		btst	#bitA,(v_jpadhold1).w		 						; is A button pressed?
+		bmi.w	PlayLevel														; if yes, branch
 	endc
 
-	if (Debug+FeatureLevelSelectOnC)>0
-		andi.b	#btnC,(v_jpadpress1).w 							; is button C pressed?
+	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)>0
+		tst.b	(v_jpadhold1).w 										; check if Start is pressed
+		beq.w	Tit_MainLoop												; if not, branch
+
+		btst	#bitC,(v_jpadhold1).w 							; is button C pressed?
 		if ExtendedMenu=0
-			bne.w	Tit_LoadLevelSelect								; if so, branch
+			bmi.w	Tit_LoadLevelSelect								; if so, branch
 		else
-			bne.w	Tit_LoadLevelSelect								; if so, branch
+			bmi.w	Tit_LoadLevelSelect								; if so, branch
 		endc ; if ExtendedMenu=0
 	endc ; if FeatureLevelSelectOnC>0
 
@@ -4255,7 +4258,7 @@ SS_MainLoop: ; Special Stage Main Loop
 		jsr	(BuildSprites).l
 		jsr	(SS_ShowLayout).l
 		bsr.w	SS_BGAnimate
-		
+
 	; If Better Bonus Stage Controls are Enabled it leaves the timer off as sonic will collect the chaos emerald within a couple of extra seconds
 	if (DebugDisableDemoTime+TweakBetterBonusStageControls)=0
 		tst.w	(f_demo).w	; is demo mode on?
