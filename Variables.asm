@@ -100,21 +100,21 @@ v_1up_ram_copy:		equ v_spcsfx_track_ram_end
 ; From here on, no longer relative to sound driver RAM
 ; =================================================================================
 
-v_gamemode:	equ $FFFFF600	; game mode (00=Sega; 04=Title; 08=Demo; 0C=Level; 10=SS; 14=Cont; 18=End; 1C=Credit; +8C=PreLevel)
-v_jpadhold2:	equ $FFFFF602	; joypad input - held, duplicate
-v_jpadpress2:	equ $FFFFF603	; joypad input - pressed, duplicate
-v_jpadhold1:	equ $FFFFF604	; joypad input - held
-v_jpadpress1:	equ $FFFFF605	; joypad input - pressed
+v_gamemode:	equ $FFFFF600											; game mode (00=Sega; 04=Title; 08=Demo; 0C=Level; 10=SS; 14=Cont; 18=End; 1C=Credit; +8C=PreLevel)
+v_jpadhold2:	equ $FFFFF602										; joypad input - held, duplicate
+v_jpadpress2:	equ $FFFFF603										; joypad input - pressed, duplicate
+v_jpadhold1:	equ $FFFFF604										; joypad input - held
+v_jpadpress1:	equ $FFFFF605										; joypad input - pressed
 
-v_vdp_buffer1:	equ $FFFFF60C	; VDP instruction buffer (2 bytes)
+v_vdp_buffer1:	equ $FFFFF60C									; VDP instruction buffer (2 bytes)
 
-v_demolength:	equ $FFFFF614	; the length of a demo in frames (2 bytes)
-v_scrposy_dup:	equ $FFFFF616	; screen position y (duplicate) (2 bytes)
-v_bgscrposy_dup:	equ $FFFFF618	; background screen position y (duplicate) (2 bytes)
-v_scrposx_dup:	equ $FFFFF61A	; screen position x (duplicate) (2 bytes)
-v_bgscreenposx_dup_unused:	equ $FFFFF61C	; background screen position x (duplicate) (2 bytes)
-v_bg3screenposy_dup_unused:	equ $FFFFF61E	; (2 bytes)
-v_bg3screenposx_dup_unused:	equ $FFFFF620	; (2 bytes)
+v_demolength:	equ $FFFFF614										; the length of a demo in frames (2 bytes)
+v_scrposx_dup:	equ $FFFFF61A									; screen position x (duplicate) (2 bytes)
+v_scrposy_dup:	equ $FFFFF616									; screen position y (duplicate) (2 bytes)
+v_bgscrposy_dup:	equ $FFFFF618								; background screen position y (duplicate) (2 bytes)
+v_bgscreenposx_dup_unused:	equ $FFFFF61C			; background screen position x (duplicate) (2 bytes)
+v_bg3screenposy_dup_unused:	equ $FFFFF61E			; (2 bytes)
+v_bg3screenposx_dup_unused:	equ $FFFFF620			; (2 bytes)
 
 v_hbla_hreg:	equ $FFFFF624	; VDP H.interrupt register buffer (8Axx) (2 bytes)
 v_hbla_line:	equ $FFFFF625	; screen line where water starts and palette is changed by HBlank

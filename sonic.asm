@@ -9,9 +9,19 @@
 ; any code based on the work done by the community is given the sources below.
 
 ; ===========================================================================
-Debug:          		equ 1 ; Debug Mode Always Enabled
-EnhancedDebug:  		equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-EnhancedDebugMenu: 	equ 0
+Original: 							equ 1
+
+	if Original=1
+Debug:          				equ 0 ; Debug Mode Always Enabled
+EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+EnhancedDebugMenu: 			equ 0
+	else
+Debug:          				equ 1 ; Debug Mode Always Enabled
+EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+EnhancedDebugMenu: 			equ 0
+	endc
+
+DebugDisableDemoTime: 	equ 0 ; Disable Demo Timeout
 
 EnableSRAM:			equ 0	; change to 1 to enable SRAM
 BackupSRAM:			equ 1
@@ -25,7 +35,11 @@ ZoneCount:			equ 6	; discrete zones are: GHZ, MZ, SYZ, LZ, SLZ, and SBZ
 
 OptimiseSound:	equ 0	; change to 1 to optimise sound queuing (Fixed by Cyber Axe)
 
-	include "Features.asm"
+	if Original=1
+		include "Features_Original.asm"
+	else
+		include "Features.asm"
+	endc
 ; ============================================================================
 	if TweakUncompressedChunkMapping>0
 TweakMergedArt:											equ 1
@@ -819,19 +833,20 @@ VBla_08:
 ; ---------------------------------------------------------------------------
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 Demo_Time:
 		bsr.w	LoadTilesAsYouMove
 		jsr	(AnimateLevelGfx).l
 		jsr	(HUD_Update).l
 		bsr.w	ProcessDPLC2
-		tst.w	(v_demolength).w ; is there time left on the demo?
-		beq.w	@end		; if not, branch
-		subq.w	#1,(v_demolength).w ; subtract 1 from time left
+	if DebugDisableDemoTime=0
+		tst.w	(v_demolength).w 						; is there time left on the demo?
+		beq.w	@end												; if not, branch
+		subq.w	#1,(v_demolength).w 			; subtract 1 from time left
+	endc
 
 	@end:
 		rts
+
 ; End of function Demo_Time
 
 ; ===========================================================================
@@ -951,9 +966,11 @@ VBla_16:
 	endc ; if FeatureEnhancedPLCQueue=0
 
 	@nochg:
+	if DebugDisableDemoTime=0
 		tst.w	(v_demolength).w
 		beq.w	@end
 		subq.w	#1,(v_demolength).w
+	endc
 
 	@end:
 		rts
@@ -2507,11 +2524,11 @@ GM_Sega:
 		copyTilemap	v_256x256,$E510,$17,7
 		copyTilemap	$FF0180,$C000,$27,$1B
 
-		if Revision>0
-			tst.b   (v_megadrive).w	; is console Japanese?
-			bmi.s   @loadpal
-			copyTilemap	$FF0A40,$C53A,2,1 ; hide "TM" with a white rectangle
-		endc
+	if Revision>0
+		tst.b   (v_megadrive).w							; is console Japanese?
+		bmi.s   @loadpal
+		copyTilemap	$FF0A40,$C53A,2,1 			; hide "TM" with a white rectangle
+	endc
 
 	@loadpal:
 	if TweakSegaLogoWhiteFade=1
@@ -2519,13 +2536,14 @@ GM_Sega:
 	  moveq #$3F,d7
 
   @loop:
-    move.w #cWhite,(a3)+    		; move data to RAM
+    move.w #cWhite,(a3)+    							; move data to RAM
     dbf d7,@loop
-    bsr.w PaletteFadeIn 				; added to allow fade in
+    bsr.w PaletteFadeIn 									; added to allow fade in
 	else
 		moveq	#palid_SegaBG,d0
-		bsr.w	PalLoad2							; load Sega logo palette
+		bsr.w	PalLoad2												; load Sega logo palette
 	endc
+
 		move.w	#-$A,(v_pcyc_num).w
 		move.w	#0,(v_pcyc_time).w
 		move.w	#0,(v_pal_buffer+$12).w
@@ -2540,23 +2558,26 @@ Sega_WaitPal:
 		bsr.w	WaitForVBla
 
 	if FeatureSkipSEGALogo>0
-		lea	(v_jpadhold1).w,a0			; address where JoyPad states are written
-		lea	($A10003).l,a1					; address where JoyPad states are read from
-		jsr	(Joypad_Read).w					; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
-		btst	#7,(v_jpadhold1).w		; Check for Start button
-		bne.s	Sega_GotoTitle				; If start is pressed, stop playing, leave this loop, and unfreeze the 68K
+		lea	(v_jpadhold1).w,a0								; address where JoyPad states are written
+		lea	($A10003).l,a1										; address where JoyPad states are read from
+		jsr	(Joypad_Read).w										; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
+		btst	#7,(v_jpadhold1).w							; Check for Start button
+		bne.s	Sega_GotoTitle									; If start is pressed, stop playing, leave this loop, and unfreeze the 68K
 	endc
 
 		bsr.w	PalCycle_Sega
 		bne.s	Sega_WaitPal
 
-		sfx	sfx_Sega,0,1,1	; play "SEGA" sound
+		sfx	sfx_Sega,0,1,1										; play "SEGA" sound
+
 	if FeatureUseSonic2SoundDriver=0
 		move.b	#$14,(v_vbla_routine).w
 	else
 		move.b	#$2,(v_vbla_routine).w
 	endc
+
 		bsr.w	WaitForVBla
+
 	if FeatureUseSonic2SoundDriver=0
 		move.w	#$1E,(v_demolength).w
 	else
@@ -2572,11 +2593,11 @@ Sega_WaitEnd:
 		bsr.w	WaitForVBla
 		tst.w	(v_demolength).w
 		beq.s	Sega_GotoTitle
-		andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
-		beq.s	Sega_WaitEnd	; if not, branch
+		andi.b	#btnStart,(v_jpadpress1).w 		; is Start button pressed?
+		beq.s	Sega_WaitEnd										; if not, branch
 
 Sega_GotoTitle:
-		move.b	#id_Title,(v_gamemode).w ; go to title screen
+		move.b	#id_Title,(v_gamemode).w 			; go to title screen
 		rts
 ; ===========================================================================
 
@@ -2596,12 +2617,12 @@ GM_Title:
 		bsr.w	SoundDriverLoad
 		lea	(vdp_control_port).l,a6
 		move.w	#$8004,(a6)	; 8-colour mode
-		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
-		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
-		move.w	#$9001,(a6)								; 64-cell hscroll size
-		move.w	#$9200,(a6)								; window vertical position
+		move.w	#$8200+(vram_fg>>10),(a6) 		; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) 		; set background nametable address
+		move.w	#$9001,(a6)										; 64-cell hscroll size
+		move.w	#$9200,(a6)										; window vertical position
 		move.w	#$8B03,(a6)
-		move.w	#$8720,(a6)								; set background colour (palette line 2, entry 0)
+		move.w	#$8720,(a6)										; set background colour (palette line 2, entry 0)
 		clr.b	(f_wtr_state).w
 		bsr.w	ClearScreen
 
@@ -2772,12 +2793,17 @@ Tit_MainLoop:
 		bsr.w	PCycle_Title
 		bsr.w	RunPLC
 
-	if FeatureLevelSelectOnC>0
-		btst	#bitC,(v_jpadpress1).w 							; is button C pressed?
+	if EnhancedDebug>0
+		andi.b	#btnA,(v_jpadpress1).w 						; is A button pressed?
+		bne.w	GotoDemo														; if yes, branch
+	endc
+
+	if (Debug+FeatureLevelSelectOnC)>0
+		andi.b	#btnC,(v_jpadpress1).w 							; is button C pressed?
 		if ExtendedMenu=0
-			bne.w	Tit_LoadLevelSelect									; if so, branch
+			bne.w	Tit_LoadLevelSelect								; if so, branch
 		else
-			bne.w	Tit_LoadLevelSelect									; if so, branch
+			bne.w	Tit_LoadLevelSelect								; if so, branch
 		endc ; if ExtendedMenu=0
 	endc ; if FeatureLevelSelectOnC>0
 
@@ -2796,23 +2822,23 @@ Tit_MainLoop:
 ; ===========================================================================
 
 Tit_ChkRegion:
-		tst.b	(v_megadrive).w	; check	if the machine is US or	Japanese
-		bpl.s	Tit_RegionJap	; if Japanese, branch
+		tst.b	(v_megadrive).w						; check	if the machine is US or	Japanese
+		bpl.s	Tit_RegionJap							; if Japanese, branch
 
-		lea	(LevSelCode_US).l,a0 ; load US code
+		lea	(LevSelCode_US).l,a0 				; load US code
 		bra.s	Tit_EnterCheat
 
 	Tit_RegionJap:
-		lea	(LevSelCode_J).l,a0 ; load J code
+		lea	(LevSelCode_J).l,a0 				; load J code
 
 Tit_EnterCheat:
 		move.w	(v_title_dcount).w,d0
 		adda.w	d0,a0
-		move.b	(v_jpadpress1).w,d0 ; get button press
-		andi.b	#btnDir,d0	; read only UDLR buttons
-		cmp.b	(a0),d0		; does button press match the cheat code?
-		bne.s	Tit_ResetCheat	; if not, branch
-		addq.w	#1,(v_title_dcount).w ; next button press
+		move.b	(v_jpadpress1).w,d0 		;	 get button press
+		andi.b	#btnDir,d0							; read only UDLR buttons
+		cmp.b	(a0),d0										; does button press match the cheat code?
+		bne.s	Tit_ResetCheat						; if not, branch
+		addq.w	#1,(v_title_dcount).w 	; next button press
 		tst.b	d0
 		bne.s	Tit_CountC
 		lea	(f_levselcheat).w,a0
@@ -2841,20 +2867,20 @@ Tit_ResetCheat:
 Tit_CountC:
 		move.b	(v_jpadpress1).w,d0
 		andi.b	#btnC,d0	; is C button pressed?
-		beq.s	loc_3230	; if not, branch
+		beq.s	Tit_CheckEnd	; if not, branch
 		addq.w	#1,(v_title_ccount).w ; increment C counter
 
-loc_3230:
+Tit_CheckEnd: ; loc_3230
 		tst.w	(v_demolength).w
 		beq.w	GotoDemo
-		andi.b	#btnStart,(v_jpadpress1).w ; check if Start is pressed
-		beq.w	Tit_MainLoop	; if not, branch
+		andi.b	#btnStart,(v_jpadpress1).w 		; check if Start is pressed
+		beq.w	Tit_MainLoop										; if not, branch
 
 Tit_ChkLevSel:
-		tst.b	(f_levselcheat).w ; check if level select code is on
-		beq.w	PlayLevel	; if not, play level
-		btst	#bitA,(v_jpadhold1).w ; check if A is pressed
-		beq.w	PlayLevel	; if not, play level
+		tst.b	(f_levselcheat).w 							; check if level select code is on
+		beq.w	PlayLevel												; if not, play level
+		btst	#bitA,(v_jpadhold1).w 					; check if A is pressed
+		beq.w	PlayLevel												; if not, play level
 
 Tit_LoadLevelSelect:
 	if BugFixLevelSelectCorruption>0
@@ -2901,6 +2927,7 @@ LevelSelect:
 	else
 		move.b	#2,(v_vbla_routine).w
 	endc
+
 		bsr.w	WaitForVBla
 		bsr.w	LevSelControls
 		bsr.w	RunPLC
@@ -2923,7 +2950,7 @@ LevelSelect:
 		cmpi.w	#$14,d0																; have you selected item $14 (sound test)?
 
 	if TweakNavigationLevelSelect=0
-		bne.w	LevSel_Level_SS													; if not, go to	Level/SS subroutine
+		bne.s	LevSel_Level_SS													; if not, go to	Level/SS subroutine
 	else
 		beq.s   @checkB             									; if so, branch
 		andi.b  #btnStart,(v_jpadpress1).w  					; is start pressed?
@@ -2982,12 +3009,12 @@ LevSel_NoCheat:
 		cmpi.w	#bgm__Last+1,d0												; is sound $80-$93 being played?
 		blo.s	LevSel_PlaySnd													; if yes, branch
 		cmpi.w	#sfx__First,d0												; is sound $94-$9F being played?
-		blo.w	LevelSelect															; if yes, branch
+		blo.s	LevelSelect															; if yes, branch
 	endc
 
 LevSel_PlaySnd:
 		bsr.w	PlaySound_Special
-		bra.w	LevelSelect
+		bra.s	LevelSelect
 ; ===========================================================================
 
 LevSel_Ending:
@@ -3144,7 +3171,7 @@ LevSelCode_US:	dc.b btnUp,btnDn,btnL,btnR,0,$FF
 GotoDemo:
 		move.w	#$1E,(v_demolength).w
 
-loc_33B6:
+Tit_Demo_Run: ; loc_33B6
 		move.b	#4,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		bsr.w	DeformLayers
@@ -3154,49 +3181,54 @@ loc_33B6:
 		addq.w	#2,d0
 		move.w	d0,(v_objspace+obX).w
 		cmpi.w	#$1C00,d0
-		blo.s	loc_33E4
+		blo.s	@Tit_Demo_CheckTimer
+
 	if TweakRemoveReduntantCode=0
 		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
 		rts
 	else
 		bsr.w	SS_ToSegaScreen
-	endc
+	endc ; if TweakRemoveReduntantCode=0
 ; ===========================================================================
 
-loc_33E4:
-		andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
-		bne.w	Tit_ChkLevSel	; if yes, branch
-		tst.w	(v_demolength).w
-		bne.w	loc_33B6
-		sfx	bgm_Fade,0,1,1 ; fade out music
-		move.w	(v_demonum).w,d0 ; load	demo number
+	@Tit_Demo_CheckTimer: ; loc_33E4
+		andi.b	#btnStart,(v_jpadpress1).w 		; is Start button pressed?
+		bne.w	Tit_ChkLevSel										; if yes, branch
+		tst.w	(v_demolength).w								; Has Demo Time Above 0?
+		bne.w	Tit_Demo_Run										; If so Coninue to run Demo
+
+  @Tit_Demo_Go:
+		sfx	bgm_Fade,0,1,1 										; fade out music
+		move.w	(v_demonum).w,d0 							; load	demo number
 		andi.w	#7,d0
 		add.w	d0,d0
-		move.w	Demo_Levels(pc,d0.w),d0	; load level number for	demo
+		move.w	Demo_Levels(pc,d0.w),d0				; load level number for	demo
 		move.w	d0,(v_zone).w
-		addq.w	#1,(v_demonum).w ; add 1 to demo number
-		cmpi.w	#4,(v_demonum).w ; is demo number less than 4?
-		blo.s	loc_3422	; if yes, branch
-		move.w	#0,(v_demonum).w ; reset demo number to	0
+		addq.w	#1,(v_demonum).w 							; add 1 to demo number
+		cmpi.w	#max_demo,(v_demonum).w 			; is demo number less than max_demo?
+		blo.s	@Tit_Demo_Enable											; if yes, branch
+		move.w	#0,(v_demonum).w 							; reset demo number to	0
 
-loc_3422:
-		move.w	#1,(f_demo).w	; turn demo mode on
-		move.b	#id_Demo,(v_gamemode).w ; set screen mode to 08 (demo)
-		cmpi.w	#$600,d0	; is level number 0600 (special	stage)?
-		bne.s	Demo_Level	; if not, branch
-		move.b	#id_Special,(v_gamemode).w ; set screen mode to $10 (Special Stage)
-		clr.w	(v_zone).w	; clear	level number
-		clr.b	(v_lastspecial).w ; clear special stage number
+	@Tit_Demo_Enable: ; loc_3422
+		move.w	#1,(f_demo).w									; turn demo mode on
+		move.b	#id_Demo,(v_gamemode).w 			; set screen mode to 08 (demo)
+		cmpi.w	#$600,d0											; is level number 0600 (special	stage)?
+		bne.s	@Tit_Demo_Level											; if not, branch
+		move.b	#id_Special,(v_gamemode).w 		; set screen mode to $10 (Special Stage)
+		clr.w	(v_zone).w											; clear	level number
+		clr.b	(v_lastspecial).w 							; clear special stage number
 
-Demo_Level:
-		move.b	#3,(v_lives).w	; set lives to 3
+	@Tit_Demo_Level:
+		move.b	#3,(v_lives).w								; set lives to 3
 		moveq	#0,d0
-		move.w	d0,(v_rings).w	; clear rings
-		move.l	d0,(v_time).w	; clear time
-		move.l	d0,(v_score).w	; clear score
-		if Revision>0
-			move.l	#5000,(v_scorelife).w ; extra life is awarded at 50000 points
-		endc
+		move.w	d0,(v_rings).w								; clear rings
+		move.l	d0,(v_time).w									; clear time
+		move.l	d0,(v_score).w								; clear score
+
+	if Revision>0
+		move.l	#5000,(v_scorelife).w 				; extra life is awarded at 50000 points
+	endc ; if Revision>0
+
 		rts
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -3211,99 +3243,98 @@ Demo_Levels:	incbin	"misc\Demo Level Order - Intro.bin"
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-
 LevSelControls:
 		move.b	(v_jpadpress1).w,d1
-		andi.b	#btnUp+btnDn,d1							; is up/down pressed and held?
-		bne.s	LevSel_UpDown									; if yes, branch
-		subq.w	#1,(v_levseldelay).w 				; subtract 1 from time to next move
+		andi.b	#btnUp+btnDn,d1								; is up/down pressed and held?
+		bne.s	LevSel_UpDown										; if yes, branch
+		subq.w	#1,(v_levseldelay).w 					; subtract 1 from time to next move
 	if ExtendedMenu=0
-		bpl.s	LevSel_SndTest								; if time remains, branch
+		bpl.s	LevSel_SndTest									; if time remains, branch
 	else
-		bpl.w	LevSel_CharOk									; if time remains, branch
+		bpl.w	LevSel_CharOk										; if time remains, branch
 	endc ; if ExtendedMenu=0
 
 LevSel_UpDown:
-		move.w	#$B,(v_levseldelay).w 			; reset time delay
+		move.w	#$B,(v_levseldelay).w 				; reset time delay
 		move.b	(v_jpadhold1).w,d1
-		andi.b	#btnUp+btnDn,d1							; is up/down pressed?
+		andi.b	#btnUp+btnDn,d1								; is up/down pressed?
 	if ExtendedMenu=0
-		beq.s	LevSel_SndTest								; if time remains, branch
+		beq.s	LevSel_SndTest									; if time remains, branch
 	else
-		beq.w	LevSel_CharOk									; if time remains, branch
+		beq.w	LevSel_CharOk										; if time remains, branch
 	endc ; if ExtendedMenu=0
 		move.w	(v_levselitem).w,d0
-		btst	#bitUp,d1											; is up	pressed?
-		beq.s	LevSel_Down										; if not, branch
-		subq.w	#1,d0												; move up 1 selection
+		btst	#bitUp,d1												; is up	pressed?
+		beq.s	LevSel_Down											; if not, branch
+		subq.w	#1,d0													; move up 1 selection
 		bhs.s	LevSel_Down
-		moveq	#$14,d0												; if selection moves below 0, jump to selection	$14
+		moveq	#$14,d0													; if selection moves below 0, jump to selection	$14
 
 LevSel_Down:
-		btst	#bitDn,d1											; is down pressed?
-		beq.s	LevSel_Refresh								; if not, branch
-		addq.w	#1,d0												; move down 1 selection
-		cmpi.w	#$15,d0 										; #((v_ptrnemcode-4-(v_plc_buffer+4))/4)-1,d0
+		btst	#bitDn,d1												; is down pressed?
+		beq.s	LevSel_Refresh									; if not, branch
+		addq.w	#1,d0													; move down 1 selection
+		cmpi.w	#$15,d0 											; #((v_ptrnemcode-4-(v_plc_buffer+4))/4)-1,d0
 		blo.s	LevSel_Refresh
-		moveq	#0,d0													; if selection moves above $14,	jump to	selection 0
+		moveq	#0,d0														; if selection moves above $14,	jump to	selection 0
 
 LevSel_Refresh:
-		move.w	d0,(v_levselitem).w 				; set new selection
-		bsr.w	LevSelTextLoad								; refresh text
+		move.w	d0,(v_levselitem).w 					; set new selection
+		bsr.w	LevSelTextLoad									; refresh text
 		rts
 ; ===========================================================================
 
 LevSel_SndTest:
-		cmpi.w	#$14,(v_levselitem).w 			; is item $14 selected?
-		bne.s	LevSel_NoMove									; if not, branch
+		cmpi.w	#$14,(v_levselitem).w 				; is item $14 selected?
+		bne.s	LevSel_NoMove										; if not, branch
 		move.b	(v_jpadpress1).w,d1
 
 	if FeatureUseSonic2SoundDriver=0
-		andi.b	#btnR+btnL,d1								; is left/right	pressed?
+		andi.b	#btnR+btnL,d1									; is left/right	pressed?
 	else ; @TODO Add dedicated Navigation Variable
-		andi.b	#btnA+btnC+btnR+btnL,d1			; is left/right	pressed?
+		andi.b	#btnA+btnC+btnR+btnL,d1				; is left/right	pressed?
 	endc
 
-		beq.s	LevSel_NoMove									; if not, branch
+		beq.s	LevSel_NoMove										; if not, branch
 		move.w	(v_levselsound).w,d0
-		btst	#bitL,d1											; is left pressed?
-		beq.s	LevSel_Right									; if not, branch
-		subq.w	#1,d0												; subtract 1 from sound	test
+		btst	#bitL,d1												; is left pressed?
+		beq.s	LevSel_Right										; if not, branch
+		subq.w	#1,d0													; subtract 1 from sound	test
 	if FeatureUseSonic2SoundDriver=0
 		bhs.s	LevSel_Right
-		moveq	#$4F,d0												; if sound test	moves below 0, set to $4F
+		moveq	#$4F,d0													; if sound test	moves below 0, set to $4F
 	endc
 
 LevSel_Right:
-		btst	#bitR,d1											; is right pressed?
-		beq.s	LevSel_Refresh2								; if not, branch
-		addq.w	#1,d0												; add 1	to sound test
+		btst	#bitR,d1												; is right pressed?
+		beq.s	LevSel_Refresh2									; if not, branch
+		addq.w	#1,d0													; add 1	to sound test
 
 	if TweakNavigationLevelSelect=0
 		cmpi.w	#$50,d0
 		blo.s	LevSel_Refresh2
 	else
 LevSel_ButtonA:
-    btst    #bitA,d1    								; is A pressed?
-    beq.s   LevSel_ButtonC 							; if not, branch
-    addi.b  #$10,d0    									; add $10 to sound test
-    bcc.s   LevSel_ButtonC  						; did the addition overflow?
-    moveq   #0,d0       								; if so, set value to $00
+    btst    #bitA,d1    									; is A pressed?
+    beq.s   LevSel_ButtonC 								; if not, branch
+    addi.b  #$10,d0    										; add $10 to sound test
+    bcc.s   LevSel_ButtonC  							; did the addition overflow?
+    moveq   #0,d0       									; if so, set value to $00
 
 LevSel_ButtonC:
-    btst    #bitC,d1    								; is C pressed?
-    beq.s   LevSel_Refresh2 						; if not, branch
-    subi.b  #$10,d0     								; subtract $10 from sound test
+    btst    #bitC,d1    									; is C pressed?
+    beq.s   LevSel_Refresh2 							; if not, branch
+    subi.b  #$10,d0     									; subtract $10 from sound test
     bcc.s   LevSel_Refresh2
     cmpi.b  #$F0,d0
-    beq.s   LevSel_Refresh2 						; do not set to 0 if already at 0
+    beq.s   LevSel_Refresh2 							; do not set to 0 if already at 0
 	endc
 
-		moveq	#0,d0													; if sound test	moves above $4F, set to	0
+		moveq	#0,d0														; if sound test	moves above $4F, set to	0
 
 LevSel_Refresh2:
-		move.w	d0,(v_levselsound).w 				; set sound test number
-		bsr.w	LevSelTextLoad								; refresh text
+		move.w	d0,(v_levselsound).w 					; set sound test number
+		bsr.w	LevSelTextLoad									; refresh text
 
 LevSel_NoMove:
 		rts
@@ -3317,20 +3348,23 @@ LevSel_NoMove:
 
 
 LevSelTextLoad:
-		cmpi.b #1,(LevelselectRam) 								; Is this the level select?
-		beq LevSelLoad   													; if so, load level select text
-		lea (ExtendedMenuText).l,a1 								; Load the Option text
-		bra TextRead   														; continue here
-		LevSelLoad: lea (LevelMenuText).l,a1 			; load level select text
+	if EnhancedDebugMenu>0
+		cmpi.b #1,(LevelselectRam) 						; Is this the level select?
+		beq LevSelLoad   											; if so, load level select text
+		lea (ExtendedMenuText).l,a1 					; Load the Option text
+		bra TextRead   												; continue here
+		LevSelLoad: lea (LevelMenuText).l,a1 	; load level select text
+	endc ; if EnhancedDebugMenu>0
+
 TextRead:
 		textpos: = ($40000000+(($E210&$3FFF)<<16)+(($E210&$C000)>>14))
 					; $E210 is a VRAM address
 
 		lea	(LevelMenuText).l,a1
 		lea	(vdp_data_port).l,a6
-		move.l	#textpos,d4												; text position on screen
-		move.w	#$E680,d3													; VRAM setting (4th palette, $680th tile)
-		moveq	#$14,d1															; number of lines of text
+		move.l	#textpos,d4										; text position on screen
+		move.w	#$E680,d3											; VRAM setting (4th palette, $680th tile)
+		moveq	#$14,d1													; number of lines of text
 
 LevSel_DrawAll:
 		move.l d4,4(a6)
@@ -3344,6 +3378,7 @@ LevSel_DrawAll:
 		lsl.w #7,d0
 		swap d0
 		add.l d0,d4
+	if EnhancedDebugMenu>0
 		cmpi.b #1,(LevelselectRam)
 		beq LevSelLoad2
 		lea (ExtendedMenuText).l,a1
@@ -3351,9 +3386,10 @@ LevSel_DrawAll:
 LevSelLoad2:
 		lea (LevelMenuText).l,a1
 TextRead2:
+
 		move.l	d4,4(a6)
-		bsr.w	LevSel_ChgLine											; draw line of text
-		addi.l	#$800000,d4												; jump to next line
+		bsr.w	LevSel_ChgLine									; draw line of text
+		addi.l	#$800000,d4										; jump to next line
 		dbf	d1,LevSel_DrawAll
 
 		moveq	#0,d0
@@ -3363,31 +3399,32 @@ TextRead2:
 		lsl.w	#7,d0
 		swap	d0
 		add.l	d0,d4
+	endc ; if EnhancedDebugMenu>0
 		lea	(LevelMenuText).l,a1
 		lsl.w	#3,d1
 		move.w	d1,d0
 		add.w	d1,d1
 		add.w	d0,d1
 		adda.w	d1,a1
-		move.w	#$C680,d3													; VRAM setting (3rd palette, $680th tile)
+		move.w	#$C680,d3											; VRAM setting (3rd palette, $680th tile)
 		move.l	d4,4(a6)
-		bsr.w	LevSel_ChgLine											; recolour selected line
+		bsr.w	LevSel_ChgLine									; recolour selected line
 		move.w	#$E680,d3
 		cmpi.w	#$14,(v_levselitem).w
 		bne.s	LevSel_DrawSnd
 		move.w	#$C680,d3
 
 LevSel_DrawSnd:
-		locVRAM	$EC30															; sound test position on screen
+		locVRAM	$EC30													; sound test position on screen
 		move.w	(v_levselsound).w,d0
 	if FeatureUseSonic2SoundDriver=0
 		addi.w	#$80,d0
 	endc
 		move.b	d0,d2
 		lsr.b	#4,d0
-		bsr.w	LevSel_ChgSnd	; draw 1st digit
+		bsr.w	LevSel_ChgSnd										; draw 1st digit
 		move.b	d2,d0
-		bsr.w	LevSel_ChgSnd	; draw 2nd digit
+		bsr.w	LevSel_ChgSnd										; draw 2nd digit
 		rts
 ; End of function LevSelTextLoad
 
@@ -3397,12 +3434,12 @@ LevSel_DrawSnd:
 
 LevSel_ChgSnd:
 		andi.w	#$F,d0
-		cmpi.b	#$A,d0		; is digit $A-$F?
-		blo.s	LevSel_Numb	; if not, branch
+		cmpi.b	#$A,d0												; is digit $A-$F?
+		blo.s	LevSel_Numb											; if not, branch
 	if ExtendedMenu=0
-		addi.b	#7,d0		; use alpha characters
+		addi.b	#7,d0													; use alpha characters
 	else
-		addi.b	#4,d0		; use alpha characters
+		addi.b	#4,d0													; use alpha characters
 	endc ; if ExtendedMenu=0
 
 	LevSel_Numb:
@@ -3416,28 +3453,28 @@ LevSel_ChgSnd:
 
 
 LevSel_ChgLine:
-		moveq	#$17,d2		; number of characters per line
+		moveq	#$17,d2													; number of characters per line
 
 	LevSel_LineLoop:
 		moveq	#0,d0
-		move.b	(a1)+,d0	; get character
-		bpl.s	LevSel_CharOk	; branch if valid
-		move.w	#0,(a6)		; use blank character
+		move.b	(a1)+,d0											; get character
+		bpl.s	LevSel_CharOk										; branch if valid
+		move.w	#0,(a6)												; use blank character
 		dbf	d2,LevSel_LineLoop
 		rts
 
 
 	LevSel_CharOk:
 	if ExtendedMenu>0
-		cmp.w #$40, d0    			; Check for $40 (End of ASCII number area)
-		blt.s @notText   				; If this is not an ASCII text character, branch
-		sub.w #$3,d0        		; Subtract an extra 3 (Compensate for missing characters in the font)
+		cmp.w #$40, d0    										; Check for $40 (End of ASCII number area)
+		blt.s @notText   											; If this is not an ASCII text character, branch
+		sub.w #$3,d0        									; Subtract an extra 3 (Compensate for missing characters in the font)
 
 	@notText:
-		sub.w #$30,d0        		; Subtract #$33 (Convert to S2 font from ASCII)
+		sub.w #$30,d0        									; Subtract #$33 (Convert to S2 font from ASCII)
 	endc ; if ExtendedMenu=0
-		add.w	d3,d0							; combine char with VRAM setting
-		move.w	d0,(a6)					; send to VRAM
+		add.w	d3,d0														; combine char with VRAM setting
+		move.w	d0,(a6)												; send to VRAM
 		dbf	d2,LevSel_LineLoop
 		rts
 ; End of function LevSel_ChgLine
@@ -3927,41 +3964,46 @@ Level_MainLoop:
 
 		cmpi.b	#id_Demo,(v_gamemode).w
 		beq.s	Level_ChkDemo	; if mode is 8 (demo), branch
+
 	if Revision=0
 		tst.w	(f_restart).w	; is the level set to restart?
 		bne.w	GM_Level	; if yes, branch
 	endc
+
 		cmpi.b	#id_Level,(v_gamemode).w
 		beq.w	Level_MainLoop	; if mode is $C (level), branch
 		rts
 ; ===========================================================================
 
 Level_ChkDemo:
-		tst.w	(f_restart).w	; is level set to restart?
-		bne.s	Level_EndDemo	; if yes, branch
-		tst.w	(v_demolength).w ; is there time left on the demo?
-		beq.s	Level_EndDemo	; if not, branch
-		cmpi.b	#id_Demo,(v_gamemode).w
-		beq.w	Level_MainLoop	; if mode is 8 (demo), branch
-	if TweakRemoveReduntantCode=0
-		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
-		rts
-	else
-		bsr.w	SS_ToSegaScreen
+		tst.w	(f_restart).w									; is level set to restart?
+		bne.s	Level_EndDemo									; if yes, branch
+
+	if DebugDisableDemoTime=0
+		tst.w	(v_demolength).w 							; is there time left on the demo?
+		beq.s	Level_EndDemo									; if not, branch
 	endc
+
+		cmpi.b	#id_Demo,(v_gamemode).w
+		beq.w	Level_MainLoop								; if mode is 8 (demo), branch
+
+		move.b	#id_Sega,(v_gamemode).w 		; go to Sega screen
+		rts
 ; ===========================================================================
 
 Level_EndDemo:
 		cmpi.b	#id_Demo,(v_gamemode).w
-		bne.s	Level_FadeDemo	; if mode is 8 (demo), branch
-		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
-		tst.w	(f_demo).w	; is demo mode on & not ending sequence?
+		bne.s	Level_FadeDemo												; if mode is 8 (demo), branch
+		move.b	#id_Sega,(v_gamemode).w 						; go to Sega screen
+		tst.w	(f_demo).w
+																								; is demo mode on & not ending sequence?
 	if TweakSegaLogoWhiteFade<2
-		bpl.s	Level_FadeDemo	; if yes, branch
+		bpl.s	Level_FadeDemo												; if yes, branch
 	else
-		bpl.w	SS_ToSegaScreen	; if yes, branch
+		bpl.w	SS_ToSegaScreen												; if yes, branch
 	endif
-		move.b	#id_Credits,(v_gamemode).w ; go to credits
+
+		move.b	#id_Credits,(v_gamemode).w 					; go to credits
 
 Level_FadeDemo:
 		move.w	#$3C,(v_demolength).w
@@ -4203,8 +4245,7 @@ GM_Special:
 ; ---------------------------------------------------------------------------
 ; Main Special Stage loop
 ; ---------------------------------------------------------------------------
-
-SS_MainLoop:
+SS_MainLoop: ; Special Stage Main Loop
 		bsr.w	PauseGame
 		move.b	#$A,(v_vbla_routine).w
 		bsr.w	WaitForVBla
@@ -4214,28 +4255,34 @@ SS_MainLoop:
 		jsr	(BuildSprites).l
 		jsr	(SS_ShowLayout).l
 		bsr.w	SS_BGAnimate
+		
+	; If Better Bonus Stage Controls are Enabled it leaves the timer off as sonic will collect the chaos emerald within a couple of extra seconds
+	if (DebugDisableDemoTime+TweakBetterBonusStageControls)=0
 		tst.w	(f_demo).w	; is demo mode on?
 		beq.s	SS_ChkEnd	; if not, branch
 		tst.w	(v_demolength).w ; is there time left on the demo?
 		beq.w	SS_ToSegaScreen	; if not, branch
+	endc ; if (EnhancedDebug+DebugDisableDemoTime+TweakBetterBonusStageControls)=0
 
 	SS_ChkEnd:
-		cmpi.b	#id_Special,(v_gamemode).w ; is game mode $10 (special stage)?
-		beq.w	SS_MainLoop	; if yes, branch
+		cmpi.b	#id_Special,(v_gamemode).w 			; is game mode $10 (special stage)?
+		beq.w	SS_MainLoop												; if yes, branch
 
-		tst.w	(f_demo).w	; is demo mode on?
+		tst.w	(f_demo).w												; is demo mode on?
+
 	if Revision=0
-		bne.w	SS_ToSegaScreen	; if yes, branch
+		bne.w	SS_ToSegaScreen										; if yes, branch
 	else
 		bne.w	SS_ToLevel
 	endc
-		move.b	#id_Level,(v_gamemode).w ; set screen mode to $0C (level)
-		cmpi.w	#(id_SBZ<<8)+3,(v_zone).w ; is level number higher than FZ?
-		blo.s	SS_Finish	; if not, branch
-		clr.w	(v_zone).w	; set to GHZ1
+
+		move.b	#id_Level,(v_gamemode).w 				; set screen mode to $0C (level)
+		cmpi.w	#(id_SBZ<<8)+3,(v_zone).w 			; is level number higher than FZ?
+		blo.s	SS_Finish													; if not, branch
+		clr.w	(v_zone).w												; set to GHZ1
 
 SS_Finish:
-		move.w	#60,(v_demolength).w ; set delay time to 1 second
+		move.w	#60,(v_demolength).w 						; set delay time to 1 second
 		move.w	#$3F,(v_pfade_start).w
 		clr.w	(v_palchgspeed).w
 
@@ -4259,14 +4306,14 @@ loc_47D4:
 
 		disable_ints
 		lea	(vdp_control_port).l,a6
-		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
-		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
-		move.w	#$9001,(a6)		; 64-cell hscroll size
+		move.w	#$8200+(vram_fg>>10),(a6) 			; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) 			; set background nametable address
+		move.w	#$9001,(a6)											; 64-cell hscroll size
 		bsr.w	ClearScreen
 
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000
-		lea	(Gra_TitleCard).l,a0 ; load title card patterns
+		lea	(Gra_TitleCard).l,a0 								; load title card patterns
 		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
 		; elseif TweakLevelCompressionMode=2
@@ -4712,14 +4759,14 @@ Cont_MainLoop:
 loc_4DF2:
 		jsr	(ExecuteObjects).l
 		jsr	(BuildSprites).l
-		cmpi.w	#$180,(v_player+obX).w ; has Sonic run off screen?
-		bhs.s	Cont_GotoLevel	; if yes, branch
+		cmpi.w	#$180,(v_player+obX).w 				; has Sonic run off screen?
+		bhs.s	Cont_GotoLevel									; if yes, branch
 		cmpi.b	#6,(v_player+obRoutine).w
 		bhs.s	Cont_MainLoop
 		tst.w	(v_demolength).w
 		bne.w	Cont_MainLoop
 	if TweakRemoveReduntantCode=0
-		move.b	#id_Sega,(v_gamemode).w ; go to Sega screen
+		move.b	#id_Sega,(v_gamemode).w 			; go to Sega screen
 		rts
 	else
 		bsr.w	SS_ToSegaScreen
@@ -5063,20 +5110,20 @@ GM_Credits:
 
 	Cred_SkipObjGfx:
 		moveq	#plcid_Main2,d0
-		bsr.w	AddPLC		; load standard	level graphics
-		move.w	#120,(v_demolength).w ; display a credit for 2 seconds
+		bsr.w	AddPLC										; load standard	level graphics
+		move.w	#120,(v_demolength).w 	; display a credit for 2 seconds
 		bsr.w	PaletteFadeIn
 
 Cred_WaitLoop:
 		move.b	#4,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		bsr.w	RunPLC
-		tst.w	(v_demolength).w ; have 2 seconds elapsed?
-		bne.s	Cred_WaitLoop	; if not, branch
-		tst.l	PLCQueueAdr.w ; have level gfx finished decompressing?
-		bne.s	Cred_WaitLoop	; if not, branch
-		cmpi.w	#9,(v_creditsnum).w ; have the credits finished?
-		beq.w	TryAgainEnd	; if yes, branch
+		tst.w	(v_demolength).w 					; have 2 seconds elapsed?
+		bne.s	Cred_WaitLoop							; if not, branch
+		tst.l	PLCQueueAdr.w 						; have level gfx finished decompressing?
+		bne.s	Cred_WaitLoop							; if not, branch
+		cmpi.w	#9,(v_creditsnum).w 		; have the credits finished?
+		beq.w	TryAgainEnd								; if yes, branch
 		rts
 
 ; ---------------------------------------------------------------------------
@@ -5191,23 +5238,23 @@ TryAg_MainLoop:
 		bsr.w	WaitForVBla
 		jsr	(ExecuteObjects).l
 		jsr	(BuildSprites).l
-		andi.b	#btnStart,(v_jpadpress1).w ; is Start button pressed?
+		andi.b	#btnStart,(v_jpadpress1).w 			; is Start button pressed?
 	if TweakRemoveReduntantCode=0
-		bne.s	TryAg_Exit	; if yes, branch
+		bne.s	TryAg_Exit												; if yes, branch
 	else
-		bne.w	SS_ToSegaScreen	; if yes, branch
+		bne.w	SS_ToSegaScreen										; if yes, branch
 	endc
-		tst.w	(v_demolength).w ; has 30 seconds elapsed?
+		tst.w	(v_demolength).w 									; has 30 seconds elapsed?
 	if TweakRemoveReduntantCode=0
-		beq.s	TryAg_Exit	; if yes, branch
+		beq.s	TryAg_Exit												; if yes, branch
 	else
-		beq.w	SS_ToSegaScreen	; if yes, branch
+		beq.w	SS_ToSegaScreen										; if yes, branch
 	endc
 		cmpi.b	#id_Credits,(v_gamemode).w
 		beq.s	TryAg_MainLoop
 
 TryAg_Exit:
-		move.b	#id_Sega,(v_gamemode).w ; goto Sega screen
+		move.b	#id_Sega,(v_gamemode).w 				; goto Sega screen
 		rts
 
 ; ===========================================================================

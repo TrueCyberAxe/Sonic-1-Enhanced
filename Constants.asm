@@ -467,3 +467,5 @@ fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)>>1	; $5D
 fr_victory:	  equ $5E
 
 max_ring_scatter: equ $20 ; 32
+
+max_demo:         equ 4
