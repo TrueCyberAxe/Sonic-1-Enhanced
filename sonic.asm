@@ -2794,19 +2794,22 @@ Tit_MainLoop:
 		bsr.w	RunPLC
 
 	if EnhancedDebug>0
-		btst	#bitA,(v_jpadhold1).w		 						; is A button pressed?
-		bmi.w	PlayLevel														; if yes, branch
+		move.b v_jpadpress1,d0        						; get pressed buttons...
+		andi.b #btnA,d0														; is A button pressed?
+		bne.w	GotoDemo														; if yes, branch
 	endc
 
-	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)>0
-		btst	#bitStart,(v_jpadhold1).w						; check if Start is pressed
-		bmi.w	GotoDemo														; if so, branch
 
-		btst	#bitC,(v_jpadhold1).w 							; is button C pressed?
+	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)>0
+		andi.b #btnStart,d0												; is Start button pressed?
+		bne.w	PlayLevel														; if so, branch
+
+		move.b v_jpadpress1,d0        						; get pressed buttons...
+		andi.b #btnC,d0 													; is button C pressed?
 		if ExtendedMenu=0
-			bmi.w	Tit_LoadLevelSelect								; if so, branch
+			bne.w	Tit_LoadLevelSelect								; if so, branch
 		else
-			bmi.w	Tit_LoadLevelSelect								; if so, branch
+			bne.w	Tit_LoadLevelSelect								; if so, branch
 		endc ; if ExtendedMenu=0
 	endc ; if FeatureLevelSelectOnC>0
 

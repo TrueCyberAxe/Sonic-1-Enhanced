@@ -151,6 +151,8 @@ BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/i
 
 ; Left Align the Score
 
+TweakCodeOptimizations:             equ 1
+FeatureFlamingDeath:                equ 1 ; Use Ashen sprite on fire death
 
 TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
 

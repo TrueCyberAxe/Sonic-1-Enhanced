@@ -353,7 +353,7 @@ v_init:		equ $FFFFFFFC	; 'init' text string (4 bytes)
 
 ; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
 ; ------- Additional -------
-f_spindash:		 equ $29           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
+f_spindash:		  equ $29           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
 f_superpeelout: equ $39
 
 f_victory:     equ $FFFFF5C0     ; victory pose flag
