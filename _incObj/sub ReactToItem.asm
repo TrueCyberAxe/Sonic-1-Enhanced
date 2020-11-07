@@ -341,19 +341,15 @@ HurtSonic:
 
 
 KillSonic:
-	if FeatureRetainRingsBetweenActs>0
-		move.w	d0,(v_rings).w						; clear rings
-	endc
+		tst.w	(v_debuguse).w											; is debug mode	active?
 
-		tst.w	(v_debuguse).w							; is debug mode	active?
-
-	if FeatureFlamingDeath=0
-		bne.s	@dontdie										; if yes, branch
+	if FeatureContextualDeath=0
+		bne.s	@dontdie														; if yes, branch
 	else
-		bne.w	@dontdie										; if yes, branch
-	endc ; if FeatureFlamingDeath=0
+		bne.w	@dontdie														; if yes, branch
+	endc ; if FeatureContextualDeath=0
 
-		move.b	#0,(v_invinc).w						; remove invincibility
+		move.b	#0,(v_invinc).w										; remove invincibility
 		move.b	#6,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
 		bset	#1,obStatus(a0)
@@ -362,7 +358,7 @@ KillSonic:
 		move.w	#0,obInertia(a0)
 		move.w	obY(a0),$38(a0)
 
-	if FeatureFlamingDeath>0
+	if FeatureContextualDeath>0
 		cmpi.b #id_Electro,(a2)										; was damage caused by a Fire Object?
 		beq.s	@electricdeath											; if yes, branch
 
@@ -399,7 +395,7 @@ KillSonic:
 		move.b	#id_Shrink,obAnim(a0)
 		bset	#7,obGfx(a0)
 		bra.s @skip
-	endc ; if FeatureFlamingDeath>0
+	endc ; if FeatureContextualDeath>0
 
 	@normaldeath:
 		move.b	#id_Death,obAnim(a0)
@@ -419,9 +415,28 @@ KillSonic:
 		rts
 ; End of function KillSonic
 
+	if FeatureContextualDeath>0
+KillSonicByCrushing:
+		move.b	#0,(v_invinc).w						; remove invincibility
+		move.b	#6,obRoutine(a0)
+
+		; bsr.w	Sonic_ResetOnFloor
+		; bset	#1,obStatus(a0)
+		; move.w	#-$700,obVelY(a0)
+		; move.w	#0,obVelX(a0)
+		; move.w	#0,obInertia(a0)
+		; move.w	obY(a0),$38(a0)
+
+		move.b	#id_Shrink,obAnim(a0)
+		bset	#7,obGfx(a0)
+
+		move.w	#sfx_Death,d0							; play normal death sound
+		; move.w	#sfx_HitSpikes,d0 			; play spikes death sound
+
+		jsr	(PlaySound_Special).l
+endc ; FeatureContextualDeath
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
 
 React_Special:
 		move.b	obColType(a1),d1
