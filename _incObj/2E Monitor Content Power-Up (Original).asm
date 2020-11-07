@@ -103,7 +103,7 @@ Pow_ChkGoggles:
 	if FeatureRestoreMonitorScubaGear>0
 		cmpi.b	#8,d0															; does monitor contain Goggles?
 		bne.s	Pow_ChkEnd													; if not, branch to Pow_ChkEnd
-		move.b	#1,(f_gogglecheck).w 							; move 1 to the goggle check
+		move.b	#1,(f_goggles).w 							; move 1 to the goggle check
 	endc
 ; ===========================================================================
 Pow_ChkEnd:

@@ -4921,7 +4921,7 @@ End_LoadSonic:
 		move.b	#1,(f_ringcount).w
 		move.b	#0,(f_timecount).w
 	if FeatureRestoreMonitorScubaGear>0
-		move.b	#0,(f_gogglecheck).w 					; move 0 to the goggle check
+		move.b	#0,(f_goggles).w 					; move 0 to the goggle check
 	endc
 		move.w	#1800,(v_demolength).w
 		move.b	#$18,(v_vbla_routine).w

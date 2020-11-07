@@ -222,7 +222,7 @@ Drown_Countdown:; Routine $A
 
 @reduceair:
 	if FeatureRestoreMonitorScubaGear>0
-		tst.b	(f_gogglecheck).w				; was a goggle monitor broken?
+		tst.b	(f_goggles).w				; was a goggle monitor broken?
 		bne	@gotomakenum							; if yes, branch
 	endc
 		subq.w	#1,(v_air).w					; subtract 1 from air remaining
