@@ -4,6 +4,8 @@
 
 Sonic_JumpHeight:
 	if FeatureBetaVictoryAnimation>0
+		; This cancels in air roll when hitting the spinning sign at the end
+		; Also has a cool "bug" that causes the leap during the GHZ high jump
 		tst.b (f_victory).w 							; Has the victory animation flag been set?
 		bne.s AirVictory 									; If so, branch
 	endc
