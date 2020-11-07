@@ -28,13 +28,13 @@ Bub_Main:	; Routine 0
 		move.b	#$84,obRender(a0)
 		move.b	#$10,obActWid(a0)
 		move.b	#1,obPriority(a0)
-		move.b	obSubtype(a0),d0 ; get bubble type
-		bpl.s	@bubble		; if type is $0-$7F, branch
+		move.b	obSubtype(a0),d0 					; get bubble type
+		bpl.s	@bubble											; if type is $0-$7F, branch
 
-		addq.b	#8,obRoutine(a0) ; goto Bub_BblMaker next
-		andi.w	#$7F,d0		; read only last 7 bits	(deduct	$80)
+		addq.b	#8,obRoutine(a0) 					; goto Bub_BblMaker next
+		andi.w	#$7F,d0										; read only last 7 bits	(deduct	$80)
 		move.b	d0,bub_time(a0)
-		move.b	d0,bub_freq(a0)	; set bubble frequency
+		move.b	d0,bub_freq(a0)						; set bubble frequency
 		move.b	#6,obAnim(a0)
 		bra.w	Bub_BblMaker
 ; ===========================================================================
@@ -42,30 +42,30 @@ Bub_Main:	; Routine 0
 @bubble:
 		move.b	d0,obAnim(a0)
 		move.w	obX(a0),bub_origX(a0)
-		move.w	#-$88,obVelY(a0) ; float bubble upwards
+		move.w	#-$88,obVelY(a0) 					; float bubble upwards
 		jsr	(RandomNumber).l
 		move.b	d0,obAngle(a0)
 
 Bub_Animate:	; Routine 2
 		lea	(Ani_Bub).l,a1
 		jsr	(AnimateSprite).l
-		cmpi.b	#6,obFrame(a0)	; is bubble full-size?
-		bne.s	Bub_ChkWater	; if not, branch
+		cmpi.b	#6,obFrame(a0)						; is bubble full-size?
+		bne.s	Bub_ChkWater								; if not, branch
 
-		move.b	#1,bub_inhalable(a0) ; set "inhalable" flag
+		move.b	#1,bub_inhalable(a0) 			; set "inhalable" flag
 
 Bub_ChkWater:	; Routine 4
 		move.w	(v_waterpos1).w,d0
-		cmp.w	obY(a0),d0	; is bubble underwater?
-		bcs.s	@wobble		; if yes, branch
+		cmp.w	obY(a0),d0									; is bubble underwater?
+		bcs.s	@wobble											; if yes, branch
 
-@burst:
-		move.b	#6,obRoutine(a0) ; goto Bub_Display next
-		addq.b	#3,obAnim(a0)	; run "bursting" animation
+	@burst:
+		move.b	#6,obRoutine(a0) 					; goto Bub_Display next
+		addq.b	#3,obAnim(a0)							; run "bursting" animation
 		bra.w	Bub_Display
 ; ===========================================================================
 
-@wobble:
+	@wobble:
 		move.b	obAngle(a0),d0
 		addq.b	#1,obAngle(a0)
 		andi.w	#$7F,d0
@@ -73,19 +73,19 @@ Bub_ChkWater:	; Routine 4
 		move.b	(a1,d0.w),d0
 		ext.w	d0
 		add.w	bub_origX(a0),d0
-		move.w	d0,obX(a0)	; change bubble's x-axis position
+		move.w	d0,obX(a0)								; change bubble's x-axis position
 		tst.b	bub_inhalable(a0)
 		beq.s	@display
-		bsr.w	Bub_ChkSonic	; has Sonic touched the	bubble?
-		beq.s	@display	; if not, branch
+		bsr.w	Bub_ChkSonic								; has Sonic touched the	bubble?
+		beq.s	@display										; if not, branch
 
-		bsr.w	ResumeMusic	; cancel countdown music
-		sfx	sfx_Bubble,0,0,0	; play collecting bubble sound
+		bsr.w	ResumeMusic									; cancel countdown music
+		sfx	sfx_Bubble,0,0,0							; play collecting bubble sound
 		lea	(v_player).w,a1
 		clr.w	obVelX(a1)
 		clr.w	obVelY(a1)
-		clr.w	obInertia(a1)	; stop Sonic
-		move.b	#id_GetAir,obAnim(a1) ; use bubble-collecting animation
+		clr.w	obInertia(a1)								; stop Sonic
+		move.b	#id_GetAir,obAnim(a1) 		; use bubble-collecting animation
 		move.w	#$23,$3E(a1)
 		move.b	#0,$3C(a1)
 		bclr	#5,obStatus(a1)
@@ -99,7 +99,7 @@ Bub_ChkWater:	; Routine 4
 		bra.w	@burst
 ; ===========================================================================
 
-@display:
+	@display:
 		bsr.w	SpeedToPos
 		tst.b	obRender(a0)
 		bpl.s	@delete
@@ -212,7 +212,7 @@ Bub_BblMaker:	; Routine $A
 		move.w	(v_waterpos1).w,d0
 		cmp.w	obY(a0),d0
 		bcs.w	DisplaySprite
-		rts	
+		rts
 ; ===========================================================================
 ; bubble production sequence
 
@@ -242,9 +242,9 @@ Bub_ChkSonic:
 		cmp.w	d0,d1
 		bcs.s	@loc_12998
 		moveq	#1,d0
-		rts	
+		rts
 ; ===========================================================================
 
 @loc_12998:
 		moveq	#0,d0
-		rts	
+		rts

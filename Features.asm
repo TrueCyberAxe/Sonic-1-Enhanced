@@ -13,8 +13,12 @@
 ; @TODO Port Sonic CD Sprites like reverse balancing
 ; @TODO Port Mega CD BIOS Sprites
 
+; @TODO Limit Air Bubbles to 3 to stop massive slowdown underwater in labyrinth / scrap 3
+
 ; ExtendedMenu Based on http://sonicresearch.org/community/index.php?threads/sonic-1-have-an-option-screen-up-using-the-level-select-and-seperating-the-two.5998/ and https://forums.sonicretro.org/index.php?threads/how-to-convert-sonic-1-level-select-to-ascii.31729/
 
+BugFixDrownInDebug:                 equ 1
+FeatureAirAnimation:                equ 1
 ; Causes Error on Demo 3 and with Object Edge Detection
 FeatureSonicCDExtendedCamera:       equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 

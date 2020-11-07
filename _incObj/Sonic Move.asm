@@ -201,7 +201,6 @@ locret_1307C:
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-
 Sonic_MoveLeft:
 		move.w	obInertia(a0),d0
 		beq.s	loc_13086
