@@ -2,11 +2,10 @@
 ; Revision 1 Onwards Fixes the Level Select Order and Holding buttons during the attract mode and ending demo sequences will not cause Sonic to miss jumps. (https://tcrf.net/Sonic_the_Hedgehog_(Genesis)#REV01.2FJapanese_Version)
 ; Revision 2 Onwards Fixes the Spike Bug
 
-; @TODO unroll when git finish goal
 ; @TODO fix super peelout bug pushing when beside colidable
-; @TODO set the animation for peelout and spindash to maximum
+; @TODO Set Spring flag for Spindash and Peelout
+; @TODO if interia is higher than max dont change it when holding left or right, should fix the todo below
 ; @TODO find what is slowing down sonic when right is pressed (possibly a scrolling issue)
-; @TODO fix bumpers so they put you in the right direction, hitting the bumper thatfaces the pinball bumper is an examble of it flipping you backwards
 
 ; @TODO Fix shield x position when balancing on edge
 ; @TODO Fix wrong balancing on object edges that causes bug in demo 2
