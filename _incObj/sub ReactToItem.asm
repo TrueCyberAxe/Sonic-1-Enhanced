@@ -418,14 +418,16 @@ KillSonic:
 	if FeatureContextualDeath>0
 KillSonicByCrushing:
 		move.b	#0,(v_invinc).w						; remove invincibility
+		move.b	#0,(v_shield).w						; remove shield
 		move.b	#6,obRoutine(a0)
 
-		; bsr.w	Sonic_ResetOnFloor
-		; bset	#1,obStatus(a0)
-		; move.w	#-$700,obVelY(a0)
-		; move.w	#0,obVelX(a0)
-		; move.w	#0,obInertia(a0)
-		; move.w	obY(a0),$38(a0)
+		bsr.w	Sonic_ResetOnFloor
+		bset	#1,obStatus(a0)
+
+		move.w	#-$140,obVelY(a0)					; Distance of Death Vertical Movment
+		move.w	#0,obVelX(a0)							; Stop Horizontal Movment
+		move.w	#0,obInertia(a0)					; Stop Exusting Inertia
+		move.w	obY(a0),$38(a0)						; ???
 
 		move.b	#id_Shrink,obAnim(a0)
 		bset	#7,obGfx(a0)
