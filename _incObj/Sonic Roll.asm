@@ -1,13 +1,10 @@
 ; ---------------------------------------------------------------------------
 ; Subroutine allowing Sonic to roll when he's moving
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 Sonic_Roll:
 		tst.b	(f_jumponly).w
 		bne.s	@noroll
+
 		move.w	obInertia(a0),d0
 		bpl.s	@ispositive
 		neg.w	d0
@@ -32,9 +29,9 @@ Sonic_Roll:
 		neg.w d0 																		; If not, negate it to get the absolute value
 
 	@cont:
-		cmpi.w    #$100,d0    											; is Sonic moving at $100 speed or faster?
-		bhi.s    Sonic_ChkRoll    									; if yes, branch
-		move.b    #id_Duck,obAnim(a0)    						; use "ducking" animation
+		cmpi.w #$100,d0    													; is Sonic moving at $100 speed or faster?
+		bhi.s Sonic_ChkRoll    											; if yes, branch
+		move.b #id_Duck,obAnim(a0)    							; use "ducking" animation
 	endc
 
 	@noroll:
@@ -42,21 +39,23 @@ Sonic_Roll:
 ; ===========================================================================
 
 Sonic_ChkRoll:
-		btst	#2,obStatus(a0)	; is Sonic already rolling?
-		beq.s	@roll		; if not, branch
+		btst	#2,obStatus(a0)												; is Sonic already rolling?
+		beq.s	@roll																	; if not, branch
+
+	@skip:
 		rts
 ; ===========================================================================
 
-@roll:
+	@roll:
 		bset	#2,obStatus(a0)
 		move.b	#$E,obHeight(a0)
 		move.b	#7,obWidth(a0)
-		move.b	#id_Roll,obAnim(a0) ; use "rolling" animation
+		move.b	#id_Roll,obAnim(a0) 								; use "rolling" animation
 		addq.w	#5,obY(a0)
-		sfx	sfx_Roll,0,0,0	; play rolling sound
+		sfx	sfx_Roll,0,0,0													; play rolling sound
 		tst.w	obInertia(a0)
 		bne.s	@ismoving
-		move.w	#$200,obInertia(a0) ; set inertia if 0
+		move.w	#$200,obInertia(a0) 								; set inertia if 0
 
 	@ismoving:
 		rts

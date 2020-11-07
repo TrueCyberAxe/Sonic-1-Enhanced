@@ -8,6 +8,9 @@
 ; @TODO find what is slowing down sonic when right is pressed (possibly a scrolling issue)
 ; @TODO fix bumpers so they put you in the right direction, hitting the bumper thatfaces the pinball bumper is an examble of it flipping you backwards
 
+; @TODO Fix shield x position when balancing on edge
+; @TODO Fix wrong balancing on object edges that causes bug in demo 2
+
 ; @TODO Port Sonic CD Sprites like reverse balancing
 ; @TODO Port Mega CD BIOS Sprites
 
@@ -44,12 +47,14 @@ BugFixDemoPlayback:									equ 1 ; Based on https://info.sonicretro.org/SCHG_Ho
 BugFixHiddenPoints:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 
+BugFixSpringDownSpring:             equ 1 ; If rolling when you hit spring, stay rolling unless up spring
+
 ; ============================================================
-BugFixTooFastToLive:								equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
-BugFixInvincibilityDelayDeath:			equ 0 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixCameraFollow:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
-BugFixSpringFaceWrongDirection:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
-BugFixWalkJump:											equ 0 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
+BugFixTooFastToLive:								equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
+BugFixInvincibilityDelayDeath:			equ 1 ; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+BugFixCameraFollow:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+BugFixSpringFaceWrongDirection:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
+BugFixWalkJump:											equ 1 ; Set to 1 for fix Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1 - Set to 2 for cleaner fix based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
 
 ; Bug Fixes Not Inluded in Other Revisions
 
@@ -160,7 +165,7 @@ TweakBetterBonusControlRestore:			equ 1 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 1 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
 
 TweakFixUnderwaterRingPhysics:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Scattered_Rings_Underwater_Physics
-TweakRemoveSpeedCap:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Remove_the_Speed_Cap
+TweakRemoveSpeedCap:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Remove_the_Speed_Cap
 TweakFixHurtWaterPhystics:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
 TweakFasterObjectMove:							equ 0 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
 

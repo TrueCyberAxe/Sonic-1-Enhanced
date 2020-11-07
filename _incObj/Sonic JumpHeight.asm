@@ -2,10 +2,12 @@
 ; Subroutine controlling Sonic's jump height/duration
 ; ---------------------------------------------------------------------------
 
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 Sonic_JumpHeight:
+	if FeatureBetaVictoryAnimation>0
+		tst.b (f_victory).w 							; Has the victory animation flag been set?
+		bne.s AirVictory 									; If so, branch
+	endc
+
 		tst.b	$3C(a0)
 		beq.s	loc_134C4
 		move.w	#-$400,d1
@@ -32,16 +34,14 @@ Sonic_AirRoll:
 		rts
 
 AirRoll_Checks:
-		if FeatureAirRoll=1
-			cmpi.b #id_Spring,obAnim(a0) 			; Is Spring Jump Active?
-			beq.s locret_134D2 								; If so, branch.
-		endc
-		if FeatureBetaVictoryAnimation>0
-			tst.b (f_victory).w 							; Has the victory animation flag been set?
-			bne.s locret_134D2 								; If so, branch
-		endc
+	if FeatureAirRoll=1
+		cmpi.b #id_Spring,obAnim(a0) 			; Is Spring Jump Active?
+		beq.s locret_134D2 								; If so, branch.
+	endc
+
     cmpi.b #id_roll,obAnim(a0) 				; Is animation 2 active?
     bne.s AirRoll_Set 								; If not, branch.
+
     btst #1,obStatus(a0) 							; Is bit 1 in the status bitfield enabled?
     bne.s AirRoll_Set 								; If so, branch.
     rts
@@ -54,6 +54,14 @@ loc_134C4:
 		cmpi.w	#-$FC0,obVelY(a0)
 		bge.s	locret_134D2
 		move.w	#-$FC0,obVelY(a0)
+
+AirVictory:
+	if FeatureBetaVictoryAnimation>0
+		cmpi.b #id_roll,obAnim(a0) 				; Is animation 2 active?
+		bne.s locret_134D2 								; If not, branch.
+
+		move.b #id_leap2,obAnim(a0)
+	endc
 
 locret_134D2:
 		rts

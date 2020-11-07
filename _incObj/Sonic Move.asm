@@ -1,10 +1,6 @@
 ; ---------------------------------------------------------------------------
 ; Subroutine to	make Sonic walk/run
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 Sonic_Move:
 		move.w	(v_sonspeedmax).w,d6
 		move.w	(v_sonspeedacc).w,d5
@@ -53,7 +49,6 @@ Sonic_Move:
 		bge.s	loc_12F5A
 		bra.s	Sonic_LookUp
 ; ===========================================================================
-
 Sonic_Balance:
 		jsr	(ObjFloorDist).l
 		cmpi.w	#$C,d1
@@ -65,7 +60,6 @@ loc_12F5A:
 		bclr	#0,obStatus(a0)
 		bra.s	loc_12F70
 ; ===========================================================================
-
 loc_12F62:
 		cmpi.b	#3,$37(a0)
 		bne.s	Sonic_LookUp
@@ -77,7 +71,6 @@ loc_12F70:
 		move.b	#id_Balance,obAnim(a0) 				; use "balancing" animation
 		bra.s	Sonic_ResetScr
 ; ===========================================================================
-
 Sonic_LookUp:
 		btst	#bitUp,(v_jpadhold2).w 					; is up being pressed?
 		beq.s	Sonic_Duck											; if not, branch
@@ -97,7 +90,6 @@ Sonic_LookUp:
 		addq.w	#2,(v_lookshift).w
 		bra.s	loc_12FC2
 ; ===========================================================================
-
 Sonic_Duck:
 		btst	#bitDn,(v_jpadhold2).w 					; is down being pressed?
 		beq.s	Sonic_ResetScr									; if not, branch
@@ -107,7 +99,6 @@ Sonic_Duck:
 		subq.w	#2,(v_lookshift).w
 		bra.s	loc_12FC2
 ; ===========================================================================
-
 Sonic_ResetScr:
 	if TweakSonic2LevelArtLoader>0
 		move.b	#0,($FFFFC903).w
@@ -228,11 +219,13 @@ loc_1309A:
 		neg.w	d1
 		cmp.w	d1,d0
 		bgt.s	loc_130A6
+
 	if TweakRemoveSpeedCap>0
 		add.w	d5,d0														; +++ remove this frame's acceleration change
 		cmp.w	d1,d0														; +++ compare speed with top speed
 		ble.s	loc_130A6												; +++ if speed was already greater than the maximum, branch
 	endc
+
 		move.w	d1,d0
 
 loc_130A6:
@@ -257,6 +250,7 @@ loc_130BA:
 		move.b	#id_Stop,obAnim(a0) 					; use "stopping" animation
 		bclr	#0,obStatus(a0)
 		sfx	sfx_Skid,0,0,0										; play stopping sound
+
 	if FeatureSpindash>1
 		move.b  #6,($FFFFD1E4).w    					; set the spin dash dust routine to skid dust
 		move.b  #$15,($FFFFD1DA).w
@@ -315,7 +309,7 @@ loc_13120:
 		move.b  #6,($FFFFD1E4).w    					; set the spin dash dust routine to skid dust
 		move.b  #$15,($FFFFD1DA).w
 	endc
-	
+
 locret_1314E:
 		rts
 ; End of function Sonic_MoveRight

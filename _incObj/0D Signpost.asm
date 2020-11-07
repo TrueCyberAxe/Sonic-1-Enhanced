@@ -9,23 +9,24 @@ Signpost:
 		jsr	Sign_Index(pc,d1.w)
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
+
 	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
 	endc
+
 		out_of_range	DeleteObject
+
 	if BugFixRenderBeforeInit=0 ; Bug 1
 		rts
 	else
-		bra.w	DisplaySprite
+			bra.w	DisplaySprite
 	endc
 ; ===========================================================================
 Sign_Index:
 		dc.w Sign_Main-Sign_Index
 		dc.w Sign_Touch-Sign_Index
 		dc.w Sign_Spin-Sign_Index
-	; if FeatureBetaVictoryAnimation=0
 		dc.w Sign_SonicRun-Sign_Index
-	; else
 	if FeatureBetaVictoryAnimation>0
 		dc.w GotThroughAct-Sign_Index
 	endc
@@ -52,10 +53,6 @@ Sign_Touch:	; Routine 2
 		bcc.s	@notouch																; if not, branch
 		music	sfx_Signpost,0,0,0											; play signpost sound
 		clr.b	(f_timecount).w													; stop time counter
-	if FeatureBetaVictoryAnimation>0
-		move.b  #1,(f_victory).w 											; Set victory animation flag
-		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
-	endc
 		move.w	(v_limitright2).w,(v_limitleft2).w 		; lock screen position
 		addq.b	#2,obRoutine(a0)
 
@@ -64,6 +61,11 @@ Sign_Touch:	; Routine 2
 ; ===========================================================================
 
 Sign_Spin:	; Routine 4
+	if FeatureBetaVictoryAnimation>0
+		move.b  #1,(f_victory).w 											; Set victory animation flag
+		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
+	endc
+
 		subq.w	#1,spintime(a0)	; subtract 1 from spin time
 		bpl.s	@chksparkle	; if time remains, branch
 		move.w	#60,spintime(a0) ; set spin cycle time to 1 second
@@ -83,8 +85,8 @@ Sign_Spin:	; Routine 4
 		lea	Sign_SparkPos(pc,d0.w),a2 ; load sparkle position data
 		bsr.w	FindFreeObj
 		bne.s	@fail
-		move.b	#id_Rings,0(a1)	; load rings object
-		move.b	#id_Ring_Sparkle,obRoutine(a1) ; jump to ring sparkle subroutine
+		move.b	#id_Rings,0(a1)									; load rings object
+		move.b	#id_Ring_Sparkle,obRoutine(a1) 	; jump to ring sparkle subroutine
 		move.b	(a2)+,d0
 		ext.w	d0
 		add.w	obX(a0),d0
@@ -115,10 +117,12 @@ Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 Sign_SonicRun:	; Routine 6
 		tst.w	(v_debuguse).w								; is debug mode	on?
 		bne.w	locret_ECEE										; if yes, branch
+
 	if FeatureBetaVictoryAnimation=1 			; If we're set to 1 Allow the run and unset the victory jump flag
-		move.b  #0,(f_victory).w 						; Set victory animation flag
-		move.b  #0,(f_lockscreen).w 				; Prevent Sonic Leaving the Screen
+		move.b  #0,(f_victory).w 						; Unset victory animation flag
+		move.b  #0,(f_lockscreen).w 				; Unset Prevent Sonic Leaving the Screen
 	endc
+
 		btst	#1,(v_player+obStatus).w
 		bne.s	loc_EC70
 		move.b	#1,(f_lockctrl).w 					; lock controls

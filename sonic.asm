@@ -16,7 +16,7 @@ Debug:          				equ 0 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
 	else
-Debug:          				equ 0 ; Debug Mode Always Enabled
+Debug:          				equ 1 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
 	endc
@@ -3574,9 +3574,9 @@ Level_ClrStuff:
 		; @Note test invinciblity as that probably needs cleared as you can die while invincible on GHZ 2
 		move.w	d0,(v_framecount).w
 
-	; if FeatureBetaVictoryAnimation>0
-	; 	clr.w (f_victory).w
-	; endc
+	if FeatureBetaVictoryAnimation>0
+		clr.w (f_victory).w
+	endc
 
 	if TweakUncompressedTitleCards=0
 		locVRAM	$B000

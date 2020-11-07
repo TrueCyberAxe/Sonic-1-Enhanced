@@ -14,7 +14,13 @@ Sonic_SpinDash:
     andi.b	#$70,d0			           ; pressing A/B/C ?
     beq.w	locret2_1AC8C		         ; if not, return
 
-    move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
+  if FeatureSpindash=1
+    move.b	#$E,obHeight(a0)       ; Adjust Height for Spindash
+    move.b	#7,obWidth(a0)         ; Adjust Width for Spindash
+  endc
+
+  move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
+
     move.w	#$BE,d0			           ; spin sound ($E0 in s2)
   	jsr	(PlaySound_Special).l	     ; play spin sound
 
@@ -25,6 +31,7 @@ Sonic_SpinDash:
   	addq.l	#4,sp			             ; Add 4 bytes to the stack return address to skip Sonic_Jump on next rts to Obj01_MdNormal, preventing conflicts with button presses.
   	move.b	#1,f_spindash(a0)		   ; set Spin Dash flag
   	move.w	#0,$3A(a0)		         ; set charge count to 0
+
   	cmpi.b	#$C,obSubtype(a0)		   ; ??? oxygen remaining?
   	bcs.s	loc2_1AC84		           ; ??? branch if carry
   	move.b	#2,($FFFFD11C).w	     ; ??? $D11C is used for the smoke/dust object
@@ -39,8 +46,9 @@ locret2_1AC8C:
 ;---------------------------------------------------------------------------
 loc2_1AC8E:
     move.b #id_Spindash,obAnim(a0)             ; set Spin Dash anim (9 in s2)
+
   if FeatureSpindash=1
-    move.w   #$C00,obInertia(a0)                ; Set Sonic's speed to Maximum Run Speed
+    move.w   #$C00,obInertia(a0)               ; Set Sonic's speed to Maximum Run Speed
   endc
 
     move.b	(v_jpadhold2).w,d0	               ; read controller
