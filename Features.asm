@@ -16,6 +16,12 @@
 
 ; ExtendedMenu Based on http://sonicresearch.org/community/index.php?threads/sonic-1-have-an-option-screen-up-using-the-level-select-and-seperating-the-two.5998/ and https://forums.sonicretro.org/index.php?threads/how-to-convert-sonic-1-level-select-to-ascii.31729/
 
+; Causes Error on Demo 3 and with Object Edge Detection
+FeatureSonicCDExtendedCamera:       equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
+
+; Causes Crash when Entering Water
+FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+
 ; Feature
 FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
 FeatureLevelSelectOnC:							equ 1 ; Press C on the Title Screen to bring up Level Select, 2 for Sonic 2 style level select
@@ -30,11 +36,9 @@ FeatureElectricShockAnimation:			equ 1 ; When you get hit with Electricity use t
 FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
 FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
 FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
-FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 FeatureUseJapaneseUpdates:					equ 1 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
 
 FeatureSuperPeelout:							  equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/basic-questions-and-answers-thread.1155/page-287#post-84061
-FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
 TweakSlowDucking:										equ 1 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
 																					; https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
 ; Tweaks
@@ -47,6 +51,7 @@ BugFixDemoPlayback:									equ 1 ; Based on https://info.sonicretro.org/SCHG_Ho
 BugFixHiddenPoints:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 BugFixTitleScreenPressStart: 				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 
+; Unfinished
 BugFixSpringDownSpring:             equ 1 ; If rolling when you hit spring, stay rolling unless up spring
 
 ; ============================================================
