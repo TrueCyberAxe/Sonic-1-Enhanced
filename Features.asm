@@ -17,13 +17,15 @@
 
 ; ExtendedMenu Based on http://sonicresearch.org/community/index.php?threads/sonic-1-have-an-option-screen-up-using-the-level-select-and-seperating-the-two.5998/ and https://forums.sonicretro.org/index.php?threads/how-to-convert-sonic-1-level-select-to-ascii.31729/
 
+BugFixVictoryDebug:                 equ 1
 BugFixDrownInDebug:                 equ 1
 FeatureAirAnimation:                equ 1
+
 ; Causes Error on Demo 3 and with Object Edge Detection
 FeatureSonicCDExtendedCamera:       equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 
 ; Causes Crash when Entering Water
-FeatureSpindash:										equ 0 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
+FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
 
 ; Feature
 FeatureCentreTitleScreen:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
@@ -39,7 +41,7 @@ FeatureElectricShockAnimation:			equ 1 ; When you get hit with Electricity use t
 FeatureRestoreMonitorEggman:				equ 1 ; Fixes the Eggman Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
 FeatureRestoreMonitorScubaGear:	  	equ 1 ; Fixes the Scuba Gear Monitor - Based on https://info.sonicretro.org/SCHG_How-to:Set_up_the_Goggle_Monitor_to_work_with_it
 FeatureRestoreMonitorSuper:	  	    equ 1 ; Fixes the S Monitor - Based on http://sonicresearch.org/community/index.php?threads/how-to-restore-s-monitor-of-sonic-1.6020/
-FeatureUseJapaneseUpdates:					equ 1 ; Any updates exclusive to being played on a japanese console, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
+FeatureSkipSomeRegionalChecks:			equ 1 ; Skip some region checks to enable stuff like no tm in all regions, extra lives are now gained every 50,000 points (if it's played on a Japanese console), and the final boss now awards 1,000 points in defeat.
 
 FeatureSuperPeelout:							  equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/basic-questions-and-answers-thread.1155/page-287#post-84061
 TweakSlowDucking:										equ 1 ; For use with Spindash - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-955483
@@ -68,6 +70,7 @@ BugFixWalkJump:											equ 1 ; Set to 1 for fix Based on https://info.sonicre
 
 BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
 BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
+
 BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
 BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
 BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
@@ -121,8 +124,8 @@ BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/i
 
 ; @TODO Own Noticed Glitch - Starlight Zone Glitch on Fade In
 ; @TODO Own Noticed Glitch - Fix bug when you roll into the right of an object like the rocks either side of the bridge in GHZ
-; @TODO Own Noticed Glitch - Fix Being able to die after hitting invinciblity monitor before the sparkles appear
-; @TODO Own Noticed Glitch - May be specific to the Air Roll however if you press jump just as you hit a sping you dont get the spring sound but still get the spring bonus height and animation
+; Done? @TODO Own Noticed Glitch - Fix Being able to die after hitting invinciblity monitor before the sparkles appear
+; @TODO Own Noticed Glitch - Rare, May be specific to the Air Roll however if you press jump just as you hit a sping you dont get the spring sound but still get the spring bonus height and animation
 
 ; @TODO implement Spindust properly, implement Sonic 2 Spindash Sound Effect
 ; @TODO fix Sonic 2 Art Loader / Compression Mode graphic Glitches either caused by QueueDMATransfer or tool that compressed / decompressed the graphics
@@ -131,12 +134,10 @@ BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/i
 ; @TODO Prevent Pause Death on End Level Screen and Special Stage
 
 ; Features to Add
-; @TODO implement Sonic CD Run Charge, but since this is Sonic 1 dont go faster than max run speed and just use regular run animation
 ; @TODO implement Sonic CD Run Charge with complete Sonic CD style animations and speed
 ; @TODO implement underwater mask when scuba monitor is active, also remove the scuba flag when hit by enemy make it act like shield
 ; @TODO implement sonic holding breath when underwater unused sprite
 ; @TODO implement Sonic JAMs Easy Mode
-; @TODO edit Air Roll so you can only roll when falling (more in fitting with the spirit of the game)
 ; @TODO all possible updates from Sonic Jam
 
 ; https://info.sonicretro.org/SCHG_How-to:Port_Flamewing%27s_Sonic_3_%26_Knuckles_Sound_Driver

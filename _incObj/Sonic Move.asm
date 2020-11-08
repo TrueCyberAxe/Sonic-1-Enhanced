@@ -75,16 +75,20 @@ Sonic_LookUp:
 		btst	#bitUp,(v_jpadhold2).w 					; is up being pressed?
 		beq.s	Sonic_Duck											; if not, branch
 		move.b	#id_LookUp,obAnim(a0) 				; use "looking up" animation
+
 	if FeatureSpindash>0
-		addq.b	#1,($FFFFC903).w
-		cmp.b	#$78,($FFFFC903).w
-	if TweakSonic2LevelArtLoader=0
-		bcs.s	Sonic_ResetScr
-	else
-		bcs.s	Sonic_ResetScr_Alt
-	endc
-		move.b	#$78,($FFFFC903).w
-	endc
+		addq.b	#1,(v_screendelay_v).w
+		cmp.b	#$78,(v_screendelay_v).w
+
+		if TweakSonic2LevelArtLoader=0
+			bcs.s	Sonic_ResetScr
+		else
+			bcs.s	Sonic_ResetScr_Alt
+		endc ; if TweakSonic2LevelArtLoader=0
+
+		move.b	#$78,(v_screendelay_v).w
+	endc ; if FeatureSpindash>0
+
 		cmpi.w	#$C8,(v_lookshift).w
 		beq.s	loc_12FC2
 		addq.w	#2,(v_lookshift).w
@@ -101,7 +105,7 @@ Sonic_Duck:
 ; ===========================================================================
 Sonic_ResetScr:
 	if TweakSonic2LevelArtLoader>0
-		move.b	#0,($FFFFC903).w
+		move.b	#0,(v_screendelay_v).w
 
 	Sonic_ResetScr_Alt:
 	endc

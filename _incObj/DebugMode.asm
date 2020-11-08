@@ -8,7 +8,8 @@ DebugMode:
 		move.w	Debug_Index(pc,d0.w),d1
 		jmp	Debug_Index(pc,d1.w)
 ; ===========================================================================
-Debug_Index:	dc.w Debug_Main-Debug_Index
+Debug_Index:
+		dc.w Debug_Main-Debug_Index
 		dc.w Debug_Action-Debug_Index
 ; ===========================================================================
 
@@ -37,11 +38,11 @@ Debug_Main:	; Routine 0
 		bra.s	@selectlist
 ; ===========================================================================
 
-@islevel:
+	@islevel:
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
 
-@selectlist:
+	@selectlist:
 		lea	(DebugList).l,a2
 		add.w	d0,d0
 		adda.w	(a2,d0.w),a2
@@ -90,7 +91,7 @@ Debug_Control:
 		bra.w	Debug_ChgItem
 ; ===========================================================================
 
-@dirheld:
+	@dirheld:
 		subq.b	#1,(v_debugxspeed).w
 		bne.s	loc_1D01C
 		move.b	#1,(v_debugxspeed).w
@@ -98,7 +99,7 @@ Debug_Control:
 		bne.s	@dirpressed
 		move.b	#-1,(v_debugyspeed).w
 
-@dirpressed:
+	@dirpressed:
 		move.b	(v_jpadhold1).w,d4
 
 loc_1D01C:
@@ -188,16 +189,18 @@ Debug_ChgItem:
 		rts
 ; ===========================================================================
 
-@backtonormal:
-		btst	#bitB,(v_jpadpress1).w ; is button B pressed?
-		beq.s	@stayindebug	; if not, branch
+	@backtonormal:
+		btst	#bitB,(v_jpadpress1).w 	; is button B pressed?
+		beq.s	stayindebug						; if not, branch
+
+Debug_Exit:
 		moveq	#0,d0
-		move.w	d0,(v_debuguse).w ; deactivate debug mode
+		move.w	d0,(v_debuguse).w 		; deactivate debug mode
 
 	if EnhancedDebug>0
 		bsr.w   Hud_Base
-		move.b	#1,(f_scorecount).w ; update score counter
-		move.b	#1,(f_ringcount).w  ; update rings counter
+		move.b	#1,(f_scorecount).w 	; update score counter
+		move.b	#1,(f_ringcount).w  	; update rings counter
 	endc
 
 		move.l	#Map_Sonic,(v_player+obMap).w
@@ -205,10 +208,10 @@ Debug_ChgItem:
 		move.b	d0,(v_player+obAnim).w
 		move.w	d0,obX+2(a0)
 		move.w	d0,obY+2(a0)
-		move.w	(v_limittopdb).w,(v_limittop2).w ; restore level boundaries
+		move.w	(v_limittopdb).w,(v_limittop2).w 	; restore level boundaries
 		move.w	(v_limitbtmdb).w,(v_limitbtm1).w
-		cmpi.b	#id_Special,(v_gamemode).w ; are you in the special stage?
-		bne.s	@stayindebug	; if not, branch
+		cmpi.b	#id_Special,(v_gamemode).w 				; are you in the special stage?
+		bne.s	stayindebug													; if not, branch
 
 		clr.w	(v_ssangle).w
 		move.w	#$40,(v_ssrotate).w ; set new level rotation speed
@@ -218,7 +221,7 @@ Debug_ChgItem:
 		bset	#2,(v_player+obStatus).w
 		bset	#1,(v_player+obStatus).w
 
-	@stayindebug:
+stayindebug:
 		rts
 ; End of function Debug_Control
 

@@ -352,24 +352,26 @@ f_debugmode:	equ $FFFFFFFA	; debug mode flag (sometimes 2 bytes)
 v_init:		equ $FFFFFFFC	; 'init' text string (4 bytes)
 
 ; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
-; ------- Additional -------
-f_spindash:		  equ $29           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
-f_superpeelout: equ $39
-
-f_victory:     equ $FFFFF5C0     ; victory pose flag
-f_goggles: equ $FFFFFFA0	   ; goggle flag move to FE2F?
-
-f_levelreload: equ $FFFFCF80     ; Reload Level Flag @TODO find unused byte in mem
-
-v_startscore:  equ $3A ; @TODO Conflict with 3A in spindash and peelout?
-v_peelout:  equ $3A ; @TODO Conflict with 3A in v_startscore?
-
 ; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.
 
-bit_in_air:    equ 1
-bit_pushing:   equ 5
+; Stage Flags and Variables
+f_victory:     					equ $FFFFFFEA     ; Victory Condition flag
+f_levelreload: 					equ $FFFFFFEB     ; Reload Level Flag
+v_startscore:  					equ $FFFFF642			;	Score as of Checkpoint
+v_screendelay:          equ $FFFFC904			; DMA Queue Freed Range
+v_screendelay_v:        equ $FFFFC903			; DMA Queue Freed Range
 
-LevelSelectRam:   equ $FFFFF5C1
+; Character Flags and Variables
+f_goggles:							equ $39
+f_spindash:		  				equ $3A           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate
+f_superpeelout: 				equ $3B
+v_charging:							equ $29
+
+
+
+;$FFFFFFA0	   														; goggle flag move to FE2F?
+
+LevelSelectRam: 				equ $FFFFF5C0
 
 ; ===========================================================================
 ; PLC Queue Enhancement

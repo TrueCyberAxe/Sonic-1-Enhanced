@@ -182,32 +182,56 @@ Drown_WobbleData:
 ; ===========================================================================
 
 Drown_Countdown:; Routine $A
+	if FeatureRestoreMonitorScubaGear>0
+		tst.b	(f_goggles).w							; Do We Have Goggles?
+		bne.w	No_Countdown							; if yes, branch
+	endc
+
+	if BugFixDrownInDebug>0
+		tst.w	(v_debuguse).w						; Are we in Debug?
+		bne.w	No_Countdown							; if yes, branch
+	endc
+
 		tst.w	$2C(a0)
 		bne.w	@loc_13F86
 		cmpi.b	#6,(v_player+obRoutine).w
-		bcc.w	@nocountdown
-		btst	#6,(v_player+obStatus).w ; is Sonic underwater?
-		beq.w	@nocountdown	; if not, branch
+		bcc.w	No_Countdown
 
-		subq.w	#1,drown_time(a0)	; decrement timer
-		bpl.w	@nochange	; branch if time remains
+		btst	#6,(v_player+obStatus).w 	; is Sonic underwater?
+		beq.w	No_Countdown							; if not, branch
+
+	if FeatureAirAnimation>0
+		cmpi.b #id_roll,obAnim(a0) 			; Is animation 2 active?
+		beq.s @skip 										; If so, branch.
+
+		move.b	#id_Surf,obAnim(a0)			; use Sonic's drowning animation
+	@skip:
+	endc
+
+		subq.w	#1,drown_time(a0)				; decrement timer
+		bpl.w	@nochange									; branch if time remains
+
 		move.w	#59,drown_time(a0)
 		move.w	#1,$36(a0)
 		jsr	(RandomNumber).l
 		andi.w	#1,d0
 		move.b	d0,$34(a0)
-		move.w	(v_air).w,d0	; check air remaining
+		move.w	(v_air).w,d0						; check air remaining
 		cmpi.w	#25,d0
-		beq.s	@warnsound	; play sound if	air is 25
+		beq.s	@warnsound								; play sound if	air is 25
 		cmpi.w	#20,d0
 		beq.s	@warnsound
 		cmpi.w	#15,d0
 		beq.s	@warnsound
 		cmpi.w	#12,d0
-		bhi.s	@reduceair	; if air is above 12, branch
+		bhi.s	@reduceair								; if air is above 12, branch
 
-		bne.s	@skipmusic	; if air is less than 12, branch
-		music	bgm_Drowning,0,0,0	; play countdown music
+	if FeatureAirAnimation>0
+		move.b	#id_Surf,obAnim(a0)			; use Sonic's drowning animation
+	endc
+
+		bne.s	@skipmusic								; if air is less than 12, branch
+		music	bgm_Drowning,0,0,0				; play countdown music
 
 	@skipmusic:
 		subq.b	#1,$32(a0)
@@ -217,14 +241,10 @@ Drown_Countdown:; Routine $A
 		bra.s	@reduceair
 ; ===========================================================================
 
-@warnsound:
+	@warnsound:
 		sfx	sfx_Warning,0,0,0	; play "ding-ding" warning sound
 
-@reduceair:
-	if FeatureRestoreMonitorScubaGear>0
-		tst.b	(f_goggles).w				; was a goggle monitor broken?
-		bne	@gotomakenum							; if yes, branch
-	endc
+	@reduceair:
 		subq.w	#1,(v_air).w					; subtract 1 from air remaining
 		bcc.w	@gotomakenum						; if air is above 0, branch
 
@@ -249,13 +269,15 @@ Drown_Countdown:; Routine $A
 		rts
 ; ===========================================================================
 
-@loc_13F86:
+	@loc_13F86:
 		subq.w	#1,$2C(a0)
+
 	if BugFixDrowningTimer=0
 		bne.s	@loc_13F94
 	else
 		bne.s	@nochange
 	endc
+
 		move.b	#6,(v_player+obRoutine).w
 		rts
 ; ===========================================================================
@@ -270,22 +292,22 @@ Drown_Countdown:; Routine $A
 	endc
 ; ===========================================================================
 
-@gotomakenum:
+	@gotomakenum:
 		bra.s	@makenum
 ; ===========================================================================
 
-@nochange:
+	@nochange:
 		tst.w	$36(a0)
-		beq.w	@nocountdown
+		beq.w	No_Countdown
 		subq.w	#1,$3A(a0)
-		bpl.w	@nocountdown
+		bpl.w	No_Countdown
 
-@makenum:
+	@makenum:
 		jsr	(RandomNumber).l
 		andi.w	#$F,d0
 		move.w	d0,$3A(a0)
 		jsr	(FindFreeObj).l
-		bne.w	@nocountdown
+		bne.w	No_Countdown
 		move.b	#id_DrownCount,0(a1) ; load object
 		move.w	(v_player+obX).w,obX(a1) ; match X position to Sonic
 		moveq	#6,d0
@@ -314,7 +336,7 @@ Drown_Countdown:; Routine $A
 		bra.s	@loc_14082
 ; ===========================================================================
 
-@loc_1403E:
+	@loc_1403E:
 		btst	#7,$36(a0)
 		beq.s	@loc_14082
 		move.w	(v_air).w,d2
@@ -335,10 +357,10 @@ Drown_Countdown:; Routine $A
 		move.b	d2,obSubtype(a1)
 		move.w	#$1C,drown_time(a1)
 
-@loc_14082:
+	@loc_14082:
 		subq.b	#1,$34(a0)
-		bpl.s	@nocountdown
+		bpl.s	No_Countdown
 		clr.w	$36(a0)
 
-@nocountdown:
+No_Countdown:
 		rts

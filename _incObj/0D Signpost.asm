@@ -10,13 +10,13 @@ Signpost:
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
 
-	if BugFixRenderBeforeInit=0 ; Bug 1
+	if BugFixRenderBeforeInit=0 										; Bug 1
 		bsr.w	DisplaySprite
 	endc
 
 		out_of_range	DeleteObject
 
-	if BugFixRenderBeforeInit=0 ; Bug 1
+	if BugFixRenderBeforeInit=0 										; Bug 1
 		rts
 	else
 			bra.w	DisplaySprite
@@ -27,14 +27,11 @@ Sign_Index:
 		dc.w Sign_Touch-Sign_Index
 		dc.w Sign_Spin-Sign_Index
 		dc.w Sign_SonicRun-Sign_Index
-	if FeatureBetaVictoryAnimation>0
-		dc.w GotThroughAct-Sign_Index
-	endc
 		dc.w Sign_Exit-Sign_Index
 
-spintime:	equ $30		; time for signpost to spin
-sparkletime:	equ $32		; time between sparkles
-sparkle_id:	equ $34		; counter to keep track of sparkles
+spintime:	equ $30																	; time for signpost to spin
+sparkletime:	equ $32															; time between sparkles
+sparkle_id:	equ $34																; counter to keep track of sparkles
 ; ===========================================================================
 
 Sign_Main:	; Routine 0
@@ -61,32 +58,41 @@ Sign_Touch:	; Routine 2
 ; ===========================================================================
 
 Sign_Spin:	; Routine 4
-	if FeatureBetaVictoryAnimation>0
-		move.b  #1,(f_victory).w 											; Set victory animation flag
+	if (FeatureBetaVictoryAnimation)>0
 		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
 	endc
+	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
+		move.b  #1,(f_victory).w 											; Set victory animation flag
 
-		subq.w	#1,spintime(a0)	; subtract 1 from spin time
-		bpl.s	@chksparkle	; if time remains, branch
-		move.w	#60,spintime(a0) ; set spin cycle time to 1 second
-		addq.b	#1,obAnim(a0)	; next spin cycle
-		cmpi.b	#3,obAnim(a0)	; have 3 spin cycles completed?
-		bne.s	@chksparkle	; if not, branch
+		tst.w	(v_debuguse).w													; is debug mode	on?
+		beq.b @skip																		; if not, branch
+
+		jsr	Debug_Exit																; if yes, branch
+
+	@skip:
+	endc ; if FeatureBetaVictoryAnimation>0
+
+		subq.w	#1,spintime(a0)												; subtract 1 from spin time
+		bpl.s	@chksparkle															; if time remains, branch
+		move.w	#60,spintime(a0) 											; set spin cycle time to 1 second
+		addq.b	#1,obAnim(a0)													; next spin cycle
+		cmpi.b	#3,obAnim(a0)													; have 3 spin cycles completed?
+		bne.s	@chksparkle															; if not, branch
 		addq.b	#2,obRoutine(a0)
 
 	@chksparkle:
-		subq.w	#1,sparkletime(a0) ; subtract 1 from time delay
-		bpl.s	@fail		; if time remains, branch
-		move.w	#$B,sparkletime(a0) ; set time between sparkles to $B frames
+		subq.w	#1,sparkletime(a0) 										; subtract 1 from time delay
+		bpl.s	@fail																		; if time remains, branch
+		move.w	#$B,sparkletime(a0) 									; set time between sparkles to $B frames
 		moveq	#0,d0
-		move.b	sparkle_id(a0),d0 ; get sparkle id
-		addq.b	#2,sparkle_id(a0) ; increment sparkle counter
+		move.b	sparkle_id(a0),d0 										; get sparkle id
+		addq.b	#2,sparkle_id(a0) 										; increment sparkle counter
 		andi.b	#$E,sparkle_id(a0)
-		lea	Sign_SparkPos(pc,d0.w),a2 ; load sparkle position data
+		lea	Sign_SparkPos(pc,d0.w),a2 								; load sparkle position data
 		bsr.w	FindFreeObj
 		bne.s	@fail
-		move.b	#id_Rings,0(a1)									; load rings object
-		move.b	#id_Ring_Sparkle,obRoutine(a1) 	; jump to ring sparkle subroutine
+		move.b	#id_Rings,0(a1)												; load rings object
+		move.b	#id_Ring_Sparkle,obRoutine(a1) 				; jump to ring sparkle subroutine
 		move.b	(a2)+,d0
 		ext.w	d0
 		add.w	obX(a0),d0
@@ -104,7 +110,7 @@ Sign_Spin:	; Routine 4
 	@fail:
 		rts
 ; ===========================================================================
-Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
+Sign_SparkPos:	dc.b -$18,-$10										; x-position, y-position
 		dc.b	8,   8
 		dc.b -$10,   0
 		dc.b  $18,  -8
@@ -115,18 +121,19 @@ Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 ; ===========================================================================
 
 Sign_SonicRun:	; Routine 6
-		tst.w	(v_debuguse).w								; is debug mode	on?
-		bne.w	locret_ECEE										; if yes, branch
+	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
+		clr.b  (f_lockscreen).w 											; Unset Prevent Sonic Leaving the Screen
+	endc
 
-	if FeatureBetaVictoryAnimation=1 			; If we're set to 1 Allow the run and unset the victory jump flag
-		move.b  #0,(f_victory).w 						; Unset victory animation flag
-		move.b  #0,(f_lockscreen).w 				; Unset Prevent Sonic Leaving the Screen
+	if BugFixVictoryDebug=0
+		tst.w	(v_debuguse).w													; is debug mode	on?
+		bne.w	locret_ECEE															; if yes, branch
 	endc
 
 		btst	#1,(v_player+obStatus).w
 		bne.s	loc_EC70
-		move.b	#1,(f_lockctrl).w 					; lock controls
-		move.w	#btnR<<8,(v_jpadhold2).w 		; make Sonic run to the right
+		move.b	#1,(f_lockctrl).w 										; lock controls
+		move.w	#btnR<<8,(v_jpadhold2).w 							; make Sonic run to the right
 
 	loc_EC70:
 		tst.b	(v_player).w
@@ -135,6 +142,7 @@ Sign_SonicRun:	; Routine 6
 		move.w	(v_limitright2).w,d1
 		addi.w	#$128,d1
 		cmp.w	d1,d0
+
 	if TweakUncompressedTitleCards=0
 		bcs.s	locret_ECEE
 	else
@@ -149,8 +157,6 @@ Sign_SonicRun:	; Routine 6
 ; ---------------------------------------------------------------------------
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 GotThroughAct:
 		tst.b	(v_objspace+$5C0).w
 		bne.s	locret_ECEE
@@ -186,11 +192,11 @@ GotThroughAct:
 
 	@hastimebonus:
 		add.w	d0,d0
-		move.w	TimeBonuses(pc,d0.w),(v_timebonus).w ; set time bonus
-		move.w	(v_rings).w,d0	; load number of rings
-		mulu.w	#10,d0		; multiply by 10
-		move.w	d0,(v_ringbonus).w ; set ring bonus
-		sfx	bgm_GotThrough,0,0,0	; play "Sonic got through" music
+		move.w	TimeBonuses(pc,d0.w),(v_timebonus).w 					; set time bonus
+		move.w	(v_rings).w,d0																; load number of rings
+		mulu.w	#10,d0																				; multiply by 10
+		move.w	d0,(v_ringbonus).w 														; set ring bonus
+		sfx	bgm_GotThrough,0,0,0															; play "Sonic got through" music
 
 locret_ECEE:
 		rts

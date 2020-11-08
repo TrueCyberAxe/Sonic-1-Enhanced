@@ -46,7 +46,6 @@ loc_1319E:
 loc_131A6:
 		move.w	d0,obInertia(a0)
 
-; @TODO I beleive this is where i can fix the stationary Roll speed
 loc_131AA:
 		tst.w	obInertia(a0)	; is Sonic moving?
 		bne.s	loc_131CC	; if yes, branch
@@ -67,7 +66,8 @@ loc_131CC:
 		subq.w	#2,(v_lookshift).w
 
 	@cont2:
-	endc
+	endc ; if FeatureSpindash>0
+
 		move.b	obAngle(a0),d0
 		jsr	(CalcSine).l
 		muls.w	obInertia(a0),d0

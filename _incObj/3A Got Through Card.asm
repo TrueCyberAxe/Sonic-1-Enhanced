@@ -243,6 +243,9 @@ loc_C766:	; Routine $10
 		addq.w	#2,(v_limitright2).w
 		cmpi.w	#$2100,(v_limitright2).w
 		beq.w	DeleteObject
+	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
+		clr.b  (f_victory).w 													; Unset victory animation flag
+	endc
 		rts
 ; ===========================================================================
 		;    x-start,	x-main,	y-main,

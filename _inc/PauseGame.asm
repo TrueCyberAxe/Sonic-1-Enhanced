@@ -4,47 +4,62 @@
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-
 PauseGame:
+	if TweakCodeOptimizations=0
 		nop
+	endc ; if TweakCodeOptimizations=0
+
 		tst.b	(v_lives).w																; do you have any lives	left?
-	if FeatureSonicCDPauseRestartLevel=0
+
+	if (EnhancedDebug+FeatureSonicCDPauseRestartLevel)=0
 		beq.s	Unpause																		; if not, branch
 	else
 		beq.w	Unpause																		; if not, branch
 	endc
+
 		tst.w	(f_pause).w																; is game already paused?
 		bne.s	Pause_StopGame														; if yes, branch
 		btst	#bitStart,(v_jpadpress1).w 								; is Start button pressed?
-	if FeatureSonicCDPauseRestartLevel=0
+
+	if (EnhancedDebug+FeatureSonicCDPauseRestartLevel)=0
 		beq.s	Pause_DoNothing														; if not, branch
 	else
 		beq.w	Pause_DoNothing														; if not, branch
 	endc
 
-
 Pause_StopGame:
-		move.w	#1,(f_pause).w													; freeze time
+	if EnhancedDebug>0
+		tst.b (v_debuguse).w 														; Is debug mode active?
+		beq.s @skip																			; if not, branch
+
+		bra.w GotoLevelSelect
+	@skip:
+	endc ; if EnhancedDebug>0
+
+		move.w	#1,(f_pause).w																; freeze time
+
 	if FeatureMusicWhilePaused=0
 		if FeatureUseSonic2SoundDriver=0
-			move.b	#1,(v_snddriver_ram+f_pausemusic).w 		; pause music
+			move.b	#1,(v_snddriver_ram+f_pausemusic).w 				; pause music
 		else
 			stopZ80
 			waitZ80
 			move.b  #MusID_Pause,(Z80_RAM+zAbsVar.StopMusic).l  ; pause music
 			startZ80
-		endc # if FeatureUseSonic2SoundDriver=0
-	endc # if FeatureMusicWhilePaused=0
+		endc ; if FeatureUseSonic2SoundDriver=0
+	endc ; if FeatureMusicWhilePaused=0
 
 Pause_Loop:
 		move.b	#$10,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		tst.b	(f_slomocheat).w 													; is slow-motion cheat on?
+
 	if FeatureSonicCDPauseRestartLevel=0
-		beq.s	Pause_ChkStart													; if not, branch
+		beq.s	Pause_ChkStart														; if not, branch
 	else
 		beq.s	Pause_Check_Reset													; if not, branch
 	endc
+
 		btst	#bitA,(v_jpadpress1).w 										; is button A pressed?
 		beq.s	Pause_ChkBC																; if not, branch
 		move.b	#id_Title,(v_gamemode).w 								; set game mode to 4 (title screen)

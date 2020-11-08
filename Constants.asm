@@ -71,14 +71,15 @@ vram_sprites:	equ $F800	; sprite table
 vram_hscroll:	equ $FC00	; horizontal scroll table
 
 ; Game modes
-id_Sega:	equ ptr_GM_Sega-GameModeArray	; $00
-id_Title:	equ ptr_GM_Title-GameModeArray	; $04
-id_Demo:	equ ptr_GM_Demo-GameModeArray	; $08
-id_Level:	equ ptr_GM_Level-GameModeArray	; $0C
-id_Special:	equ ptr_GM_Special-GameModeArray; $10
-id_Continue:	equ ptr_GM_Cont-GameModeArray	; $14
-id_Ending:	equ ptr_GM_Ending-GameModeArray	; $18
-id_Credits:	equ ptr_GM_Credits-GameModeArray; $1C
+id_Sega:	equ ptr_GM_Sega-GameModeArray	                 ; $00
+id_Title:	equ ptr_GM_Title-GameModeArray	               ; $04
+id_Demo:	equ ptr_GM_Demo-GameModeArray	                 ; $08
+id_Level:	equ ptr_GM_Level-GameModeArray	               ; $0C
+id_Special:	equ ptr_GM_Special-GameModeArray             ; $10
+id_Continue:	equ ptr_GM_Cont-GameModeArray	             ; $14
+id_Ending:	equ ptr_GM_Ending-GameModeArray	             ; $18
+id_Credits:	equ ptr_GM_Credits-GameModeArray             ; $1C
+id_LevelSelect:	equ ptr_GM_Level_Select-GameModeArray
 
 ; Levels
 id_GHZ:		equ 0
@@ -457,6 +458,13 @@ fr_Injury:	equ $55
 fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
 
+bitHorizontal:	 equ 0
+bitVertical:	   equ 1
+bitSpinSmoke:	   equ 2
+bitStandingOn:	 equ 3
+bitPushing:	     equ 5
+bitObjectFlag:	 equ 7
+
 ; ------- Additional -------
 fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)>>1	; $58
 fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)>>1	; $59
@@ -464,8 +472,12 @@ fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)>>1	; $5A
 fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)>>1	; $5B
 fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)>>1	; $5C
 fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)>>1	; $5D
-fr_victory:	  equ $5E
+
+obSmoke:      equ $FFFFD11C
+
 
 max_ring_scatter: equ $20 ; 32
-
 max_demo:         equ 4
+
+bit_in_air:       equ 1
+bit_pushing:      equ 5

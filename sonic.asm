@@ -59,10 +59,10 @@ TweakNonNemesisLevelArtLoad: 				equ 1
 
 	if TweakSonic2LevelArtLoader>0
 FeatureEnhancedPLCQueue: 						equ 1
-	elseif FeatureSpindash>0
+	elseif FeatureSpindash>1
 FeatureEnhancedPLCQueue: 						equ 1
 	else
-FeatureEnhancedPLCQueue: 						equ 0
+FeatureEnhancedPLCQueue: 						equ 1
 	endc
 
 	if Revision=0
@@ -73,23 +73,19 @@ FeatureEnableUnusedArt: 						equ 1
 FeatureEnableUnusedArt: 						equ 0
 	endc
 
-	if BugFixCameraFollow>0
-FixCameraFollow: 										equ 1
-	elseif FeatureSpindash>0
+	if (BugFixCameraFollow+FeatureSpindash)>0
 FixCameraFollow: 										equ 1
 	else
 FixCameraFollow: 										equ 0
 	endc
 
-	if BugFixInvincibilityDelayDeath=0
-OptimizeMonitorOrder:								equ 0
+	if (BugFixInvincibilityDelayDeath)>0
+OptimizeMonitorOrder:								equ 1
 	else
-OptimizeMonitorOrder: 							equ 1
+OptimizeMonitorOrder: 							equ 0
 	endc
 
-	if FeatureSonicCDExtendedCamera>0
-FixCameraFollowBug: 								equ 1
-  elseif BugFixCameraFollow>0
+	if (FeatureSonicCDExtendedCamera+BugFixCameraFollow)>0
 FixCameraFollowBug: 								equ 1
 	else
 FixCameraFollowBug: 								equ 0
@@ -105,6 +101,18 @@ ExtendedMenu: 											equ 0
 AsciiMenu: 													equ 1
 	else
 AsciiMenu: 													equ 0
+	endc
+
+	if EnhancedDebug>0
+ExtendedGameModeArray:							equ 1	;	Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-the-gamemodearray.1983/#post-31703
+	else
+ExtendedGameModeArray:							equ 0
+	endc
+
+	if EnhancedDebug>0
+ExtendedLevelSelect:								equ 1
+	else
+ExtendedLevelSelect:								equ 0
 	endc
 
 	include	"Constants.asm"
@@ -387,14 +395,12 @@ SetupValues:
 
 GameProgram:
 		tst.w	(vdp_control_port).l
+
 	if FeatureSkipChecksum=0
 		btst	#6,($A1000D).l
 		beq.s	CheckSumCheck
 		cmpi.l	#'init',(v_init).w 			; has checksum routine already run?
 		beq.w	GameInit									; if yes, branch
-	else
-		bra.w	GameInit									; if yes, branch
-	endc
 
 CheckSumCheck:
 		movea.l	#EndOfHeader,a0					; start	checking bytes after the header	($200)
@@ -422,6 +428,7 @@ CheckSumCheck:
 		andi.b	#$C0,d0
 		move.b	d0,(v_megadrive).w 			; get region setting
 		move.l	#'init',(v_init).w 			; set flag so checksum won't run again
+	endc ; if FeatureSkipChecksum=0
 
 GameInit:
 		lea	(v_256x256).l,a6
@@ -429,35 +436,56 @@ GameInit:
 		move.w	#$3F7F,d6
 	@clearRAM:
 		move.l	d7,(a6)+
-		dbf	d6,@clearRAM								; clear RAM ($0000-$FDFF)
+		dbf	d6,@clearRAM									; clear RAM ($0000-$FDFF)
 
 		bsr.w	VDPSetupGame
 		bsr.w	SoundDriverLoad
 		bsr.w	JoypadInit
-		move.b	#id_Sega,(v_gamemode).w ; set Game Mode to Sega Screen
+		move.b	#id_Sega,(v_gamemode).w 	; set Game Mode to Sega Screen
 
 MainGameLoop:
-		move.b	(v_gamemode).w,d0 			; load Game Mode
-		andi.w	#$1C,d0									; limit Game Mode value to $1C max (change to a maximum of 7C to add more game modes)
-		jsr	GameModeArray(pc,d0.w) 			; jump to apt location in ROM
-		bra.s	MainGameLoop							; loop indefinitely
+		move.b	(v_gamemode).w,d0 				; load Game Mode
+
+	if ExtendedGameModeArray=0
+		andi.w	#$1C,d0										; limit Game Mode value to $1C max (change to a maximum of 7C to add more game modes)
+		jsr	GameModeArray(pc,d0.w) 				; jump to apt location in ROM
+	elseif ExtendedGameModeArray=1
+		andi.w	#$7C,d0										; limit Game Mode value to $1C max (change to a maximum of 7C to add more game modes)
+		movea.l GameModeArray(pc,d0.w),a1 ; jump to apt location in ROM
+		jsr (a1)
+	endc ; if ExtendedGameModeArray=0
+
+		bra.s	MainGameLoop								; loop indefinitely
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Main game mode array
 ; ---------------------------------------------------------------------------
 
 GameModeArray:
+	if ExtendedGameModeArray=0
+ptr_GM_Sega:		bra.w	GM_Sega								; Sega Screen ($00)
+ptr_GM_Title:		bra.w	GM_Title							; Title	Screen ($04)
+ptr_GM_Demo:		bra.w	GM_Level							; Demo Mode ($08)
+ptr_GM_Level:		bra.w	GM_Level							; Normal Level ($0C)
+ptr_GM_Special:	bra.w	GM_Special						; Special Stage	($10)
+ptr_GM_Cont:		bra.w	GM_Continue						; Continue Screen ($14)
+ptr_GM_Ending:	bra.w	GM_Ending							; End of game sequence ($18)
+ptr_GM_Credits:	bra.w	GM_Credits						; Credits ($1C)
+	else
+ptr_GM_Sega:		dc.l	GM_Sega								; Sega Screen ($00)
+ptr_GM_Title:		dc.l	GM_Title							; Title	Screen ($04)
+ptr_GM_Demo:		dc.l	GM_Level							; Demo Mode ($08)
+ptr_GM_Level:		dc.l	GM_Level							; Normal Level ($0C)
+ptr_GM_Special:	dc.l	GM_Special						; Special Stage	($10)
+ptr_GM_Cont:		dc.l	GM_Continue						; Continue Screen ($14)
+ptr_GM_Ending:	dc.l	GM_Ending							; End of game sequence ($18)
+ptr_GM_Credits:	dc.l	GM_Credits						; Credits ($1C)
+		if EnhancedDebug>0
+ptr_GM_Level_Select:	dc.l	GM_Level_Select	; Level Select
+		endc ; if EnhancedDebug>0
+	endc ; if ExtendedGameModeArray=0
+	rts
 
-ptr_GM_Sega:		bra.w	GM_Sega				; Sega Screen ($00)
-ptr_GM_Title:		bra.w	GM_Title			; Title	Screen ($04)
-ptr_GM_Demo:		bra.w	GM_Level			; Demo Mode ($08)
-ptr_GM_Level:		bra.w	GM_Level			; Normal Level ($0C)
-ptr_GM_Special:	bra.w	GM_Special		; Special Stage	($10)
-ptr_GM_Cont:		bra.w	GM_Continue		; Continue Screen ($14)
-ptr_GM_Ending:	bra.w	GM_Ending			; End of game sequence ($18)
-ptr_GM_Credits:	bra.w	GM_Credits		; Credits ($1C)
-
-		rts
 ; ===========================================================================
 
 CheckSumError:
@@ -658,12 +686,13 @@ VBlank:
 		move.w	(vdp_control_port).l,d0
 		move.l	#$40000010,(vdp_control_port).l
 		move.l	(v_scrposy_dup).w,(vdp_data_port).l ; send screen y-axis pos. to VSRAM
-		btst	#6,(v_megadrive).w ; is Megadrive PAL?
-		beq.s	@notPAL		; if not, branch
+
+		btst	#6,(v_megadrive).w 										; is Megadrive PAL?
+		beq.s	@notPAL																; if not, branch
 
 		move.w	#$700,d0
 	@waitPAL:
-		dbf	d0,@waitPAL ; wait here in a loop doing nothing for a while...
+		dbf	d0,@waitPAL 														; wait here in a loop doing nothing for a while...
 
 	@notPAL:
 		move.b	(v_vbla_routine).w,d0
@@ -701,6 +730,7 @@ VBla_00:
 		bne.w	VBla_Music	; if not, branch
 
 		move.w	(vdp_control_port).l,d0
+
 		btst	#6,(v_megadrive).w ; is Megadrive PAL?
 		beq.s	@notPAL		; if not, branch
 
@@ -811,21 +841,23 @@ VBla_08:
 	endc ; if FeatureEnhancedPLCQueue=0
 
  	;  #$83,(v_vdp_buffer2).w
+
 	; @NOTE spindash Queue system tutorial wanted me to remove move	#$83,($FFFFF640).w and jsr	Process_DMA but they dont exist
-	@nochg:
-	if TweakRemoveUselessZ80Commands=0
-		startZ80
-	endc
+	@nochg: ; loc_D50
+		if TweakRemoveUselessZ80Commands=0
+			startZ80
+		endc
+
 		movem.l	(v_screenposx).w,d0-d7
 		movem.l	d0-d7,(v_screenposx_dup).w
 		movem.l	(v_fg_scroll_flags).w,d0-d1
 		movem.l	d0-d1,(v_fg_scroll_flags_dup).w
 		cmpi.b	#96,(v_hbla_line).w
 		bhs.s	Demo_Time
-	if FeatureEnhancedPLCQueue=0 ; <----- Something wrong with this Line???
+
 		move.b	#1,($FFFFF64F).w
 		addq.l	#4,sp
-	endc ; if FeatureEnhancedPLCQueue=0
+
 		bra.w	VBla_Exit
 
 ; ---------------------------------------------------------------------------
@@ -851,7 +883,7 @@ Demo_Time:
 
 ; ===========================================================================
 
-VBla_0A:
+VBla_0A: ; loc_DAE
 	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
@@ -896,10 +928,10 @@ VBla_0C:
 		writeCRAM	v_pal_dry,$80,0
 		bra.s	@waterbelow
 
-@waterabove:
+	@waterabove:
 		writeCRAM	v_pal_water,$80,0
 
-	@waterbelow:
+	@waterbelow: ; loc_EEE
 		move.w	(v_hbla_hreg).w,(a5)
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
@@ -942,7 +974,7 @@ VBla_12:
 		bra.w	sub_1642
 ; ===========================================================================
 
-VBla_16:
+VBla_16: ; loc_FAE
 	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
@@ -2325,7 +2357,7 @@ PalLoad4_Water:
 		rts
 ; End of function PalLoad4_Water
 
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+	if FeatureEnhancedPLCQueue>0
 
 ; ---------------------------------------------------------------------------
 ; Subroutine for queueing VDP commands (seems to only queue transfers to VRAM),
@@ -2342,7 +2374,6 @@ PalLoad4_Water:
 
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
-	if FeatureEnhancedPLCQueue>0
 ; sub_144E: DMA_68KtoVRAM: QueueCopyToVRAM: QueueVDPCommand: Add_To_DMA_Queue:
 QueueDMATransfer:
 		movea.l	($FFFFC8FC).w,a1
@@ -2424,6 +2455,44 @@ ProcessDMAQueue_Done:
 		rts
 ; End of function ProcessDMAQueue
 
+LoadSonicDynPLC:			; XREF: Obj01_Control; et al
+		moveq	#0,d0
+		move.b	$1A(a0),d0	; load frame number
+		cmp.b	($FFFFF766).w,d0
+		beq.s	locret_13C96
+		move.b	d0,($FFFFF766).w
+		lea	(SonicDynPLC).l,a2
+		add.w	d0,d0
+		adda.w	(a2,d0.w),a2
+		moveq	#0,d5
+		move.b	(a2)+,d5
+		subq.w	#1,d5
+		bmi.s	locret_13C96
+		move.w	#$F000,d4
+		move.l	#Art_Sonic,d6
+
+SPLC_ReadEntry:
+		moveq	#0,d1
+		move.b	(a2)+,d1
+		lsl.w	#8,d1
+		move.b	(a2)+,d1
+		move.w	d1,d3
+		lsr.w	#8,d3
+		andi.w	#$F0,d3
+		addi.w	#$10,d3
+		andi.w	#$FFF,d1
+		lsl.l	#5,d1
+		add.l	d6,d1
+		move.w	d4,d2
+		add.w	d3,d4
+		add.w	d3,d4
+		jsr	(QueueDMATransfer).l
+		dbf	d5,SPLC_ReadEntry	; repeat for number of entries
+
+locret_13C96:
+		rts
+; End of function LoadSonicDynPLC
+
 	endc ; if FeatureEnhancedPLCQueue>0
 
 ; ===========================================================================
@@ -2502,11 +2571,11 @@ GM_Sega:
 		lea	(vdp_control_port).l,a6
 	endc ; @TODO fix
 
-		move.w	#$8004,(a6)	; use 8-colour mode
-		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
-		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
-		move.w	#$8700,(a6)	; set background colour (palette entry 0)
-		move.w	#$8B00,(a6)	; full-screen vertical scrolling
+		move.w	#$8004,(a6)											; use 8-colour mode
+		move.w	#$8200+(vram_fg>>10),(a6) 			; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) 			; set background nametable address
+		move.w	#$8700,(a6)											; set background colour (palette entry 0)
+		move.w	#$8B00,(a6)											; full-screen vertical scrolling
 		clr.b	(f_wtr_state).w
 		disable_ints
 		move.w	(v_vdp_buffer1).w,d0
@@ -2514,21 +2583,23 @@ GM_Sega:
 		move.w	d0,(vdp_control_port).l
 		bsr.w	ClearScreen
 		locVRAM	0
-		lea	(Nem_SegaLogo).l,a0 ; load Sega	logo patterns
+		lea	(Nem_SegaLogo).l,a0 								; load Sega	logo patterns
 		bsr.w	NemDec
 		lea	(v_256x256).l,a1
-		lea	(Eni_SegaLogo).l,a0 ; load Sega	logo mappings
+		lea	(Eni_SegaLogo).l,a0 								; load Sega	logo mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
 		copyTilemap	v_256x256,$E510,$17,7
 		copyTilemap	$FF0180,$C000,$27,$1B
 
-	if Revision>0
-		tst.b   (v_megadrive).w							; is console Japanese?
-		bmi.s   @loadpal
-		copyTilemap	$FF0A40,$C53A,2,1 			; hide "TM" with a white rectangle
-	endc
+	if FeatureSkipSomeRegionalChecks=0
+		if Revision>0
+			tst.b   (v_megadrive).w								; is console Japanese?
+			bmi.s   @loadpal
+			copyTilemap	$FF0A40,$C53A,2,1 				; hide "TM" with a white rectangle
+		endc ; if Revision>0
+	endc ; if FeatureSkipSomeRegionalChecks=0
 
 	@loadpal:
 	if TweakSegaLogoWhiteFade=1
@@ -2536,12 +2607,12 @@ GM_Sega:
 	  moveq #$3F,d7
 
   @loop:
-    move.w #cWhite,(a3)+    							; move data to RAM
+    move.w #cWhite,(a3)+    								; move data to RAM
     dbf d7,@loop
-    bsr.w PaletteFadeIn 									; added to allow fade in
+    bsr.w PaletteFadeIn 										; added to allow fade in
 	else
 		moveq	#palid_SegaBG,d0
-		bsr.w	PalLoad2												; load Sega logo palette
+		bsr.w	PalLoad2													; load Sega logo palette
 	endc
 
 		move.w	#-$A,(v_pcyc_num).w
@@ -2558,17 +2629,17 @@ Sega_WaitPal:
 		bsr.w	WaitForVBla
 
 	if FeatureSkipSEGALogo>0
-		lea	(v_jpadhold1).w,a0								; address where JoyPad states are written
-		lea	($A10003).l,a1										; address where JoyPad states are read from
-		jsr	(Joypad_Read).w										; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
-		btst	#7,(v_jpadhold1).w							; Check for Start button
-		bne.s	Sega_GotoTitle									; If start is pressed, stop playing, leave this loop, and unfreeze the 68K
+		lea	(v_jpadhold1).w,a0									; address where JoyPad states are written
+		lea	($A10003).l,a1											; address where JoyPad states are read from
+		jsr	(Joypad_Read).w											; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
+		btst	#7,(v_jpadhold1).w								; Check for Start button
+		bne.s	Sega_GotoTitle										; If start is pressed, stop playing, leave this loop, and unfreeze the 68K
 	endc
 
 		bsr.w	PalCycle_Sega
 		bne.s	Sega_WaitPal
 
-		sfx	sfx_Sega,0,1,1										; play "SEGA" sound
+		sfx	sfx_Sega,0,1,1											; play "SEGA" sound
 
 	if FeatureUseSonic2SoundDriver=0
 		move.b	#$14,(v_vbla_routine).w
@@ -2593,36 +2664,135 @@ Sega_WaitEnd:
 		bsr.w	WaitForVBla
 		tst.w	(v_demolength).w
 		beq.s	Sega_GotoTitle
-		andi.b	#btnStart,(v_jpadpress1).w 		; is Start button pressed?
-		beq.s	Sega_WaitEnd										; if not, branch
+		andi.b	#btnStart,(v_jpadpress1).w 			; is Start button pressed?
+		beq.s	Sega_WaitEnd											; if not, branch
 
 Sega_GotoTitle:
-		move.b	#id_Title,(v_gamemode).w 			; go to title screen
+		move.b	#id_Title,(v_gamemode).w 				; go to title screen
 		rts
 ; ===========================================================================
 
 ; ---------------------------------------------------------------------------
 ; Title	screen
 ; ---------------------------------------------------------------------------
+	if ExtendedLevelSelect>0
+GotoLevelSelect:
+		move.b	#id_LevelSelect,(v_gamemode).w	; go to title screen
+		rts
+
+GM_Level_Select:
+		bsr.w	ClearPLC
+
+	if FeatureUseSonic2SoundDriver=0
+		sfx	bgm_Fade,0,0,1 														; stop music
+	else
+		music	bgm_Fade,0,0,1 													; stop music
+	endc
+
+		bsr.w	PaletteFadeOut
+
+		move.b (v_gamemode).w,d0 											; load Game Mode
+		move.w d0,d1
+		lsr.b #$01,d1
+		add.w d1,d0
+
+		disable_ints
+		move.b	#1,(f_nobgscroll).w 									; clear scroll lock
+		move.w	#$8004,(a6)														; 8-colour mode
+		move.w	#$8200+(vram_fg>>10),(a6) 						; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) 						; set background nametable address
+		move.w	#$9001,(a6)														;	64-cell hscroll size
+		move.w	#$9200,(a6)														; window vertical position
+		move.w	#$8B03,(a6)
+		move.w	#0,(a6)																; set background colour (palette line 2, entry 0)
+		clr.b	(f_wtr_state).w
+		move.b	#0,(v_lastlamp).w 										; clear lamppost counter
+		move.w	#0,(v_debuguse).w											; disable debug item placement mode
+		move.w	#0,(f_demo).w													; disable debug mode
+		move.w	#0,(f_victory).w 											; normally unused variable - used for f_victory and f_levelreload
+		move.w	#(id_GHZ<<8),(v_zone).w								; set level to GHZ (00)
+		move.w	#0,(v_pcyc_time).w 										; disable palette cycling
+		bsr.w	ClearScreen
+
+		lea	(v_objspace).w,a1
+		moveq	#0,d0
+		move.w	#$7FF,d1
+
+	@ClrObj1:
+		move.l	d0,(a1)+
+		dbf	d1,@ClrObj1																; fill object space ($D000-$EFFF) with 0
+
+		locVRAM	$4000
+		lea	(Nem_TitleFg).l,a0 												; load title	screen patterns
+		bsr.w	NemDec
+
+		lea	(vdp_data_port).l,a6
+		locVRAM	$D000,4(a6)
+		lea	(Art_Text).l,a5														; load level select font
+		move.w	#$28F,d1
+
+	@Load_LevelSelectFont:
+		move.w	(a5)+,(a6)
+		dbf	d1,@Load_LevelSelectFont									; load level select font
+
+		bsr.w	DrawChunks
+		lea	(v_256x256).l,a1
+		lea	(Eni_Title).l,a0 													; load title screen mappings
+		move.w	#0,d0
+		bsr.w	EniDec
+		copyTilemap	v_256x256,$C208,$21,$15
+
+		moveq	#palid_LevelSel,d0
+		bsr.w	PalLoad1																; load level select palette
+
+		moveq	#palid_LevelSel,d0
+		bsr.w	PalLoad2																; load level select palette
+
+		lea	(v_hscrolltablebuffer).w,a1
+		moveq	#0,d0
+		move.w	#$DF,d1
+
+	@ClrScroll1:
+		move.l	d0,(a1)+
+		dbf	d1,@ClrScroll1 												; clear scroll data (in RAM)
+
+		move.l	d0,(v_scrposy_dup).w
+		disable_ints
+		lea	(vdp_data_port).l,a6
+		locVRAM	$E000
+		move.w	#$3FF,d1
+
+	@ClrScroll2:
+		move.l	d0,(a6)
+		dbf	d1,@ClrScroll2 												; clear scroll data (in VRAM)
+
+		bsr.w	PaletteFadeIn 											; Fade into Menu
+		bsr.w	LevSelTextLoad
+		bsr.w LevelSelect
+		; LevSel_Level
+		bsr.w LevSel_Level_SS
+		bra.w PlayLevel
+	endc ; if ExtendedLevelSelect>0
 
 GM_Title:
 	if FeatureUseSonic2SoundDriver=0
-		sfx	bgm_Stop,0,1,1 ; stop music
+		sfx	bgm_Stop,0,1,1 														; stop music
 	else
-		music	bgm_Stop,0,1,1 ; stop music
+		music	bgm_Stop,0,1,1 													; stop music
 	endc
+
 		bsr.w	ClearPLC
 		bsr.w	PaletteFadeOut
 		disable_ints
 		bsr.w	SoundDriverLoad
 		lea	(vdp_control_port).l,a6
-		move.w	#$8004,(a6)	; 8-colour mode
-		move.w	#$8200+(vram_fg>>10),(a6) 		; set foreground nametable address
-		move.w	#$8400+(vram_bg>>13),(a6) 		; set background nametable address
-		move.w	#$9001,(a6)										; 64-cell hscroll size
-		move.w	#$9200,(a6)										; window vertical position
+		move.w	#$8004,(a6)														; 8-colour mode
+		move.w	#$8200+(vram_fg>>10),(a6) 						; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) 						; set background nametable address
+		move.w	#$9001,(a6)														; 64-cell hscroll size
+		move.w	#$9200,(a6)														; window vertical position
 		move.w	#$8B03,(a6)
-		move.w	#$8720,(a6)										; set background colour (palette line 2, entry 0)
+		move.w	#$8720,(a6)														; set background colour (palette line 2, entry 0)
 		clr.b	(f_wtr_state).w
 		bsr.w	ClearScreen
 
@@ -2632,16 +2802,16 @@ GM_Title:
 
 	Tit_ClrObj1:
 		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrObj1								; fill object space ($D000-$EFFF) with 0
+		dbf	d1,Tit_ClrObj1														; fill object space ($D000-$EFFF) with 0
 
 		locVRAM	0
-		lea	(Nem_JapNames).l,a0 					; load Japanese credits
+		lea	(Nem_JapNames).l,a0 											; load Japanese credits
 		bsr.w	NemDec
 		locVRAM	$14C0
-		lea	(Gra_CreditText).l,a0 				;	load alphabet
+		lea	(Gra_CreditText).l,a0 										;	load alphabet
 		bsr.w	NemDec
 		lea	(v_256x256).l,a1
-		lea	(Eni_JapNames).l,a0 					; load mappings for	Japanese credits
+		lea	(Eni_JapNames).l,a0 											; load mappings for	Japanese credits
 		move.w	#0,d0
 		bsr.w	EniDec
 
@@ -2653,51 +2823,57 @@ GM_Title:
 
 	Tit_ClrPal:
 		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrPal									; fill palette with 0 (black)
+		dbf	d1,Tit_ClrPal															; fill palette with 0 (black)
 
-		moveq	#palid_Sonic,d0							; load Sonic's palette
+		moveq	#palid_Sonic,d0													; load Sonic's palette
 		bsr.w	PalLoad1
-		move.b	#id_CreditsText,(v_objspace+$80).w ; load "SONIC TEAM PRESENTS" object
+		move.b	#id_CreditsText,(v_objspace+$80).w 		; load "SONIC TEAM PRESENTS" object
 		jsr	(ExecuteObjects).l
 		jsr	(BuildSprites).l
 		bsr.w	PaletteFadeIn
 		disable_ints
 		locVRAM	$4000
-		lea	(Nem_TitleFg).l,a0 						; load title	screen patterns
+		lea	(Nem_TitleFg).l,a0 												; load title	screen patterns
 		bsr.w	NemDec
 		locVRAM	$6000
-		lea	(Nem_TitleSonic).l,a0 				;	load Sonic title screen	patterns
+		lea	(Nem_TitleSonic).l,a0 										;	load Sonic title screen	patterns
 		bsr.w	NemDec
+
+	if FeatureSkipSomeRegionalChecks=0
 		locVRAM	$A200
-		lea	(Nem_TitleTM).l,a0 						; load "TM" patterns
+		lea	(Nem_TitleTM).l,a0 												; load "TM" patterns
 		bsr.w	NemDec
+	endc ; if FeatureSkipSomeRegionalChecks=0
+
 		lea	(vdp_data_port).l,a6
 		locVRAM	$D000,4(a6)
-		lea	(Art_Text).l,a5								; load level select font
+		lea	(Art_Text).l,a5														; load level select font
 		move.w	#$28F,d1
 
 	Tit_LoadText:
 		move.w	(a5)+,(a6)
-		dbf	d1,Tit_LoadText								; load level select font
+		dbf	d1,Tit_LoadText														; load level select font
 
-		move.b	#0,(v_lastlamp).w 				; clear lamppost counter
-		move.w	#0,(v_debuguse).w					; disable debug item placement mode
-		move.w	#0,(f_demo).w							; disable debug mode
-		move.w	#0,($FFFFFFEA).w 					; unused variable
-		move.w	#(id_GHZ<<8),(v_zone).w		; set level to GHZ (00)
-		move.w	#0,(v_pcyc_time).w 				; disable palette cycling
+		move.b	#0,(v_lastlamp).w 										; clear lamppost counter
+		move.w	#0,(v_debuguse).w											; disable debug item placement mode
+		move.w	#0,(f_demo).w													; disable debug mode
+		move.w	#0,(f_victory).w 											; normally unused variable - used for f_victory and f_levelreload
+		move.w	#(id_GHZ<<8),(v_zone).w								; set level to GHZ (00)
+		move.w	#0,(v_pcyc_time).w 										; disable palette cycling
+
 	if BugFixDrownLockTitleScreen>0
-		move.b	#0,(f_nobgscroll).w 			; clear scroll lock
+		move.b	#0,(f_nobgscroll).w 									; clear scroll lock
 	endc
+
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		lea	(v_16x16).w,a1
-		lea	(Blk16_TITLE).l,a0 						; load	GHZ 16x16 mappings
+		lea	(Blk16_TITLE).l,a0 												; load	GHZ 16x16 mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
 	if TweakUncompressedChunkMapping=0
-		lea	(Blk256_TITLE).l,a0 					; load GHZ 256x256 mappings
+		lea	(Blk256_TITLE).l,a0 											; load GHZ 256x256 mappings
 		lea	(v_256x256).l,a1
 		bsr.w	KosDec
 	endc ; if TweakUncompressedChunkMapping=0
@@ -2713,7 +2889,7 @@ GM_Title:
 		move.w	#$6000,d2
 		bsr.w	DrawChunks
 		lea	(v_256x256).l,a1
-		lea	(Eni_Title).l,a0 							; load title screen mappings
+		lea	(Eni_Title).l,a0 													; load title screen mappings
 		move.w	#0,d0
 		bsr.w	EniDec
 
@@ -2725,26 +2901,26 @@ GM_Title:
 
 		locVRAM	0
 
-		lea	(Gra_Title).l,a0 							; load GHZ patterns for Title Screen
+		lea	(Gra_Title).l,a0 													; load GHZ patterns for Title Screen
 
 	if TweakTitleCompress=0
 		bsr.w	NemDec
 	else
 		if TweakLevelCompressionMode<2
 			bsr.w	NemDec
-		; elseif TweakLevelCompressionMode=2 ; @NOTE needs proper implementation
+		; elseif TweakLevelCompressionMode=2 					; @NOTE needs proper implementation
 		; 	bsr.w	KosDec
 		else
 			; bsr.w CompDec
-			bsr.w	LoadCompArt ; @NOTE Doesnt work
+			bsr.w	LoadCompArt 													; @NOTE Doesnt work
 		endc
 	endc
 
-		moveq	#palid_Title,d0							; load title screen palette
+		moveq	#palid_Title,d0													; load title screen palette
 		bsr.w	PalLoad1
-		sfx	bgm_Title,0,1,1								; play title screen music
-		move.b	#0,(f_debugmode).w 				; disable debug mode
-		move.w	#$178,(v_demolength).w 		; run title screen for $178 frames
+		sfx	bgm_Title,0,1,1														; play title screen music
+		move.b	#0,(f_debugmode).w 										; disable debug mode
+		move.w	#$178,(v_demolength).w 								; run title screen for $178 frames
 		lea	(v_objspace+$80).w,a1
 		moveq	#0,d0
 
@@ -2758,19 +2934,22 @@ GM_Title:
 		move.l	d0,(a1)+
 		dbf	d1,Tit_ClrObj2
 
-		move.b	#id_TitleSonic,(v_objspace+$40).w ; load big Sonic object
-		move.b	#id_PSBTM,(v_objspace+$80).w 			; load "PRESS START BUTTON" object
-		;clr.b	(v_objspace+$80+obRoutine).w ; The 'Mega Games 10' version of Sonic 1 added this line, to fix the 'PRESS START BUTTON' object not appearing
+		move.b	#id_TitleSonic,(v_objspace+$40).w 		; load big Sonic object
+		move.b	#id_PSBTM,(v_objspace+$80).w 					; load "PRESS START BUTTON" object
+		;clr.b	(v_objspace+$80+obRoutine).w 					; The 'Mega Games 10' version of Sonic 1 added this line, to fix the 'PRESS START BUTTON' object not appearing
 
-	if Revision>0
-		tst.b   (v_megadrive).w									; is console Japanese?
-		bpl.s   @isjap													; if yes, branch
-	endc
+	if FeatureSkipSomeRegionalChecks=0
+		if Revision>0
+			tst.b   (v_megadrive).w											; is console Japanese?
+			bpl.s   @isjap															; if yes, branch
+		endc ; if Revision>0
 
-		move.b	#id_PSBTM,(v_objspace+$C0).w 			; load "TM" object
+		move.b	#id_PSBTM,(v_objspace+$C0).w 					; load "TM" object
 		move.b	#3,(v_objspace+$C0+obFrame).w
+	endc ; if FeatureSkipSomeRegionalChecks=0
+
 	@isjap:
-		move.b	#id_PSBTM,(v_objspace+$100).w 		; load object which hides part of Sonic
+		move.b	#id_PSBTM,(v_objspace+$100).w 				; load object which hides part of Sonic to cover with banner
 		move.b	#2,(v_objspace+$100+obFrame).w
 		jsr	(ExecuteObjects).l
 		bsr.w	DeformLayers
@@ -2794,33 +2973,33 @@ Tit_MainLoop:
 		bsr.w	RunPLC
 
 	if EnhancedDebug>0
-		move.b v_jpadpress1,d0        						; get pressed buttons...
-		andi.b #btnA,d0														; is A button pressed?
-		bne.w	GotoDemo														; if yes, branch
+		move.b v_jpadpress1,d0        								; get pressed buttons...
+		andi.b #btnA,d0																; is A button pressed?
+		bne.w	GotoDemo																; if yes, branch
 	endc
 
-
 	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)>0
-		andi.b #btnStart,d0												; is Start button pressed?
-		bne.w	PlayLevel														; if so, branch
+		andi.b #btnStart,d0														; is Start button pressed?
+		bne.w	PlayLevel																; if so, branch
 
-		move.b v_jpadpress1,d0        						; get pressed buttons...
-		andi.b #btnC,d0 													; is button C pressed?
+		move.b v_jpadpress1,d0        								; get pressed buttons...
+		andi.b #btnC,d0 															; is button C pressed?
+
 		if ExtendedMenu=0
-			bne.w	Tit_LoadLevelSelect								; if so, branch
+			bne.w	Tit_LoadLevelSelect										; if so, branch
 		else
-			bne.w	Tit_LoadLevelSelect								; if so, branch
+			bne.w	Tit_LoadLevelSelect										; if so, branch
 		endc ; if ExtendedMenu=0
 	endc ; if FeatureLevelSelectOnC>0
 
 		move.w	(v_objspace+obX).w,d0
 		addq.w	#2,d0
-		move.w	d0,(v_objspace+obX).w 						; move Sonic to the right
-		cmpi.w	#$1C00,d0													; has Sonic object passed $1C00 on x-axis?
-		blo.s	Tit_ChkRegion												; if not, branch
+		move.w	d0,(v_objspace+obX).w 								; move Sonic to the right
+		cmpi.w	#$1C00,d0															; has Sonic object passed $1C00 on x-axis?
+		blo.s	Tit_ChkRegion														; if not, branch
 
 	if TweakRemoveReduntantCode=0
-		move.b	#id_Sega,(v_gamemode).w 					; go to Sega screen
+		move.b	#id_Sega,(v_gamemode).w 							; go to Sega screen
 		rts
 	else
 		bsr.w	SS_ToSegaScreen
@@ -2828,23 +3007,23 @@ Tit_MainLoop:
 ; ===========================================================================
 
 Tit_ChkRegion:
-		tst.b	(v_megadrive).w						; check	if the machine is US or	Japanese
-		bpl.s	Tit_RegionJap							; if Japanese, branch
+		tst.b	(v_megadrive).w													; check	if the machine is US or	Japanese
+		bpl.s	Tit_RegionJap														; if Japanese, branch
 
-		lea	(LevSelCode_US).l,a0 				; load US code
+		lea	(LevSelCode_US).l,a0 											; load US code
 		bra.s	Tit_EnterCheat
 
 	Tit_RegionJap:
-		lea	(LevSelCode_J).l,a0 				; load J code
+		lea	(LevSelCode_J).l,a0 											; load J code
 
 Tit_EnterCheat:
 		move.w	(v_title_dcount).w,d0
 		adda.w	d0,a0
-		move.b	(v_jpadpress1).w,d0 		;	 get button press
-		andi.b	#btnDir,d0							; read only UDLR buttons
-		cmp.b	(a0),d0										; does button press match the cheat code?
-		bne.s	Tit_ResetCheat						; if not, branch
-		addq.w	#1,(v_title_dcount).w 	; next button press
+		move.b	(v_jpadpress1).w,d0 									;	 get button press
+		andi.b	#btnDir,d0														; read only UDLR buttons
+		cmp.b	(a0),d0																	; does button press match the cheat code?
+		bne.s	Tit_ResetCheat													; if not, branch
+		addq.w	#1,(v_title_dcount).w 								; next button press
 		tst.b	d0
 		bne.s	Tit_CountC
 		lea	(f_levselcheat).w,a0
@@ -2855,11 +3034,11 @@ Tit_EnterCheat:
 		tst.b	(v_megadrive).w
 		bpl.s	Tit_PlayRing
 		moveq	#1,d1
-		move.b	d1,1(a0,d1.w)	; cheat depends on how many times C is pressed
+		move.b	d1,1(a0,d1.w)													; cheat depends on how many times C is pressed
 
 	Tit_PlayRing:
-		move.b	#1,(a0,d1.w)	; activate cheat
-		sfx	sfx_Ring,0,1,1	; play ring sound when code is entered
+		move.b	#1,(a0,d1.w)													; activate cheat
+		sfx	sfx_Ring,0,1,1														; play ring sound when code is entered
 		bra.s	Tit_CountC
 ; ===========================================================================
 
@@ -2868,48 +3047,48 @@ Tit_ResetCheat:
 		beq.s	Tit_CountC
 		cmpi.w	#9,(v_title_dcount).w
 		beq.s	Tit_CountC
-		move.w	#0,(v_title_dcount).w ; reset UDLR counter
+		move.w	#0,(v_title_dcount).w 								; reset UDLR counter
 
 Tit_CountC:
 		move.b	(v_jpadpress1).w,d0
-		andi.b	#btnC,d0	; is C button pressed?
-		beq.s	Tit_CheckEnd	; if not, branch
-		addq.w	#1,(v_title_ccount).w ; increment C counter
+		andi.b	#btnC,d0															; is C button pressed?
+		beq.s	Tit_CheckEnd														; if not, branch
+		addq.w	#1,(v_title_ccount).w 								; increment C counter
 
 Tit_CheckEnd: ; loc_3230
 		tst.w	(v_demolength).w
 		beq.w	GotoDemo
-		andi.b	#btnStart,(v_jpadpress1).w 		; check if Start is pressed
-		beq.w	Tit_MainLoop										; if not, branch
+		andi.b	#btnStart,(v_jpadpress1).w 						; check if Start is pressed
+		beq.w	Tit_MainLoop														; if not, branch
 
 Tit_ChkLevSel:
-		tst.b	(f_levselcheat).w 							; check if level select code is on
-		beq.w	PlayLevel												; if not, play level
-		btst	#bitA,(v_jpadhold1).w 					; check if A is pressed
-		beq.w	PlayLevel												; if not, play level
+		tst.b	(f_levselcheat).w 											; check if level select code is on
+		beq.w	PlayLevel																; if not, play level
+		btst	#bitA,(v_jpadhold1).w 									; check if A is pressed
+		beq.w	PlayLevel																; if not, play level
 
 Tit_LoadLevelSelect:
 	if BugFixLevelSelectCorruption>0
 		move.b	#4,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		moveq	#$00,d0				; clear d0
-		move.b	d0,(v_bg1_scroll_flags_dup).w		; clear background strip 1 draw flags
-		move.b	d0,(v_bg2_scroll_flags_dup).w		; clear background strip 2 draw flags
+		move.b	d0,(v_bg1_scroll_flags_dup).w					; clear background strip 1 draw flags
+		move.b	d0,(v_bg2_scroll_flags_dup).w					; clear background strip 2 draw flags
 	if Revision>0
-		move.b	d0,(v_bg3_scroll_flags_dup).w		; clear background strip 3 draw flags
+		move.b	d0,(v_bg3_scroll_flags_dup).w					; clear background strip 3 draw flags
 	endc
-		move.b	d0,(v_fg_scroll_flags_dup).w		; clear foreground strip draw flags
+		move.b	d0,(v_fg_scroll_flags_dup).w					; clear foreground strip draw flags
 	endc
 
 		moveq	#palid_LevelSel,d0
-		bsr.w	PalLoad2	; load level select palette
+		bsr.w	PalLoad2																; load level select palette
 		lea	(v_hscrolltablebuffer).w,a1
 		moveq	#0,d0
 		move.w	#$DF,d1
 
 	Tit_ClrScroll1:
 		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrScroll1 ; clear scroll data (in RAM)
+		dbf	d1,Tit_ClrScroll1 												; clear scroll data (in RAM)
 
 		move.l	d0,(v_scrposy_dup).w
 		disable_ints
@@ -2919,7 +3098,7 @@ Tit_LoadLevelSelect:
 
 	Tit_ClrScroll2:
 		move.l	d0,(a6)
-		dbf	d1,Tit_ClrScroll2 ; clear scroll data (in VRAM)
+		dbf	d1,Tit_ClrScroll2 												; clear scroll data (in VRAM)
 
 		bsr.w	LevSelTextLoad
 
@@ -2953,6 +3132,7 @@ LevelSelect:
 		tst.b (LevelSelectRam)
 	  beq SkipLSelect
 	endc ; if ExtendedMenu>0
+
 		cmpi.w	#$14,d0																; have you selected item $14 (sound test)?
 
 	if TweakNavigationLevelSelect=0
@@ -2961,7 +3141,7 @@ LevelSelect:
 		beq.s   @checkB             									; if so, branch
 		andi.b  #btnStart,(v_jpadpress1).w  					; is start pressed?
 		beq.s   LevelSelect         									; if not, branch
-		bra.s   LevSel_Level_SS         							; if so, go to  Level/SS subroutine
+		bra.s   LevSel_Level_SS         							; go to  Level/SS subroutine
 
 	@checkB:
 		andi.b  #btnB,(v_jpadpress1).w  							; is B pressed?
@@ -2969,6 +3149,7 @@ LevelSelect:
 
 	@soundtest:
 	endc
+
 	if ExtendedMenu>0
 		bra JapCredits
 	endc ; if ExtendedMenu>0
@@ -2995,17 +3176,17 @@ LevelSelect:
 
 		if ExtendedMenu>0
 LevSel_TheLevelSelect:
-  cmpi.b #1,(LevelSelectRam)
-  beq LevSel_NoMove
-  cmpi.w #$02,(v_levselitem).w ; is item $14 selected?
-  bne LevSel_SndTest ; if not, branch
-  move.b (v_jpadpress1).w,d1
-  andi.b #btnStart,d1  ; is left/right pressed?
-  beq.w LevSel_NoMove
+	  cmpi.b #1,(LevelSelectRam)
+	  beq LevSel_NoMove
+	  cmpi.w #$02,(v_levselitem).w ; is item $14 selected?
+	  bne LevSel_SndTest ; if not, branch
+	  move.b (v_jpadpress1).w,d1
+	  andi.b #btnStart,d1  ; is left/right pressed?
+	  beq.w LevSel_NoMove
 
-  Move.b #1,(LevelSelectRam)
-  jsr GM_Title
-  rts
+	  Move.b #1,(LevelSelectRam)
+	  jsr GM_Title
+	  rts
 	endc ; if ExtendedMenu>0
 
 LevSel_NoCheat:
@@ -3035,7 +3216,6 @@ LevSel_Credits:
 		move.w	#0,(v_creditsnum).w
 		rts
 ; ===========================================================================
-
 LevSel_Level_SS:
 	if TweakConsistantLevelSelectClear>0
 		move.w  (v_zone).w,d0
@@ -3077,8 +3257,10 @@ LevSel_Level:
 		tst.b (LevelSelectRam)
 	  beq Option_Level_SS   ; XREF: LevSel_Level_SS
 	endc ; if ExtendedMenu>0
+
 		andi.w	#$3FFF,d0
 		move.w	d0,(v_zone).w							; set level number
+
 	if ExtendedMenu>0
 		bne LevelSelect
 		move.w d0,($FFFFFE10).w ; set level number
@@ -3575,7 +3757,7 @@ Level_ClrStuff:
 		move.w	d0,(v_framecount).w
 
 	if FeatureBetaVictoryAnimation>0
-		clr.w (f_victory).w
+		clr.b	(f_victory).w
 	endc
 
 	if TweakUncompressedTitleCards=0
@@ -3706,13 +3888,12 @@ Level_ClrRam:
 		move.w	(v_hbla_hreg).w,(a6)
 
 	if FeatureEnhancedPLCQueue>0
-		; ResetDMAQueue
-		clr.w	(v_sgfx_buffer).w
+		clr.w	(v_sgfx_buffer).w																						; ResetDMAQueue
 		move.l	#v_sgfx_buffer,(v_sgfx_buffer+$FC).w
 	endc ; if FeatureEnhancedPLCQueue>0
 
 	if FeatureBetaVictoryAnimation>0
-		clr.w (f_victory).w
+		clr.b	(f_victory).w
 	endc ; if FeatureBetaVictoryAnimation>0
 
 		cmpi.b	#id_LZ,(v_zone).w 																				; is level LZ?
@@ -3801,17 +3982,21 @@ Level_TtlCardLoop:
 		jsr	(Hud_Base).l																									; load basic HUD gfx
 
 	Level_SkipTtlCard: ; loc_3946
+
 	if TweakFastLevelReload>0
 		move.b    #1,(f_levelreload).w
 	endc
+
 		moveq	#palid_Sonic,d0
 		bsr.w	PalLoad1																										; load Sonic's palette
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		bset	#2,(v_fg_scroll_flags).w
+
 	if TweakNonNemesisLevelArtLoad>0
 		bsr.w	LoadZoneTiles																								; load level art
 	endc
+
 		bsr.w	LevelDataLoad 																							; load block mappings and palettes
 		bsr.w	LoadTilesFromStart
 		jsr	(FloorLog_Unk).l
@@ -3882,8 +4067,8 @@ Level_LoadObj:
 		movea.l	(a1,d0.w),a1
 
 Level_Demo:
-		move.b	1(a1),(v_btnpushtime2).w ; load key press duration
-		subq.b	#1,(v_btnpushtime2).w ; subtract 1 from duration
+		move.b	1(a1),(v_btnpushtime2).w 	; load key press duration
+		subq.b	#1,(v_btnpushtime2).w 		; subtract 1 from duration
 		move.w	#1800,(v_demolength).w
 		tst.w	(f_demo).w
 		bpl.s	Level_ChkWaterPal
@@ -3893,12 +4078,14 @@ Level_Demo:
 		move.w	#510,(v_demolength).w
 
 Level_ChkWaterPal:
-		cmpi.b	#id_LZ,(v_zone).w ; is level LZ/SBZ3?
-		bne.s	Level_Delay	; if not, branch
-		moveq	#palid_LZWater,d0 ; palette $B (LZ underwater)
-		cmpi.b	#3,(v_act).w	; is level SBZ3?
-		bne.s	Level_WtrNotSbz	; if not, branch
-		moveq	#palid_SBZ3Water,d0 ; palette $D (SBZ3 underwater)
+		cmpi.b	#id_LZ,(v_zone).w 				; is level LZ/SBZ3?
+		bne.s	Level_Delay									; if not, branch
+
+		moveq	#palid_LZWater,d0 					; palette $B (LZ underwater)
+		cmpi.b	#3,(v_act).w							; is level SBZ3?
+		bne.s	Level_WtrNotSbz							; if not, branch
+
+		moveq	#palid_SBZ3Water,d0 				; palette $D (SBZ3 underwater)
 
 	Level_WtrNotSbz:
 		bsr.w	PalLoad4_Water
@@ -3911,11 +4098,11 @@ Level_Delay:
 		bsr.w	WaitForVBla
 		dbf	d1,Level_DelayLoop
 
-		move.w	#$202F,(v_pfade_start).w ; fade in 2nd, 3rd & 4th palette lines
+		move.w	#$202F,(v_pfade_start).w 					; fade in 2nd, 3rd & 4th palette lines
 		bsr.w	PalFadeIn_Alt
-		tst.w	(f_demo).w	; is an ending sequence demo running?
-		bmi.s	Level_ClrCardArt ; if yes, branch
-		addq.b	#2,(v_objspace+$80+obRoutine).w ; make title card move
+		tst.w	(f_demo).w													; is an ending sequence demo running?
+		bmi.s	Level_ClrCardArt 										; if yes, branch
+		addq.b	#2,(v_objspace+$80+obRoutine).w 	; make title card move
 		addq.b	#4,(v_objspace+$C0+obRoutine).w
 		addq.b	#4,(v_objspace+$100+obRoutine).w
 		addq.b	#4,(v_objspace+$140+obRoutine).w
@@ -3936,7 +4123,6 @@ Level_StartGame:
 ; ---------------------------------------------------------------------------
 ; Main level loop (when	all title card and loading sequences are finished)
 ; ---------------------------------------------------------------------------
-
 Level_MainLoop:
 		bsr.w	PauseGame
 		move.b	#8,(v_vbla_routine).w
@@ -3953,6 +4139,7 @@ Level_MainLoop:
 
 		tst.w	(v_debuguse).w	; is debug mode being used?
 		bne.s	Level_DoScroll	; if yes, branch
+
 		cmpi.b	#6,(v_player+obRoutine).w ; has Sonic just died?
 		bhs.s	Level_SkipScroll ; if yes, branch
 
@@ -4330,16 +4517,15 @@ loc_47D4:
 	else
 		;locVRAM	$B000,vdp_control_port												; set mode "VRAM Write to $B000"
 		move.l  #$70000002,($C00004)
-		lea	Gra_TitleCard,a0 																	; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length in tiles
-		jsr LoadUncArt          															; load uncompressed art
+		lea	Gra_TitleCard,a0 																		; load title card patterns
+		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0		; the title card art length in tiles
+		jsr LoadUncArt          																; load uncompressed art
 	endif ; if TweakUncompressedTitleCards=0
 
 		jsr	(Hud_Base).l
 
 	if FeatureEnhancedPLCQueue>0
-		; ResetDMAQueue
-		clr.w	(v_sgfx_buffer).w
+		clr.w	(v_sgfx_buffer).w																	; ResetDMAQueue
 		move.l	#v_sgfx_buffer,(v_sgfx_buffer+$FC).w
 	endc ; if FeatureEnhancedPLCQueue>0
 
@@ -8109,8 +8295,8 @@ Map_WFall	include	"_maps\Waterfalls.asm"
 ; ---------------------------------------------------------------------------
 
 SonicPlayer:
-		tst.w	(v_debuguse).w	; is debug mode	being used?
-		beq.s	Sonic_Normal	; if not, branch
+		tst.w	(v_debuguse).w				; is debug mode	being used?
+		beq.s	Sonic_Normal					; if not, branch
 		jmp	(DebugMode).l
 ; ===========================================================================
 
@@ -8143,11 +8329,17 @@ Sonic_Main:	; Routine 0
 		move.w	#$C,(v_sonspeedacc).w ; Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w ; Sonic's deceleration
 
-Sonic_Control:	; Routine 2
+Sonic_Control:																; Routine 2
+	if BugFixVictoryDebug>0
+		tst.b	(f_victory).w												; is victory flag set?
+		bne.w	loc_12C58														; if yes, branch
+	endc
+
 	if Debug=0
 		tst.w	(f_debugmode).w											; is debug cheat enabled?
 		beq.s	loc_12C58														; if not, branch
 	endc
+
 	if FeatureSonicCDExtendedCamera>0
 		bsr.s Sonic_PanCamera
 	endc
@@ -9692,10 +9884,8 @@ AddPoints:
 
 		addi.l  #5000,(v_scorelife).w ; increase requirement by 50000
 
-		if FeatureUseJapaneseUpdates=0
-			tst.b   (v_megadrive).w
-			bmi.s   @noextralife ; branch if Mega Drive is Japanese
-		endc
+		tst.b   (v_megadrive).w
+		bmi.s   @noextralife ; branch if Mega Drive is Japanese
 
 		addq.b  #1,(v_lives).w ; give extra life
 		addq.b  #1,(f_lifecount).w

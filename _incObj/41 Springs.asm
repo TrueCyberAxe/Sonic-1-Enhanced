@@ -11,7 +11,7 @@ Springs:
 	if BugFixRenderBeforeInit=0 ; Bug 1
 		bsr.w	DisplaySprite
 	endc
-	
+
 		out_of_range	DeleteObject
 
 	if BugFixRenderBeforeInit=0 ; Bug 1
@@ -158,8 +158,9 @@ loc_DC56:
 
 Spring_AniLR:	; Routine $A
 	if FeatureSpindash>0
-		clr.w ($FFFFC904).w									; clear screen delay counter
+		clr.w (v_screendelay).w							; clear screen delay counter
 	endc
+
 		lea	(Ani_Spring).l,a1
 		bra.w	AnimateSprite
 ; ===========================================================================

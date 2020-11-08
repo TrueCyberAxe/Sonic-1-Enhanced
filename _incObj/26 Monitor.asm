@@ -87,6 +87,7 @@ Mon_Solid:														; Routine 2
 		btst  #1,obStatus(a0)
 		beq.s loc_A25C
 	endc
+
 		move.w	#$1A,d1
 		move.w	#$F,d2
 		bsr.w	Mon_SolidSides
@@ -95,6 +96,7 @@ Mon_Solid:														; Routine 2
 		bmi.s	loc_A20A
 		cmpi.b	#id_Roll,obAnim(a1) 			; is Sonic rolling?
 		beq.s	loc_A25C										; if yes, branch
+
 	if FeatureSpindash>0
 		cmpi.b	#id_Spindash,obAnim(a1)		; is Sonic spin-dashing?
 		beq.s	loc_A25C										; if yes, branch
