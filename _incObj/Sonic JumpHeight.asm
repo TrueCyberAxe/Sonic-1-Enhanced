@@ -4,10 +4,8 @@
 
 Sonic_JumpHeight:
 	if FeatureBetaVictoryAnimation>0
-		; This cancels in air roll when hitting the spinning sign at the end
-		; Also has a cool "bug" that causes the leap during the GHZ high jump
 		tst.b (f_victory).w 							; Has the victory animation flag been set?
-		bne.s AirVictory 									; If so, branch
+		bne.s AirVictory 									; If yes, branch
 	endc
 
 		tst.b	$3C(a0)
@@ -20,9 +18,11 @@ Sonic_JumpHeight:
 loc_134AE:
 		cmp.w	obVelY(a0),d1
 		ble.s	locret_134C2
+
 		move.b	(v_jpadhold2).w,d0
 		andi.b	#btnABC,d0	; is A, B or C pressed?
 		bne.s	locret_134C2	; if yes, branch
+
 		move.w	d1,obVelY(a0)
 
 locret_134C2:
@@ -57,14 +57,13 @@ loc_134C4:
 		bge.s	locret_134D2
 		move.w	#-$FC0,obVelY(a0)
 
-AirVictory:
-	if FeatureBetaVictoryAnimation>0
-		cmpi.b #id_roll,obAnim(a0) 				; Is animation 2 active?
-		bne.s locret_134D2 								; If not, branch.
-
-		move.b #id_leap2,obAnim(a0)
-	endc
-
 locret_134D2:
 		rts
+
+AirVictory:
+	if FeatureBetaVictoryAnimation>0
+		move.b #id_leap2,obAnim(a0)
+		rts
+	endc
+
 ; End of function Sonic_JumpHeight

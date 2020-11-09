@@ -6,12 +6,17 @@
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
 Sonic_PanCamera:
-        move.w    (v_camera_pan).w,d1        ; get the current camera pan value
-        move.w    obInertia(a0),d0        ; get sonic's inertia
-        bpl.s    @abs_inertia            ; if sonic's inertia is positive, branch ahead
-        neg.w    d0                        ; otherwise, we negate it to get the absolute value
+    tst.w	(f_demo).w ; Do Not Alter Camera in Demo Mode, causes death bug on demo #2
+    beq.s	@skip_demo
+    rts
 
-    @abs_inertia:
+  @skip_demo:
+    move.w    (v_camera_pan).w,d1        ; get the current camera pan value
+    move.w    obInertia(a0),d0        ; get sonic's inertia
+    bpl.s    @abs_inertia            ; if sonic's inertia is positive, branch ahead
+    neg.w    d0                        ; otherwise, we negate it to get the absolute value
+
+  @abs_inertia:
 
 ; These lines were intended to prevent the Camera from panning while
 ; going up the very first giant ramp in Palmtree Panic Zone Act 1.

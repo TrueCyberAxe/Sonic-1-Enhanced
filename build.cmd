@@ -22,6 +22,8 @@ FOR /F "TOKENS=*" %%A IN (errors.txt) DO IF NOT "%%A"=="" IF NOT "%%A"=="SN 68k 
 IF NOT "%ERROR%"=="FALSE" GOTO :END
 @ECHO.
 @ECHO ==================================================================================
+REM Advanced Debugger
+convsym sonic.lst s1built.bin -input asm68k_lst -inopt "/localSign=@ /localJoin=. /ignoreMacroDefs+ /ignoreMacroExp- /addMacrosAsOpcodes+" -a
 REM Fix ROM Header
 fixheadr.exe s1built.bin
 

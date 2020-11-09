@@ -448,17 +448,23 @@ MS_WaterSlide:	dc.b 2			; water	slide (LZ)
 		dc.b $F0, $F, 0, 0, $EC
 		dc.b $F8, 2, 0,	$10, $C
 	if FeatureSpindash>1
-MS_Spindash1:	dc.b 1				; Spindash 1
-		dc.b	$F8, $F, 0, 0, $F4
-MS_Spindash2:	dc.b 1				; Spindash 2
-		dc.b	$F8, $F, 0, 0, $F4
-MS_Spindash3:	dc.b 1				; Spindash 3
-		dc.b	$F8, $F, 0, 0, $F4
-MS_Spindash4:	dc.b 1				; Spindash 4
-		dc.b	$F8, $F, 0, 0, $F4
-MS_Spindash5:	dc.b 1				; Spindash 5
-		dc.b	$F8, $F, 0, 0, $F4
-MS_Spindash6:	dc.b 1				; Spindash 6
-		dc.b	$F8, $F, 0, 0, $F4
+MS_Spindash1: dc.b 1, $F5, $10 ; 01 F 510
+MS_Spindash2: dc.b 1, $F5, $20 ; 01 F 520
+MS_Spindash3: dc.b 1, $F5, $30 ; 01 F 530
+MS_Spindash4: dc.b 1, $F5, $40 ; 01 F 540
+MS_Spindash5: dc.b 1, $F5, $50 ; 01 F 550
+MS_Spindash6: dc.b 1, $F5, $60 ; 01 F 560
+; MS_Spindash1:	dc.b 1				; Spindash 1
+; 		dc.b	$F8, $F, 0, 0, $F4
+; MS_Spindash2:	dc.b 1				; Spindash 2
+; 		dc.b	$F8, $F, 0, 0, $F4
+; MS_Spindash3:	dc.b 1				; Spindash 3
+; 		dc.b	$F8, $F, 0, 0, $F4
+; MS_Spindash4:	dc.b 1				; Spindash 4
+; 		dc.b	$F8, $F, 0, 0, $F4
+; MS_Spindash5:	dc.b 1				; Spindash 5
+; 		dc.b	$F8, $F, 0, 0, $F4
+; MS_Spindash6:	dc.b 1				; Spindash 6
+; 		dc.b	$F8, $F, 0, 0, $F4
 	endc ; if FeatureSpindash>1
 		even

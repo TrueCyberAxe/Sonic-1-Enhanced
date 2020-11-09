@@ -193,6 +193,37 @@ af2ndRoutine:	equ $FA	; increment 2nd routine counter
 ; Background music
   if FeatureUseSonic2SoundDriver=0
 bgm__First:	equ $81
+bgm__Last:	equ ((ptr_musend-MusicIndex-4)/4)+bgm__First
+
+; Sound effects
+sfx__First:	equ $A0
+sfx__Last:	equ ((ptr_sndend-SoundIndex-4)/4)+sfx__First
+
+; Special sound effects
+spec__First:	equ $D0
+spec__Last:	equ ((ptr_specend-SpecSoundIndex-4)/4)+spec__First
+
+flg__First:	equ $E0
+flg__Last:	equ ((ptr_flgend-Sound_ExIndex-4)/4)+flg__First
+  else
+bgm__First:	equ $01
+bgm__Last:	equ ((zMusIDPtr__End-zMasterPlaylist-4)/4)+bgm__First
+
+; Sound effects
+sfx__First:	equ bgm__Last+1
+sfx__Last:	equ ((SndPtr__End-SoundIndex-2)/2)+sfx__First
+
+; Special sound effects
+spec__First:	equ sfx__Last+1
+spec__Last:	equ ((SpecPtr__End-SpecSoundIndex-4)/4)+spec__First
+
+flg__First  equ $FA
+flg__Last:  equ ((CmdPtr__End-zCommandIndex-2)/2)+flg__First
+
+sfx_Stop:   equ ((CmdPtr_StopSFX-zCommandIndex)/2)+flg__First
+
+  endc ; if FeatureUseSonic2SoundDriver=0
+
 bgm_GHZ:	equ ((ptr_mus81-MusicIndex)/4)+bgm__First
 bgm_LZ:		equ ((ptr_mus82-MusicIndex)/4)+bgm__First
 bgm_MZ:		equ ((ptr_mus83-MusicIndex)/4)+bgm__First
@@ -212,10 +243,7 @@ bgm_Continue:	equ ((ptr_mus90-MusicIndex)/4)+bgm__First
 bgm_Credits:	equ ((ptr_mus91-MusicIndex)/4)+bgm__First
 bgm_Drowning:	equ ((ptr_mus92-MusicIndex)/4)+bgm__First
 bgm_Emerald:	equ ((ptr_mus93-MusicIndex)/4)+bgm__First
-bgm__Last:	equ ((ptr_musend-MusicIndex-4)/4)+bgm__First
 
-; Sound effects
-sfx__First:	equ $A0
 sfx_Jump:	equ ((ptr_sndA0-SoundIndex)/4)+sfx__First
 sfx_Lamppost:	equ ((ptr_sndA1-SoundIndex)/4)+sfx__First
 sfx_A2:		equ ((ptr_sndA2-SoundIndex)/4)+sfx__First
@@ -264,109 +292,14 @@ sfx_Spring:	equ ((ptr_sndCC-SoundIndex)/4)+sfx__First
 sfx_Switch:	equ ((ptr_sndCD-SoundIndex)/4)+sfx__First
 sfx_RingLeft:	equ ((ptr_sndCE-SoundIndex)/4)+sfx__First
 sfx_Signpost:	equ ((ptr_sndCF-SoundIndex)/4)+sfx__First
-sfx__Last:	equ ((ptr_sndend-SoundIndex-4)/4)+sfx__First
 
-; Special sound effects
-spec__First:	equ $D0
 sfx_Waterfall:	equ ((ptr_sndD0-SpecSoundIndex)/4)+spec__First
-spec__Last:	equ ((ptr_specend-SpecSoundIndex-4)/4)+spec__First
 
-flg__First:	equ $E0
 bgm_Fade:	equ ((ptr_flgE0-Sound_ExIndex)/4)+flg__First
 sfx_Sega:	equ ((ptr_flgE1-Sound_ExIndex)/4)+flg__First
 bgm_Speedup:	equ ((ptr_flgE2-Sound_ExIndex)/4)+flg__First
 bgm_Slowdown:	equ ((ptr_flgE3-Sound_ExIndex)/4)+flg__First
 bgm_Stop:	equ ((ptr_flgE4-Sound_ExIndex)/4)+flg__First
-flg__Last:	equ ((ptr_flgend-Sound_ExIndex-4)/4)+flg__First
-  else
-bgm__First:	equ $01
-bgm_GHZ:	equ ((ptr_mus81-zMasterPlaylist)/4)+bgm__First
-bgm_LZ:		equ ((ptr_mus82-zMasterPlaylist)/4)+bgm__First
-bgm_MZ:		equ ((ptr_mus83-zMasterPlaylist)/4)+bgm__First
-bgm_SLZ:	equ ((ptr_mus84-zMasterPlaylist)/4)+bgm__First
-bgm_SYZ:	equ ((ptr_mus85-zMasterPlaylist)/4)+bgm__First
-bgm_SBZ:	equ ((ptr_mus86-zMasterPlaylist)/4)+bgm__First
-bgm_Invincible:	equ ((ptr_mus87-zMasterPlaylist)/4)+bgm__First
-bgm_ExtraLife:	equ ((ptr_mus88-zMasterPlaylist)/4)+bgm__First
-bgm_SS:		equ ((ptr_mus89-zMasterPlaylist)/4)+bgm__First
-bgm_Title:	equ ((ptr_mus8A-zMasterPlaylist)/4)+bgm__First
-bgm_Ending:	equ ((ptr_mus8B-zMasterPlaylist)/4)+bgm__First
-bgm_Boss:	equ ((ptr_mus8C-zMasterPlaylist)/4)+bgm__First
-bgm_FZ:		equ ((ptr_mus8D-zMasterPlaylist)/4)+bgm__First
-bgm_GotThrough:	equ ((ptr_mus8E-zMasterPlaylist)/4)+bgm__First
-bgm_GameOver:	equ ((ptr_mus8F-zMasterPlaylist)/4)+bgm__First
-bgm_Continue:	equ ((ptr_mus90-zMasterPlaylist)/4)+bgm__First
-bgm_Credits:	equ ((ptr_mus91-zMasterPlaylist)/4)+bgm__First
-bgm_Drowning:	equ ((ptr_mus92-zMasterPlaylist)/4)+bgm__First
-bgm_Emerald:	equ ((ptr_mus93-zMasterPlaylist)/4)+bgm__First
-bgm__Last:	equ ((zMusIDPtr__End-zMasterPlaylist-4)/4)+bgm__First
-
-; Sound effects
-sfx__First:	equ bgm__Last+1
-sfx_Jump:	equ ((ptr_sndA0-SoundIndex)/2)+sfx__First
-sfx_Lamppost:	equ ((ptr_sndA1-SoundIndex)/2)+sfx__First
-sfx_A2:		equ ((ptr_sndA2-SoundIndex)/2)+sfx__First
-sfx_Death:	equ ((ptr_sndA3-SoundIndex)/2)+sfx__First
-sfx_Skid:	equ ((ptr_sndA4-SoundIndex)/2)+sfx__First
-sfx_A5:		equ ((ptr_sndA5-SoundIndex)/2)+sfx__First
-sfx_HitSpikes:	equ ((ptr_sndA6-SoundIndex)/2)+sfx__First
-sfx_Push:	equ ((ptr_sndA7-SoundIndex)/2)+sfx__First
-sfx_SSGoal:	equ ((ptr_sndA8-SoundIndex)/2)+sfx__First
-sfx_SSItem:	equ ((ptr_sndA9-SoundIndex)/2)+sfx__First
-sfx_Splash:	equ ((ptr_sndAA-SoundIndex)/2)+sfx__First
-sfx_AB:		equ ((ptr_sndAB-SoundIndex)/2)+sfx__First
-sfx_HitBoss:	equ ((ptr_sndAC-SoundIndex)/2)+sfx__First
-sfx_Bubble:	equ ((ptr_sndAD-SoundIndex)/2)+sfx__First
-sfx_Fireball:	equ ((ptr_sndAE-SoundIndex)/2)+sfx__First
-sfx_Shield:	equ ((ptr_sndAF-SoundIndex)/2)+sfx__First
-sfx_Saw:	equ ((ptr_sndB0-SoundIndex)/2)+sfx__First
-sfx_Electric:	equ ((ptr_sndB1-SoundIndex)/2)+sfx__First
-sfx_Drown:	equ ((ptr_sndB2-SoundIndex)/2)+sfx__First
-sfx_Flamethrower:equ ((ptr_sndB3-SoundIndex)/2)+sfx__First
-sfx_Bumper:	equ ((ptr_sndB4-SoundIndex)/2)+sfx__First
-sfx_Ring:	equ ((ptr_sndB5-SoundIndex)/2)+sfx__First
-sfx_SpikesMove:	equ ((ptr_sndB6-SoundIndex)/2)+sfx__First
-sfx_Rumbling:	equ ((ptr_sndB7-SoundIndex)/2)+sfx__First
-sfx_B8:		equ ((ptr_sndB8-SoundIndex)/2)+sfx__First
-sfx_Collapse:	equ ((ptr_sndB9-SoundIndex)/2)+sfx__First
-sfx_SSGlass:	equ ((ptr_sndBA-SoundIndex)/2)+sfx__First
-sfx_Door:	equ ((ptr_sndBB-SoundIndex)/2)+sfx__First
-sfx_Teleport:	equ ((ptr_sndBC-SoundIndex)/2)+sfx__First
-sfx_ChainStomp:	equ ((ptr_sndBD-SoundIndex)/2)+sfx__First
-sfx_Roll:	equ ((ptr_sndBE-SoundIndex)/2)+sfx__First
-sfx_Continue:	equ ((ptr_sndBF-SoundIndex)/2)+sfx__First
-sfx_Basaran:	equ ((ptr_sndC0-SoundIndex)/2)+sfx__First
-sfx_BreakItem:	equ ((ptr_sndC1-SoundIndex)/2)+sfx__First
-sfx_Warning:	equ ((ptr_sndC2-SoundIndex)/2)+sfx__First
-sfx_GiantRing:	equ ((ptr_sndC3-SoundIndex)/2)+sfx__First
-sfx_Bomb:	equ ((ptr_sndC4-SoundIndex)/2)+sfx__First
-sfx_Cash:	equ ((ptr_sndC5-SoundIndex)/2)+sfx__First
-sfx_RingLoss:	equ ((ptr_sndC6-SoundIndex)/2)+sfx__First
-sfx_ChainRise:	equ ((ptr_sndC7-SoundIndex)/2)+sfx__First
-sfx_Burning:	equ ((ptr_sndC8-SoundIndex)/2)+sfx__First
-sfx_Bonus:	equ ((ptr_sndC9-SoundIndex)/2)+sfx__First
-sfx_EnterSS:	equ ((ptr_sndCA-SoundIndex)/2)+sfx__First
-sfx_WallSmash:	equ ((ptr_sndCB-SoundIndex)/2)+sfx__First
-sfx_Spring:	equ ((ptr_sndCC-SoundIndex)/2)+sfx__First
-sfx_Switch:	equ ((ptr_sndCD-SoundIndex)/2)+sfx__First
-sfx_RingLeft:	equ ((ptr_sndCE-SoundIndex)/2)+sfx__First
-sfx_Signpost:	equ ((ptr_sndCF-SoundIndex)/2)+sfx__First
-sfx__Last:	equ ((SndPtr__End-SoundIndex-2)/2)+sfx__First
-
-; Special sound effects
-spec__First:	equ sfx__Last+1
-sfx_Waterfall:	equ ((ptr_sndD0-SpecSoundIndex)/4)+spec__First
-spec__Last:	equ ((SpecPtr__End-SpecSoundIndex-4)/4)+spec__First
-
-flg__First  equ $FA
-sfx_Stop:   equ ((CmdPtr_StopSFX-zCommandIndex)/2)+flg__First
-bgm_Fade:   equ ((CmdPtr_FadeOut-zCommandIndex)/2)+flg__First
-sfx_Sega:   equ ((CmdPtr_SegaSound-zCommandIndex)/2)+flg__First
-bgm_Speedup:    equ ((CmdPtr_SpeedUp-zCommandIndex)/2)+flg__First
-bgm_Slowdown:   equ ((CmdPtr_SlowDown-zCommandIndex)/2)+flg__First
-bgm_Stop:   equ ((CmdPtr_Stop-zCommandIndex)/2)+flg__First
-flg__Last:  equ ((CmdPtr__End-zCommandIndex-2)/2)+flg__First
-  endc ; if FeatureUseSonic2SoundDriver=0
 
 ; Sonic frame IDs
 fr_Null:	equ 0
@@ -466,15 +399,20 @@ bitPushing:	     equ 5
 bitObjectFlag:	 equ 7
 
 ; ------- Additional -------
-fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)>>1	; $58
-fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)>>1	; $59
-fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)>>1	; $5A
-fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)>>1	; $5B
-fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)>>1	; $5C
-fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)>>1	; $5D
+fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)/2	; $58
+fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)/2	; $59
+fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)/2	; $5A
+fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)/2	; $5B
+fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)/2	; $5C
+fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)/2	; $5D
+
+  if FeatureSpindash=1
+sfx_Spindash:	equ sfx_Roll ; $BE
+  else
+sfx_Spindash:	equ ((ptr_sndD1-SpecSoundIndex)/4)+spec__First
+  endc
 
 obSmoke:      equ $FFFFD11C
-
 
 max_ring_scatter: equ $20 ; 32
 max_demo:         equ 4

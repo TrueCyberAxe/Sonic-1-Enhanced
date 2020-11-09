@@ -97,10 +97,10 @@ Lamp_Blue:	; Routine 2
 
 	if FeatureSpindash<2
 		move.w	#$7A0,obGfx(a1)
-	else ; Spindust glitch fix @TODO remove divide
+	else
 		move.w	#($D800/$20),obGfx(a1)
 	endc
-	
+
 		move.b	#4,obRender(a1)
 		move.b	#8,obActWid(a1)
 		move.b	#4,obPriority(a1)

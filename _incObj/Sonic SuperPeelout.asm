@@ -34,7 +34,8 @@ Sonic_Peelout:
 Sonic_DashLaunch:
     move.b   #id_PeeloutCharge,obAnim(a0)
   if FeatureSuperPeelout=1
-    move.w   #$760,obInertia(a0)                    ; Set Sonic's speed to Maximum Run Speed
+    move.w   #$A00,obInertia(a0)                    ; Set Sonic's speed to Maximum Run Speed
+    ; move.w   #$760,obInertia(a0)                  ; Set Sonic's speed to Maximum Run Speed
   else
     move.w   #$0F00,obInertia(a0)                   ; Set sonic's speed to Sonic CD Peelout Speed
   endc

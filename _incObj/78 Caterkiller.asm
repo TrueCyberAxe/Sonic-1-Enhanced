@@ -346,7 +346,7 @@ loc_16C64:
 		bne.s	loc_16C82
 
 loc_16C7C:
-	if BugFixCaterkillerDeath>0
+	if (BugFixCaterkillerDeath+FeatureSpindash)>0
 		clr.b	obColType(a1)	; immediately remove all touch response values when destroying the head to avoid taking damage
 	endc
 		move.b	#$A,obRoutine(a0)

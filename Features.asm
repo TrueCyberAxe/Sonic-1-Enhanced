@@ -2,7 +2,7 @@
 ; Revision 1 Onwards Fixes the Level Select Order and Holding buttons during the attract mode and ending demo sequences will not cause Sonic to miss jumps. (https://tcrf.net/Sonic_the_Hedgehog_(Genesis)#REV01.2FJapanese_Version)
 ; Revision 2 Onwards Fixes the Spike Bug
 
-; @TODO fix super peelout bug pushing when beside colidable
+; @TODO Fix Sonic 2 Spindash
 ; @TODO Set Spring flag for Spindash and Peelout
 ; @TODO if interia is higher than max dont change it when holding left or right, should fix the todo below
 ; @TODO find what is slowing down sonic when right is pressed (possibly a scrolling issue)
@@ -22,7 +22,7 @@ BugFixDrownInDebug:                 equ 1
 FeatureAirAnimation:                equ 1
 
 ; Causes Error on Demo 3 and with Object Edge Detection
-FeatureSonicCDExtendedCamera:       equ 0 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
+FeatureSonicCDExtendedCamera:       equ 1 ; Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 
 ; Causes Crash when Entering Water
 FeatureSpindash:										equ 1 ; 0 = Off, 1 = Sonic CD, 2 = Sonic 2 - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and
@@ -68,27 +68,27 @@ BugFixWalkJump:											equ 1 ; Set to 1 for fix Based on https://info.sonicre
 
 ; Bug Fixes Not Inluded in Other Revisions
 
-BugFixPatternLoadCueShifting:				equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
-BugFixPatternLoadCueRaceCondition: 	equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
+BugFixPatternLoadCueShifting:				equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+BugFixPatternLoadCueRaceCondition: 	equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 
-BugFixDeleteScatteredRings:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
-BugFixScatteredRingsTimer:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
-BugFixDrowningTimer:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
-BugFixDeathBoundary:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
-BugFixHurtDeathBoundary:						equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
-BugFixSongFadeRestoration:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
-BugFixBlinkingHUD:									equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
-BugFixLevelSelectCorruption:				equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
-BugFixRememberSprite:								equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
-BugFixSoundDriverBugs:							equ 0 ; Uncommenting of code in ; Sound_ChkValue:
-BugFixCaterkillerDeath:							equ 0 ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
-BugFixGameOverFlicker:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
-BugFixFallOffFinalZone:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
-BugFixRollerGlitch:									equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
+BugFixDeleteScatteredRings:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
+BugFixScatteredRingsTimer:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
+BugFixDrowningTimer:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
+BugFixDeathBoundary:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
+BugFixHurtDeathBoundary:						equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
+BugFixSongFadeRestoration:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
+BugFixBlinkingHUD:									equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
+BugFixLevelSelectCorruption:				equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
+BugFixRememberSprite:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
+BugFixSoundDriverBugs:							equ 1 ; Uncommenting of code in ; Sound_ChkValue:
+BugFixCaterkillerDeath:							equ 1 ; Fixes bug that occurs when rolling into a Caterkiller too fast - Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+BugFixGameOverFlicker:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
+BugFixFallOffFinalZone:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
+BugFixRollerGlitch:									equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
 ; BugFixHorizontalSpikePole:	  			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
-BugFixRenderBeforeInit:							equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
-BugFixFZDebugCreditTransition:			equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
-BugFixDrownLockTitleScreen:					equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
+BugFixRenderBeforeInit:							equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
+BugFixFZDebugCreditTransition:			equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
+BugFixDrownLockTitleScreen:					equ 1 ; Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 
 
 ; @todo port from sonic 2 code
@@ -166,23 +166,23 @@ BugFixMonitorBugs:									equ 0 ; Based on http://sonicresearch.org/community/i
 ; Left Align the Score
 
 TweakCodeOptimizations:             equ 1
-FeatureContextualDeath:                equ 1 ; Use Ashen sprite on fire death
-
+FeatureContextualDeath:             equ 1 ; Use Ashen sprite on fire death
 TweakMathOptimizations:							equ 0 ; Replace Maths with Bit Shifts and other CPU GEMs
 
 TweakBetterBonusControlRestore:			equ 1 ; Restore unused Bonus Stage Controls
 TweakBetterBonusStageControls:			equ 1 ; Overrides TweakBetterBonusControlRestore - Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Special_Stage_jumping_physics
 
-TweakFixUnderwaterRingPhysics:			equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Scattered_Rings_Underwater_Physics
+TweakFixUnderwaterRingPhysics:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Fix_Scattered_Rings_Underwater_Physics
 TweakRemoveSpeedCap:								equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Remove_the_Speed_Cap
-TweakFixHurtWaterPhystics:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
-TweakFasterObjectMove:							equ 0 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
-
-TweakSonic2OffScreenDeletionCode:		equ 0 ; Faster Code from Sonic 2 - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-941555
-TweakFasterRingScatter:							equ 0 ; Faster Scatter - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
-TweakFasterUnderwaterRings:					equ 0 ; Half the Amount of ring scatter underwater -  - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
+TweakFixHurtWaterPhystics:					equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Collide_with_water_after_being_hurt
+TweakFasterObjectMove:							equ 1 ; Uses the faster Object Code from S3K - Based on https://info.sonicretro.org/SCHG_How-to:Improve_ObjectMove_subroutines
+TweakSonic2OffScreenDeletionCode:		equ 1 ; Faster Code from Sonic 2 - Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-941555
+TweakFasterRingScatter:							equ 1 ; Faster Scatter - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
+TweakFasterUnderwaterRings:					equ 1 ; Half the Amount of ring scatter underwater -  - Based on https://forums.sonicretro.org/index.php?threads/updated-speed-up-the-ring-loss-process-even-further-with-underwater.28725/ / https://info.sonicretro.org/SCHG_How-to:Speed_Up_Ring_Loss_Process_%28With_Underwater%29
 ; TweakUseRecompresedAssets						equ 1 ; All Nemesis files recompressed with KENSharp, all Kos files recompressed with Kosinski+ KENSharp
 ; TweakExtendSonicAnimationLimit:			equ 1 ; Based on https://info.sonicretro.org/SCHG_How-to:Extend_the_Sonic_1_sprite_mappings_and_art_limit
+
+; Everything above is stable unless stated otherwise ---------
 
 ; Art and Level Tweaks
 TweakSonic2LevelArtLoader:					equ 0 ; Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1

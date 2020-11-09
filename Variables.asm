@@ -361,6 +361,10 @@ v_startscore:  					equ $FFFFF642			;	Score as of Checkpoint
 v_screendelay:          equ $FFFFC904			; DMA Queue Freed Range
 v_screendelay_v:        equ $FFFFC903			; DMA Queue Freed Range
 
+f_sfx_spinrev:					equ $FFFFC900
+v_sfx_spinrev:					equ $FFFFC901
+v_sfx_frequency:				equ $FFFFC902
+
 ; Character Flags and Variables
 f_goggles:							equ $39
 f_spindash:		  				equ $3A           ; spindash flag @TODO replace this with a bit value to save memory $22 bit 7 (29) is a good candidate

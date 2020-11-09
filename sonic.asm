@@ -12,10 +12,12 @@
 Original: 							equ 0
 
 	if Original=1
+AdvancedDebugger				equ 0
 Debug:          				equ 0 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
 	else
+AdvancedDebugger				equ 1 ; Vladik's Advanced Error Handler and Debugger 2.0
 Debug:          				equ 1 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
@@ -115,12 +117,29 @@ ExtendedLevelSelect:								equ 1
 ExtendedLevelSelect:								equ 0
 	endc
 
+	if FeatureSpindash>1
+SonicExpanded:											equ 1
+	else
+SonicExpanded:											equ 1
+	endc ; if FeatureSpindash>1
+
+	if FeatureSpindash>1
+ExtendedSoundEffects:								equ 1
+	else
+ExtendedSoundEffects:								equ 1
+	endc ; if FeatureSpindash>1
+
+
+
 	include	"Constants.asm"
 	include	"Variables.asm"
 	include	"Macros.asm"
 ; ===========================================================================
 
 StartOfRom:
+	if AdvancedDebugger>0
+		include   "Debugger.asm"
+	endc ; if AdvancedDebugger>0
 Vectors:
 		dc.l v_systemstack&$FFFFFF				; Initial stack pointer value
 		dc.l EntryPoint										; Start of program
@@ -201,16 +220,16 @@ loc_E0:
 		dc.l ErrorTrap
 		dc.l ErrorTrap
 	endc ; if Revision<2
+	if AdvancedDebugger=0
+Console:			dc.b "SEGA MEGA DRIVE " 																; Hardware system ID (Console name)
+	endc ; if AdvancedDebugger=0
+Date:					dc.b "(C)SEGA 1991.APR" 																; Copyright holder and release date (generally year)
 	if FeatureUpdateHeader=0
-		Console:	dc.b "SEGA MEGA DRIVE " 																		; Hardware system ID (Console name)
-		Date:		dc.b "(C)SEGA 1991.APR" 																			; Copyright holder and release date (generally year)
-		Title_Local:	dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
-		Title_Int:	dc.b "SONIC THE               HEDGEHOG                " 	; International name
+Title_Local:	dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
+Title_Int:		dc.b "SONIC THE               HEDGEHOG                " ; International name
 	else
-		Console:	dc.b "SEGA MEGA DRIVE " 																		; Hardware system ID (Console name)
-		Date:		dc.b "(C)SEGA 1991.APR" 																			; Copyright holder and release date (generally year)
-		Title_Local:	dc.b "SONIC THE HEDGEHOG                              " ; Domestic name
-		Title_Int:	dc.b "SONIC THE HEDGEHOG                              " 	; International name
+Title_Local:	dc.b "SONIC THE HEDGEHOG                              " ; Domestic name
+Title_Int:		dc.b "SONIC THE HEDGEHOG                              " ; International name
 	endc ; if FeatureUpdateHeader=0
 Serial:
 		if Revision=0
@@ -500,7 +519,7 @@ CheckSumError:
 	@endlessloop:
 		bra.s	@endlessloop
 ; ===========================================================================
-
+	if AdvancedDebugger=0
 BusError:
 		move.b	#2,(v_errortype).w
 		bra.s	loc_43A
@@ -547,6 +566,7 @@ Line1111Emu:
 ErrorExcept:
 		move.b	#0,(v_errortype).w
 		bra.s	loc_462
+	endc ; if AdvancedDebugger=0
 ; ===========================================================================
 
 loc_43A:
@@ -8330,19 +8350,26 @@ Sonic_Main:	; Routine 0
 		move.w	#$80,(v_sonspeeddec).w ; Sonic's deceleration
 
 Sonic_Control:																; Routine 2
+	if AdvancedDebugger>0
+		btst #bitA+btnStart,(v_jpadpress1).w 			; is button B pressed?
+		beq.s @skip
+		RaiseError "Intentional crash test:%<endl>Level ID = %<.w $FFFFFE10>%<endl>Frame = %<.w $FFFFFE04>", SampleLevelDebugger
+	@skip:
+	endc ; if AdvancedDebugger>0
+
 	if BugFixVictoryDebug>0
 		tst.b	(f_victory).w												; is victory flag set?
 		bne.w	loc_12C58														; if yes, branch
-	endc
+	endc ; if BugFixVictoryDebug>0
 
 	if Debug=0
 		tst.w	(f_debugmode).w											; is debug cheat enabled?
 		beq.s	loc_12C58														; if not, branch
-	endc
+	endc ; if Debug=0
 
 	if FeatureSonicCDExtendedCamera>0
 		bsr.s Sonic_PanCamera
-	endc
+	endc ; if FeatureSonicCDExtendedCamera>0
 
 		btst	#bitB,(v_jpadpress1).w 							; is button B pressed?
 		beq.s	loc_12C58														; if not, branch
@@ -8352,7 +8379,7 @@ Sonic_Control:																; Routine 2
 
 	if FeatureSonicCDExtendedCamera>0
 		include "_incObj\Sonic_PanCamera.asm"
-	endc
+	endc ; if FeatureSonicCDExtendedCamera>0
 ; ===========================================================================
 
 loc_12C58:
@@ -8443,6 +8470,7 @@ Sonic_MdJump:
 		clr.b	fr_Duck(a0)
 	endc
 		bsr.w	Sonic_JumpHeight
+	@skip_JumpHeight:
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
 		jsr	(ObjectFall).l
@@ -9996,7 +10024,11 @@ SonicDynPLC:		include	"_maps\Sonic - Dynamic Gfx Script.asm"
 ; ---------------------------------------------------------------------------
 ; Uncompressed graphics	- Sonic
 ; ---------------------------------------------------------------------------
+	if SonicExpanded=0
 Art_Sonic:	incbin	"artunc\Sonic.bin"	; Sonic
+	else
+Art_Sonic:	incbin	"artunc\Sonic - Expanded.bin"	; Sonic
+	endc
 		even
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
@@ -10565,9 +10597,13 @@ Level_End:	incbin	"levels\ending.bin"
 		even
 byte_6A320:	dc.b 0,	0, 0, 0
 
-
 Art_BigRing:	incbin	"artunc\Giant Ring.bin"
 		even
+
+	if FeatureSpindash>1
+Art_Dust:			incbin	"artunc\spindust.bin"
+		even
+	endc ; if FeatureSpindash>1
 
 		align	$100,$FF
 
@@ -10735,6 +10771,27 @@ SoundDriver:
 
 ; end of 'ROM'
 		even
+	if AdvancedDebugger>0
+	SampleLevelDebugger:
+	   Console.WriteLine "Camera (FG): %<.w $FFFFF700>-%<.w $FFFFF704>"
+	   Console.WriteLine "Camera (BG): %<.w $FFFFF708>-%<.w $FFFFF70C>"
+	   Console.BreakLine
+
+	   Console.WriteLine "%<pal1>Objects IDs in slots:%<pal0>"
+	   Console.Write "%<setw,39>"       ; format slots table nicely ...
+
+	   lea       $FFFFD000, a0
+	   move.w   #$2000/$40-1, d0
+
+	   @DisplayObjSlot:
+	       Console.Write "%<.b (a0)> "
+	       lea       $40(a0), a0
+	       dbf       d0, @DisplayObjSlot
+
+	   rts
+
+		include   "ErrorHandler.asm"
+	endc ; if AdvancedDebugger>0
 EndOfRom:
 
 

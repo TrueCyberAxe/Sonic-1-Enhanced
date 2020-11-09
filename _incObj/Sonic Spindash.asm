@@ -11,22 +11,20 @@ Sonic_SpinDash:
     bne.s	@end		                 ; if not, return
 
     move.b	(v_jpadpress2).w,d0	   ; read controller
-    andi.b	#$70,d0			           ; pressing A/B/C ?
+    andi.b	#btnABC,d0			           ; pressing A/B/C ?
     beq.w	@end		                 ; if not, return
 
   if FeatureSpindash=1
     move.b	#$E,obHeight(a0)       ; Adjust Height for CD Spindash
     move.b	#7,obWidth(a0)         ; Adjust Width for CD Spindash
+    move.w   #$C00,obInertia(a0)   ; Set Sonic's speed to Maximum Run Speed
+  else
+    move.w #$1F00,obAnim(a0)       ; changed from #$900
   endc
 
     move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
-
-    move.w	#$BE,d0			           ; spin sound ($E0 in s2)
+    move.w	#sfx_Spindash,d0			 ; spin sound ($E0 in s2)
   	jsr	(PlaySound_Special).l	     ; play spin sound
-
-  if FeatureSpindash=1
-    move.w   #$0F00,obInertia(a0)  ; Set Sonic's speed
-  endc
 
   	addq.l	#4,sp			             ; Add 4 bytes to the stack return address to skip Sonic_Jump on next rts to Obj01_MdNormal, preventing conflicts with button presses.
   	move.b	#1,f_spindash(a0)		   ; set Spin Dash flag
@@ -42,6 +40,8 @@ Sonic_SpinDash:
 		bsr.w Sonic_LevelBound
 		bsr.w Sonic_AnglePos
 
+    move.w #$60,(v_lookshift).w
+
   @end: ; locret2_1AC8C
 		rts
 
@@ -49,14 +49,11 @@ Sonic_SpinDash:
 Spindash_Charging: ; loc2_1AC8E
     move.b #id_Spindash,obAnim(a0)             ; set Spin Dash anim (9 in s2)
 
-  if FeatureSpindash=1
-    move.w   #$C00,obInertia(a0)               ; Set Sonic's speed to Maximum Run Speed
-  endc
-
     move.b	(v_jpadhold2).w,d0	               ; read controller
-    btst	#bitDn,d0			                     ; check down button
-    bne.w	loc2_1AD30		                       ; if set, branch
+    btst	#bitDn,d0			                       ; check down button
+    bne.w	Spindash_Charge_Add		               ; if set, branch
 
+  @Release_Spindash:
     move.b	#$E,$16(a0)		                     ; $16(a0) is height/2
     move.b	#7,$17(a0)		                     ; $17(a0) is width/2
     move.b	#id_roll,obAnim(a0)		             ; set animation to roll
@@ -65,9 +62,11 @@ Spindash_Charging: ; loc2_1AC8E
     move.b	#0,f_spindash(a0)		               ; clear Spin Dash flag
     moveq	#0,d0
 
+  if FeatureSpindash>1
     move.b	v_charging(a0),d0		               ; copy charge count
     add.w	d0,d0			                           ; double it
     move.w	Dash_Speeds(pc,d0.w),obInertia(a0) ; get normal speed
+  endc ; if FeatureSpindash>1
 
     move.w	obInertia(a0),d0		               ; get inertia
     subi.w	#$800,d0		                       ; subtract $800
@@ -76,18 +75,18 @@ Spindash_Charging: ; loc2_1AC8E
     neg.w	d0			                             ; negate it
     addi.w	#$2000,d0		                       ; add $2000
     move.w	d0,(v_screendelay).w	             ; move to $C904 - Horizontal scroll delay Fix - was move.w	d0,($FFFFEED0).w	; move to $EED0
-    btst	#bitHorizontal,obStatus(a0)		                   ; is sonic facing right?
+    btst	#bitHorizontal,obStatus(a0)		       ; is sonic facing right?
+    beq.s	@skip	      	                       ; if not, branch
 
-    beq.s	@loc2_1ACF4		                       ; if not, branch
     neg.w	obInertia(a0)			                   ; negate inertia
 
-  @loc2_1ACF4:
+  @skip:
 
   if FeatureSpindash>1
     bset	#bitSpinSmoke,obStatus(a0)		       ; set unused (in s1) flag
     move.b	#0,(obSmoke).w	                   ; clear $D11C (smoke)
   endc ; if FeatureSpindash>1
-  
+
     move.w	#$BC,d0			                       ; spin release sound
     jsr	(PlaySound_Special).l	                 ; play it!
 		bra.s loc2_1AD78
@@ -105,7 +104,7 @@ Dash_Speeds:
   	dc.w $C00 ; 8
 
 ;===========================================================================
-loc2_1AD30: ; If still charging the dash...
+Spindash_Charge_Add: ; loc2_1AD30 If still charging the dash...
     tst.w	v_charging(a0)		       ; check charge count
     beq.s	loc2_1AD48	             ; if zero, branch
     move.w	v_charging(a0),d0	     ; otherwise put it in d0
@@ -116,11 +115,11 @@ loc2_1AD30: ; If still charging the dash...
 
 loc2_1AD48:
     move.b	(v_jpadpress2).w,d0	   ; read controller
-    andi.b	#$70,d0			           ; pressing A/B/C?
+    andi.b	#btnABC,d0			           ; pressing A/B/C?
     beq.w	loc2_1AD78		           ; if not, branch
 
   if FeatureSpindash>1
-    move.w	#$BE,d0			           ; Spindash Reving was $E0 in sonic 2
+    move.w	#sfx_Spindash,d0			 ; Spindash Reving was $E0 in sonic 2
   endc                             ; @TODO check this is the correct place for this endc
 
     jsr	(PlaySound_Special).l	     ; play charge sound
@@ -147,10 +146,10 @@ rts
 
 ; End of subroutine Sonic_SpinDash
 
-  if FeatureSpindash>1
+  if FeatureSpindash>2
 SpinDash_dust: ; Sprite_1DD20: ; DATA XREF: ROM:0001600C?o
 		moveq	#0,d0
-		move.b	$24(a0),d0
+		move.b	obRoutine(a0),d0
 		move	off_1DD2E(pc,d0.w),d1
 		jmp	off_1DD2E(pc,d1.w)
 ;---------------------------------------------------------------------------
@@ -158,14 +157,14 @@ off_1DD2E:	dc loc_1DD36-off_1DD2E; 0 ; DATA XREF: h+6DBA?o h+6DBC?o ...
 		dc loc_1DD90-off_1DD2E; 1
 		dc loc_1DE46-off_1DD2E; 2
 		dc loc_1DE4A-off_1DD2E; 3
-;---------------------------------------------------------------------------
+;-------------obPriority-----------------------------------------------------------
 
 loc_1DD36:				; DATA XREF: h+6DBA?o
-		addq.b	#2,$24(a0)
+		addq.b	#2,obRoutine(a0)
 		move.l	#MapUnc_1DF5E,4(a0)
 		or.b	#4,1(a0)
-		move.b	#1,$18(a0)
-		move.b	#$10,$19(a0)
+		move.b	#1,obPriority(a0)
+		move.b	#$10,obActWid(a0)
 		move	#$7A0,2(a0)
 		move	#-$3000,$3E(a0)
 		move	#$F400,$3C(a0)
@@ -184,7 +183,7 @@ loc_1DD8C:				; CODE XREF: h+6DF6?j h+6E04?j
 loc_1DD90:				; DATA XREF: h+6DBA?o
 		movea.w	$3E(a0),a2
 		moveq	#0,d0
-		move.b	$1C(a0),d0
+		move.b	obAnim(a0),d0
 		add	d0,d0
 		move	off_1DDA4(pc,d0.w),d1
 		jmp	off_1DDA4(pc,d1.w)
@@ -208,7 +207,7 @@ loc_1DDAC:				; DATA XREF: h+6E30?o
 loc_1DDCC:				; DATA XREF: h+6E30?o
 ;		cmp.b	#$C,$28(a2)
 ;		bcs.s	loc_1DE3E
-		cmp.b	#4,$24(a2)
+		cmp.b	#4,obRoutine(a2)
 		bcc.s	loc_1DE3E
 		tst.b	$39(a2)
 		beq.s	loc_1DE3E
@@ -238,7 +237,7 @@ loc_1DE28:				; CODE XREF: h+6E42?j h+6E56?j ...
 ;---------------------------------------------------------------------------
 
 loc_1DE3E:				; CODE XREF: h+6E5E?j h+6E66?j ...
-		move.b	#0,$1C(a0)
+		move.b	#0,obAnim(a0)
 		rts
 ;---------------------------------------------------------------------------
 
@@ -249,12 +248,12 @@ loc_1DE46:				; DATA XREF: h+6DBA?o
 loc_1DE4A:
 	movea.w	$3E(a0),a2
 	moveq	#$10,d1
-	cmp.b	#$D,$1C(a2)
+	cmp.b	#$D,obAnim(a2)
 	beq.s	loc_1DE64
 	moveq	#$6,d1
 	cmp.b	#$3,$21(a2)
 	beq.s	loc_1DE64
-	move.b	#2,$24(a0)
+	move.b	#2,obRoutine(a0)
 	move.b	#0,$32(a0)
 	rts
 ;---------------------------------------------------------------------------
@@ -263,7 +262,7 @@ loc_1DE64:				; CODE XREF: h+6EE0?j
 		subq.b	#1,$32(a0)
 		bpl.s	loc_1DEE0
 		move.b	#3,$32(a0)
-		jsr	SingleObjLoad
+		jsr	FindFreeObj
 		bne.s	loc_1DEE0
 		move.b	0(a0),0(a1)
 		move	8(a2),8(a1)
@@ -275,12 +274,12 @@ loc_1DE64:				; CODE XREF: h+6EE0?j
 loc_1DE9A:				; CODE XREF: h+6F1E?j
 		add	d1,$C(a1)
 		move.b	#bitHorizontal,obStatus(a1)
-		move.b	#3,$1C(a1)
-		addq.b	#2,$24(a1)
+		move.b	#3,obAnim(a1)
+		addq.b	#2,obRoutine(a1)
 		move.l	4(a0),4(a1)
 		move.b	1(a0),1(a1)
-		move.b	#1,$18(a1)
-		move.b	#4,$19(a1)
+		move.b	#1,obPriority(a1)
+		move.b	#4,obActWid(a1)
 		move	2(a0),2(a1)
 		move	$3E(a0),$3E(a1)
 		and	#$7FFF,2(a1)
@@ -327,14 +326,15 @@ loc_1DF0A:				; CODE XREF: h+6FBE?j
 locret_1DF36:				; CODE XREF: h+6F7A?j h+6F90?j
 		rts
 ;---------------------------------------------------------------------------
-off_1DF38:	dc byte_1DF40-off_1DF38; 0 ; DATA XREF: h+6EB4?o h+6FC4?o ...
-		dc byte_1DF43-off_1DF38; 1
-		dc byte_1DF4F-off_1DF38; 2
-		dc byte_1DF58-off_1DF38; 3
-byte_1DF40:	dc.b $1F,  0,$FF	; 0 ; DATA XREF: h+6FC4?o
-byte_1DF43:	dc.b   3,  1,  2,  3,  4,  5,  6,  7,  8,  9,$FD,  0; 0	; DATA XREF: h+6FC4?o
-byte_1DF4F:	dc.b   1, $A, $B, $C, $D, $E, $F,$10,$FF; 0 ; DATA XREF: h+6FC4?o
-byte_1DF58:	dc.b   3,$11,$12,$13,$14,$FC; 0	; DATA XREF: h+6FC4?o
+off_1DF38:
+    dc byte_1DF40-off_1DF38           ; 0 ; DATA XREF: h+6EB4?o h+6FC4?o ...
+		dc byte_1DF43-off_1DF38           ; 1
+		dc byte_1DF4F-off_1DF38           ; 2
+		dc byte_1DF5obRoutineff_1DF38     ; 3
+byte_1DF40:	dc.b $1F,  0,$FF	                                    ; 0 ; DATA XREF: h+6FC4?o
+byte_1DF43:	dc.b   3,  1,  2,  3,  4,  5,  6,  7,  8,  9,$FD,  0  ; 0	; DATA XREF: h+6FC4?o
+byte_1DF4F:	dc.b   1, $A, $B, $C, $D, $E, $F,$10,$FF              ; 0 ; DATA XREF: h+6FC4?o
+byte_1DF58:	dc.b   3,$11,$12,$13,$14,$FC                          ; 0	; DATA XREF: h+6FC4?o
 ; -------------------------------------------------------------------------------
 ; Unknown Sprite Mappings
 ; -------------------------------------------------------------------------------
