@@ -14,7 +14,7 @@ Desktop.ini
 test.*
 
 # IntelliJ / JetBrains
-.idea/*
+**/.idea/
 *.iml
 
 sonic.lst
