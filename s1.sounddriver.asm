@@ -2735,106 +2735,106 @@ ptr_sndD0:	dc.l SoundD0
 ptr_sndD1:	dc.l SoundD1
 	endc ; if FeatureSpindash>1
 ptr_specend
-SoundA0:	incbin	"sound/sfx/SndA0 - Jump.bin"
+SoundA0:	incbin	"sound/sfx/SndA0 - Jump.asm"
 		even
-SoundA1:	incbin	"sound/sfx/SndA1 - Lamppost.bin"
+SoundA1:	incbin	"sound/sfx/SndA1 - Lamppost.asm"
 		even
-SoundA2:	incbin	"sound/sfx/SndA2.bin"
+SoundA2:	incbin	"sound/sfx/SndA2.asm"
 		even
-SoundA3:	incbin	"sound/sfx/SndA3 - Death.bin"
+SoundA3:	incbin	"sound/sfx/SndA3 - Death.asm"
 		even
-SoundA4:	incbin	"sound/sfx/SndA4 - Skid.bin"
+SoundA4:	incbin	"sound/sfx/SndA4 - Skid.asm"
 		even
-SoundA5:	incbin	"sound/sfx/SndA5.bin"
+SoundA5:	incbin	"sound/sfx/SndA5.asm"
 		even
-SoundA6:	incbin	"sound/sfx/SndA6 - Hit Spikes.bin"
+SoundA6:	incbin	"sound/sfx/SndA6 - Hit Spikes.asm"
 		even
-SoundA7:	incbin	"sound/sfx/SndA7 - Push Block.bin"
+SoundA7:	incbin	"sound/sfx/SndA7 - Push Block.asm"
 		even
-SoundA8:	incbin	"sound/sfx/SndA8 - SS Goal.bin"
+SoundA8:	incbin	"sound/sfx/SndA8 - SS Goal.asm"
 		even
-SoundA9:	incbin	"sound/sfx/SndA9 - SS Item.bin"
+SoundA9:	incbin	"sound/sfx/SndA9 - SS Item.asm"
 		even
-SoundAA:	incbin	"sound/sfx/SndAA - Splash.bin"
+SoundAA:	incbin	"sound/sfx/SndAA - Splash.asm"
 		even
-SoundAB:	incbin	"sound/sfx/SndAB.bin"
+SoundAB:	incbin	"sound/sfx/SndAB.asm"
 		even
-SoundAC:	incbin	"sound/sfx/SndAC - Hit Boss.bin"
+SoundAC:	incbin	"sound/sfx/SndAC - Hit Boss.asm"
 		even
-SoundAD:	incbin	"sound/sfx/SndAD - Get Bubble.bin"
+SoundAD:	incbin	"sound/sfx/SndAD - Get Bubble.asm"
 		even
-SoundAE:	incbin	"sound/sfx/SndAE - Fireball.bin"
+SoundAE:	incbin	"sound/sfx/SndAE - Fireball.asm"
 		even
-SoundAF:	incbin	"sound/sfx/SndAF - Shield.bin"
+SoundAF:	incbin	"sound/sfx/SndAF - Shield.asm"
 		even
-SoundB0:	incbin	"sound/sfx/SndB0 - Saw.bin"
+SoundB0:	incbin	"sound/sfx/SndB0 - Saw.asm"
 		even
-SoundB1:	incbin	"sound/sfx/SndB1 - Electric.bin"
+SoundB1:	incbin	"sound/sfx/SndB1 - Electric.asm"
 		even
-SoundB2:	incbin	"sound/sfx/SndB2 - Drown Death.bin"
+SoundB2:	incbin	"sound/sfx/SndB2 - Drown Death.asm"
 		even
-SoundB3:	incbin	"sound/sfx/SndB3 - Flamethrower.bin"
+SoundB3:	incbin	"sound/sfx/SndB3 - Flamethrower.asm"
 		even
-SoundB4:	incbin	"sound/sfx/SndB4 - Bumper.bin"
+SoundB4:	incbin	"sound/sfx/SndB4 - Bumper.asm"
 		even
-SoundB5:	incbin	"sound/sfx/SndB5 - Ring.bin"
+SoundB5:	incbin	"sound/sfx/SndB5 - Ring.asm"
 		even
-SoundB6:	incbin	"sound/sfx/SndB6 - Spikes Move.bin"
+SoundB6:	incbin	"sound/sfx/SndB6 - Spikes Move.asm"
 		even
-SoundB7:	incbin	"sound/sfx/SndB7 - Rumbling.bin"
+SoundB7:	incbin	"sound/sfx/SndB7 - Rumbling.asm"
 		even
-SoundB8:	incbin	"sound/sfx/SndB8.bin"
+SoundB8:	incbin	"sound/sfx/SndB8.asm"
 		even
-SoundB9:	incbin	"sound/sfx/SndB9 - Collapse.bin"
+SoundB9:	incbin	"sound/sfx/SndB9 - Collapse.asm"
 		even
-SoundBA:	incbin	"sound/sfx/SndBA - SS Glass.bin"
+SoundBA:	incbin	"sound/sfx/SndBA - SS Glass.asm"
 		even
-SoundBB:	incbin	"sound/sfx/SndBB - Door.bin"
+SoundBB:	incbin	"sound/sfx/SndBB - Door.asm"
 		even
-SoundBC:	incbin	"sound/sfx/SndBC - Teleport.bin"
+SoundBC:	incbin	"sound/sfx/SndBC - Teleport.asm"
 		even
-SoundBD:	incbin	"sound/sfx/SndBD - ChainStomp.bin"
+SoundBD:	incbin	"sound/sfx/SndBD - ChainStomp.asm"
 		even
-SoundBE:	incbin	"sound/sfx/SndBE - Roll.bin"
+SoundBE:	incbin	"sound/sfx/SndBE - Roll.asm"
 		even
-SoundBF:	incbin	"sound/sfx/SndBF - Get Continue.bin"
+SoundBF:	incbin	"sound/sfx/SndBF - Get Continue.asm"
 		even
-SoundC0:	incbin	"sound/sfx/SndC0 - Basaran Flap.bin"
+SoundC0:	incbin	"sound/sfx/SndC0 - Basaran Flap.asm"
 		even
-SoundC1:	incbin	"sound/sfx/SndC1 - Break Item.bin"
+SoundC1:	incbin	"sound/sfx/SndC1 - Break Item.asm"
 		even
-SoundC2:	incbin	"sound/sfx/SndC2 - Drown Warning.bin"
+SoundC2:	incbin	"sound/sfx/SndC2 - Drown Warning.asm"
 		even
-SoundC3:	incbin	"sound/sfx/SndC3 - Giant Ring.bin"
+SoundC3:	incbin	"sound/sfx/SndC3 - Giant Ring.asm"
 		even
-SoundC4:	incbin	"sound/sfx/SndC4 - Bomb.bin"
+SoundC4:	incbin	"sound/sfx/SndC4 - Bomb.asm"
 		even
-SoundC5:	incbin	"sound/sfx/SndC5 - Cash Register.bin"
+SoundC5:	incbin	"sound/sfx/SndC5 - Cash Register.asm"
 		even
-SoundC6:	incbin	"sound/sfx/SndC6 - Ring Loss.bin"
+SoundC6:	incbin	"sound/sfx/SndC6 - Ring Loss.asm"
 		even
-SoundC7:	incbin	"sound/sfx/SndC7 - Chain Rising.bin"
+SoundC7:	incbin	"sound/sfx/SndC7 - Chain Rising.asm"
 		even
-SoundC8:	incbin	"sound/sfx/SndC8 - Burning.bin"
+SoundC8:	incbin	"sound/sfx/SndC8 - Burning.asm"
 		even
-SoundC9:	incbin	"sound/sfx/SndC9 - Hidden Bonus.bin"
+SoundC9:	incbin	"sound/sfx/SndC9 - Hidden Bonus.asm"
 		even
-SoundCA:	incbin	"sound/sfx/SndCA - Enter SS.bin"
+SoundCA:	incbin	"sound/sfx/SndCA - Enter SS.asm"
 		even
-SoundCB:	incbin	"sound/sfx/SndCB - Wall Smash.bin"
+SoundCB:	incbin	"sound/sfx/SndCB - Wall Smash.asm"
 		even
-SoundCC:	incbin	"sound/sfx/SndCC - Spring.bin"
+SoundCC:	incbin	"sound/sfx/SndCC - Spring.asm"
 		even
-SoundCD:	incbin	"sound/sfx/SndCD - Switch.bin"
+SoundCD:	incbin	"sound/sfx/SndCD - Switch.asm"
 		even
-SoundCE:	incbin	"sound/sfx/SndCE - Ring Left Speaker.bin"
+SoundCE:	incbin	"sound/sfx/SndCE - Ring Left Speaker.asm"
 		even
-SoundCF:	incbin	"sound/sfx/SndCF - Signpost.bin"
+SoundCF:	incbin	"sound/sfx/SndCF - Signpost.asm"
 		even
-SoundD0:	incbin	"sound/sfx/SndD0 - Waterfall.bin"
+SoundD0:	incbin	"sound/sfx/SndD0 - Waterfall.asm"
 		even
 	if FeatureSpindash>1
-SoundD1:	incbin	"sound/sfx/SndD1 - Spindash.bin"
+SoundD1:	incbin	"Enhancements/sound/sfx/SndD1 - Spindash.asm"
 		even
 	endc ; if FeatureSpindash>1
 
