@@ -45,7 +45,7 @@ Pow_Checks:
 	if OptimizeMonitorOrder=0
 		include	"_incObj/2E Monitor Content Power-Up (Original).asm"
 	else
-		include	"_incObj/2E Monitor Content Power-Up (Optimised).asm"
+		include	"Enhancements/_incObj/2E Monitor Content Power-Up (Optimised).asm"
 	endc
 ; ===========================================================================
 Pow_Delete:	; Routine 4

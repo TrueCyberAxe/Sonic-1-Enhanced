@@ -4,14 +4,14 @@
 	if TweakMergedArt=0
 Blk16_TITLE:
 	else
-Blk16_TITLE:		incbin	"map16\GHZ.bin"
+Blk16_TITLE:		incbin	"Enhancements/map16/GHZ.bin"
 		even
 Gra_Title:			incbin	"artnem\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
 		if TweakUncompressedChunkMapping=0
 Blk256_TITLE:		incbin	"map256\GHZ.bin"
 		else
-Blk256_TITLE:		incbin	"map256\GHZ.unc"
+Blk256_TITLE:		incbin	"Enhancements/map256\GHZ.unc"
 		endc ; if TweakUncompressedChunkMapping=0
 		even
 	endc ; if TweakMergedArt=0
@@ -25,7 +25,7 @@ Gra_Title:		incbin	"artnem\8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
 Gra_GHZ:			incbin	"artnem\8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
-Gra_GHZ:	  	incbin	"artnem\8x8 - GHZ.nem"	; GHZ combined patterns
+Gra_GHZ:	  	incbin	"Enhancements/artnem/8x8 - GHZ.nem"	; GHZ combined patterns
 	endc ; if TweakMergedArt=0
 		even
 	if TweakMergedArt=0
@@ -34,7 +34,7 @@ Blk256_TITLE:
 	if TweakUncompressedChunkMapping=0
 Blk256_GHZ:		incbin	"map256\GHZ.bin"
 	else
-Blk256_GHZ:		incbin	"map256\GHZ.unc"
+Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.unc"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------

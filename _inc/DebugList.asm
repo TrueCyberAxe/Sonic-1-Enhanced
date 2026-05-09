@@ -21,9 +21,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@GHZend-@GHZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object						Subtype		Frame		VRAM		Setting
 		dbug  Map_Crab,			id_Crabmeat,			0,				0,			$400
@@ -48,9 +48,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@LZend-@LZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object						Subtype		Frame		VRAM		Setting
 		dbug  Map_Spring,	id_Springs,					0,				0,			$523
@@ -82,9 +82,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@MZend-@MZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object						Subtype		Frame		VRAM		Setting
 		dbug  Map_Buzz,			id_BuzzBomber,		0,				0,			$444
@@ -111,9 +111,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@SLZend-@SLZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object								Subtype		Frame		VRAM		Setting
 		dbug  Map_Elev,			id_Elevator,					0,				0,			$4000
@@ -137,9 +137,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@SYZend-@SYZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object						Subtype		Frame		VRAM		Setting
 		dbug  Map_Spike,		id_Spikes,				0,				0,			$51B
@@ -163,9 +163,9 @@ dbug:	macro map,object,subtype,frame,vram
 	dc.w (@SBZend-@SBZ-2)/8
 
 	if EnhancedDebug=0
-		include "_inc/DebugListStart.asm"
+		include "Enhancements/_inc/DebugListStart.asm"
 	else
-		include "_inc/DebugListEnhancedStart.asm"
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
 	endc ; if EnhancedDebug=0
 ;					Mapping				Object								Subtype		Frame		VRAM		Setting
 		dbug  Map_Bomb,			id_Bomb,							0,				0,			$400

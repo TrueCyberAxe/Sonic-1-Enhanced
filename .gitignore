@@ -1,11 +1,23 @@
-desktop.ini
+# Windows
+Desktop.ini
 
-*/temp.dat
-*/dllcache
-*/SonLVL.log
+# Temp/cache
+**/temp.dat
+**/dllcache/
+**/SonLVL.log
 
-errors.txt
+# Build outputs
+**/s1*.bin
+**/*.lst
 
-s1*.bin
-*.lst
+# Test files
 test.*
+
+# IntelliJ / JetBrains
+.idea/
+*.iml
+
+sonic.lst
+errors.txt
+s1built.bin
+s1built.prev.bin

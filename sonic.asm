@@ -7,21 +7,8 @@
 ;
 ; Bug Fixes, Tweaks and Feature Options Implemented by Cyber Axe
 ; any code based on the work done by the community is given the sources below.
-
 ; ===========================================================================
-Original: 							equ 0
-
-	if Original=1
-AdvancedDebugger				equ 0
-Debug:          				equ 0 ; Debug Mode Always Enabled
-EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-EnhancedDebugMenu: 			equ 0
-	else
-AdvancedDebugger				equ 1 ; Vladik's Advanced Error Handler and Debugger 2.0
-Debug:          				equ 1 ; Debug Mode Always Enabled
-EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-EnhancedDebugMenu: 			equ 0
-	endc
+Original: equ 0 ; When Set to 1, Disabled all Enhancements by Cyber Axe
 
 DebugDisableDemoTime: 	equ 0 ; Disable Demo Timeout
 
@@ -37,100 +24,7 @@ ZoneCount:			equ 6	; discrete zones are: GHZ, MZ, SYZ, LZ, SLZ, and SBZ
 
 OptimiseSound:	equ 0	; change to 1 to optimise sound queuing (Fixed by Cyber Axe)
 
-	if Original=1
-		include "Features_Original.asm"
-	else
-		include "Features.asm"
-	endc
-; ============================================================================
-	if TweakUncompressedChunkMapping>0
-TweakMergedArt:											equ 1
-	elseif TweakLevelCompressionMode>1
-TweakMergedArt:											equ 1
-	else
-TweakMergedArt:											equ 0
-	endc
-
-	if TweakLevelCompressionMode<2
-TweakNonNemesisLevelArtLoad: 				equ 0
-	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: 				equ 0
-	else
-TweakNonNemesisLevelArtLoad: 				equ 1
-	endc
-
-	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: 						equ 1
-	elseif FeatureSpindash>1
-FeatureEnhancedPLCQueue: 						equ 1
-	else
-FeatureEnhancedPLCQueue: 						equ 1
-	endc
-
-	if Revision=0
-FeatureEnableUnusedArt: 						equ 1
-	elseif Revision>2
-FeatureEnableUnusedArt: 						equ 1
-	else
-FeatureEnableUnusedArt: 						equ 0
-	endc
-
-	if (BugFixCameraFollow+FeatureSpindash)>0
-FixCameraFollow: 										equ 1
-	else
-FixCameraFollow: 										equ 0
-	endc
-
-	if (BugFixInvincibilityDelayDeath)>0
-OptimizeMonitorOrder:								equ 1
-	else
-OptimizeMonitorOrder: 							equ 0
-	endc
-
-	if (FeatureSonicCDExtendedCamera+BugFixCameraFollow)>0
-FixCameraFollowBug: 								equ 1
-	else
-FixCameraFollowBug: 								equ 0
-	endc
-
-	if EnhancedDebugMenu>0
-ExtendedMenu: 											equ 1
-	else
-ExtendedMenu: 											equ 0
-	endc
-
-	if ExtendedMenu>0
-AsciiMenu: 													equ 1
-	else
-AsciiMenu: 													equ 0
-	endc
-
-	if EnhancedDebug>0
-ExtendedGameModeArray:							equ 1	;	Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-the-gamemodearray.1983/#post-31703
-	else
-ExtendedGameModeArray:							equ 0
-	endc
-
-	if EnhancedDebug>0
-ExtendedLevelSelect:								equ 1
-	else
-ExtendedLevelSelect:								equ 0
-	endc
-
-	if FeatureSpindash>1
-SonicExpanded:											equ 1
-	else
-SonicExpanded:											equ 1
-	endc ; if FeatureSpindash>1
-
-	if FeatureSpindash>1
-ExtendedSoundEffects:								equ 1
-	else
-ExtendedSoundEffects:								equ 1
-	endc ; if FeatureSpindash>1
-
-
-
+    include	"Enhancements/sonic_enhanced.asm"
 	include	"Constants.asm"
 	include	"Variables.asm"
 	include	"Macros.asm"
@@ -690,7 +584,7 @@ ErrorWaitForC:
 	if AsciiMenu=0
 Art_Text:	incbin	"artunc\menutext.bin" 					; text used in level select and debug mode
 	else
-Art_Text:	incbin	"artunc\menutext - ascii.bin" 	; text used in level select and debug mode
+Art_Text:	incbin	"Enhancements/artunc/menutext - ascii.bin" 	; text used in level select and debug mode
 	endc ; if ExtendedMenu=0
 		even
 
@@ -1349,7 +1243,7 @@ TilemapToVRAM:
 	if TweakImproovedDecompression=0
 		include	"_inc\Decompression Nemesis.asm"
 	else
-		include	"_inc\Decompression Nemesis (Improved).asm"
+		include	"Enhancements/_inc/Decompression Nemesis (Improved).asm"
 	endc
 
 
@@ -1613,13 +1507,13 @@ QuickPLC:
 	if TweakImproovedDecompression=0
 		include	"_inc\Decompression Kosinski.asm"
 	else
-		include	"_inc\Decompression Kosinski (Improved).asm"
+		include	"Enhancements/_inc/Decompression Kosinski (Improved).asm"
 	endc
 	if TweakLevelCompressionMode>2
-		include	"_inc\Decompression COMPER.asm"
+		include	"Enhancements/_inc/Decompression COMPER.asm"
 	endc
 	if TweakUncompressedTitleCards>0
-		include	"_inc\Uncompressed Art.asm"
+		include	"Enhancements/_inc/Uncompressed Art.asm"
 	endc
 
 		include	"_inc\PaletteCycle.asm"
@@ -8378,7 +8272,7 @@ Sonic_Control:																; Routine 2
 		rts
 
 	if FeatureSonicCDExtendedCamera>0
-		include "_incObj\Sonic_PanCamera.asm"
+		include "Enhancements/_incObj/Sonic_PanCamera.asm"
 	endc ; if FeatureSonicCDExtendedCamera>0
 ; ===========================================================================
 
@@ -8523,10 +8417,10 @@ loc_12EA6:
 		include	"_incObj\Sonic RollSpeed.asm"
 		include	"_incObj\Sonic JumpDirection.asm"
 	if FeatureSpindash>0
-		include "_incObj\Sonic Spindash.asm"
+		include "Enhancements/_incObj/Sonic Spindash.asm"
 	endc
 	if FeatureSuperPeelout>0
-		include "_incObj\Sonic SuperPeelout.asm"
+		include "Enhancements/_incObj/Sonic SuperPeelout.asm"
 	endc
 
 ; ===========================================================================
@@ -8564,7 +8458,7 @@ locret_13302:
 		include	"_incObj\Sonic (part 2).asm"
 		include	"_incObj\Sonic Loops.asm"
 	if BugFixScatteredRingsTimer>0
-		include "_incObj\Sonic Drowns.asm"
+		include "Enhancements/_incObj/Sonic Drowns.asm"
 	endc
 		include	"_incObj\Sonic Animate.asm"
 		include	"_anim\Sonic.asm"
@@ -10027,7 +9921,7 @@ SonicDynPLC:		include	"_maps\Sonic - Dynamic Gfx Script.asm"
 	if SonicExpanded=0
 Art_Sonic:	incbin	"artunc\Sonic.bin"	; Sonic
 	else
-Art_Sonic:	incbin	"artunc\Sonic - Expanded.bin"	; Sonic
+Art_Sonic:	incbin	"Enhancements/artunc/Sonic - Expanded.bin"	; Sonic
 	endc
 		even
 ; ---------------------------------------------------------------------------
@@ -10353,13 +10247,13 @@ Nem_Squirrel:			incbin	"artnem\Animal Squirrel.bin"
 ; ---------------------------------------------------------------------------
 
 	if TweakLevelCompressionMode=0
-		include "_inc\Graphics - Primary Patterns and Block Mappings.asm"
+		include "_inc/Graphics - Primary Patterns and Block Mappings.asm"
 	elseif TweakLevelCompressionMode=1
-		include "_inc\Graphics - Primary Patterns and Block Mappings (Recompressed).asm"
+		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (Recompressed).asm"
 	elseif TweakLevelCompressionMode=2
-		include "_inc\Graphics - Primary Patterns and Block Mappings (Kosinski).asm"
+		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (Kosinski).asm"
 	else
-		include "_inc\Graphics - Primary Patterns and Block Mappings (COMPER).asm"
+		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (COMPER).asm"
 	endc ; if TweakLevelCompressionMode<2
 
 ; ---------------------------------------------------------------------------
@@ -10394,7 +10288,7 @@ Gra_EndEggman:
 	if TweakLevelCompressionMode<3
 Gra_EndFlowers:	incbin	"artkos\Flowers at Ending.bin" ; ending sequence animated flowers
 	else
-Gra_EndFlowers:	incbin	"artcom\Flowers at Ending.bin" ; ending sequence animated flowers
+Gra_EndFlowers:	incbin	"Enhancements/artcom/Flowers at Ending.bin" ; ending sequence animated flowers
 	endc ; if TweakLevelCompressionMode<3
 
 	even
@@ -10601,7 +10495,7 @@ Art_BigRing:	incbin	"artunc\Giant Ring.bin"
 		even
 
 	if FeatureSpindash>1
-Art_Dust:			incbin	"artunc\spindust.bin"
+Art_Dust:			incbin	"Enhancements/artunc/spindust.bin"
 		even
 	endc ; if FeatureSpindash>1
 
