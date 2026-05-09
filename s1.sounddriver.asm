@@ -2635,43 +2635,43 @@ Kos_Z80:
 		incbin	"sound\z80.bin", $B5, $16AB
 		even
 
-Music81:	incbin	"sound/music/Mus81 - GHZ.bin"
+Music81:	incbin	"sound/music/Mus81 - GHZ.asm"
 		even
-Music82:	incbin	"sound/music/Mus82 - LZ.bin"
+Music82:	incbin	"sound/music/Mus82 - LZ.asm"
 		even
-Music83:	incbin	"sound/music/Mus83 - MZ.bin"
+Music83:	incbin	"sound/music/Mus83 - MZ.asm"
 		even
-Music84:	incbin	"sound/music/Mus84 - SLZ.bin"
+Music84:	incbin	"sound/music/Mus84 - SLZ.asm"
 		even
-Music85:	incbin	"sound/music/Mus85 - SYZ.bin"
+Music85:	incbin	"sound/music/Mus85 - SYZ.asm"
 		even
-Music86:	incbin	"sound/music/Mus86 - SBZ.bin"
+Music86:	incbin	"sound/music/Mus86 - SBZ.asm"
 		even
-Music87:	incbin	"sound/music/Mus87 - Invincibility.bin"
+Music87:	incbin	"sound/music/Mus87 - Invincibility.asm"
 		even
-Music88:	incbin	"sound/music/Mus88 - Extra Life.bin"
+Music88:	incbin	"sound/music/Mus88 - Extra Life.asm"
 		even
-Music89:	incbin	"sound/music/Mus89 - Special Stage.bin"
+Music89:	incbin	"sound/music/Mus89 - Special Stage.asm"
 		even
-Music8A:	incbin	"sound/music/Mus8A - Title Screen.bin"
+Music8A:	incbin	"sound/music/Mus8A - Title Screen.asm"
 		even
-Music8B:	incbin	"sound/music/Mus8B - Ending.bin"
+Music8B:	incbin	"sound/music/Mus8B - Ending.asm"
 		even
-Music8C:	incbin	"sound/music/Mus8C - Boss.bin"
+Music8C:	incbin	"sound/music/Mus8C - Boss.asm"
 		even
-Music8D:	incbin	"sound/music/Mus8D - FZ.bin"
+Music8D:	incbin	"sound/music/Mus8D - FZ.asm"
 		even
-Music8E:	incbin	"sound/music/Mus8E - Sonic Got Through.bin"
+Music8E:	incbin	"sound/music/Mus8E - Sonic Got Through.asm"
 		even
-Music8F:	incbin	"sound/music/Mus8F - Game Over.bin"
+Music8F:	incbin	"sound/music/Mus8F - Game Over.asm"
 		even
-Music90:	incbin	"sound/music/Mus90 - Continue Screen.bin"
+Music90:	incbin	"sound/music/Mus90 - Continue Screen.asm"
 		even
-Music91:	incbin	"sound/music/Mus91 - Credits.bin"
+Music91:	incbin	"sound/music/Mus91 - Credits.asm"
 		even
-Music92:	incbin	"sound/music/Mus92 - Drowning.bin"
+Music92:	incbin	"sound/music/Mus92 - Drowning.asm"
 		even
-Music93:	incbin	"sound/music/Mus93 - Get Emerald.bin"
+Music93:	incbin	"sound/music/Mus93 - Get Emerald.asm"
 		even
 ; ---------------------------------------------------------------------------
 ; Sound	effect pointers

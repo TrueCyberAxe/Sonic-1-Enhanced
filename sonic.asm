@@ -25,8 +25,8 @@ ZoneCount:			equ 6	; discrete zones are: GHZ, MZ, SYZ, LZ, SLZ, and SBZ
 OptimiseSound:	equ 0	; change to 1 to optimise sound queuing (Fixed by Cyber Axe)
 
     include	"Enhancements/sonic_enhanced.asm"
-	include	"Constants.asm"
-	include	"Variables.asm"
+	include	"_Constants.asm"
+	include	"_Variables.asm"
 	include	"Macros.asm"
 ; ===========================================================================
 
@@ -4251,10 +4251,10 @@ SignpostArtLoad:
 ; End of function SignpostArtLoad
 
 ; ===========================================================================
-Demo_GHZ:	incbin	"demodata\Intro - GHZ.bin"
-Demo_MZ:	incbin	"demodata\Intro - MZ.bin"
-Demo_SYZ:	incbin	"demodata\Intro - SYZ.bin"
-Demo_SS:	incbin	"demodata\Intro - Special Stage.bin"
+Demo_GHZ:	incbin	"demodata/Intro - GHZ.asm"
+Demo_MZ:	incbin	"demodata/Intro - MZ.asm"
+Demo_SYZ:	incbin	"demodata/Intro - SYZ.asm"
+Demo_SS:	incbin	"demodata/Intro - Special Stage.asm"
 ; ===========================================================================
 
 ; ---------------------------------------------------------------------------
@@ -5373,21 +5373,21 @@ Map_EEgg:	include	"_maps\Try Again & End Eggman.asm"
 ; ---------------------------------------------------------------------------
 ; Ending sequence demos
 ; ---------------------------------------------------------------------------
-Demo_EndGHZ1:	incbin	"demodata\Ending - GHZ1.bin"
+Demo_EndGHZ1:	incbin	"demodata/Ending - GHZ1.asm"
 		even
-Demo_EndMZ:	incbin	"demodata\Ending - MZ.bin"
+Demo_EndMZ:	incbin	"demodata/Ending - MZ.asm"
 		even
-Demo_EndSYZ:	incbin	"demodata\Ending - SYZ.bin"
+Demo_EndSYZ:	incbin	"demodata/Ending - SYZ.asm"
 		even
-Demo_EndLZ:	incbin	"demodata\Ending - LZ.bin"
+Demo_EndLZ:	incbin	"demodata/Ending - LZ.asm"
 		even
-Demo_EndSLZ:	incbin	"demodata\Ending - SLZ.bin"
+Demo_EndSLZ:	incbin	"demodata/Ending - SLZ.asm"
 		even
-Demo_EndSBZ1:	incbin	"demodata\Ending - SBZ1.bin"
+Demo_EndSBZ1:	incbin	"demodata/Ending - SBZ1.asm"
 		even
-Demo_EndSBZ2:	incbin	"demodata\Ending - SBZ2.bin"
+Demo_EndSBZ2:	incbin	"demodata/Ending - SBZ2.asm"
 		even
-Demo_EndGHZ2:	incbin	"demodata\Ending - GHZ2.bin"
+Demo_EndGHZ2:	incbin	"demodata/Ending - GHZ2.asm"
 		even
 
 	if Revision=0
@@ -9905,7 +9905,7 @@ Nem_TitleFg:		incbin	"artnem\Title Screen Foreground.bin"
 		even
 Nem_TitleSonic:	incbin	"artnem\Title Screen Sonic.bin"
 		even
-Nem_TitleTM:		incbin	"artnem\Title Screen TM.bin"
+Nem_TitleTM:		incbin	"artnem/Title Screen TM.nem"
 		even
 Eni_JapNames:		incbin	"tilemaps\Hidden Japanese Credits.bin" ; Japanese credits (mappings)
 		even
