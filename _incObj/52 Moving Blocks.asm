@@ -12,10 +12,10 @@ MBlock_Index:	dc.w MBlock_Main-MBlock_Index
 		dc.w MBlock_Platform-MBlock_Index
 		dc.w MBlock_StandOn-MBlock_Index
 
-mblock_origX:	equ $30
-mblock_origY:	equ $32
+mblock_origX = objoff_30
+mblock_origY = objoff_32
 
-MBlock_Var:	dc.b $10, 0		; object width,	frame number
+MBlock_Var:	dc.b $10, 0		; object width, frame number
 		dc.b $20, 1
 		dc.b $20, 2
 		dc.b $40, 3
@@ -25,20 +25,20 @@ MBlock_Var:	dc.b $10, 0		; object width,	frame number
 MBlock_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_MBlock,obMap(a0)
-		move.w	#$42B8,obGfx(a0)
+		move.w	#ArtTile_MZ_Block|Tile_Pal3,obGfx(a0)
 		cmpi.b	#id_LZ,(v_zone).w ; check if level is LZ
 		bne.s	loc_FE44
 		move.l	#Map_MBlockLZ,obMap(a0) ; LZ specific code
-		move.w	#$43BC,obGfx(a0)
+		move.w	#ArtTile_LZ_Moving_Block|Tile_Pal3,obGfx(a0)
 		move.b	#7,obHeight(a0)
 
 loc_FE44:
 		cmpi.b	#id_SBZ,(v_zone).w ; check if level is SBZ
 		bne.s	loc_FE60
-		move.w	#$22C0,obGfx(a0) ; SBZ specific code (object 5228)
+		move.w	#ArtTile_SBZ_Moving_Block_Short|Tile_Pal2,obGfx(a0) ; SBZ specific code (object 5228)
 		cmpi.b	#$28,obSubtype(a0) ; is object 5228 ?
 		beq.s	loc_FE60	; if yes, branch
-		move.w	#$4460,obGfx(a0) ; SBZ specific code (object 523x)
+		move.w	#ArtTile_SBZ_Moving_Block_Long|Tile_Pal3,obGfx(a0) ; SBZ specific code (object 523x)
 
 loc_FE60:
 		move.b	#4,obRender(a0)
@@ -66,13 +66,24 @@ MBlock_StandOn:	; Routine 4
 		moveq	#0,d1
 		move.b	obActWid(a0),d1
 		jsr	(ExitPlatform).l
+	if FixBugs
+		; MBlock_Move manipulates the stack pointer, potentially
+		; resulting in a crash. To avoid this, don't store data on
+		; the stack. We can use object scratch RAM instead.
+		move.w	obX(a0),objoff_38(a0)
+	else
 		move.w	obX(a0),-(sp)
+	endif
 		bsr.w	MBlock_Move
+	if FixBugs
+		move.w	objoff_38(a0),d2
+	else
 		move.w	(sp)+,d2
+	endif
 		jsr	(MvSonicOnPtfm2).l
 
 MBlock_ChkDel:
-		out_of_range	DeleteObject,mblock_origX(a0)
+		out_of_range.w	DeleteObject,mblock_origX(a0)
 		bra.w	DisplaySprite
 ; ===========================================================================
 
@@ -84,11 +95,17 @@ MBlock_Move:
 		move.w	MBlock_TypeIndex(pc,d0.w),d1
 		jmp	MBlock_TypeIndex(pc,d1.w)
 ; ===========================================================================
-MBlock_TypeIndex:dc.w MBlock_Type00-MBlock_TypeIndex, MBlock_Type01-MBlock_TypeIndex
-		dc.w MBlock_Type02-MBlock_TypeIndex, MBlock_Type03-MBlock_TypeIndex
-		dc.w MBlock_Type02-MBlock_TypeIndex, MBlock_Type05-MBlock_TypeIndex
-		dc.w MBlock_Type06-MBlock_TypeIndex, MBlock_Type07-MBlock_TypeIndex
-		dc.w MBlock_Type08-MBlock_TypeIndex, MBlock_Type02-MBlock_TypeIndex
+MBlock_TypeIndex:
+		dc.w MBlock_Type00-MBlock_TypeIndex
+		dc.w MBlock_Type01-MBlock_TypeIndex
+		dc.w MBlock_Type02-MBlock_TypeIndex
+		dc.w MBlock_Type03-MBlock_TypeIndex
+		dc.w MBlock_Type02-MBlock_TypeIndex
+		dc.w MBlock_Type05-MBlock_TypeIndex
+		dc.w MBlock_Type06-MBlock_TypeIndex
+		dc.w MBlock_Type07-MBlock_TypeIndex
+		dc.w MBlock_Type08-MBlock_TypeIndex
+		dc.w MBlock_Type02-MBlock_TypeIndex
 		dc.w MBlock_Type0A-MBlock_TypeIndex
 ; ===========================================================================
 
@@ -112,6 +129,13 @@ loc_FF26:
 ; ===========================================================================
 
 MBlock_Type02:
+	if FixBugs
+		; align hidden LZ1 raft with water surface
+		tst.b	objoff_3F(a0)
+		beq.s	.nosurface
+		move.w	(v_waterpos1).w,obY(a0)
+.nosurface:
+	endif
 		cmpi.b	#4,obRoutine(a0) ; is Sonic standing on the platform?
 		bne.s	MBlock_02_Wait
 		addq.b	#1,obSubtype(a0) ; if yes, add 1 to type
@@ -126,7 +150,7 @@ MBlock_Type03:
 		bsr.w	ObjHitWallRight
 		tst.w	d1		; has the platform hit a wall?
 		bmi.s	MBlock_03_End	; if yes, branch
-		addq.w	#1,obX(a0)	; move platform	to the right
+		addq.w	#1,obX(a0)	; move platform to the right
 		move.w	obX(a0),mblock_origX(a0)
 		rts
 ; ===========================================================================
@@ -137,12 +161,19 @@ MBlock_03_End:
 ; ===========================================================================
 
 MBlock_Type05:
+	if FixBugs
+		; align hidden LZ1 raft with water surface
+		tst.b	objoff_3F(a0)
+		beq.s	.nosurface
+		move.w	(v_waterpos1).w,obY(a0)
+.nosurface:
+	endif
 		moveq	#0,d3
 		move.b	obActWid(a0),d3
 		bsr.w	ObjHitWallRight
 		tst.w	d1		; has the platform hit a wall?
 		bmi.s	MBlock_05_End	; if yes, branch
-		addq.w	#1,obX(a0)	; move platform	to the right
+		addq.w	#1,obX(a0)	; move platform to the right
 		move.w	obX(a0),mblock_origX(a0)
 		rts
 ; ===========================================================================
@@ -159,7 +190,7 @@ MBlock_Type06:
 		tst.w	d1		; has platform hit the floor?
 		bpl.w	locret_FFA0	; if not, branch
 		add.w	d1,obY(a0)
-		clr.w	obVelY(a0)	; stop platform	falling
+		clr.w	obVelY(a0)	; stop platform falling
 		clr.b	obSubtype(a0)	; change to type 00 (non-moving)
 
 locret_FFA0:
@@ -170,10 +201,16 @@ MBlock_Type07:
 		tst.b	(f_switch+2).w	; has switch number 02 been pressed?
 		beq.s	MBlock_07_ChkDel
 		subq.b	#3,obSubtype(a0) ; if yes, change object type to 04
+	if FixBugs
+		move.b	#1,objoff_3F(a0) ; align hidden LZ1 raft with water surface
+	endif
 
 MBlock_07_ChkDel:
+		; This line, combined with the coordinate being pushed to
+		; the stack in MBlock_StandOn, can be disasterous.
 		addq.l	#4,sp
-		out_of_range	DeleteObject,mblock_origX(a0)
+
+		out_of_range.w	DeleteObject,mblock_origX(a0)
 		rts
 ; ===========================================================================
 
@@ -203,21 +240,21 @@ MBlock_Type0A:
 		neg.w	d3
 
 loc_10004:
-		tst.w	$36(a0)		; is platform set to move back?
+		tst.w	objoff_36(a0)		; is platform set to move back?
 		bne.s	MBlock_0A_Back	; if yes, branch
 		move.w	obX(a0),d0
 		sub.w	mblock_origX(a0),d0
 		cmp.w	d3,d0
 		beq.s	MBlock_0A_Wait
 		add.w	d1,obX(a0)	; move platform
-		move.w	#300,$34(a0)	; set time delay to 5 seconds
+		move.w	#300,objoff_34(a0)	; set time delay to 5 seconds
 		rts
 ; ===========================================================================
 
 MBlock_0A_Wait:
-		subq.w	#1,$34(a0)	; subtract 1 from time delay
+		subq.w	#1,objoff_34(a0)	; subtract 1 from time delay
 		bne.s	locret_1002E	; if time remains, branch
-		move.w	#1,$36(a0)	; set platform to move back to its original position
+		move.w	#1,objoff_36(a0)	; set platform to move back to its original position
 
 locret_1002E:
 		rts
@@ -232,6 +269,6 @@ MBlock_0A_Back:
 ; ===========================================================================
 
 MBlock_0A_Reset:
-		clr.w	$36(a0)
+		clr.w	objoff_36(a0)
 		subq.b	#1,obSubtype(a0)
 		rts

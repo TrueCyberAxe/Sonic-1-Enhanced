@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 83 - blocks that disintegrate Eggman	presses	a switch (SBZ2)
+; Object 83 - blocks that disintegrate Eggman presses a switch (SBZ2)
 ; ---------------------------------------------------------------------------
 
 FalseFloor:
@@ -10,48 +10,48 @@ FalseFloor:
 ; ===========================================================================
 FFloor_Index:	dc.w FFloor_Main-FFloor_Index
 		dc.w FFloor_ChkBreak-FFloor_Index
-		dc.w loc_19C36-FFloor_Index
-		dc.w loc_19C62-FFloor_Index
-		dc.w loc_19C72-FFloor_Index
-		dc.w loc_19C80-FFloor_Index
+		dc.w FFloor_Break-FFloor_Index
+		dc.w FFloor_AllGone-FFloor_Index
+		dc.w FFloor_Block-FFloor_Index
+		dc.w FFloor_Frag-FFloor_Index
 ; ===========================================================================
 
 FFloor_Main:	; Routine 0
-		move.w	#$2080,obX(a0)
-		move.w	#$5D0,obY(a0)
+		move.w	#boss_sbz2_x+$30,obX(a0)
+		move.w	#boss_sbz2_y+$C0,obY(a0)
 		move.b	#$80,obActWid(a0)
 		move.b	#$10,obHeight(a0)
 		move.b	#4,obRender(a0)
 		bset	#7,obRender(a0)
 		moveq	#0,d4
-		move.w	#$2010,d5
+		move.w	#boss_sbz2_x-$40,d5
 		moveq	#7,d6
-		lea	$30(a0),a2
+		lea	objoff_30(a0),a2
 
 FFloor_MakeBlock:
 		jsr	(FindFreeObj).l
 		bne.s	FFloor_ExitMake
 		move.w	a1,(a2)+
-		move.b	#id_FalseFloor,(a1) ; load block object
+		move.b	#id_FalseFloor,obID(a1) ; load block object
 		move.l	#Map_FFloor,obMap(a1)
-		move.w	#$4518,obGfx(a1)
+		move.w	#ArtTile_Eggman_Trap_Floor|Tile_Pal3,obGfx(a1)
 		move.b	#4,obRender(a1)
 		move.b	#$10,obActWid(a1)
 		move.b	#$10,obHeight(a1)
 		move.b	#3,obPriority(a1)
-		move.w	d5,obX(a1)	; set X	position
-		move.w	#$5D0,obY(a1)
+		move.w	d5,obX(a1)	; set X position
+		move.w	#boss_sbz2_y+$C0,obY(a1)
 		addi.w	#$20,d5		; add $20 for next X position
 		move.b	#8,obRoutine(a1)
 		dbf	d6,FFloor_MakeBlock ; repeat sequence 7 more times
 
 FFloor_ExitMake:
 		addq.b	#2,obRoutine(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 FFloor_ChkBreak:; Routine 2
-		cmpi.w	#$474F,obSubtype(a0) ; is object set to disintegrate?
+		cmpi.w	#"GO",obSubtype(a0) ; is object set to disintegrate?
 		bne.s	FFloor_Solid	; if not, branch
 		clr.b	obFrame(a0)
 		addq.b	#2,obRoutine(a0) ; next subroutine
@@ -63,7 +63,7 @@ FFloor_Solid:
 		ext.w	d0
 		addq.w	#8,d0
 		asl.w	#4,d0
-		move.w	#$2100,d4
+		move.w	#boss_sbz2_x+$B0,d4
 		sub.w	d0,d4
 		move.b	d0,obActWid(a0)
 		move.w	d4,obX(a0)
@@ -74,44 +74,48 @@ FFloor_Solid:
 		jmp	(SolidObject).l
 ; ===========================================================================
 
-loc_19C36:	; Routine 4
+; loc_19C36:
+FFloor_Break:	; Routine 4
 		subi.b	#$E,obTimeFrame(a0)
 		bcc.s	FFloor_Solid2
 		moveq	#-1,d0
 		move.b	obFrame(a0),d0
 		ext.w	d0
 		add.w	d0,d0
-		move.w	$30(a0,d0.w),d0
+		move.w	objoff_30(a0,d0.w),d0
 		movea.l	d0,a1
-		move.w	#$474F,obSubtype(a1)
+		move.w	#"GO",obSubtype(a1)
 		addq.b	#1,obFrame(a0)
 		cmpi.b	#8,obFrame(a0)
-		beq.s	loc_19C62
+		beq.s	FFloor_AllGone
 
 FFloor_Solid2:
 		bra.s	FFloor_Solid
 ; ===========================================================================
 
-loc_19C62:	; Routine 6
+; loc_19C62:
+FFloor_AllGone:	; Routine 6
 		bclr	#3,obStatus(a0)
 		bclr	#3,(v_player+obStatus).w
-		bra.w	loc_1982C
+		bra.w	FalseFloor_Delete
 ; ===========================================================================
 
-loc_19C72:	; Routine 8
-		cmpi.w	#$474F,obSubtype(a0) ; is object set to disintegrate?
-		beq.s	FFloor_Break	; if yes, branch
+; loc_19C72:
+FFloor_Block:	; Routine 8
+		cmpi.w	#"GO",obSubtype(a0)	; is object set to disintegrate?
+		beq.s	FFloor_BlockBreak	; if yes, branch
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 
-loc_19C80:	; Routine $A
+; loc_19C80:
+FFloor_Frag:	; Routine $A
 		tst.b	obRender(a0)
-		bpl.w	loc_1982C
+		bpl.w	FalseFloor_Delete
 		jsr	(ObjectFall).l
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 
-FFloor_Break:
+FFloor_BlockBreak:
 		lea	FFloor_FragSpeed(pc),a4
 		lea	FFloor_FragPos(pc),a5
 		moveq	#1,d4
@@ -150,7 +154,8 @@ loc_19CC4:
 		dbf	d1,FFloor_LoopFrag ; repeat sequence 3 more times
 
 FFloor_BreakSnd:
-		sfx	sfx_WallSmash,0,0,0	; play smashing sound
+		move.w	#sfx_WallSmash,d0
+		jsr	(QueueSound2).l	; play smashing sound
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 FFloor_FragSpeed:dc.w $80, 0

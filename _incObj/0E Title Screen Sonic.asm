@@ -16,36 +16,38 @@ TSon_Index:	dc.w TSon_Main-TSon_Index
 
 TSon_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
-	if FeatureCentreTitleScreen=0
-		move.w 	#$F0,obX(a0)				; Sonic's X Position
+	if (FeatureCentreTitleScreen)|(FixBugs)
+		; Fix title screen position
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Title_Screen_position_in_Sonic_1
+		move.w	#$F0+8,obX(a0)
 	else
-		move.w #$F8,obX(a0)					; Sonic's X Position
-	endc
-		move.w #$DE,obScreenY(a0) 	; position is fixed to screen
-		move.l #Map_TSon,obMap(a0)
-		move.w #$2300,obGfx(a0)
-		move.b #1,obPriority(a0)
-		move.b #29,obDelayAni(a0) 	; set time delay to 0.5 seconds
+		move.w	#$F0,obX(a0)
+	endif
+		move.w	#$DE,obScreenY(a0) ; position is fixed to screen
+		move.l	#Map_TSon,obMap(a0)
+		move.w	#ArtTile_Title_Sonic|Tile_Pal2,obGfx(a0)
+		move.b	#1,obPriority(a0)
+		move.b	#29,obDelayAni(a0) ; set time delay to 0.5 seconds
 		lea	(Ani_TSon).l,a1
 		bsr.w	AnimateSprite
 
 TSon_Delay:	;Routine 2
-		subq.b #1,obDelayAni(a0) 		; subtract 1 from time delay
-		bpl.s	@wait									; if time remains, branch
-		addq.b #2,obRoutine(a0) 		; go to next routine
+		subq.b	#1,obDelayAni(a0) ; subtract 1 from time delay
+		bpl.s	.wait		; if time remains, branch
+		addq.b	#2,obRoutine(a0) ; go to next routine
 		bra.w	DisplaySprite
 
-	@wait:
+.wait:
 		rts
 ; ===========================================================================
 
 TSon_Move:	; Routine 4
 		subq.w	#8,obScreenY(a0) ; move Sonic up
 		cmpi.w	#$96,obScreenY(a0) ; has Sonic reached final position?
-		bne.s	@display	; if not, branch
+		bne.s	.display	; if not, branch
 		addq.b	#2,obRoutine(a0)
 
-	@display:
+.display:
 		bra.w	DisplaySprite
 
 		rts

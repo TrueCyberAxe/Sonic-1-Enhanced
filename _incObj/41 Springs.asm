@@ -7,18 +7,16 @@ Springs:
 		move.b	obRoutine(a0),d0
 		move.w	Spring_Index(pc,d0.w),d1
 		jsr	Spring_Index(pc,d1.w)
-
-	if BugFixRenderBeforeInit=0 ; Bug 1
-		bsr.w	DisplaySprite
-	endc
-
-		out_of_range	DeleteObject
-
-	if BugFixRenderBeforeInit=0 ; Bug 1
-		rts
-	else
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
+		; Objects shouldn't call DisplaySprite and DeleteObject in
+		; the same frame or else cause a null-pointer dereference.
+		out_of_range.w	DeleteObject
 		bra.w	DisplaySprite
-	endc
+	else
+		bsr.w	DisplaySprite
+		out_of_range.w	DeleteObject
+		rts
+	endif
 ; ===========================================================================
 Spring_Index:	dc.w Spring_Main-Spring_Index
 		dc.w Spring_Up-Spring_Index
@@ -31,7 +29,7 @@ Spring_Index:	dc.w Spring_Main-Spring_Index
 		dc.w Spring_AniDwn-Spring_Index
 		dc.w Spring_ResetDwn-Spring_Index
 
-spring_pow:	equ $30											; power of current spring
+spring_pow = objoff_30			; power of current spring
 
 Spring_Powers:	dc.w -$1000							; power	of red spring
 		dc.w -$A00													; power	of yellow spring
@@ -40,7 +38,7 @@ Spring_Powers:	dc.w -$1000							; power	of red spring
 Spring_Main:														; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Spring,obMap(a0)
-		move.w	#$523,obGfx(a0)
+		move.w	#ArtTile_Spring_Horizontal,obGfx(a0)
 		ori.b	#4,obRender(a0)
 		move.b	#$10,obActWid(a0)
 		move.b	#4,obPriority(a0)
@@ -51,7 +49,7 @@ Spring_Main:														; Routine 0
 		move.b	#8,obRoutine(a0) 						; use "Spring_LR" routine
 		move.b	#1,obAnim(a0)
 		move.b	#3,obFrame(a0)
-		move.w	#$533,obGfx(a0)
+		move.w	#ArtTile_Spring_Vertical,obGfx(a0)
 		move.b	#8,obActWid(a0)
 
 	Spring_NotLR:
@@ -61,7 +59,7 @@ Spring_Main:														; Routine 0
 		move.b	#$E,obRoutine(a0) 					; use "Spring_Dwn" routine
 		bset	#1,obStatus(a0)
 
-	Spring_NotDwn:
+Spring_NotDwn:
 		btst	#1,d0
 		beq.s	loc_DB72
 		bset	#5,obGfx(a0)
@@ -93,7 +91,8 @@ Spring_BounceUp:
 		move.b	#2,obRoutine(a1)
 		bclr	#3,obStatus(a0)
 		clr.b	obSolid(a0)
-		sfx	sfx_Spring,0,0,0								; play spring sound
+		move.w	#sfx_Spring,d0
+		jsr	(QueueSound2).l	; play spring sound
 
 Spring_AniUp:	; Routine 4
 		lea	(Ani_Spring).l,a1
@@ -101,7 +100,7 @@ Spring_AniUp:	; Routine 4
 ; ===========================================================================
 
 Spring_ResetUp:	; Routine 6
-		move.b	#1,obNextAni(a0) 						; reset animation
+		move.b	#1,obPrevAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) 						; goto "Spring_Up" routine
 		rts
 ; ===========================================================================
@@ -131,8 +130,8 @@ Spring_BounceLR:
 		subi.w	#$10,obX(a1)
 		neg.w	obVelX(a1)										; move Sonic to	the right
 
-	Spring_Flipped:
-		move.w	#$F,$3E(a1)
+Spring_Flipped:
+		move.w	#15,locktime(a1)
 		move.w	obVelX(a1),obInertia(a1)
 
 	if BugFixSpringFaceWrongDirection=0
@@ -154,7 +153,8 @@ Spring_BounceLR:
 loc_DC56:
 		bclr	#5,obStatus(a0)
 		bclr	#5,obStatus(a1)
-		sfx	sfx_Spring,0,0,0								; play spring sound
+		move.w	#sfx_Spring,d0
+		jsr	(QueueSound2).l	; play spring sound
 
 Spring_AniLR:	; Routine $A
 	if FeatureSpindash>0
@@ -166,7 +166,7 @@ Spring_AniLR:	; Routine $A
 ; ===========================================================================
 
 Spring_ResetLR:	; Routine $C
-		move.b	#2,obNextAni(a0) 						; reset animation
+		move.b	#2,obPrevAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) 						; goto "Spring_LR" routine
 		rts
 ; ===========================================================================
@@ -201,7 +201,8 @@ Spring_BounceDwn:
 		move.b	#2,obRoutine(a1)
 		bclr	#3,obStatus(a0)
 		clr.b	obSolid(a0)
-		sfx	sfx_Spring,0,0,0								; play spring sound
+		move.w	#sfx_Spring,d0
+		jsr	(QueueSound2).l	; play spring sound
 
 	if BugFixSpringDownSpring=0
 		move.b	#id_roll,obAnim(a1)
@@ -213,8 +214,9 @@ Spring_AniDwn: ; Routine $10
 
 ; ===========================================================================
 
-Spring_ResetDwn: ; Routine $12
-		move.b	#1,obNextAni(a0) 						; reset animation
+Spring_ResetDwn:
+		; Routine $12
+		move.b	#1,obPrevAni(a0) ; reset animation
 		subq.b	#4,obRoutine(a0) 						; goto "Spring_Dwn" routine
 
 	@return:

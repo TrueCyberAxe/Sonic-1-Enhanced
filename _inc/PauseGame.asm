@@ -1,8 +1,6 @@
 ; ---------------------------------------------------------------------------
-; Subroutine to	pause the game
+; Subroutine to pause the game
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
 PauseGame:
 	if TweakCodeOptimizations=0
@@ -40,7 +38,7 @@ Pause_StopGame:
 
 	if FeatureMusicWhilePaused=0
 		if FeatureUseSonic2SoundDriver=0
-			move.b	#1,(v_snddriver_ram+f_pausemusic).w 				; pause music
+			move.b	#1,(v_snddriver_ram.f_pausemusic).w ; pause music				; pause music
 		else
 			stopZ80
 			waitZ80
@@ -50,8 +48,8 @@ Pause_StopGame:
 	endc ; if FeatureMusicWhilePaused=0
 
 Pause_Loop:
-		move.b	#$10,(v_vbla_routine).w
-		bsr.w	WaitForVBla
+		move.b	#id_VBlank_Paused,(v_vblank_routine).w
+		bsr.w	WaitForVBlank
 		tst.b	(f_slomocheat).w 													; is slow-motion cheat on?
 
 	if FeatureSonicCDPauseRestartLevel=0
@@ -86,7 +84,7 @@ Pause_Reset:
 	endc
 
 Pause_ChkBC:
-		btst	#bitB,(v_jpadhold1).w 										; is button B pressed?
+		btst	#bitB,(v_jpadhold1).w ; is button B held?
 		bne.s	Pause_SlowMo															; if yes, branch
 		btst	#bitC,(v_jpadpress1).w 										; is button C pressed?
 		bne.s	Pause_SlowMo															; if yes, branch
@@ -97,14 +95,16 @@ Pause_ChkStart:
 
 Pause_EndMusic:
 	if FeatureMusicWhilePaused=0
-		if FeatureUseSonic2SoundDriver=0
-			move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; unpause the music
-		else
-			stopZ80
-      waitZ80
-      move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
-      startZ80
-		endc ; if FeatureUseSonic2SoundDriver=0
+
+	if FeatureUseSonic2SoundDriver=0
+		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; unpause the music
+	else
+		stopZ80
+		waitZ80
+		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+		startZ80
+	endc ; if FeatureUseSonic2SoundDriver=0
+
 	endc ; if FeatureMusicWhilePaused=0
 
 Unpause:
@@ -116,15 +116,19 @@ Pause_DoNothing:
 
 Pause_SlowMo:
 		move.w	#1,(f_pause).w
-		if FeatureMusicWhilePaused=0
-			if FeatureUseSonic2SoundDriver=0
-				move.b	#$80,(v_snddriver_ram+f_pausemusic).w		; unpause the music
-			else
-				stopZ80
-	      waitZ80
-	      move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
-	      startZ80
-			endc ; if FeatureUseSonic2SoundDriver=0
-		endc ; if FeatureMusicWhilePaused=0
+
+	if FeatureMusicWhilePaused=0
+
+	if FeatureUseSonic2SoundDriver=0
+		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; Unpause the music
+	else
+		stopZ80
+		waitZ80
+		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+		startZ80
+	endc ; if FeatureUseSonic2SoundDriver=0
+
+	endc ; if FeatureMusicWhilePaused=0
+
 		rts
 ; End of function PauseGame

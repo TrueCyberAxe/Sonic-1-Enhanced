@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 45 - spiked metal block from beta version (MZ)
+; Object 45 - unused sidways spiked metal stomper from beta version (MZ)
 ; ---------------------------------------------------------------------------
 
 SideStomp:
@@ -10,7 +10,7 @@ SideStomp:
 ; ===========================================================================
 SStom_Index:	dc.w SStom_Main-SStom_Index
 		dc.w SStom_Solid-SStom_Index
-		dc.w loc_BA8E-SStom_Index
+		dc.w SStom_Spikes-SStom_Index
 		dc.w SStom_Display-SStom_Index
 		dc.w SStom_Pole-SStom_Index
 
@@ -35,41 +35,41 @@ SStom_Main:	; Routine 0
 		lea	(SStom_Var).l,a2
 		movea.l	a0,a1
 		moveq	#3,d1
-		bra.s	@load
+		bra.s	.load
 
-	@loop:
+.loop:
 		bsr.w	FindNextFreeObj
-		bne.s	@fail
+		bne.s	.fail
 
-	@load:
+.load:
 		move.b	(a2)+,obRoutine(a1)
-		move.b	#id_SideStomp,0(a1)
+		_move.b	#id_SideStomp,obID(a1)
 		move.w	obY(a0),obY(a1)
 		move.b	(a2)+,d0
 		ext.w	d0
 		add.w	obX(a0),d0
 		move.w	d0,obX(a1)
 		move.l	#Map_SStom,obMap(a1)
-		move.w	#$300,obGfx(a1)
+		move.w	#ArtTile_MZ_Spike_Stomper,obGfx(a1)
 		move.b	#4,obRender(a1)
-		move.w	obX(a1),$30(a1)
-		move.w	obX(a0),$3A(a1)
+		move.w	obX(a1),objoff_30(a1)
+		move.w	obX(a0),objoff_3A(a1)
 		move.b	obSubtype(a0),obSubtype(a1)
 		move.b	#$20,obActWid(a1)
-		move.w	d2,$34(a1)
+		move.w	d2,objoff_34(a1)
 		move.b	#4,obPriority(a1)
 		cmpi.b	#1,(a2)		; is subobject spikes?
-		bne.s	@notspikes	; if not, branch
+		bne.s	.notspikes	; if not, branch
 		move.b	#$91,obColType(a1) ; use harmful collision type
 
-	@notspikes:
+.notspikes:
 		move.b	(a2)+,obFrame(a1)
-		move.l	a0,$3C(a1)
-		dbf	d1,@loop	; repeat 3 times
+		move.l	a0,objoff_3C(a1)
+		dbf	d1,.loop	; repeat 3 times
 
 		move.b	#3,obPriority(a1)
 
-	@fail:
+.fail:
 		move.b	#$10,obActWid(a0)
 
 SStom_Solid:	; Routine 2
@@ -80,95 +80,100 @@ SStom_Solid:	; Routine 2
 		move.w	#$20,d3
 		move.w	(sp)+,d4
 		bsr.w	SolidObject
-	if BugFixRenderBeforeInit=0 ; Bug 2
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
+		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
-	endc
+	endif
 		bra.w	SStom_ChkDel
 ; ===========================================================================
 
 SStom_Pole:	; Routine 8
-		movea.l	$3C(a0),a1
-		move.b	$32(a1),d0
+		movea.l	objoff_3C(a0),a1
+		move.b	objoff_32(a1),d0
 		addi.b	#$10,d0
 		lsr.b	#5,d0
 		addq.b	#3,d0
 		move.b	d0,obFrame(a0)
 
-loc_BA8E:	; Routine 4
-		movea.l	$3C(a0),a1
+; loc_BA8E:
+SStom_Spikes:	; Routine 4
+		movea.l	objoff_3C(a0),a1
 		moveq	#0,d0
-		move.b	$32(a1),d0
+		move.b	objoff_32(a1),d0
 		neg.w	d0
-		add.w	$30(a0),d0
+		add.w	objoff_30(a0),d0
 		move.w	d0,obX(a0)
 
 SStom_Display:	; Routine 6
-	if BugFixRenderBeforeInit=0 ; Bug 1
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 1
 		bsr.w	DisplaySprite
-	endc
+	endif
 
 SStom_ChkDel:
-			out_of_range	DeleteObject,$3A(a0)
-		if BugFixRenderBeforeInit=0 ; Bug 1 / Bug 2
+		out_of_range.w	DeleteObject,objoff_3A(a0)
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1 / Bug 2
+		; This has been moved to prevent a display-after-free bug.
+		bra.w	DisplaySprite
+	else
 			rts
-		else
-			bra.w	DisplaySprite
-		endc
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
+	endif
+; ===========================================================================
 
 SStom_Move:
 		moveq	#0,d0
 		move.b	obSubtype(a0),d0
 		add.w	d0,d0
-		move.w	off_BAD6(pc,d0.w),d1
-		jmp	off_BAD6(pc,d1.w)
+		move.w	SStom_Move_Index(pc,d0.w),d1
+		jmp	SStom_Move_Index(pc,d1.w)
 ; End of function SStom_Move
 
 ; ===========================================================================
-		; This indicates only two subtypes... that do the same thing
-		; Compare to SStom_Len. This breaks subtype 02
-off_BAD6:	dc.w loc_BADA-off_BAD6
-		dc.w loc_BADA-off_BAD6
+SStom_Move_Index:
+		dc.w SStom_Move_0-SStom_Move_Index	; 0
+		dc.w SStom_Move_0-SStom_Move_Index	; 1 - same as 0
+	if FixBugs
+		; An entry for subtype 02 is missing, despite being defined in SStom_Len
+		dc.w SStom_Move_0-SStom_Move_Index	; 2 - missing
+	endif
 ; ===========================================================================
 
-loc_BADA:
-		tst.w	$36(a0)
+; loc_BADA:
+SStom_Move_0:
+		tst.w	objoff_36(a0)
 		beq.s	loc_BB08
-		tst.w	$38(a0)
+		tst.w	objoff_38(a0)
 		beq.s	loc_BAEC
-		subq.w	#1,$38(a0)
+		subq.w	#1,objoff_38(a0)
 		bra.s	loc_BB3C
 ; ===========================================================================
 
 loc_BAEC:
-		subi.w	#$80,$32(a0)
+		subi.w	#$80,objoff_32(a0)
 		bcc.s	loc_BB3C
-		move.w	#0,$32(a0)
+		move.w	#0,objoff_32(a0)
 		move.w	#0,obVelX(a0)
-		move.w	#0,$36(a0)
+		move.w	#0,objoff_36(a0)
 		bra.s	loc_BB3C
 ; ===========================================================================
 
 loc_BB08:
-		move.w	$34(a0),d1
-		cmp.w	$32(a0),d1
+		move.w	objoff_34(a0),d1
+		cmp.w	objoff_32(a0),d1
 		beq.s	loc_BB3C
 		move.w	obVelX(a0),d0
 		addi.w	#$70,obVelX(a0)
-		add.w	d0,$32(a0)
-		cmp.w	$32(a0),d1
+		add.w	d0,objoff_32(a0)
+		cmp.w	objoff_32(a0),d1
 		bhi.s	loc_BB3C
-		move.w	d1,$32(a0)
+		move.w	d1,objoff_32(a0)
 		move.w	#0,obVelX(a0)
-		move.w	#1,$36(a0)
-		move.w	#$3C,$38(a0)
+		move.w	#1,objoff_36(a0)
+		move.w	#$3C,objoff_38(a0)
 
 loc_BB3C:
 		moveq	#0,d0
-		move.b	$32(a0),d0
+		move.b	objoff_32(a0),d0
 		neg.w	d0
-		add.w	$30(a0),d0
+		add.w	objoff_30(a0),d0
 		move.w	d0,obX(a0)
 		rts

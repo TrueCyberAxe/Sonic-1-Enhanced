@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 63 - platforms	on a conveyor belt (LZ)
+; Object 63 - platforms on a conveyor belt (LZ)
 ; ---------------------------------------------------------------------------
 
 LabyrinthConvey:
@@ -7,20 +7,20 @@ LabyrinthConvey:
 		move.b	obRoutine(a0),d0
 		move.w	LCon_Index(pc,d0.w),d1
 		jsr	LCon_Index(pc,d1.w)
-		out_of_range.s	loc_1236A,$30(a0)
+		out_of_range.s	loc_1236A,objoff_30(a0)
 
 LCon_Display:
 		bra.w	DisplaySprite
 ; ===========================================================================
 
 loc_1236A:
-		cmpi.b	#2,(v_act).w
+		cmpi.b	#act3,(v_act).w
 		bne.s	loc_12378
 		cmpi.w	#-$80,d0
-		bcc.s	LCon_Display
+		bhs.s	LCon_Display
 
 loc_12378:
-		move.b	$2F(a0),d0
+		move.b	objoff_2F(a0),d0
 		bpl.w	DeleteObject
 		andi.w	#$7F,d0
 		lea	(v_obj63).w,a2
@@ -28,9 +28,9 @@ loc_12378:
 		bra.w	DeleteObject
 ; ===========================================================================
 LCon_Index:	dc.w LCon_Main-LCon_Index
-		dc.w loc_124B2-LCon_Index
-		dc.w loc_124C2-LCon_Index
-		dc.w loc_124DE-LCon_Index
+		dc.w LCon_Platform-LCon_Index
+		dc.w LCon_OnPlatform-LCon_Index
+		dc.w LCon_Wheel-LCon_Index
 ; ===========================================================================
 
 LCon_Main:	; Routine 0
@@ -38,16 +38,16 @@ LCon_Main:	; Routine 0
 		bmi.w	loc_12460
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_LConv,obMap(a0)
-		move.w	#$43F6,obGfx(a0)
+		move.w	#ArtTile_LZ_Conveyor_Belt|Tile_Pal3,obGfx(a0)
 		ori.b	#4,obRender(a0)
 		move.b	#$10,obActWid(a0)
 		move.b	#4,obPriority(a0)
 		cmpi.b	#$7F,obSubtype(a0)
 		bne.s	loc_123E2
 		addq.b	#4,obRoutine(a0)
-		move.w	#$3F6,obGfx(a0)
+		move.w	#ArtTile_LZ_Conveyor_Belt,obGfx(a0)
 		move.b	#1,obPriority(a0)
-		bra.w	loc_124DE
+		bra.w	LCon_Wheel
 ; ===========================================================================
 
 loc_123E2:
@@ -59,45 +59,49 @@ loc_123E2:
 		andi.w	#$1E,d0
 		lea	LCon_Data(pc),a2
 		adda.w	(a2,d0.w),a2
-		move.w	(a2)+,$38(a0)
-		move.w	(a2)+,$30(a0)
-		move.l	a2,$3C(a0)
+		move.w	(a2)+,objoff_38(a0)
+		move.w	(a2)+,objoff_30(a0)
+		move.l	a2,objoff_3C(a0)
 		andi.w	#$F,d1
 		lsl.w	#2,d1
-		move.b	d1,$38(a0)
-		move.b	#4,$3A(a0)
+		move.b	d1,objoff_38(a0)
+		move.b	#4,objoff_3A(a0)
 		tst.b	(f_conveyrev).w
 		beq.s	loc_1244C
-		move.b	#1,$3B(a0)
-		neg.b	$3A(a0)
+		move.b	#1,objoff_3B(a0)
+		neg.b	objoff_3A(a0)
 		moveq	#0,d1
-		move.b	$38(a0),d1
-		add.b	$3A(a0),d1
-		cmp.b	$39(a0),d1
-		bcs.s	loc_12448
+		move.b	objoff_38(a0),d1
+		add.b	objoff_3A(a0),d1
+		cmp.b	objoff_39(a0),d1
+		blo.s	loc_12448
 		move.b	d1,d0
 		moveq	#0,d1
 		tst.b	d0
 		bpl.s	loc_12448
-		move.b	$39(a0),d1
+		move.b	objoff_39(a0),d1
 		subq.b	#4,d1
 
 loc_12448:
-		move.b	d1,$38(a0)
+		move.b	d1,objoff_38(a0)
 
 loc_1244C:
-		move.w	(a2,d1.w),$34(a0)
-		move.w	2(a2,d1.w),$36(a0)
+		move.w	(a2,d1.w),objoff_34(a0)
+		move.w	2(a2,d1.w),objoff_36(a0)
 		bsr.w	LCon_ChangeDir
-		bra.w	loc_124B2
+		bra.w	LCon_Platform
 ; ===========================================================================
 
 loc_12460:
-		move.b	d0,$2F(a0)
+		move.b	d0,objoff_2F(a0)
 		andi.w	#$7F,d0
 		lea	(v_obj63).w,a2
 		bset	#0,(a2,d0.w)
+	if FixBugs
+		bne.s	.delete
+	else
 		bne.w	DeleteObject
+	endif
 		add.w	d0,d0
 		andi.w	#$1E,d0
 		addi.w	#ObjPosLZPlatform_Index-ObjPos_Index,d0
@@ -106,14 +110,29 @@ loc_12460:
 		move.w	(a2)+,d1
 		movea.l	a0,a1
 		bra.s	LCon_MakePtfms
+
+	if FixBugs
+		; Avoid returning to LabyrinthConvey to prevent a
+		; display-and-delete bug.
+.delete:
+		addq.l	#4,sp
+		bra.w	DeleteObject
+	endif
 ; ===========================================================================
 
 LCon_Loop:
+	if FixBugs
+		; If an object is allocated before the parent object, then
+		; when the child is deleted, it will have already been queued
+		; for display, which is a display-and-delete bug.
+		bsr.w	FindNextFreeObj
+	else
 		bsr.w	FindFreeObj
+	endif
 		bne.s	loc_124AA
 
 LCon_MakePtfms:
-		move.b	#id_LabyrinthConvey,0(a1)
+		_move.b	#id_LabyrinthConvey,obID(a1)
 		move.w	(a2)+,obX(a1)
 		move.w	(a2)+,obY(a1)
 		move.w	(a2)+,d0
@@ -123,17 +142,19 @@ loc_124AA:
 		dbf	d1,LCon_Loop
 
 		addq.l	#4,sp
-		rts	
+		rts
 ; ===========================================================================
 
-loc_124B2:	; Routine 2
+; loc_124B2:
+LCon_Platform:	; Routine 2
 		moveq	#0,d1
 		move.b	obActWid(a0),d1
 		jsr	(PlatformObject).l
 		bra.w	sub_12502
 ; ===========================================================================
 
-loc_124C2:	; Routine 4
+; loc_124C2:
+LCon_OnPlatform: ; Routine 4
 		moveq	#0,d1
 		move.b	obActWid(a0),d1
 		jsr	(ExitPlatform).l
@@ -143,7 +164,8 @@ loc_124C2:	; Routine 4
 		jmp	(MvSonicOnPtfm2).l
 ; ===========================================================================
 
-loc_124DE:	; Routine 6
+; loc_124DE:
+LCon_Wheel:	; Routine 6
 		move.w	(v_framecount).w,d0
 		andi.w	#3,d0
 		bne.s	loc_124FC
@@ -159,63 +181,59 @@ loc_124F2:
 loc_124FC:
 		addq.l	#4,sp
 		bra.w	RememberState
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+; ===========================================================================
 
 
 sub_12502:
 		tst.b	(f_switch+$E).w
 		beq.s	loc_12520
-		tst.b	$3B(a0)
+		tst.b	objoff_3B(a0)
 		bne.s	loc_12520
-		move.b	#1,$3B(a0)
+		move.b	#1,objoff_3B(a0)
 		move.b	#1,(f_conveyrev).w
-		neg.b	$3A(a0)
+		neg.b	objoff_3A(a0)
 		bra.s	loc_12534
 ; ===========================================================================
 
 loc_12520:
 		move.w	obX(a0),d0
-		cmp.w	$34(a0),d0
+		cmp.w	objoff_34(a0),d0
 		bne.s	loc_1256A
 		move.w	obY(a0),d0
-		cmp.w	$36(a0),d0
+		cmp.w	objoff_36(a0),d0
 		bne.s	loc_1256A
 
 loc_12534:
 		moveq	#0,d1
-		move.b	$38(a0),d1
-		add.b	$3A(a0),d1
-		cmp.b	$39(a0),d1
-		bcs.s	loc_12552
+		move.b	objoff_38(a0),d1
+		add.b	objoff_3A(a0),d1
+		cmp.b	objoff_39(a0),d1
+		blo.s	loc_12552
 		move.b	d1,d0
 		moveq	#0,d1
 		tst.b	d0
 		bpl.s	loc_12552
-		move.b	$39(a0),d1
+		move.b	objoff_39(a0),d1
 		subq.b	#4,d1
 
 loc_12552:
-		move.b	d1,$38(a0)
-		movea.l	$3C(a0),a1
-		move.w	(a1,d1.w),$34(a0)
-		move.w	2(a1,d1.w),$36(a0)
+		move.b	d1,objoff_38(a0)
+		movea.l	objoff_3C(a0),a1
+		move.w	(a1,d1.w),objoff_34(a0)
+		move.w	2(a1,d1.w),objoff_36(a0)
 		bsr.w	LCon_ChangeDir
 
 loc_1256A:
 		bsr.w	SpeedToPos
-		rts	
+		rts
 ; End of function sub_12502
-
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
+; ===========================================================================
 
 LCon_ChangeDir:
 		moveq	#0,d0
 		move.w	#-$100,d2
 		move.w	obX(a0),d0
-		sub.w	$34(a0),d0
+		sub.w	objoff_34(a0),d0
 		bcc.s	loc_12584
 		neg.w	d0
 		neg.w	d2
@@ -224,16 +242,16 @@ loc_12584:
 		moveq	#0,d1
 		move.w	#-$100,d3
 		move.w	obY(a0),d1
-		sub.w	$36(a0),d1
+		sub.w	objoff_36(a0),d1
 		bcc.s	loc_12598
 		neg.w	d1
 		neg.w	d3
 
 loc_12598:
 		cmp.w	d0,d1
-		bcs.s	loc_125C2
+		blo.s	loc_125C2
 		move.w	obX(a0),d0
-		sub.w	$34(a0),d0
+		sub.w	objoff_34(a0),d0
 		beq.s	loc_125AE
 		ext.l	d0
 		asl.l	#8,d0
@@ -246,12 +264,12 @@ loc_125AE:
 		swap	d0
 		move.w	d0,obX+2(a0)
 		clr.w	obY+2(a0)
-		rts	
+		rts
 ; ===========================================================================
 
 loc_125C2:
 		move.w	obY(a0),d1
-		sub.w	$36(a0),d1
+		sub.w	objoff_36(a0),d1
 		beq.s	loc_125D4
 		ext.l	d1
 		asl.l	#8,d1
@@ -264,21 +282,87 @@ loc_125D4:
 		swap	d1
 		move.w	d1,obY+2(a0)
 		clr.w	obX+2(a0)
-		rts	
+		rts
 ; End of function LCon_ChangeDir
 
 ; ===========================================================================
-LCon_Data:	dc.w word_125F4-LCon_Data
-		dc.w word_12610-LCon_Data
-		dc.w word_12628-LCon_Data
-		dc.w word_1263C-LCon_Data
-		dc.w word_12650-LCon_Data
-		dc.w word_12668-LCon_Data
-word_125F4:	dc.w $18, $1070, $1078,	$21A, $10BE, $260, $10BE, $393
-		dc.w $108C, $3C5, $1022, $390, $1022, $244
-word_12610:	dc.w $14, $1280, $127E,	$280, $12CE, $2D0, $12CE, $46E
-		dc.w $1232, $420, $1232, $2CC
-word_12628:	dc.w $10, $D68,	$D22, $482, $D22, $5DE,	$DAE, $5DE, $DAE, $482
-word_1263C:	dc.w $10, $DA0,	$D62, $3A2, $DEE, $3A2,	$DEE, $4DE, $D62, $4DE
-word_12650:	dc.w $14, $D00,	$CAC, $242, $DDE, $242,	$DDE, $3DE, $C52, $3DE,	$C52, $29C
-word_12668:	dc.w $10, $1300, $1252,	$20A, $13DE, $20A, $13DE, $2BE,	$1252, $2BE
+; Conveyor belt corner target coordinate definitions.
+; Each group corresponds to the lower nybble of the given subtype.
+; Format:
+; 	dc.w number of entries, times 4
+; 	dc.w base X position (used for out_of_range check)
+; 	dc.w entries...
+; Entries consist of a target X position and target Y position.
+
+LCon_Data:	dc.w .group0-LCon_Data
+		dc.w .group1-LCon_Data
+		dc.w .group2-LCon_Data
+		dc.w .group3-LCon_Data
+		dc.w .group4-LCon_Data
+		dc.w .group5-LCon_Data
+
+.group0:	
+		.baseX_0: = $1070
+		.baseY_0: = $2F0
+		dc.w 6*4
+		dc.w .baseX_0
+		dc.w .baseX_0+$08, .baseY_0-$D6
+		dc.w .baseX_0+$4E, .baseY_0-$90
+		dc.w .baseX_0+$4E, .baseY_0+$A3
+		dc.w .baseX_0+$1C, .baseY_0+$D5
+		dc.w .baseX_0-$4E, .baseY_0+$A0
+		dc.w .baseX_0-$4E, .baseY_0-$AC
+
+.group1:
+		.baseX_1: = $1280
+		.baseY_1: = $377
+		dc.w 5*4
+		dc.w .baseX_1
+		dc.w .baseX_1-$02, .baseY_1-$F7
+		dc.w .baseX_1+$4E, .baseY_1-$A7
+		dc.w .baseX_1+$4E, .baseY_1+$F7
+		dc.w .baseX_1-$4E, .baseY_1+$A9
+		dc.w .baseX_1-$4E, .baseY_1-$AB
+
+.group2:
+		.baseX_2: = $D68
+		.baseY_2: = $530
+		dc.w 4*4
+		dc.w .baseX_2
+		dc.w .baseX_2-$46, .baseY_2-$AE
+		dc.w .baseX_2-$46, .baseY_2+$AE
+		dc.w .baseX_2+$46, .baseY_2+$AE
+		dc.w .baseX_2+$46, .baseY_2-$AE
+
+.group3:
+		.baseX_3: = $DA0
+		.baseY_3: = $440
+		dc.w 4*4
+		dc.w .baseX_3
+		dc.w .baseX_3-$3E, .baseY_3-$9E
+		dc.w .baseX_3+$4E, .baseY_3-$9E
+		dc.w .baseX_3+$4E, .baseY_3+$9E
+		dc.w .baseX_3-$3E, .baseY_3+$9E
+
+.group4:
+		.baseX_4: = $D00
+		.baseY_4: = $310
+		dc.w 5*4
+		dc.w .baseX_4
+		dc.w .baseX_4-$54, .baseY_4-$CE
+		dc.w .baseX_4+$DE, .baseY_4-$CE
+		dc.w .baseX_4+$DE, .baseY_4+$CE
+		dc.w .baseX_4-$AE, .baseY_4+$CE
+		dc.w .baseX_4-$AE, .baseY_4-$74
+
+.group5:
+		.baseX_5: = $1300
+		.baseY_5: = $264
+		dc.w 4*4
+		dc.w .baseX_5
+		dc.w .baseX_5-$AE, .baseY_5-$5A
+		dc.w .baseX_5+$DE, .baseY_5-$5A
+		dc.w .baseX_5+$DE, .baseY_5+$5A
+		dc.w .baseX_5-$AE, .baseY_5+$5A
+
+		even

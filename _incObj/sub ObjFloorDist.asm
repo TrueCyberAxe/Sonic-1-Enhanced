@@ -12,9 +12,6 @@
 ;	(a4) = floor angle
 ; ---------------------------------------------------------------------------
 
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
 ObjFloorDist:
 		move.w	obX(a0),d3
 
@@ -36,7 +33,6 @@ ObjFloorDist2:
 		beq.s	locret_14E4E
 		move.b	#0,d3
 
-	locret_14E4E:
-		rts	
-
-; End of function ObjFloorDist2
+locret_14E4E:
+		rts
+; End of function ObjFloorDist

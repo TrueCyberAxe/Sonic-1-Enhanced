@@ -6,24 +6,24 @@ Blk16_TITLE:
 	else
 Blk16_TITLE:		incbin	"Enhancements/map16/GHZ.bin"
 		even
-Gra_Title:			incbin	"artnem\8x8 - GHZ1.bin"	; GHZ primary patterns
+Gra_Title:			incbin	"artnem/8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
 		if TweakUncompressedChunkMapping=0
-Blk256_TITLE:		incbin	"map256\GHZ.bin"
+Blk256_TITLE:		incbin	"map256/GHZ.bin"
 		else
-Blk256_TITLE:		incbin	"Enhancements/map256\GHZ.unc"
+Blk256_TITLE:		incbin	"Enhancements/map256/GHZ.unc"
 		endc ; if TweakUncompressedChunkMapping=0
 		even
 	endc ; if TweakMergedArt=0
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
-Blk16_GHZ:		incbin	"map16\GHZ.bin"
+Blk16_GHZ:		incbin	"map16/GHZ.bin"
 		even
 	if TweakMergedArt=0
-Gra_Title:		incbin	"artnem\8x8 - GHZ1.bin"	; GHZ primary patterns
+Gra_Title:		incbin	"artnem/8x8 - GHZ1.bin"	; GHZ primary patterns
 		even
-Gra_GHZ:			incbin	"artnem\8x8 - GHZ2.bin"	; GHZ secondary patterns
+Gra_GHZ:			incbin	"artnem/8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
 Gra_GHZ:	  	incbin	"Enhancements/artnem/8x8 - GHZ.nem"	; GHZ combined patterns
 	endc ; if TweakMergedArt=0
@@ -32,7 +32,7 @@ Gra_GHZ:	  	incbin	"Enhancements/artnem/8x8 - GHZ.nem"	; GHZ combined patterns
 Blk256_TITLE:
 	endc ; if TweakMergedArt=0
 	if TweakUncompressedChunkMapping=0
-Blk256_GHZ:		incbin	"map256\GHZ.bin"
+Blk256_GHZ:		incbin	"map256/GHZ.bin"
 	else
 Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.unc"
 	endc ; if TweakUncompressedChunkMapping=0
@@ -40,83 +40,83 @@ Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.unc"
 ; ---------------------------------------------------------------------------
 ; Labyrinth Zone
 ; ---------------------------------------------------------------------------
-Blk16_LZ:			incbin	"map16\LZ.bin"
+Blk16_LZ:			incbin	"map16/LZ.bin"
 		even
-Gra_LZ:				incbin	"artnem\8x8 - LZ.bin"	; LZ primary patterns
+Gra_LZ:				incbin	"artnem/8x8 - LZ.bin"	; LZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
-Blk256_LZ:		incbin	"map256\LZ.bin"
+Blk256_LZ:		incbin	"map256/LZ.bin"
 	else
-Blk256_LZ:		incbin	"map256\LZ.unc"
+Blk256_LZ:		incbin	"map256/LZ.unc"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Marble Zone
 ; ---------------------------------------------------------------------------
-Blk16_MZ:			incbin	"map16\MZ.bin"
+Blk16_MZ:			incbin	"map16/MZ.bin"
 		even
-Gra_MZ:				incbin	"artnem\8x8 - MZ.bin"	; MZ primary patterns
+Gra_MZ:				incbin	"artnem/8x8 - MZ.bin"	; MZ primary patterns
 		even
 Blk256_MZ:
 	if Revision=0
 		if TweakUncompressedChunkMapping=0
-							incbin	"map256\MZ.bin"
+							incbin	"map256/MZ.bin"
 		else
-							incbin	"map256\MZ.unc"
+							incbin	"map256/MZ.unc"
 		endc
 	else
 		if TweakUncompressedChunkMapping=0
-							incbin	"map256\MZ (JP1).bin"
+							incbin	"map256/MZ (JP1).bin"
 		else
-							incbin	"map256\MZ (JP1).unc"
+							incbin	"map256/MZ (JP1).unc"
 		endc
 	endc ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Star Light Zone
 ; ---------------------------------------------------------------------------
-Blk16_SLZ:		incbin	"map16\SLZ.bin"
+Blk16_SLZ:		incbin	"map16/SLZ.bin"
 		even
-Gra_SLZ:			incbin	"artnem\8x8 - SLZ.bin"	; SLZ primary patterns
+Gra_SLZ:			incbin	"artnem/8x8 - SLZ.bin"	; SLZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
-Blk256_SLZ:		incbin	"map256\SLZ.bin"
+Blk256_SLZ:		incbin	"map256/SLZ.bin"
 	else
-Blk256_SLZ:		incbin	"map256\SLZ.unc"
+Blk256_SLZ:		incbin	"map256/SLZ.unc"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Spring Yard Zone
 ; ---------------------------------------------------------------------------
-Blk16_SYZ:		incbin	"map16\SYZ.bin"
+Blk16_SYZ:		incbin	"map16/SYZ.bin"
 		even
-Gra_SYZ:			incbin	"artnem\8x8 - SYZ.bin"	; SYZ primary patterns
+Gra_SYZ:			incbin	"artnem/8x8 - SYZ.bin"	; SYZ primary patterns
 		even
 	if TweakUncompressedChunkMapping=0
-Blk256_SYZ:		incbin	"map256\SYZ.bin"
+Blk256_SYZ:		incbin	"map256/SYZ.bin"
 	else
-Blk256_SYZ:		incbin	"map256\SYZ.unc"
+Blk256_SYZ:		incbin	"map256/SYZ.unc"
 	endc ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Scrap Brain Zone
 ; ---------------------------------------------------------------------------
-Blk16_SBZ:		incbin	"map16\SBZ.bin"
+Blk16_SBZ:		incbin	"map16/SBZ.bin"
 		even
-Gra_SBZ:			incbin	"artnem\8x8 - SBZ.bin"	; SBZ primary patterns
+Gra_SBZ:			incbin	"artnem/8x8 - SBZ.bin"	; SBZ primary patterns
 		even
 Blk256_SBZ:
 	if Revision=0
 		if TweakUncompressedChunkMapping=0
-							incbin	"map256\SBZ.bin"
+							incbin	"map256/SBZ.bin"
 		else
-							incbin	"map256\SBZ.unc"
+							incbin	"map256/SBZ.unc"
 		endc
 	else
 		if TweakUncompressedChunkMapping=0
-							incbin	"map256\SBZ (JP1).bin"
+							incbin	"map256/SBZ (JP1).bin"
 		else
-							incbin	"map256\SBZ (JP1).unc"
+							incbin	"map256/SBZ (JP1).unc"
 		endc
 	endc ; if TweakUncompressedChunkMapping=0
 		even

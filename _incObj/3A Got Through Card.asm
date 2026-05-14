@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 3A - "SONIC GOT THROUGH" title	card
+; Object 3A - "SONIC GOT THROUGH" title card
 ; ---------------------------------------------------------------------------
 
 GotThroughCard:
@@ -11,19 +11,19 @@ GotThroughCard:
 Got_Index:	dc.w Got_ChkPLC-Got_Index
 		dc.w Got_Move-Got_Index
 		dc.w Got_Wait-Got_Index
-		dc.w Got_TimeBonus-Got_Index
+		dc.w Got_Bonus-Got_Index
 		dc.w Got_Wait-Got_Index
 		dc.w Got_NextLevel-Got_Index
 		dc.w Got_Wait-Got_Index
-		dc.w Got_Move2-Got_Index
-		dc.w loc_C766-Got_Index
+		dc.w Got_MoveBack-Got_Index
+		dc.w Got_Boundary-Got_Index
 
-got_mainX:	equ $30		; position for card to display on
-got_finalX:	equ $32		; position for card to finish on
+got_mainX = objoff_30		; position for card to display on
+got_finalX = objoff_32		; position for card to finish on
 ; ===========================================================================
 
 Got_ChkPLC:	; Routine 0
-		tst.l	PLCQueueAdr.w ; are the pattern load cues empty?
+		tst.l	v_plc_queue_base.w ; are the pattern load cues empty?
 		beq.s	Got_Main	; if yes, branch
 		rts
 ; ===========================================================================
@@ -34,7 +34,7 @@ Got_Main:
 		moveq	#6,d1
 
 Got_Loop:
-		move.b	#id_GotThroughCard,0(a1)
+		_move.b	#id_GotThroughCard,obID(a1)
 		move.w	(a2),obX(a1)	; load start x-position
 		move.w	(a2)+,got_finalX(a1) ; load finish x-position (same as start)
 		move.w	(a2)+,got_mainX(a1) ; load main x-position
@@ -45,12 +45,12 @@ Got_Loop:
 		bne.s	loc_C5CA
 		add.b	(v_act).w,d0	; add act number to frame number
 
-	loc_C5CA:
+loc_C5CA:
 		move.b	d0,obFrame(a1)
 		move.l	#Map_Got,obMap(a1)
-		move.w	#$8580,obGfx(a1)
+		move.w	#ArtTile_Title_Card|Tile_Prio,obGfx(a1)
 		move.b	#0,obRender(a1)
-		lea	$40(a1),a1
+		lea	object_size(a1),a1
 		dbf	d1,Got_Loop	; repeat 6 times
 
 Got_Move:	; Routine 2
@@ -61,14 +61,14 @@ Got_Move:	; Routine 2
 		bge.s	Got_ChgPos
 		neg.w	d1
 
-	Got_ChgPos:
+Got_ChgPos:
 		add.w	d1,obX(a0)	; change item's position
 
-	loc_C5FE:
+loc_C5FE:
 		move.w	obX(a0),d0
 		bmi.s	locret_C60E
-		cmpi.w	#$200,d0	; has item moved beyond	$200 on	x-axis?
-		bcc.s	locret_C60E	; if yes, branch
+		cmpi.w	#$200,d0	; has item moved beyond $200 on x-axis?
+		bhs.s	locret_C60E	; if yes, branch
 		bra.w	DisplaySprite
 ; ===========================================================================
 
@@ -78,11 +78,11 @@ locret_C60E:
 
 loc_C610:
 		move.b	#$E,obRoutine(a0)
-		bra.w	Got_Move2
+		bra.w	Got_MoveBack
 ; ===========================================================================
 
 loc_C61A:
-		cmpi.b	#$E,($FFFFD724).w
+		cmpi.b	#$E,(v_endcardring+obRoutine).w
 		beq.s	loc_C610
 		cmpi.b	#4,obFrame(a0)
 		bne.s	loc_C5FE
@@ -98,17 +98,18 @@ Got_Display:
 		bra.w	DisplaySprite
 ; ===========================================================================
 
-Got_TimeBonus:	; Routine 6
+; Got_TimeBonus: <- old misnomer
+Got_Bonus:	; Routine 6
 		bsr.w	DisplaySprite
 		move.b	#1,(f_endactbonus).w ; set time/ring bonus update flag
 		moveq	#0,d0
-		tst.w	(v_timebonus).w	; is time bonus	= zero?
+		tst.w	(v_timebonus).w	; is time bonus = zero?
 		beq.s	Got_RingBonus	; if yes, branch
 		addi.w	#10,d0		; add 10 to score
 		subi.w	#10,(v_timebonus).w ; subtract 10 from time bonus
 
 Got_RingBonus:
-		tst.w	(v_ringbonus).w	; is ring bonus	= zero?
+		tst.w	(v_ringbonus).w	; is ring bonus = zero?
 		beq.s	Got_ChkBonus	; if yes, branch
 		addi.w	#10,d0		; add 10 to score
 		subi.w	#10,(v_ringbonus).w ; subtract 10 from ring bonus
@@ -116,11 +117,12 @@ Got_RingBonus:
 Got_ChkBonus:
 		tst.w	d0		; is there any bonus?
 		bne.s	Got_AddBonus	; if yes, branch
-		sfx	sfx_Cash,0,0,0	; play "ker-ching" sound
+		move.w	#sfx_Cash,d0
+		jsr	(QueueSound2).l	; play "ker-ching" sound
 		addq.b	#2,obRoutine(a0)
-		cmpi.w	#(id_SBZ<<8)+1,(v_zone).w
-		bne.s	Got_SetDelay
-		addq.b	#4,obRoutine(a0)
+		cmpi.w	#id_SBZ_act2,(v_zone).w	; is level SBZ2?
+		bne.s	Got_SetDelay		; if not, branch
+		addq.b	#4,obRoutine(a0)	; prepare SBZ3 transition cutscene
 
 Got_SetDelay:
 		move.w	#180,obTimeFrame(a0) ; set time delay to 3 seconds
@@ -131,10 +133,11 @@ locret_C692:
 
 Got_AddBonus:
 		jsr	(AddPoints).l
-		move.b	(v_vbla_byte).w,d0
+		move.b	(v_vblank_byte).w,d0
 		andi.b	#3,d0
 		bne.s	locret_C692
-		sfx	sfx_Switch,1,0,0	; play "blip" sound
+		move.w	#sfx_Switch,d0
+		jmp	(QueueSound2).l	; play "blip" sound
 ; ===========================================================================
 
 Got_NextLevel:	; Routine $A
@@ -154,63 +157,29 @@ Got_NextLevel:	; Routine $A
 ; ===========================================================================
 
 Got_ChkSS:
-		clr.b	(v_lastlamp).w	; clear	lamppost counter
-		tst.b	(f_bigring).w	; has Sonic jumped into	a giant	ring?
-		beq.s	VBla_08A	; if not, branch
+		clr.b	(v_lastlamp).w	; clear lamppost counter
+		tst.b	(f_bigring).w	; has Sonic jumped into a giant ring?
+		beq.s	loc_C6EA	; if not, branch
 		move.b	#id_Special,(v_gamemode).w ; set game mode to Special Stage (10)
 		bra.s	Got_Display2
 ; ===========================================================================
 
-VBla_08A:
+loc_C6EA:
 		move.w	#1,(f_restart).w ; restart level
 
 Got_Display2:
 		bra.w	DisplaySprite
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Level	order array
+; Level order array
 ; ---------------------------------------------------------------------------
 LevelOrder:
-		; Green Hill Zone
-		dc.b id_GHZ, 1	; Act 1
-		dc.b id_GHZ, 2	; Act 2
-		dc.b id_MZ, 0	; Act 3
-		dc.b 0, 0
+		include	"_inc/LevelOrder.asm"
 
-		; Labyrinth Zone
-		dc.b id_LZ, 1	; Act 1
-		dc.b id_LZ, 2	; Act 2
-		dc.b id_SLZ, 0	; Act 3
-		dc.b id_SBZ, 2	; Scrap Brain Zone Act 3
-
-		; Marble Zone
-		dc.b id_MZ, 1	; Act 1
-		dc.b id_MZ, 2	; Act 2
-		dc.b id_SYZ, 0	; Act 3
-		dc.b 0, 0
-
-		; Star Light Zone
-		dc.b id_SLZ, 1	; Act 1
-		dc.b id_SLZ, 2	; Act 2
-		dc.b id_SBZ, 0	; Act 3
-		dc.b 0, 0
-
-		; Spring Yard Zone
-		dc.b id_SYZ, 1	; Act 1
-		dc.b id_SYZ, 2	; Act 2
-		dc.b id_LZ, 0	; Act 3
-		dc.b 0, 0
-
-		; Scrap Brain Zone
-		dc.b id_SBZ, 1	; Act 1
-		dc.b id_LZ, 3	; Act 2
-		dc.b 0, 0	; Final Zone
-		dc.b 0, 0
-		even
-		zonewarning LevelOrder,8
 ; ===========================================================================
 
-Got_Move2:	; Routine $E
+; Got_Move2:
+Got_MoveBack:	; Routine $E
 		moveq	#$20,d1		; set horizontal speed
 		move.w	got_finalX(a0),d0
 		cmp.w	obX(a0),d0	; has item reached its finish position?
@@ -218,12 +187,12 @@ Got_Move2:	; Routine $E
 		bge.s	Got_ChgPos2
 		neg.w	d1
 
-	Got_ChgPos2:
+Got_ChgPos2:
 		add.w	d1,obX(a0)	; change item's position
 		move.w	obX(a0),d0
 		bmi.s	locret_C748
-		cmpi.w	#$200,d0	; has item moved beyond	$200 on	x-axis?
-		bcc.s	locret_C748	; if yes, branch
+		cmpi.w	#$200,d0	; has item moved beyond $200 on x-axis?
+		bhs.s	locret_C748	; if yes, branch
 		bra.w	DisplaySprite
 ; ===========================================================================
 
@@ -236,10 +205,12 @@ Got_SBZ2:
 		bne.w	DeleteObject
 		addq.b	#2,obRoutine(a0)
 		clr.b	(f_lockctrl).w	; unlock controls
-		music	bgm_FZ,1,0,0	; play FZ music
+		move.w	#bgm_FZ,d0
+		jmp	(QueueSound1).l	; play FZ music
 ; ===========================================================================
 
-loc_C766:	; Routine $10
+; loc_C766:
+Got_Boundary:	; Routine $10
 		addq.w	#2,(v_limitright2).w
 		cmpi.w	#$2100,(v_limitright2).w
 		beq.w	DeleteObject
@@ -248,8 +219,8 @@ loc_C766:	; Routine $10
 	endc
 		rts
 ; ===========================================================================
-		;    x-start,	x-main,	y-main,
-		;				routine, frame number
+		;    x-start, x-main, y-main,
+		;    routine, frame number
 
 Got_Config:	dc.w 4,		$124,	$BC			; "SONIC HAS"
 		dc.b 				2,	0

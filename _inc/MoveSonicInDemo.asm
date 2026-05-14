@@ -1,9 +1,6 @@
 ; ---------------------------------------------------------------------------
-; Subroutine to	move Sonic in demo mode
+; Subroutine to move Sonic in demo mode
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
 
 MoveSonicInDemo:
 		tst.w	(f_demo).w	; is demo mode on?
@@ -12,20 +9,20 @@ MoveSonicInDemo:
 ; ===========================================================================
 
 ; This is an unused subroutine for recording a demo
-
 DemoRecorder:
-		lea	($80000).l,a1
+		; This was likely intended for a deveveloper cartridge that used RAM instead of ROM.
+		lea	(EndOfRom).l,a1 ; Write past the end of the ROM.
 		move.w	(v_btnpushtime1).w,d0
 		adda.w	d0,a1
 		move.b	(v_jpadhold1).w,d0
 		cmp.b	(a1),d0
-		bne.s	@next
+		bne.s	.next
 		addq.b	#1,1(a1)
 		cmpi.b	#$FF,1(a1)
-		beq.s	@next
+		beq.s	.next
 		rts
 
-	@next:
+.next:
 		move.b	d0,2(a1)
 		move.b	#0,3(a1)
 		addq.w	#2,(v_btnpushtime1).w
@@ -36,77 +33,81 @@ DemoRecorder:
 MDemo_On:
 	if EnhancedDebug>0
 		btst	#bitA,(v_jpadhold1).w 						; check if A is pressed
-		beq.s	@checkC														; if not, branch
+		beq.s	.checkC										; if not, branch
 
-		bra @quit
+		bra .quit
 
 	@checkC:
 		btst	#bitC,(v_jpadhold1).w 						; check if C is pressed
-		beq.s	@skip															; if not, branch
+		beq.s	.skip										; if not, branch
 
-		bra @quit
+		bra .quit
 
-		@skip:
+.skip:
 	endc
 
-		tst.b	(v_jpadhold1).w										; is start button pressed?
-		bpl.s	@dontquit													; if not, branch
+		tst.b	(v_jpadhold1).w	; is start button held?
+		bpl.s	.dontquit	; if not, branch
 
-	@quit:
+.quit:
 		tst.w	(f_demo).w												; is this an ending sequence demo?
-		bmi.s	@dontquit													; if yes, branch
+		bmi.s	.dontquit	; if yes, branch
 		move.b	#id_Title,(v_gamemode).w				; go to title screen
 
-	@dontquit:
+.dontquit:
 		lea	(DemoDataPtr).l,a1
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
 		cmpi.b	#id_Special,(v_gamemode).w 			; is this a special stage?
-		bne.s	@notspecial												; if not, branch
+		bne.s	.notspecial	; if not, branch
 		moveq	#6,d0															; use demo #6
 
-	@notspecial:
+.notspecial:
 		lsl.w	#2,d0
 		movea.l	(a1,d0.w),a1										; fetch address for demo data
 		tst.w	(f_demo).w												; is this an ending sequence demo?
-		bpl.s	@notcredits												; if not, branch
+		bpl.s	.notcredits	; if not, branch
 		lea	(DemoEndDataPtr).l,a1
 		move.w	(v_creditsnum).w,d0
 		subq.w	#1,d0
 		lsl.w	#2,d0
 		movea.l	(a1,d0.w),a1										; fetch address for credits demo
 
-	@notcredits:
+.notcredits:
 		move.w	(v_btnpushtime1).w,d0
 		adda.w	d0,a1
 		move.b	(a1),d0
 		lea	(v_jpadhold1).w,a0
 		move.b	d0,d1
 
-	if BugFixDemoPlayback>0
+	if (BugFixDemoPlayback)|(FixBugs)
+		; Fix demo playback
+		; https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
 		move.b	v_jpadhold2-v_jpadhold1(a0),d2
-	elseif Revision=0
-		move.b	(a0),d2
 	else
-		moveq	#0,d2
-	endc
+		if Revision=0
+			move.b	(a0),d2
+		else
+			moveq	#0,d2
+		endif
+	endif
 
 		eor.b	d2,d0
 		move.b	d1,(a0)+
 		and.b	d1,d0
 		move.b	d0,(a0)+
 		subq.b	#1,(v_btnpushtime2).w
-		bcc.s	@end
+		bcc.s	.end
 		move.b	3(a1),(v_btnpushtime2).w
 		addq.w	#2,(v_btnpushtime1).w
 
-	@end:
+.end:
 		rts
 ; End of function MoveSonicInDemo
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Demo sequence	pointers
+; Demo sequence pointers
 ; ---------------------------------------------------------------------------
 DemoDataPtr:	dc.l Demo_GHZ		; demos run after the title screen
 		dc.l Demo_GHZ
@@ -126,7 +127,9 @@ DemoEndDataPtr:	dc.l Demo_EndGHZ1	; demos run during the credits
 		dc.l Demo_EndSBZ2
 		dc.l Demo_EndGHZ2
 
-		dc.b 0,	$8B, 8,	$37, 0,	$42, 8,	$5C, 0,	$6A, 8,	$5F, 0,	$2F, 8,	$2C
-		dc.b 0,	$21, 8,	3, $28,	$30, 8,	8, 0, $2E, 8, $15, 0, $F, 8, $46
-		dc.b 0,	$1A, 8,	$FF, 8,	$CA, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0
-		even
+; Stray demo data is present here. It involves Sonic slowly running
+; right, jumping once, then running at full speed for a few seconds.
+; Interestingly, this lines up with our knowledge of the fabled
+; Tokyo Game Show prototype.
+; See it in action: https://youtu.be/S8_IAfQbUu0
+Demo_Unused:	include	"demodata/Unused Demo.asm"

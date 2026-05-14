@@ -15,15 +15,15 @@ Bump_Index:	dc.w Bump_Main-Bump_Index
 Bump_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Bump,obMap(a0)
-		move.w	#$380,obGfx(a0)
+		move.w	#ArtTile_SYZ_Bumper,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#$10,obActWid(a0)
 		move.b	#1,obPriority(a0)
 		move.b	#$D7,obColType(a0)
 
 Bump_Hit:	; Routine 2
-		tst.b	obColProp(a0)	; has Sonic touched the	bumper?
-		beq.w	@display	; if not, branch
+		tst.b	obColProp(a0)	; has Sonic touched the bumper?
+		beq.w	.display	; if not, branch
 		clr.b	obColProp(a0)
 		lea	(v_player).w,a1
 		move.w	obX(a0),d1
@@ -41,40 +41,41 @@ Bump_Hit:	; Routine 2
 		bset	#1,obStatus(a1)
 		bclr	#4,obStatus(a1)
 		bclr	#5,obStatus(a1)
-		clr.b	$3C(a1)
+		clr.b	jumping(a1)
 		move.b	#1,obAnim(a0)	; use "hit" animation
-		sfx	sfx_Bumper,0,0,0	; play bumper sound
+		move.w	#sfx_Bumper,d0
+		jsr	(QueueSound2).l	; play bumper sound
 		lea	(v_objstate).w,a2
 		moveq	#0,d0
 		move.b	obRespawnNo(a0),d0
-		beq.s	@addscore
+		beq.s	.addscore
 		cmpi.b	#$8A,2(a2,d0.w)	; has bumper been hit 10 times?
-		bcc.s	@display	; if yes, Sonic	gets no	points
+		bhs.s	.display	; if yes, Sonic gets no points
 		addq.b	#1,2(a2,d0.w)
 
-	@addscore:
+.addscore:
 		moveq	#1,d0
 		jsr	(AddPoints).l	; add 10 to score
 		bsr.w	FindFreeObj
-		bne.s	@display
-		move.b	#id_Points,0(a1) ; load points object
+		bne.s	.display
+		_move.b	#id_Points,obID(a1) ; load points object
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		move.b	#4,obFrame(a1)
 
-	@display:
+.display:
 		lea	(Ani_Bump).l,a1
 		bsr.w	AnimateSprite
-		out_of_range.s	@resetcount
+		out_of_range.s	.resetcount
 		bra.w	DisplaySprite
 ; ===========================================================================
 
-@resetcount:
+.resetcount:
 		lea	(v_objstate).w,a2
 		moveq	#0,d0
 		move.b	obRespawnNo(a0),d0
-		beq.s	@delete
+		beq.s	.delete
 		bclr	#7,2(a2,d0.w)
 
-	@delete:
+.delete:
 		bra.w	DeleteObject

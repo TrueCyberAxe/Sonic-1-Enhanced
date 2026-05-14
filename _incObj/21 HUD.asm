@@ -17,42 +17,38 @@ HUD_Main:	; Routine 0
 		move.w	#$90,obX(a0)
 		move.w	#$108,obScreenY(a0)
 		move.l	#Map_HUD,obMap(a0)
-		move.w	#$6CA,obGfx(a0)
+		move.w	#ArtTile_HUD,obGfx(a0)
 		move.b	#0,obRender(a0)
 		move.b	#0,obPriority(a0)
 
 HUD_Flash:	; Routine 2
-	if BugFixBlinkingHUD=0
+	if (BugFixBlinkingHUD)|(FixBugs)
+		; Fix the HUD blinking
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
+		moveq	#0,d0
+		btst	#3,(v_framebyte).w
+		bne.s	.display
 		tst.w	(v_rings).w	; do you have any rings?
-		beq.s	@norings	; if not, branch
+		bne.s	.norings	; if so, branch
+		addq.w	#1,d0		; make ring counter flash red
+.norings:
+	else
+		tst.w	(v_rings).w	; do you have any rings?
+		beq.s	.norings	; if not, branch
 		clr.b	obFrame(a0)	; make all counters yellow
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 
-@norings:
+.norings:
 		moveq	#0,d0
 		btst	#3,(v_framebyte).w
-		bne.s	@display
+		bne.s	.display
 		addq.w	#1,d0		; make ring counter flash red
-		cmpi.b	#9,(v_timemin).w ; have	9 minutes elapsed?
-		bne.s	@display	; if not, branch
+	endif
+		cmpi.b	#9,(v_timemin).w ; have 9 minutes elapsed?
+		bne.s	.display	; if not, branch
 		addq.w	#2,d0		; make time counter flash red
-	else
-		moveq	#0,d0
-		btst	#3,(v_framebyte).w
-		bne.s	@display
-		tst.w	(v_rings).w	; do you have any rings?
-		bne.s	@norings	; if so, branch
-		addq.w	#1,d0		; make ring counter flash red
 
-; ===========================================================================
-
-@norings:
-		cmpi.b	#9,(v_timemin).w ; have	9 minutes elapsed?
-		bne.s	@display	; if not, branch
-		addq.w	#2,d0		; make time counter flash red
-	endc
-
-	@display:
+.display:
 		move.b	d0,obFrame(a0)
-		jmp	DisplaySprite
+		jmp	(DisplaySprite).l

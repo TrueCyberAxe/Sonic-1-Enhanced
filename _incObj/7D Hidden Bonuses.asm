@@ -11,7 +11,7 @@ HiddenBonus:
 Bonus_Index:	dc.w Bonus_Main-Bonus_Index
 		dc.w Bonus_Display-Bonus_Index
 
-bonus_timelen:	equ $30		; length of time to display bonus sprites
+bonus_timelen = objoff_30		; length of time to display bonus sprites
 ; ===========================================================================
 
 Bonus_Main:	; Routine 0
@@ -23,48 +23,50 @@ Bonus_Main:	; Routine 0
 		sub.w	obX(a0),d0
 		add.w	d2,d0
 		cmp.w	d3,d0
-		bcc.s	@chkdel
+		bhs.s	.chkdel
 		move.w	obY(a1),d1
 		sub.w	obY(a0),d1
 		add.w	d2,d1
 		cmp.w	d3,d1
-		bcc.s	@chkdel
+		bhs.s	.chkdel
 		tst.w	(v_debuguse).w
-		bne.s	@chkdel
+		bne.s	.chkdel
 		tst.b	(f_bigring).w
-		bne.s	@chkdel
+		bne.s	.chkdel
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Bonus,obMap(a0)
-		move.w	#$84B6,obGfx(a0)
+		move.w	#ArtTile_Hidden_Points|Tile_Prio,obGfx(a0)
 		ori.b	#4,obRender(a0)
 		move.b	#0,obPriority(a0)
 		move.b	#$10,obActWid(a0)
 		move.b	obSubtype(a0),obFrame(a0)
 		move.w	#119,bonus_timelen(a0) ; set display time to 2 seconds
-		sfx	sfx_Bonus,0,0,0	; play bonus sound
+		move.w	#sfx_Bonus,d0
+		jsr	(QueueSound2).l	; play bonus sound
 		moveq	#0,d0
 		move.b	obSubtype(a0),d0
 		add.w	d0,d0
-		move.w	@points(pc,d0.w),d0 ; load bonus points array
+		move.w	.points(pc,d0.w),d0 ; load bonus points array
 		jsr	(AddPoints).l
 
-	@chkdel:
-		out_of_range.s	@delete
+.chkdel:
+		out_of_range.s	.delete
 		rts
 
-	@delete:
+.delete:
 		jmp	(DeleteObject).l
 
 ; ===========================================================================
-@points:	dc.w 0			; Bonus	points array
+.points:	dc.w 0			; Bonus points array
 		dc.w 1000
 		dc.w 100
-	if BugFixHiddenPoints=0
-		dc.w 1
-	else
+	if (BugFixHiddenPoints)|(FixBugs)
+		; Fix the Hidden Points bug
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 		dc.w 10
-	endc
-
+	else
+		dc.w 1 ; This is the wrong number of points.
+	endif
 ; ===========================================================================
 
 Bonus_Display:	; Routine 2

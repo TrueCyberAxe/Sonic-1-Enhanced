@@ -1,26 +1,27 @@
 ; ---------------------------------------------------------------------------
-; Subroutine to	load level boundaries and start	locations
+; Subroutine to load level boundaries and start locations
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
 
 LevelSizeLoad:
 		moveq	#0,d0
-		move.b	d0,($FFFFF740).w
-		move.b	d0,($FFFFF741).w
-		move.b	d0,($FFFFF746).w
-		move.b	d0,($FFFFF748).w
+		move.b	d0,(v_unused7).w
+		move.b	d0,(v_unused8).w
+		move.b	d0,(v_unused9).w
+		move.b	d0,(v_unused10).w
 		move.b	d0,(v_dle_routine).w
+	if FixBugs
+		; Fix title screen not always scrolling after a game over
+		move.b	d0,(f_nobgscroll).w
+	endif
 		move.w	(v_zone).w,d0
 		lsl.b	#6,d0
 		lsr.w	#4,d0
 		move.w	d0,d1
 		add.w	d0,d0
 		add.w	d1,d0
-		lea	LevelSizeArray(pc,d0.w),a0 ; load level	boundaries
+		lea	LevelSizeArray(pc,d0.w),a0 ; load level boundaries
 		move.w	(a0)+,d0
-		move.w	d0,($FFFFF730).w
+		move.w	d0,(v_unused11).w
 		move.l	(a0)+,d0
 		move.l	d0,(v_limitleft2).w
 		move.l	d0,(v_limitleft1).w
@@ -30,62 +31,40 @@ LevelSizeLoad:
 		move.w	(v_limitleft2).w,d0
 		addi.w	#$240,d0
 		move.w	d0,(v_limitleft3).w
-		move.w	#$1010,($FFFFF74A).w
+		move.w	#$1010,(v_fg_xblock).w ; and v_fg_yblock
 		move.w	(a0)+,d0
 		move.w	d0,(v_lookshift).w
 	if FeatureSonicCDExtendedCamera>0
 		move.w    #160,(v_camera_pan).w    ; reset the horizontal camera pan value to 160 pixels
 	endc
 		bra.w	LevSz_ChkLamp
+
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Level size array
 ; ---------------------------------------------------------------------------
 LevelSizeArray:
-		; GHZ
-		dc.w $0004, $0000, $24BF, $0000, $0300, $0060
-		dc.w $0004, $0000, $1EBF, $0000, $0300, $0060
-		dc.w $0004, $0000, $2960, $0000, $0300, $0060
-		dc.w $0004, $0000, $2ABF, $0000, $0300, $0060
-		; LZ
-		dc.w $0004, $0000, $19BF, $0000, $0530, $0060
-		dc.w $0004, $0000, $10AF, $0000, $0720, $0060
-		dc.w $0004, $0000, $202F, $FF00, $0800, $0060
-		dc.w $0004, $0000, $20BF, $0000, $0720, $0060
-		; MZ
-		dc.w $0004, $0000, $17BF, $0000, $01D0, $0060
-		dc.w $0004, $0000, $17BF, $0000, $0520, $0060
-		dc.w $0004, $0000, $1800, $0000, $0720, $0060
-		dc.w $0004, $0000, $16BF, $0000, $0720, $0060
-		; SLZ
-		dc.w $0004, $0000, $1FBF, $0000, $0640, $0060
-		dc.w $0004, $0000, $1FBF, $0000, $0640, $0060
-		dc.w $0004, $0000, $2000, $0000, $06C0, $0060
-		dc.w $0004, $0000, $3EC0, $0000, $0720, $0060
-		; SYZ
-		dc.w $0004, $0000, $22C0, $0000, $0420, $0060
-		dc.w $0004, $0000, $28C0, $0000, $0520, $0060
-		dc.w $0004, $0000, $2C00, $0000, $0620, $0060
-		dc.w $0004, $0000, $2EC0, $0000, $0620, $0060
-		; SBZ
-		dc.w $0004, $0000, $21C0, $0000, $0720, $0060
-		dc.w $0004, $0000, $1E40, $FF00, $0800, $0060
-		dc.w $0004, $2080, $2460, $0510, $0510, $0060
-		dc.w $0004, $0000, $3EC0, $0000, $0720, $0060
-		zonewarning LevelSizeArray,$30
-		; Ending
-		dc.w $0004, $0000, $0500, $0110, $0110, $0060
-		dc.w $0004, $0000, $0DC0, $0110, $0110, $0060
-		dc.w $0004, $0000, $2FFF, $0000, $0320, $0060
-		dc.w $0004, $0000, $2FFF, $0000, $0320, $0060
+		include	"_inc/LevelSizeArray.asm"
 
 ; ---------------------------------------------------------------------------
 ; Ending start location array
+; (Previously separated into "_inc/Start Location Array - Ending.asm")
 ; ---------------------------------------------------------------------------
 EndingStLocArray:
-		include	"_inc\Start Location Array - Ending.asm"
+		binclude	"startpos/Credits Demos/ghz1 (Credits demo 1).bin"	; $0050, $03B0
+		binclude	"startpos/Credits Demos/mz2 (Credits demo).bin"   	; $0EA0, $046C
+		binclude	"startpos/Credits Demos/syz3 (Credits demo).bin"        ; $1750, $00BD
+		binclude	"startpos/Credits Demos/lz3 (Credits demo).bin"         ; $0A00, $062C
+		binclude	"startpos/Credits Demos/slz3 (Credits demo).bin"        ; $0BB0, $004C
+		binclude	"startpos/Credits Demos/sbz1 (Credits demo).bin"        ; $1570, $016C
+		binclude	"startpos/Credits Demos/sbz2 (Credits demo).bin"        ; $01B0, $072C
+		binclude	"startpos/Credits Demos/ghz1 (Credits demo 2).bin"      ; $1400, $02AC
+		even
 
 ; ===========================================================================
+; ---------------------------------------------------------------------------
+; Continuation from
+; ---------------------------------------------------------------------------
 
 LevSz_ChkLamp:
 		tst.b	(v_lastlamp).w	; have any lampposts been hit?
@@ -98,6 +77,18 @@ LevSz_ChkLamp:
 ; ===========================================================================
 
 LevSz_StartLoc:
+	if FixBugs
+		; Fix title screen position
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Title_Screen_position_in_Sonic_1#Fix_vertical_position_after_editing_GHZ1
+		cmpi.b	#id_Title,(v_gamemode).w	; is this the title screen?
+		bne.s	LevSz_NotTitle			; if not, branch
+		move.w	#$0050,d1			; X coordinate (this also dictates the little delay before the title screen starts scrolling)
+		move.w	#$03B0,d0			; Y coordinate
+		move.w	d1,(v_player+obX).w		; set X coordinate
+		move.w	d0,(v_player+obY).w		; set Y coordinate
+		bra.s	LevSz_SkipStartPos		; skip normal logic
+LevSz_NotTitle:
+	endif
 		move.w	(v_zone).w,d0
 		lsl.b	#6,d0
 		lsr.w	#4,d0
@@ -119,16 +110,16 @@ LevSz_SonicPos:
 		move.w	d0,(v_player+obY).w ; set Sonic's position on y-axis
 
 SetScreen:
-	LevSz_SkipStartPos:
+LevSz_SkipStartPos:
 
 	if FixCameraFollow>0
 		clr.w (v_trackpos).w 		; reset Sonic's position tracking index
-		lea (v_tracksonic).w,a2 ; load the tracking array into a2
-		moveq #63,d2 						; begin a 64-step loop
+	    	lea (v_tracksonic).w,a2		; load the tracking array into a2
+	   	 moveq #63,d2			; begin a 64-step loop
 
 	@loop:
-		move.w d1,(a2)+ 				; fill in X
-		move.w d0,(a2)+ 				; fill in Y
+		move.w d1,(a2)+ 		; fill in X
+		move.w d0,(a2)+ 		; fill in Y
 		dbf d2,@loop 			; loop
 	endc
 
@@ -136,58 +127,112 @@ SetScreen:
 		bcc.s	SetScr_WithinLeft ; if yes, branch
 		moveq	#0,d1
 
-	SetScr_WithinLeft:
+SetScr_WithinLeft:
 		move.w	(v_limitright2).w,d2
 		cmp.w	d2,d1		; is Sonic inside the right edge?
-		bcs.s	SetScr_WithinRight ; if yes, branch
+		blo.s	SetScr_WithinRight ; if yes, branch
 		move.w	d2,d1
 
-	SetScr_WithinRight:
+SetScr_WithinRight:
 		move.w	d1,(v_screenposx).w ; set horizontal screen position
 
 		subi.w	#96,d0		; is Sonic within 96px of upper edge?
 		bcc.s	SetScr_WithinTop ; if yes, branch
 		moveq	#0,d0
 
-	SetScr_WithinTop:
+SetScr_WithinTop:
 		cmp.w	(v_limitbtm2).w,d0 ; is Sonic above the bottom edge?
 		blt.s	SetScr_WithinBottom ; if yes, branch
 		move.w	(v_limitbtm2).w,d0
 
-	SetScr_WithinBottom:
+SetScr_WithinBottom:
 		move.w	d0,(v_screenposy).w ; set vertical screen position
 		bsr.w	BgScrollSpeed
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
 		lsl.b	#2,d0
 		move.l	LoopTileNums(pc,d0.w),(v_256loop1).w
+	if Revision=0
 		bra.w	LevSz_LoadScrollBlockSize
+	else
+		rts
+	endif
+
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Sonic start location array
-; ---------------------------------------------------------------------------
-StartLocArray:	include	"_inc\Start Location Array - Levels.asm"
-
-; ---------------------------------------------------------------------------
-; Which	256x256	tiles contain loops or roll-tunnels
+; (Previously separated into "_inc/Start Location Array - Levels.asm")
 ; ---------------------------------------------------------------------------
 
-LoopTileNums:
+; All unused acts default to the same starting location of x=$80, y=$A8
+unused_startloc: macro
+	dc.w	$0080,$00A8
+	endm
 
-; 		loop	loop	tunnel	tunnel
-
-	dc.b	$B5,	$7F,	$1F,	$20	; Green Hill
-	dc.b	$7F,	$7F,	$7F,	$7F	; Labyrinth
-	dc.b	$7F,	$7F,	$7F,	$7F	; Marble
-	dc.b	$AA,	$B4,	$7F,	$7F	; Star Light
-	dc.b	$7F,	$7F,	$7F,	$7F	; Spring Yard
-	dc.b	$7F,	$7F,	$7F,	$7F	; Scrap Brain
-	zonewarning LoopTileNums,4
-	dc.b	$7F,	$7F,	$7F,	$7F	; Ending (Green Hill)
-
+StartLocArray:
+		binclude	"startpos/ghz1.bin"
+		binclude	"startpos/ghz2.bin"
+		binclude	"startpos/ghz3.bin"
+		unused_startloc
+		binclude	"startpos/lz1.bin"
+		binclude	"startpos/lz2.bin"
+		binclude	"startpos/lz3.bin"
+		binclude	"startpos/sbz3.bin"	; SBZ3 is LZ4 internally
+		binclude	"startpos/mz1.bin"
+		binclude	"startpos/mz2.bin"
+		binclude	"startpos/mz3.bin"
+		unused_startloc
+		binclude	"startpos/slz1.bin"
+		binclude	"startpos/slz2.bin"
+		binclude	"startpos/slz3.bin"
+		unused_startloc
+		binclude	"startpos/syz1.bin"
+		binclude	"startpos/syz2.bin"
+		binclude	"startpos/syz3.bin"
+		unused_startloc
+		binclude	"startpos/sbz1.bin"
+		binclude	"startpos/sbz2.bin"
+		binclude	"startpos/fz.bin"	; FZ is SBZ3 internally
+		unused_startloc
+		zonewarning StartLocArray,$10
+		binclude	"startpos/end1.bin"
+		binclude	"startpos/end2.bin"
+		unused_startloc
+		unused_startloc
 		even
 
 ; ===========================================================================
+; ---------------------------------------------------------------------------
+; Which 256x256 tiles contain loops or roll-tunnels. Values above $80 are
+; when the special chunks are active, and $7F is a blank placeholder value.
+; ---------------------------------------------------------------------------
+
+LoopTileNums:
+		; 	loop	loop	tunnel	tunnel
+		dc.b	$B5,	$7F,	$1F,	$20	; Green Hill
+		dc.b	$7F,	$7F,	$7F,	$7F	; Labyrinth
+		dc.b	$7F,	$7F,	$7F,	$7F	; Marble
+		dc.b	$AA,	$B4,	$7F,	$7F	; Star Light
+		dc.b	$7F,	$7F,	$7F,	$7F	; Spring Yard
+		dc.b	$7F,	$7F,	$7F,	$7F	; Scrap Brain
+		zonewarning LoopTileNums,4
+		dc.b	$7F,	$7F,	$7F,	$7F	; Ending (Green Hill)
+		even
+
+; ===========================================================================
+; ---------------------------------------------------------------------------
+
+	if Revision=0
+; ---------------------------------------------------------------------------
+; Old (and mostly unused) scroll block definition system used in REV00.
+; Each word represents a scroll block size, for example GHZ has $70 pixels
+; for the first scroll block (clouds/top mountains), followed by $100 pixels
+; for the rest of the bottom mountains and water. The majority of this
+; information is unused, since most of REV00's backgrounds are not scrolled
+; in any special way, and GHZ is the only real zone that uses this system.
+; This was deleted entirely for REV01 when each zone got unique deformation.
+; ---------------------------------------------------------------------------
+
 ; LevSz_Unk:
 LevSz_LoadScrollBlockSize:
 		moveq	#0,d0
@@ -198,54 +243,25 @@ LevSz_LoadScrollBlockSize:
 		move.l	(a1)+,(a2)+
 		move.l	(a1)+,(a2)+
 		rts
-; End of function LevelSizeLoad
+; End of function LevSz_LoadScrollBlockSize
+; ---------------------------------------------------------------------------
 
-; ===========================================================================
 ; dword_61B4:
 BGScrollBlockSizes:
-		; GHZ
-		dc.w $70
-		dc.w $100	; I guess these used to be per act?
-		dc.w $100	; Or maybe each scroll block got its own size?
-		dc.w $100	; Either way, these are unused now.
-		; LZ
-		dc.w $800
-		dc.w $100
-		dc.w $100
-		dc.w 0
-		; MZ
-		dc.w $800
-		dc.w $100
-		dc.w $100
-		dc.w 0
-		; SLZ
-		dc.w $800
-		dc.w $100
-		dc.w $100
-		dc.w 0
-		; SYZ
-		dc.w $800
-		dc.w $100
-		dc.w $100
-		dc.w 0
-		; SBZ
-		dc.w $800
-		dc.w $100
-		dc.w $100
-		dc.w 0
+		dc.w	$70,$100,$100,$100	; GHZ
+		dc.w	$800,$100,$100,0	; LZ
+		dc.w	$800,$100,$100,0	; MZ
+		dc.w	$800,$100,$100,0	; SLZ
+		dc.w	$800,$100,$100,0	; SYZ
+		dc.w	$800,$100,$100,0	; SBZ
 		zonewarning BGScrollBlockSizes,8
-		; Ending
-		dc.w $70
-		dc.w $100
-		dc.w $100
-		dc.w $100
+		dc.w	$70,$100,$100,$100	; Ending (same as GHZ)
+	endif
 
+; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Subroutine to	set scroll speed of some backgrounds
+; Subroutine to setup scroll positions (mostly to set the backgrounds in the right place)
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
 
 BgScrollSpeed:
 		tst.b	(v_lastlamp).w
@@ -265,15 +281,30 @@ loc_6206:
 ; End of function BgScrollSpeed
 
 ; ===========================================================================
-BgScroll_Index:	dc.w BgScroll_GHZ-BgScroll_Index, BgScroll_LZ-BgScroll_Index
-		dc.w BgScroll_MZ-BgScroll_Index, BgScroll_SLZ-BgScroll_Index
-		dc.w BgScroll_SYZ-BgScroll_Index, BgScroll_SBZ-BgScroll_Index
+BgScroll_Index:	dc.w BgScroll_GHZ-BgScroll_Index
+		dc.w BgScroll_LZ-BgScroll_Index
+		dc.w BgScroll_MZ-BgScroll_Index
+		dc.w BgScroll_SLZ-BgScroll_Index
+		dc.w BgScroll_SYZ-BgScroll_Index
+		dc.w BgScroll_SBZ-BgScroll_Index
 		zonewarning BgScroll_Index,2
 		dc.w BgScroll_End-BgScroll_Index
 ; ===========================================================================
 
 BgScroll_GHZ:
+	if Revision=0
 		bra.w	Deform_GHZ
+	else
+		clr.l	(v_bgscreenposx).w
+		clr.l	(v_bgscreenposy).w
+		clr.l	(v_bg2screenposy).w
+		clr.l	(v_bg3screenposy).w
+		lea	(v_bgscroll_buffer).w,a2
+		clr.l	(a2)+
+		clr.l	(a2)+
+		clr.l	(a2)+
+		rts
+	endif
 ; ===========================================================================
 
 BgScroll_LZ:
@@ -290,6 +321,9 @@ BgScroll_SLZ:
 		asr.l	#1,d0
 		addi.w	#$C0,d0
 		move.w	d0,(v_bgscreenposy).w
+	if Revision<>0
+		clr.l	(v_bgscreenposx).w
+	endif
 		rts
 ; ===========================================================================
 
@@ -299,26 +333,58 @@ BgScroll_SYZ:
 		asl.l	#1,d0
 		add.l	d2,d0
 		asr.l	#8,d0
+	if Revision=0
 		move.w	d0,(v_bgscreenposy).w
 		move.w	d0,(v_bg2screenposy).w
+	else
+		addq.w	#1,d0
+		move.w	d0,(v_bgscreenposy).w
+		clr.l	(v_bgscreenposx).w
+	endif
 		rts
 ; ===========================================================================
 
 BgScroll_SBZ:
+	if Revision=0
 		asl.l	#4,d0
 		asl.l	#1,d0
 		asr.l	#8,d0
+	else
+		andi.w	#$7F8,d0
+		asr.w	#3,d0
+		addq.w	#1,d0
+	endif
 		move.w	d0,(v_bgscreenposy).w
 		rts
 ; ===========================================================================
 
 BgScroll_End:
+	if Revision=0
 		move.w	#$1E,(v_bgscreenposy).w
 		move.w	#$1E,(v_bg2screenposy).w
 		rts
-; ===========================================================================
+		; dead code
 		move.w	#$A8,(v_bgscreenposx).w
 		move.w	#$1E,(v_bgscreenposy).w
 		move.w	#-$40,(v_bg2screenposx).w
 		move.w	#$1E,(v_bg2screenposy).w
 		rts
+	else
+		move.w	(v_screenposx).w,d0
+		asr.w	#1,d0
+		move.w	d0,(v_bgscreenposx).w
+		move.w	d0,(v_bg2screenposx).w
+		asr.w	#2,d0
+		move.w	d0,d1
+		add.w	d0,d0
+		add.w	d1,d0
+		move.w	d0,(v_bg3screenposx).w
+		clr.l	(v_bgscreenposy).w
+		clr.l	(v_bg2screenposy).w
+		clr.l	(v_bg3screenposy).w
+		lea	(v_bgscroll_buffer).w,a2
+		clr.l	(a2)+
+		clr.l	(a2)+
+		clr.l	(a2)+
+		rts
+	endif

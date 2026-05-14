@@ -1,18 +1,32 @@
 ; ---------------------------------------------------------------------------
-; Sprite mappings - special stage chaos	emeralds
+; Sprite mappings - special stage chaos emeralds
+; This is some weird intermingled setup with three different map tables
 ; ---------------------------------------------------------------------------
-Map_SS_Chaos1:	dc.w byte_1B96C-Map_SS_Chaos1
-		dc.w byte_1B97E-Map_SS_Chaos1
-Map_SS_Chaos2:	dc.w byte_1B972-Map_SS_Chaos2
-		dc.w byte_1B97E-Map_SS_Chaos2
-Map_SS_Chaos3:	dc.w byte_1B978-Map_SS_Chaos3
-		dc.w byte_1B97E-Map_SS_Chaos3
-byte_1B96C:	dc.b 1
-		dc.b $F8, 5, 0,	0, $F8
-byte_1B972:	dc.b 1
-		dc.b $F8, 5, 0,	4, $F8
-byte_1B978:	dc.b 1
-		dc.b $F8, 5, 0,	8, $F8
-byte_1B97E:	dc.b 1
-		dc.b $F8, 5, 0,	$C, $F8
+Map_SS_Chaos1:	mappingsTable
+	mappingsTableEntry.w	M_Chaos_1
+	mappingsTableEntry.w	M_Chaos_White
+Map_SS_Chaos2:	mappingsTable
+	mappingsTableEntry.w	M_Chaos_2
+	mappingsTableEntry.w	M_Chaos_White
+Map_SS_Chaos3:	mappingsTable
+	mappingsTableEntry.w	M_Chaos_3
+	mappingsTableEntry.w	M_Chaos_White
+
+M_Chaos_1:	spriteHeader
+	spritePiece	-8, -8, 2, 2, 0, 0, 0, 0, 0
+M_Chaos_1_End
+
+M_Chaos_2:	spriteHeader
+	spritePiece	-8, -8, 2, 2, 4, 0, 0, 0, 0
+M_Chaos_2_End
+
+M_Chaos_3:	spriteHeader
+	spritePiece	-8, -8, 2, 2, 8, 0, 0, 0, 0
+M_Chaos_3_End
+
+M_Chaos_White:	spriteHeader	; cross-referenced in all three mappings
+	spritePiece	-8, -8, 2, 2, $C, 0, 0, 0, 0
+M_Chaos_White_End
+
 		even
+

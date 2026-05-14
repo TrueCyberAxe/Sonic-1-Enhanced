@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 13 - lava ball	maker (MZ, SLZ)
+; Object 13 - lava ball maker (MZ, SLZ)
 ; ---------------------------------------------------------------------------
 
 LavaMaker:
@@ -7,12 +7,13 @@ LavaMaker:
 		move.b	obRoutine(a0),d0
 		move.w	LavaM_Index(pc,d0.w),d1
 		jsr	LavaM_Index(pc,d1.w)
-	if BugFixRenderBeforeInit=0 ; Bug 6
-		bra.w	LBall_ChkDel
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+		; See LavaBall.
+		out_of_range.w	DeleteObject
+		rts
 	else
-		out_of_range    DeleteObject
-    rts
-  endc
+		bra.w	LBall_ChkDel
+	endif
 ; ===========================================================================
 LavaM_Index:	dc.w LavaM_Main-LavaM_Index
 		dc.w LavaM_MakeLava-LavaM_Index
@@ -34,13 +35,13 @@ LavaM_Main:	; Routine 0
 
 LavaM_MakeLava:	; Routine 2
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from time delay
-		bne.s	LavaM_Wait	; if time still	remains, branch
+		bne.s	LavaM_Wait	; if time still remains, branch
 		move.b	obDelayAni(a0),obTimeFrame(a0) ; reset time delay
 		bsr.w	ChkObjectVisible
 		bne.s	LavaM_Wait
 		bsr.w	FindFreeObj
 		bne.s	LavaM_Wait
-		move.b	#id_LavaBall,0(a1) ; load lava ball object
+		_move.b	#id_LavaBall,obID(a1) ; load lava ball object
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		move.b	obSubtype(a0),obSubtype(a1)

@@ -2,6 +2,13 @@
 ; Object 82 - Eggman (SBZ2)
 ; ---------------------------------------------------------------------------
 
+; loc_1982C:
+FalseFloor_Delete:
+		; This is part of Object 82, but it is only ever called
+		; from Object 83 (the collapsing floor)
+		jmp	(DeleteObject).l
+; ===========================================================================
+
 ScrapEggman:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
@@ -18,32 +25,32 @@ SEgg_ObjData:	dc.b 2,	0, 3		; routine number, animation, priority
 
 SEgg_Main:	; Routine 0
 		lea	SEgg_ObjData(pc),a2
-		move.w	#$2160,obX(a0)
-		move.w	#$5A4,obY(a0)
+		move.w	#boss_sbz2_x+$110,obX(a0)
+		move.w	#boss_sbz2_y+$94,obY(a0)
 		move.b	#$F,obColType(a0)
-		move.b	#$10,obColProp(a0)
+		move.b	#16,obBossHits(a0) ; SBZ2 Eggman has 16 hits, despite being unhittable
 		bclr	#0,obStatus(a0)
 		clr.b	ob2ndRout(a0)
 		move.b	(a2)+,obRoutine(a0)
 		move.b	(a2)+,obAnim(a0)
 		move.b	(a2)+,obPriority(a0)
 		move.l	#Map_SEgg,obMap(a0)
-		move.w	#$400,obGfx(a0)
+		move.w	#ArtTile_Eggman,obGfx(a0)
 		move.b	#4,obRender(a0)
 		bset	#7,obRender(a0)
 		move.b	#$20,obActWid(a0)
 		jsr	(FindNextFreeObj).l
 		bne.s	SEgg_Eggman
-		move.l	a0,$34(a1)
-		move.b	#id_ScrapEggman,(a1) ; load switch object
-		move.w	#$2130,obX(a1)
-		move.w	#$5BC,obY(a1)
+		move.l	a0,objoff_34(a1)
+		move.b	#id_ScrapEggman,obID(a1) ; load switch object
+		move.w	#boss_sbz2_x+$E0,obX(a1)
+		move.w	#boss_sbz2_y+$AC,obY(a1)
 		clr.b	ob2ndRout(a0)
 		move.b	(a2)+,obRoutine(a1)
 		move.b	(a2)+,obAnim(a1)
 		move.b	(a2)+,obPriority(a1)
 		move.l	#Map_But,obMap(a1)
-		move.w	#$4A4,obGfx(a1)
+		move.w	#ArtTile_Eggman_Button,obGfx(a1)
 		move.b	#4,obRender(a1)
 		bset	#7,obRender(a1)
 		move.b	#$10,obActWid(a1)
@@ -61,43 +68,44 @@ SEgg_Eggman:	; Routine 2
 SEgg_EggIndex:	dc.w SEgg_ChkSonic-SEgg_EggIndex
 		dc.w SEgg_PreLeap-SEgg_EggIndex
 		dc.w SEgg_Leap-SEgg_EggIndex
-		dc.w loc_19934-SEgg_EggIndex
+		dc.w SEgg_Move-SEgg_EggIndex
 ; ===========================================================================
 
 SEgg_ChkSonic:
 		move.w	obX(a0),d0
 		sub.w	(v_player+obX).w,d0
-		cmpi.w	#128,d0		; is Sonic within 128 pixels of	Eggman?
-		bcc.s	loc_19934	; if not, branch
+		cmpi.w	#128,d0		; is Sonic within 128 pixels of Eggman?
+		bhs.s	SEgg_Move	; if not, branch
 		addq.b	#2,ob2ndRout(a0)
-		move.w	#180,$3C(a0)	; set delay to 3 seconds
+		move.w	#180,objoff_3C(a0)	; set delay to 3 seconds
 		move.b	#1,obAnim(a0)
 
-loc_19934:
+; loc_19934:
+SEgg_Move:
 		jmp	(SpeedToPos).l
 ; ===========================================================================
 
 SEgg_PreLeap:
-		subq.w	#1,$3C(a0)	; subtract 1 from time delay
+		subq.w	#1,objoff_3C(a0)	; subtract 1 from time delay
 		bne.s	loc_19954	; if time remains, branch
 		addq.b	#2,ob2ndRout(a0)
 		move.b	#2,obAnim(a0)
 		addq.w	#4,obY(a0)
-		move.w	#15,$3C(a0)
+		move.w	#15,objoff_3C(a0)
 
 loc_19954:
-		bra.s	loc_19934
+		bra.s	SEgg_Move
 ; ===========================================================================
 
 SEgg_Leap:
-		subq.w	#1,$3C(a0)
+		subq.w	#1,objoff_3C(a0)
 		bgt.s	loc_199D0
 		bne.s	loc_1996A
 		move.w	#-$FC,obVelX(a0) ; make Eggman leap
 		move.w	#-$3C0,obVelY(a0)
 
 loc_1996A:
-		cmpi.w	#$2132,obX(a0)
+		cmpi.w	#boss_sbz2_x+$E2,obX(a0)
 		bgt.s	loc_19976
 		clr.w	obVelX(a0)
 
@@ -105,34 +113,40 @@ loc_19976:
 		addi.w	#$24,obVelY(a0)
 		tst.w	obVelY(a0)
 		bmi.s	SEgg_FindBlocks
-		cmpi.w	#$595,obY(a0)
-		bcs.s	SEgg_FindBlocks
-		move.w	#$5357,obSubtype(a0)
-		cmpi.w	#$59B,obY(a0)
-		bcs.s	SEgg_FindBlocks
-		move.w	#$59B,obY(a0)
+		cmpi.w	#boss_sbz2_y+$85,obY(a0)
+		blo.s	SEgg_FindBlocks
+		move.w	#"SW",obSubtype(a0)
+		cmpi.w	#boss_sbz2_y+$8B,obY(a0)
+		blo.s	SEgg_FindBlocks
+		move.w	#boss_sbz2_y+$8B,obY(a0)
 		clr.w	obVelY(a0)
 
 SEgg_FindBlocks:
 		move.w	obVelX(a0),d0
 		or.w	obVelY(a0),d0
 		bne.s	loc_199D0
-		lea	(v_objspace).w,a1 ; start at the first object RAM
-		moveq	#$3E,d0
-		moveq	#$40,d1
 
-SEgg_FindLoop:	
+	if FixBugs
+		lea	(v_lvlobjspace-object_size).w,a1
+		moveq	#(v_lvlobjend-v_lvlobjspace)/object_size-1,d0
+	else
+		lea	(v_objspace).w,a1 ; Nonsensical starting point, since dynamic object allocations begin at v_lvlobjspace.
+		moveq	#(v_objspace_end-(v_objspace+object_size*1))/object_size/2-1,d0	; Nonsensical length, it only covers the first half of object RAM.
+	endif
+		moveq	#object_size,d1
+
+SEgg_FindLoop:
 		adda.w	d1,a1		; jump to next object RAM
-		cmpi.b	#id_FalseFloor,(a1) ; is object a block? (object $83)
-		dbeq	d0,SEgg_FindLoop ; if not, repeat (max	$3E times)
+		cmpi.b	#id_FalseFloor,obID(a1) ; is object a block? (object $83)
+		dbeq	d0,SEgg_FindLoop ; if not, repeat (max $3E times)
 
 		bne.s	loc_199D0
-		move.w	#$474F,obSubtype(a1) ; set block to disintegrate
+		move.w	#"GO",obSubtype(a1) ; set block to disintegrate
 		addq.b	#2,ob2ndRout(a0)
 		move.b	#1,obAnim(a0)
 
 loc_199D0:
-		bra.w	loc_19934
+		bra.w	SEgg_Move
 ; ===========================================================================
 
 SEgg_Switch:	; Routine 4
@@ -141,13 +155,14 @@ SEgg_Switch:	; Routine 4
 		move.w	SEgg_SwIndex(pc,d0.w),d0
 		jmp	SEgg_SwIndex(pc,d0.w)
 ; ===========================================================================
-SEgg_SwIndex:	dc.w loc_199E6-SEgg_SwIndex
+SEgg_SwIndex:	dc.w SEgg_SwChk-SEgg_SwIndex
 		dc.w SEgg_SwDisplay-SEgg_SwIndex
 ; ===========================================================================
 
-loc_199E6:
-		movea.l	$34(a0),a1
-		cmpi.w	#$5357,obSubtype(a1)
+; loc_199E6:
+SEgg_SwChk:
+		movea.l	objoff_34(a0),a1
+		cmpi.w	#"SW",obSubtype(a1)
 		bne.s	SEgg_SwDisplay
 		move.b	#1,obFrame(a0)
 		addq.b	#2,ob2ndRout(a0)

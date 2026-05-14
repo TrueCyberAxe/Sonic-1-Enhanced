@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------------------
-; Object 46 - solid blocks and blocks that fall	from the ceiling (MZ)
+; Object 46 - solid blocks and blocks that fall from the ceiling (MZ)
 ; ---------------------------------------------------------------------------
 
 MarbleBrick:
@@ -11,7 +11,7 @@ MarbleBrick:
 Brick_Index:	dc.w Brick_Main-Brick_Index
 		dc.w Brick_Action-Brick_Index
 
-brick_origY:	equ $30
+brick_origY = objoff_30
 ; ===========================================================================
 
 Brick_Main:	; Routine 0
@@ -19,19 +19,19 @@ Brick_Main:	; Routine 0
 		move.b	#$F,obHeight(a0)
 		move.b	#$F,obWidth(a0)
 		move.l	#Map_Brick,obMap(a0)
-		move.w	#$4000,obGfx(a0)
+		move.w	#ArtTile_Level|Tile_Pal3,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#3,obPriority(a0)
 		move.b	#$10,obActWid(a0)
 		move.w	obY(a0),brick_origY(a0)
-		move.w	#$5C0,$32(a0)
+		move.w	#$5C0,objoff_32(a0)
 
 Brick_Action:	; Routine 2
 		tst.b	obRender(a0)
-		bpl.s	@chkdel
+		bpl.s	.chkdel
 		moveq	#0,d0
 		move.b	obSubtype(a0),d0 ; get object type
-		andi.w	#7,d0		; read only the	1st digit
+		andi.w	#7,d0		; read only the 1st digit
 		add.w	d0,d0
 		move.w	Brick_TypeIndex(pc,d0.w),d1
 		jsr	Brick_TypeIndex(pc,d1.w)
@@ -41,21 +41,23 @@ Brick_Action:	; Routine 2
 		move.w	obX(a0),d4
 		bsr.w	SolidObject
 
-	@chkdel:
-		if Revision=0
-			if BugFixRenderBeforeInit=0 ; Cyber Axe: Bug 1
+.chkdel:
+	if Revision=0
+			if BugFixRenderBeforeInit=0 ; Bug 1
 				bsr.w	DisplaySprite
 			endc
-				out_of_range	DeleteObject
-			if BugFixRenderBeforeInit=0 ; Cyber Axe: Bug 1
+
+			out_of_range.w	DeleteObject
+
+			if BugFixRenderBeforeInit=0 ; Bug 1
 				rts
 			else
 				bra.w	DisplaySprite
 			endc
-		else
-			out_of_range	DeleteObject
-			bra.w	DisplaySprite
-		endc
+	else
+		out_of_range.w	DeleteObject
+		bra.w	DisplaySprite
+	endif
 ; ===========================================================================
 Brick_TypeIndex:dc.w Brick_Type00-Brick_TypeIndex
 		dc.w Brick_Type01-Brick_TypeIndex
@@ -75,8 +77,8 @@ Brick_Type02:
 		neg.w	d0
 
 loc_E888:
-		cmpi.w	#$90,d0		; is Sonic within $90 pixels of	the block?
-		bcc.s	Brick_Type01	; if not, resume wobbling
+		cmpi.w	#$90,d0		; is Sonic within $90 pixels of the block?
+		bhs.s	Brick_Type01	; if not, resume wobbling
 		move.b	#3,obSubtype(a0)	; if yes, make the block fall
 
 Brick_Type01:
@@ -98,21 +100,27 @@ Brick_Type03:
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)	; increase falling speed
 		bsr.w	ObjFloorDist
-		tst.w	d1		; has the block	hit the	floor?
+		tst.w	d1		; has the block hit the floor?
 		bpl.w	locret_E8EE	; if not, branch
 		add.w	d1,obY(a0)
 		clr.w	obVelY(a0)	; stop the block falling
 		move.w	obY(a0),brick_origY(a0)
 		move.b	#4,obSubtype(a0)
-		move.w	(a1),d0
-		andi.w	#$3FF,d0
-		if Revision=0
-		cmpi.w	#$2E8,d0
-		else
-			cmpi.w	#$16A,d0
-		endc
-		bcc.s	locret_E8EE
-		move.b	#0,obSubtype(a0)
+
+		move.w	(a1),d0		; a1 = 16x16 block ID the brick is resting on
+		andi.w	#$3FF,d0	; mask out mirror/flip flags
+	if Revision=0
+		; The bricks did not wobble on lava in REV00, which was corrected in REV01.
+		; Looking at the prototype, this is because Marble Zone originally had
+		; a lot of unused blank 16x16 blocks between the main stuff and lava.
+		; At some point, the unused blocks were deleted, but the devs forgot to
+		; adjust this value accordingly, which resulted in the static bricks.
+		cmpi.w	#$2E8,d0	; impossible condition (there aren't this many blocks in MZ)
+	else
+		cmpi.w	#$16A,d0	; is it a lava block? (block ID $16A and above)
+	endif
+		bcc.s	locret_E8EE	; if yes, branch (keep it wobbling)
+		move.b	#0,obSubtype(a0) ; otherwise, reset it back to static
 
 locret_E8EE:
 		rts

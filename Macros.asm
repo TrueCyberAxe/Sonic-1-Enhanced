@@ -1,14 +1,14 @@
 ; ---------------------------------------------------------------------------
 ; Align and pad
-; input: length to align to, value to use as padding (default is 0)
+; input: length to align to, value to use as padding (default is $FF)
 ; ---------------------------------------------------------------------------
 
 align:	macro
 	if (narg=1)
-	dcb.b \1-(*%\1),0
+	dcb.b (\1-(*%\1))%\1,$FF
 	else
-	dcb.b \1-(*%\1),\2
-	endc
+	dcb.b (\1-(*%\1))%\1,\2
+	endif
 	endm
 
 ; ---------------------------------------------------------------------------
@@ -18,10 +18,10 @@ align:	macro
 
 locVRAM:	macro loc,controlport
 		if (narg=1)
-		move.l	#($40000000+((loc&$3FFF)<<16)+((loc&$C000)>>14)),(vdp_control_port).l
+		move.l	#($40000000+(((\loc)&$3FFF)<<16)+(((\loc)&$C000)>>14)),(vdp_control_port).l
 		else
-		move.l	#($40000000+((loc&$3FFF)<<16)+((loc&$C000)>>14)),controlport
-		endc
+		move.l	#($40000000+(((\loc)&$3FFF)<<16)+(((\loc)&$C000)>>14)),\controlport
+		endif
 		endm
 
 ; ---------------------------------------------------------------------------
@@ -29,13 +29,13 @@ locVRAM:	macro loc,controlport
 ; input: source, length, destination
 ; ---------------------------------------------------------------------------
 
-writeVRAM:	macro
+writeVRAM:	macro source,destination
 		lea	(vdp_control_port).l,a5
-		move.l	#$94000000+(((\2>>1)&$FF00)<<8)+$9300+((\2>>1)&$FF),(a5)
-		move.l	#$96000000+(((\1>>1)&$FF00)<<8)+$9500+((\1>>1)&$FF),(a5)
-		move.w	#$9700+((((\1>>1)&$FF0000)>>16)&$7F),(a5)
-		move.w	#$4000+(\3&$3FFF),(a5)
-		move.w	#$80+((\3&$C000)>>14),(v_vdp_buffer2).w
+		move.l	#$94000000+((((\source\_end-\source)>>1)&$FF00)<<8)+$9300+(((\source\_end-\source)>>1)&$FF),(a5)
+		move.l	#$96000000+((((\source)>>1)&$FF00)<<8)+$9500+(((\source)>>1)&$FF),(a5)
+		move.w	#$9700+(((((\source)>>1)&$FF0000)>>16)&$7F),(a5)
+		move.w	#$4000+((\destination)&$3FFF),(a5)
+		move.w	#$80+(((\destination)&$C000)>>14),(v_vdp_buffer2).w
 		move.w	(v_vdp_buffer2).w,(a5)
 		endm
 
@@ -44,13 +44,13 @@ writeVRAM:	macro
 ; input: source, length, destination
 ; ---------------------------------------------------------------------------
 
-writeCRAM:	macro
+writeCRAM:	macro source,destination
 		lea	(vdp_control_port).l,a5
-		move.l	#$94000000+(((\2>>1)&$FF00)<<8)+$9300+((\2>>1)&$FF),(a5)
-		move.l	#$96000000+(((\1>>1)&$FF00)<<8)+$9500+((\1>>1)&$FF),(a5)
-		move.w	#$9700+((((\1>>1)&$FF0000)>>16)&$7F),(a5)
-		move.w	#$C000+(\3&$3FFF),(a5)
-		move.w	#$80+((\3&$C000)>>14),(v_vdp_buffer2).w
+		move.l	#$94000000+((((\source\_end-\source)>>1)&$FF00)<<8)+$9300+(((\source\_end-\source)>>1)&$FF),(a5)
+		move.l	#$96000000+((((\source)>>1)&$FF00)<<8)+$9500+(((\source)>>1)&$FF),(a5)
+		move.w	#$9700+(((((\source)>>1)&$FF0000)>>16)&$7F),(a5)
+		move.w	#$C000+((\destination)&$3FFF),(a5)
+		move.w	#$80+(((\destination)&$C000)>>14),(v_vdp_buffer2).w
 		move.w	(v_vdp_buffer2).w,(a5)
 		endm
 
@@ -59,13 +59,45 @@ writeCRAM:	macro
 ; input: value, length, destination
 ; ---------------------------------------------------------------------------
 
-fillVRAM:	macro value,length,loc
+fillVRAM:	macro byte,start,end
 		lea	(vdp_control_port).l,a5
-		move.w	#$8F01,(a5)
-		move.l	#$94000000+((length&$FF00)<<8)+$9300+(length&$FF),(a5)
+		move.w	#$8F01,(a5) ; Set increment to 1, since DMA fill writes bytes
+		move.l	#$94000000+((((\end)-(\start)-1)&$FF00)<<8)+$9300+(((\end)-(\start)-1)&$FF),(a5)
 		move.w	#$9780,(a5)
-		move.l	#$40000080+((loc&$3FFF)<<16)+((loc&$C000)>>14),(a5)
-		move.w	#value,(vdp_data_port).l
+		move.l	#$40000080+(((\start)&$3FFF)<<16)+(((\start)&$C000)>>14),(a5)
+		move.w	#(\byte)|(\byte)<<8,(vdp_data_port).l
+.wait\@:	move.w	(a5),d1
+		btst	#1,d1
+		bne.s	.wait\@
+		move.w	#$8F02,(a5) ; Set increment back to 2, since the VDP usually operates on words
+		endm
+
+; ---------------------------------------------------------------------------
+; Fill portion of RAM with 0
+; input: start, end
+; ---------------------------------------------------------------------------
+
+clearRAM:	macro startAddress,endAddress
+	if narg=2
+		.length\@: equ (\endAddress)-(\startAddress)
+	else
+		.length\@: equ \startAddress\_end-\startAddress
+	endif
+		lea	(\startAddress).w,a1
+		moveq	#0,d0
+		move.w	#.length\@/4-1,d1
+
+.loop\@:
+		move.l	d0,(a1)+
+		dbf	d1,.loop\@
+
+	if (\endAddress-\startAddress)&2
+		move.w	d0,(a1)+
+	endif
+
+	if (\endAddress-\startAddress)&1
+		move.b	d0,(a1)+
+	endif
 		endm
 
 ; ---------------------------------------------------------------------------
@@ -73,11 +105,11 @@ fillVRAM:	macro value,length,loc
 ; input: source, destination, width [cells], height [cells]
 ; ---------------------------------------------------------------------------
 
-copyTilemap:	macro source,loc,width,height
-		lea	(source).l,a1
-		move.l	#$40000000+((loc&$3FFF)<<16)+((loc&$C000)>>14),d0
-		moveq	#width,d1
-		moveq	#height,d2
+copyTilemap:	macro source,destination,width,height
+		lea	(\source).l,a1
+		locVRAM	\destination,d0
+		moveq	#(\width)-1,d1
+		moveq	#(\height)-1,d2
 		bsr.w	TilemapToVRAM
 		endm
 
@@ -94,19 +126,19 @@ stopZ80:	macro
 ; ---------------------------------------------------------------------------
 
 waitZ80:	macro
-	@wait:	btst	#0,(z80_bus_request).l
-		bne.s	@wait
+.wait\@:	btst	#0,(z80_bus_request).l
+		bne.s	.wait\@
 		endm
 
 ; ---------------------------------------------------------------------------
 ; reset the Z80
 ; ---------------------------------------------------------------------------
 
-resetZ80:	macro
+deassertZ80Reset:	macro
 		move.w	#$100,(z80_reset).l
 		endm
 
-resetZ80a:	macro
+assertZ80Reset:	macro
 		move.w	#0,(z80_reset).l
 		endm
 
@@ -123,7 +155,7 @@ startZ80:	macro
 ; ---------------------------------------------------------------------------
 
 disable_ints:	macro
-		move	#$2700,sr
+		move.w	#$2700,sr
 		endm
 
 ; ---------------------------------------------------------------------------
@@ -131,7 +163,27 @@ disable_ints:	macro
 ; ---------------------------------------------------------------------------
 
 enable_ints:	macro
-		move	#$2300,sr
+		move.w	#$2300,sr
+		endm
+
+; ---------------------------------------------------------------------------
+; disable display
+; ---------------------------------------------------------------------------
+
+disable_display:	macro
+		move.w	(v_vdp_buffer1).w,d0		; get buffered copy of VDP register $81
+		andi.b	#%10111111,d0			; clear bit 6 (disable display; fill with background color)
+		move.w	d0,(vdp_control_port).l		; write to VDP
+		endm
+
+; ---------------------------------------------------------------------------
+; enable display
+; ---------------------------------------------------------------------------
+
+enable_display:	macro
+		move.w	(v_vdp_buffer1).w,d0		; get buffered copy of VDP register $81
+		ori.b	#%01000000,d0			; set bit 6 (enable display)
+		move.w	d0,(vdp_control_port).l		; write to VDP
 		endm
 
 ; ---------------------------------------------------------------------------
@@ -139,83 +191,83 @@ enable_ints:	macro
 ; ---------------------------------------------------------------------------
 
 jhi:		macro loc
-		bls.s	@nojump
+		bls.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jcc:		macro loc
-		bcs.s	@nojump
+		bcs.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jhs:		macro loc
-		jcc	loc
+		jcc	\loc
 		endm
 
 jls:		macro loc
-		bhi.s	@nojump
+		bhi.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jcs:		macro loc
-		bcc.s	@nojump
+		bcc.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jlo:		macro loc
-		jcs	loc
+		jcs	\loc
 		endm
 
 jeq:		macro loc
-		bne.s	@nojump
+		bne.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jne:		macro loc
-		beq.s	@nojump
+		beq.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jgt:		macro loc
-		ble.s	@nojump
+		ble.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jge:		macro loc
-		blt.s	@nojump
+		blt.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jle:		macro loc
-		bgt.s	@nojump
+		bgt.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jlt:		macro loc
-		bge.s	@nojump
+		bge.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jpl:		macro loc
-		bmi.s	@nojump
+		bmi.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 jmi:		macro loc
-		bpl.s	@nojump
+		bpl.s	.nojump\@
 		jmp	loc
-	@nojump:
+	.nojump\@:
 		endm
 
 ; ---------------------------------------------------------------------------
@@ -228,7 +280,7 @@ out_of_range:	macro exit,pos
 		move.w	pos,d0		; get object position (if specified as not obX)
 		else
 		move.w	obX(a0),d0	; get object position
-		endc
+		endif
 		andi.w	#$FF80,d0	; round down to nearest $80
 		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#128,d1
@@ -239,78 +291,54 @@ out_of_range:	macro exit,pos
 		endm
 
 ; ---------------------------------------------------------------------------
-; play a sound effect or music
-; input: track, terminate routine, branch or jump, move operand size
-; ---------------------------------------------------------------------------
-
-music:		macro track,terminate,branch,byte
-		  if OptimiseSound=1
-			move.b	#track,(v_snddriver_ram+PlaySound).l ; Cyber Axe: replaced v_playsnd2 with PlaySound to fix compiling error
-		    if terminate=1
-			rts
-		    endc
-		  else
-	 	    if byte=1
-			move.b	#track,d0
-		    else
-			move.w	#track,d0
-		    endc
-		    if branch=1
-		      if terminate=0
-			bsr.w	PlaySound
-		      else
-			bra.w	PlaySound
-		      endc
-		    else
-		      if terminate=0
-			jsr	(PlaySound).l
-		      else
-			jmp	(PlaySound).l
-		      endc
-		    endc
-		  endc
-		endm
-
-sfx:		macro track,terminate,branch,byte
-		  if OptimiseSound=1
-			move.b	#track,(v_snddriver_ram+PlaySound_Special).l  ; Cyber Axe: replaced v_playsnd2 with PlaySound_Special to fix compiling error
-		    if terminate=1
-			rts
-		    endc
-		  else
-	 	    if byte=1
-			move.b	#track,d0
-		    else
-			move.w	#track,d0
-		    endc
-		    if branch=1
-		      if terminate=0
-			bsr.w	PlaySound_Special
-		      else
-			bra.w	PlaySound_Special
-		      endc
-		    else
-		      if terminate=0
-			jsr	(PlaySound_Special).l
-		      else
-			jmp	(PlaySound_Special).l
-		      endc
-		    endc
-		  endc
-		endm
-
-; ---------------------------------------------------------------------------
 ; bankswitch between SRAM and ROM
 ; (remember to enable SRAM in the header first!)
 ; ---------------------------------------------------------------------------
 
 gotoSRAM:	macro
-		move.b  #1,($A130F1).l
+		move.b	#1,($A130F1).l
 		endm
 
 gotoROM:	macro
-		move.b  #0,($A130F1).l
+		move.b	#0,($A130F1).l
 		endm
+
+; ---------------------------------------------------------------------------
+; macro to simplify editing the demo scripts
+; (taken from the Sonic 2 disassembly, adapted for ASM68K)
+; ---------------------------------------------------------------------------
+
+demoinput:	macro buttons,duration
+	btns_mask: = 0
+
+	i:   = 1
+	len: = strlen("\buttons")
+	while (i<=len)
+		btn:	substr i,i,"\buttons"
+		i: = i+1
+
+		; If anyone reads this in the future and knows how to get
+		; switch-cases to work in ASM68K, please submit a PR...
+		if "\btn"="U"
+			btns_mask: = btns_mask|btnUp
+		elseif "\btn"="D"
+			btns_mask: = btns_mask|btnDn
+		elseif "\btn"="L"
+			btns_mask: = btns_mask|btnL
+		elseif "\btn"="R"
+			btns_mask: = btns_mask|btnR
+		elseif "\btn"="A"
+			btns_mask: = btns_mask|btnA
+		elseif "\btn"="B"
+			btns_mask: = btns_mask|btnB
+		elseif "\btn"="C"
+			btns_mask: = btns_mask|btnC
+		elseif "\btn"="S"
+			btns_mask: = btns_mask|btnStart
+		endif
+	endw
+	dc.b	btns_mask,\duration-1
+    endm
 
 ; ---------------------------------------------------------------------------
 ; compare the size of an index with ZoneCount constant
@@ -319,8 +347,34 @@ gotoROM:	macro
 ; ---------------------------------------------------------------------------
 
 zonewarning:	macro loc,elementsize
-	@end:
-		if (@end-loc)-(ZoneCount*elementsize)<>0
-		inform 1,"Size of \loc ($%h) does not match ZoneCount ($\#ZoneCount).",(@end-loc)/elementsize
-		endc
+	.end:
+		if (.end-loc)-(ZoneCount*elementsize)<>0
+		inform 1,"Size of \loc ($%h) does not match ZoneCount ($\#ZoneCount).",(.end-loc)/elementsize
+		endif
+		endm
+
+; ---------------------------------------------------------------------------
+; binclude compatibility macro for asm68k
+; ---------------------------------------------------------------------------
+
+binclude:	macro path,offset,length
+	if offset<>0|length<>0
+		if length<>0
+			incbin \path,\offset,\length
+		else
+			incbin \path,\offset
+		endif
+	else
+		incbin \path
+	endif
+		endm
+
+; ---------------------------------------------------------------------------
+; Macro to binclude something with an end marker
+; ---------------------------------------------------------------------------
+
+bincludeEndMarker: macro *,path
+\*:
+		binclude \path
+\*_end:
 		endm

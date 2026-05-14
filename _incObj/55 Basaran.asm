@@ -15,7 +15,7 @@ Bas_Index:	dc.w Bas_Main-Bas_Index
 Bas_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Bas,obMap(a0)
-		move.w	#$84B8,obGfx(a0)
+		move.w	#ArtTile_Basaran|Tile_Prio,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#$C,obHeight(a0)
 		move.b	#2,obPriority(a0)
@@ -25,98 +25,108 @@ Bas_Main:	; Routine 0
 Bas_Action:	; Routine 2
 		moveq	#0,d0
 		move.b	ob2ndRout(a0),d0
-		move.w	@index(pc,d0.w),d1
-		jsr	@index(pc,d1.w)
+		move.w	.index(pc,d0.w),d1
+		jsr	.index(pc,d1.w)
 		lea	(Ani_Bas).l,a1
 		bsr.w	AnimateSprite
 		bra.w	RememberState
 ; ===========================================================================
-@index:		dc.w @dropcheck-@index
-		dc.w @dropfly-@index
-		dc.w @flapsound-@index
-		dc.w @flyup-@index
+.index:		dc.w .dropcheck-.index
+		dc.w .dropfly-.index
+		dc.w .flapsound-.index
+		dc.w .flyup-.index
 ; ===========================================================================
 
-@dropcheck:
+.dropcheck:
 		move.w	#$80,d2
-		bsr.w	@chkdistance	; is Sonic < $80 pixels from basaran?
-		bcc.s	@nodrop		; if not, branch
+		bsr.w	.chkdistance	; is Sonic < $80 pixels from basaran?
+		bcc.s	.nodrop		; if not, branch
 		move.w	(v_player+obY).w,d0
-		move.w	d0,$36(a0)
+		move.w	d0,objoff_36(a0)
 		sub.w	obY(a0),d0
-		bcs.s	@nodrop
+		bcs.s	.nodrop
 		cmpi.w	#$80,d0		; is Sonic < $80 pixels from basaran?
-		bcc.s	@nodrop		; if not, branch
-		tst.w	(v_debuguse).w	; is debug mode	on?
-		bne.s	@nodrop		; if yes, branch
+		bhs.s	.nodrop		; if not, branch
+		tst.w	(v_debuguse).w	; is debug mode on?
+		bne.s	.nodrop		; if yes, branch
 
-		move.b	(v_vbla_byte).w,d0
+		move.b	(v_vblank_byte).w,d0
 		add.b	d7,d0
 		andi.b	#7,d0
-		bne.s	@nodrop
+		bne.s	.nodrop
 		move.b	#1,obAnim(a0)
 		addq.b	#2,ob2ndRout(a0)
 
-	@nodrop:
+.nodrop:
 		rts
 ; ===========================================================================
 
-@dropfly:
+.dropfly:
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)	; make basaran fall
 		move.w	#$80,d2
-		bsr.w	@chkdistance
-		move.w	$36(a0),d0
+		bsr.w	.chkdistance
+		move.w	objoff_36(a0),d0
 		sub.w	obY(a0),d0
-		bcs.s	@chkdel
+		bcs.s	.chkdel
 		cmpi.w	#$10,d0		; is basaran close to Sonic vertically?
-		bcc.s	@dropmore	; if not, branch
+		bhs.s	.dropmore	; if not, branch
 		move.w	d1,obVelX(a0)	; make basaran fly horizontally
 		move.w	#0,obVelY(a0)	; stop basaran falling
 		move.b	#2,obAnim(a0)
 		addq.b	#2,ob2ndRout(a0)
 
-	@dropmore:
+.dropmore:
 		rts
 
-	@chkdel:
+.chkdel:
 		tst.b	obRender(a0)
+	if FixBugs
+		; Objects shouldn't call DisplaySprite and DeleteObject on
+		; the same frame or else cause a null-pointer dereference.
+		bmi.s	.return
+		addq.l	#4,sp
+		bra.w	DeleteObject
+.return:
+	else
 		bpl.w	DeleteObject
+	endif
 		rts
 ; ===========================================================================
 
-@flapsound:
-		move.b	(v_vbla_byte).w,d0
+.flapsound:
+		move.b	(v_vblank_byte).w,d0
 		andi.b	#$F,d0
-		bne.s	@nosound
-		sfx	sfx_Basaran,0,0,0	; play flapping sound every 16th frame
+		bne.s	.nosound
+		move.w	#sfx_Basaran,d0
+		jsr	(QueueSound2).l	; play flapping sound every 16th frame
 
-	@nosound:
+.nosound:
 		bsr.w	SpeedToPos
 		move.w	(v_player+obX).w,d0
 		sub.w	obX(a0),d0
-		bcc.s	@isright	; if Sonic is right of basaran, branch
+		bcc.s	.isright	; if Sonic is right of basaran, branch
 		neg.w	d0
 
-	@isright:
+.isright:
 		cmpi.w	#$80,d0		; is Sonic within $80 pixels of basaran?
-		bcs.s	@dontflyup	; if yes, branch
-		move.b	(v_vbla_byte).w,d0
+		blo.s	.dontflyup	; if yes, branch
+		move.b	(v_vblank_byte).w,d0
 		add.b	d7,d0
 		andi.b	#7,d0
-		bne.s	@dontflyup
+		bne.s	.dontflyup
 		addq.b	#2,ob2ndRout(a0)
 
-@dontflyup:
+.dontflyup:
 		rts
 ; ===========================================================================
 
-@flyup:
+.flyup:
 		bsr.w	SpeedToPos
 		subi.w	#$18,obVelY(a0)	; make basaran fly upwards
 		bsr.w	ObjHitCeiling
 		tst.w	d1		; has basaran hit the ceiling?
-		bpl.s	@noceiling	; if not, branch
+		bpl.s	.noceiling	; if not, branch
 		sub.w	d1,obY(a0)
 		andi.w	#$FFF8,obX(a0)
 		clr.w	obVelX(a0)	; stop basaran moving
@@ -124,44 +134,45 @@ Bas_Action:	; Routine 2
 		clr.b	obAnim(a0)
 		clr.b	ob2ndRout(a0)
 
-	@noceiling:
+.noceiling:
 		rts
 ; ===========================================================================
 
 ; Subroutine to check Sonic's distance from the basaran
 
 ; input:
-;	d2 = distance to compare
+; d2 = distance to compare
 
 ; output:
-;	d0 = distance between Sonic and basaran
-;	d1 = speed/direction for basaran to fly
+; d0 = distance between Sonic and basaran
+; d1 = speed/direction for basaran to fly
 
-@chkdistance:
+.chkdistance:
 		move.w	#$100,d1
 		bset	#0,obStatus(a0)
 		move.w	(v_player+obX).w,d0
 		sub.w	obX(a0),d0
-		bcc.s	@right		; if Sonic is right of basaran, branch
+		bcc.s	.right		; if Sonic is right of basaran, branch
 		neg.w	d0
 		neg.w	d1
 		bclr	#0,obStatus(a0)
 
-	@right:
+.right:
 		cmp.w	d2,d0
 		rts
 ; ===========================================================================
 ; unused crap
 	if TweakRemoveReduntantCode=0
 			bsr.w	SpeedToPos
-		if BugFixRenderBeforeInit=0 ; Bug 3
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
+		; Objects should not call DisplaySprite and DeleteObject on
+		; the same frame or else cause a null-pointer dereference.
 			bsr.w	DisplaySprite
-		endc
+	endif
 			tst.b	obRender(a0)
 			bpl.w	DeleteObject
-		if BugFixRenderBeforeInit=0 ; Bug 3
+	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 3
+		bra.w	DisplaySprite
+	else
 			rts
-		else
-			bra.w	DisplaySprite
-		endc
-	endc
+	endif

@@ -1,6 +1,7 @@
 ; ---------------------------------------------------------------------------
 ; Object 19 - blank
+; (This was the infamous rolling GHZ ball level obstacle in the prototype)
 ; ---------------------------------------------------------------------------
 
 Obj19:
-		rts	
+		rts

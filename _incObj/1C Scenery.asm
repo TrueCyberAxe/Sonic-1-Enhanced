@@ -27,22 +27,22 @@ Scen_Main:	; Routine 0
 		move.b	(a1)+,obColType(a0)
 
 Scen_ChkDel:	; Routine 2
-		out_of_range	DeleteObject
+		out_of_range.w	DeleteObject
 		bra.w	DisplaySprite
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Variables for	object $1C are stored in an array
+; Variables for object $1C are stored in an array
 ; ---------------------------------------------------------------------------
-Scen_Values:	dc.l Map_Scen		; mappings address
-		dc.w $44D8		; VRAM setting
-		dc.b 0,	8, 2, 0		; frame, width,	priority, collision response
+Scen_Values:	dc.l Map_Scen                                     ; mappings address
+		dc.w ArtTile_SLZ_Fireball_Launcher|Tile_Pal3 ; VRAM setting
+		dc.b 0,	8, 2, 0                                   ; frame, width, priority, collision response
 		dc.l Map_Scen
-		dc.w $44D8
+		dc.w ArtTile_SLZ_Fireball_Launcher|Tile_Pal3
 		dc.b 0,	8, 2, 0
 		dc.l Map_Scen
-		dc.w $44D8
+		dc.w ArtTile_SLZ_Fireball_Launcher|Tile_Pal3
 		dc.b 0,	8, 2, 0
 		dc.l Map_Bri
-		dc.w $438E
+		dc.w ArtTile_GHZ_Bridge|Tile_Pal3
 		dc.b 1,	$10, 1,	0
 		even

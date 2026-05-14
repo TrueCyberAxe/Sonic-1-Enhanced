@@ -12,21 +12,21 @@ Van_Index:	dc.w Van_Main-Van_Index
 		dc.w Van_RmvSonic-Van_Index
 		dc.w Van_LoadSonic-Van_Index
 
-van_time:	equ $30													; time for Sonic to disappear
+van_time = objoff_30		; time for Sonic to disappear
 ; ===========================================================================
 
 Van_Main:	; Routine 0
-		tst.l	PLCQueueAdr.w 									; are pattern load cues empty?
-		beq.s	@isempty												; if yes, branch
+		tst.l	(v_plc_buffer).w ; are pattern load cues empty?
+		beq.s	.isempty	; if yes, branch
 		rts
 
-	@isempty:
+.isempty:
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_Vanish,obMap(a0)
 		move.b	#4,obRender(a0)
 		move.b	#1,obPriority(a0)
 		move.b	#$38,obActWid(a0)
-		move.w	#$541,obGfx(a0)
+		move.w	#ArtTile_Warp,obGfx(a0)
 		move.w	#120,van_time(a0) 						; set time for Sonic's disappearance to 2 seconds
 
 Van_RmvSonic:	; Routine 2
@@ -36,21 +36,22 @@ Van_RmvSonic:	; Routine 2
 		lea	(Ani_Vanish).l,a1
 		jsr	(AnimateSprite).l
 		cmpi.b	#2,obFrame(a0)
-		bne.s	@display
+		bne.s	.display
 		tst.b	(v_player).w
-		beq.s	@display
+		beq.s	.display
 		move.b	#0,(v_player).w								; remove Sonic
-		sfx	sfx_SSGoal,0,0,0									; play Special Stage "GOAL" sound
+		move.w	#sfx_SSGoal,d0
+		jsr	(QueueSound2).l	; play Special Stage "GOAL" sound
 
-	@display:
+.display:
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 
 Van_LoadSonic:	; Routine 4
 		subq.w	#1,van_time(a0)								; subtract 1 from time
-		bne.s	@wait														; if time remains, branch
+		bne.s	.wait		; if time remains, branch
 		move.b	#id_SonicPlayer,(v_player).w 	; load Sonic object
 		jmp	(DeleteObject).l
 
-	@wait:
+.wait:
 		rts

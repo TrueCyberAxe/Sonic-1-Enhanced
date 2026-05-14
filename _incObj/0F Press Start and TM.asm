@@ -16,27 +16,31 @@ PSB_Index:	dc.w PSB_Main-PSB_Index
 
 PSB_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
-	if FeatureCentreTitleScreen=0
-		move.w	#$D0,obX(a0)					; Press Start X Position
+	if (FeatureCentreTitleScreen)|(FixBugs)
+		; Fix title screen position
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Title_Screen_position_in_Sonic_1
+		move.w	#$D0+8,obX(a0)
 	else
-		move.w	#$D8,obX(a0)					; Press Start X Position
-	endc
+		move.w	#$D0,obX(a0)
+	endif
 		move.w	#$130,obScreenY(a0)
 		move.l	#Map_PSB,obMap(a0)
-		move.w	#$200,obGfx(a0)
+		move.w	#ArtTile_Title_Foreground,obGfx(a0)
 		cmpi.b	#2,obFrame(a0)	; is object "PRESS START"?
-		bcs.s	PSB_PrsStart	; if yes, branch
+		blo.s	PSB_PrsStart	; if yes, branch
 
 		addq.b	#2,obRoutine(a0)
-		cmpi.b	#3,obFrame(a0)	; is the object	"TM"?
+		cmpi.b	#3,obFrame(a0)	; is the object "TM"?
 		bne.s	PSB_Exit	; if not, branch
 
-		move.w	#$2510,obGfx(a0) ; "TM" specific code
-	if FeatureCentreTitleScreen=0
-		move.w	#$170,obX(a0)
+		move.w	#ArtTile_Title_Trademark|Tile_Pal2,obGfx(a0) ; "TM" specific code
+	if (FeatureCentreTitleScreen)|(FixBugs)
+		; Fix title screen position
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Title_Screen_position_in_Sonic_1
+		move.w	#$170+8,obX(a0)
 	else
-		move.w	#$178,obX(a0)
-	endc
+		move.w	#$170,obX(a0)
+	endif
 		move.w	#$F8,obScreenY(a0)
 
 PSB_Exit:	; Routine 4

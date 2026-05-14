@@ -14,7 +14,7 @@ Over_Index:	dc.w Over_ChkPLC-Over_Index
 ; ===========================================================================
 
 Over_ChkPLC:	; Routine 0
-		tst.l	PLCQueueAdr.w ; are the pattern load cues empty?
+		tst.l	(v_plc_queue_base).w ; are the pattern load cues empty?
 		beq.s	Over_Main	; if yes, branch
 		rts
 ; ===========================================================================
@@ -22,14 +22,14 @@ Over_ChkPLC:	; Routine 0
 Over_Main:
 		addq.b	#2,obRoutine(a0)
 		move.w	#$50,obX(a0)	; set x-position
-		btst	#0,obFrame(a0)	; is the object	"OVER"?
+		btst	#0,obFrame(a0)	; is the object "OVER"?
 		beq.s	Over_1stWord	; if not, branch
 		move.w	#$1F0,obX(a0)	; set x-position for "OVER"
 
-	Over_1stWord:
+Over_1stWord:
 		move.w	#$F0,obScreenY(a0)
 		move.l	#Map_Over,obMap(a0)
-		move.w	#$855E,obGfx(a0)
+		move.w	#ArtTile_Game_Over|Tile_Prio,obGfx(a0)
 		move.b	#0,obRender(a0)
 		move.b	#0,obPriority(a0)
 
@@ -40,7 +40,7 @@ Over_Move:	; Routine 2
 		bcs.s	Over_UpdatePos
 		neg.w	d1
 
-	Over_UpdatePos:
+Over_UpdatePos:
 		add.w	d1,obX(a0)	; change item's position
 		bra.w	DisplaySprite
 ; ===========================================================================
@@ -48,10 +48,15 @@ Over_Move:	; Routine 2
 Over_SetWait:
 		move.w	#720,obTimeFrame(a0) ; set time delay to 12 seconds
 		addq.b	#2,obRoutine(a0)
-	if BugFixGameOverFlicker>0
+
+	if BugFixGameOverFlicker
 		bra.w   DisplaySprite ; KoH additional line to prevent blinking.
 	endc
+
+	if FixBugs=0
+		; this causes the text to briefly flicker when conjoining
 		rts
+	endif
 ; ===========================================================================
 
 Over_Wait:	; Routine 4
@@ -77,10 +82,9 @@ Over_ChgMode:
 ; ===========================================================================
 
 Over_ResetLvl:
-		if Revision=0
-		else
+		if Revision<>0
 			clr.l	(v_lamp_time).w
-		endc
+		endif
 		move.w	#1,(f_restart).w ; restart level
 
 Over_Display:

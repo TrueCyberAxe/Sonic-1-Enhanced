@@ -1,9 +1,6 @@
 ; ---------------------------------------------------------------------------
-; Subroutine to	make an	object fall downwards, increasingly fast
+; Subroutine to make an object fall downwards, increasingly fast
 ; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
 
 ObjectFall:
 	if TweakFasterObjectMove=0
@@ -33,5 +30,4 @@ ObjectFall:
 		add.l	d0,obY(a0)
 	endc
 		rts
-
 ; End of function ObjectFall

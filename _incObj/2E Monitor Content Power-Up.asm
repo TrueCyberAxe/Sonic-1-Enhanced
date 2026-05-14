@@ -15,7 +15,7 @@ Pow_Index:
 ; ===========================================================================
 Pow_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
-		move.w	#$680,obGfx(a0)
+		move.w	#ArtTile_Monitor,obGfx(a0)
 		move.b	#$24,obRender(a0)
 		move.b	#3,obPriority(a0)
 		move.b	#8,obActWid(a0)
@@ -43,21 +43,23 @@ Pow_Checks:
 		move.b	obAnim(a0),d0
 
 	if OptimizeMonitorOrder=0
-		include	"_incObj/2E Monitor Content Power-Up (Original).asm"
+		include	"_incObj/2E Monitor Content Power-Up Checks.asm"
 	else
-		include	"Enhancements/_incObj/2E Monitor Content Power-Up (Optimised).asm"
+		include	"Enhancements/_incObj/2E Monitor Content Power-Up Checks (Optimised).asm"
 	endc
 ; ===========================================================================
 Pow_Delete:	; Routine 4
 		subq.w	#1,obTimeFrame(a0)
 
-	if BugFixRenderBeforeInit=0 ; Bug 6
-		bmi.w	DeleteObject			; delete after half a second
+	if (BugFixRenderBeforeInit)|(FixBugs)
+		; Avoid returning to PowerUp to prevent display-and-delete
+		; and double-delete bugs.
+		bpl.s	.return
+		addq.l	#4,sp
+		bra.w	DeleteObject	; delete after half a second
 	else
-    bpl.s   @locret
-    addq.l  #4,sp
-    bra.w   DeleteObject    ; delete after half a second
+		bmi.w	DeleteObject	; delete after half a second
+	endif
 
-    @locret:
-  endc
-    rts
+.return:
+		rts

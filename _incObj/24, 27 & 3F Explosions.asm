@@ -1,43 +1,51 @@
+; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Object 24 - buzz bomber missile vanishing (unused?)
+; Object 24 - Unused small explosion, originally used for the front-facing
+; Ball Hog badnik from the prototype. Would also technically be used by the
+; Buzz Bomber badnik to dissolve its missile after destroying it, but does
+; not work because the relevant flag is never set, and the required graphics
+; aren't even loaded into VRAM (it would be "Nem_UnkExplode", but loading
+; it overwrites part of the Crabmeat graphics at "ArtTile_Missile_Disolve").
 ; ---------------------------------------------------------------------------
 
-MissileDissolve:
+; MissileDissolve: <--- old misnomer
+UnusedExplosion:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
-		move.w	MDis_Index(pc,d0.w),d1
-		jmp	MDis_Index(pc,d1.w)
+		move.w	UnkExpl_Index(pc,d0.w),d1
+		jmp	UnkExpl_Index(pc,d1.w)
 ; ===========================================================================
-MDis_Index:	dc.w MDis_Main-MDis_Index
-		dc.w MDis_Animate-MDis_Index
+UnkExpl_Index:	dc.w UnkExpl_Main-UnkExpl_Index
+		dc.w UnkExpl_Animate-UnkExpl_Index
 ; ===========================================================================
 
-MDis_Main:	; Routine 0
+UnkExpl_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
-		move.l	#Map_MisDissolve,obMap(a0)
-		move.w	#$41C,obGfx(a0)
+		move.l	#Map_UnkExplode,obMap(a0)
+		move.w	#ArtTile_UnusedExplosion,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#1,obPriority(a0)
 		move.b	#0,obColType(a0)
 		move.b	#$C,obActWid(a0)
 		move.b	#9,obTimeFrame(a0)
 		move.b	#0,obFrame(a0)
-		sfx	sfx_A5,0,0,0		 ; play sound
+		move.w	#sfx_A5,d0		; (this sfx is also unused)
+		jsr	(QueueSound2).l		; play sound
 
-MDis_Animate:	; Routine 2
+UnkExpl_Animate:	; Routine 2
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from frame duration
-		bpl.s	@display
+		bpl.s	.display
 		move.b	#9,obTimeFrame(a0) ; set frame duration to 9 frames
 		addq.b	#1,obFrame(a0)	; next frame
 		cmpi.b	#4,obFrame(a0)	; has animation completed?
 		beq.w	DeleteObject	; if yes, branch
 
-	@display:
+.display:
 		bra.w	DisplaySprite
-; ===========================================================================
 
+; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Object 27 - explosion	from a destroyed enemy or monitor
+; Object 27 - Gray explosion from a destroyed enemy or monitor
 ; ---------------------------------------------------------------------------
 
 ExplosionItem:
@@ -55,56 +63,60 @@ ExItem_Animal:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		bsr.w	FindFreeObj
 		bne.s	ExItem_Main
-		move.b	#id_Animals,0(a1) ; load animal object
+		_move.b	#id_Animals,obID(a1) ; load animal object
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
-		move.w	$3E(a0),$3E(a1)
+		move.w	objoff_3E(a0),objoff_3E(a1)
 
 ExItem_Main:	; Routine 2
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_ExplodeItem,obMap(a0)
-		move.w	#$5A0,obGfx(a0)
+		move.w	#ArtTile_Explosion,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#1,obPriority(a0)
 		move.b	#0,obColType(a0)
 		move.b	#$C,obActWid(a0)
 		move.b	#7,obTimeFrame(a0) ; set frame duration to 7 frames
 		move.b	#0,obFrame(a0)
-		sfx	sfx_BreakItem,0,0,0	; play breaking enemy sound
+		move.w	#sfx_BreakItem,d0
+		jsr	(QueueSound2).l	; play breaking enemy sound
 
-ExItem_Animate:	; Routine 4 (2 for ExplosionBomb)
+ExItem_Animate:	; Routine 4 (2 for Explosion)
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from frame duration
-		bpl.s	@display
+		bpl.s	.display
 		move.b	#7,obTimeFrame(a0) ; set frame duration to 7 frames
 		addq.b	#1,obFrame(a0)	; next frame
 		cmpi.b	#5,obFrame(a0)	; is the final frame (05) displayed?
 		beq.w	DeleteObject	; if yes, branch
 
-	@display:
+.display:
 		bra.w	DisplaySprite
+
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
-; Object 3F - explosion	from a destroyed boss, bomb or cannonball
+; Object 3F - Fiery explosion from a destroyed boss, bomb badnik, or cannonball
 ; ---------------------------------------------------------------------------
 
-ExplosionBomb:
+; ExplosionBomb: <--- old misnomer, this is used for more than just bombs
+Explosion:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
-		move.w	ExBom_Index(pc,d0.w),d1
-		jmp	ExBom_Index(pc,d1.w)
+		move.w	Expl_Index(pc,d0.w),d1
+		jmp	Expl_Index(pc,d1.w)
 ; ===========================================================================
-ExBom_Index:	dc.w ExBom_Main-ExBom_Index
-		dc.w ExItem_Animate-ExBom_Index
+Expl_Index:	dc.w Expl_Main-Expl_Index
+		dc.w ExItem_Animate-Expl_Index	; <-- this branches to a different object!
 ; ===========================================================================
 
-ExBom_Main:	; Routine 0
+Expl_Main:	; Routine 0
 		addq.b	#2,obRoutine(a0)
 		move.l	#Map_ExplodeBomb,obMap(a0)
-		move.w	#$5A0,obGfx(a0)
+		move.w	#ArtTile_Explosion,obGfx(a0)
 		move.b	#4,obRender(a0)
 		move.b	#1,obPriority(a0)
 		move.b	#0,obColType(a0)
 		move.b	#$C,obActWid(a0)
 		move.b	#7,obTimeFrame(a0)
 		move.b	#0,obFrame(a0)
-		sfx	sfx_Bomb,1,0,0	; play exploding bomb sound
+		move.w	#sfx_Bomb,d0
+		jmp	(QueueSound2).l	; play exploding bomb sound
