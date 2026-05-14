@@ -1883,7 +1883,7 @@ PalLoad_Water:
 
 	if FeatureEnhancedPLCQueue>0
 
-	include	"Enhanced/PLCQueue.asm"
+	include	"Enhancements/PLCQueue.asm"
 
 	endc ; if FeatureEnhancedPLCQueue>0
 
@@ -5433,14 +5433,14 @@ Nem_Cater:	binclude	"artnem/Enemy Caterkiller.nem"
 		if TweakLevelCompressionMode=0
 Gra_TitleCard:	binclude	"artnem/Title Cards.nem"
 		elseif TweakLevelCompressionMode=1
-Gra_TitleCard:	binclude	"Enhanced/artnem/Recompressed/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artnem/Recompressed/Title Cards.nem"
 		elseif TweakLevelCompressionMode=2
-Gra_TitleCard:	binclude	"Enhanced/artkos/Recompressed/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artkos/Recompressed/Title Cards.nem"
 		else
-Gra_TitleCard:	binclude	"Enhanced/artcom/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artcom/Title Cards.nem"
 		endc
 	else
-Gra_TitleCard:	binclude	"Enhanced/artunc/Decompressed/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artunc/Decompressed/Title Cards.nem"
 	endc
 Gra_TitleCard_End:
 		even
@@ -6026,7 +6026,7 @@ SoundDriver:
 	if FeatureUseSonic2SoundDriver=0
 		include "s1.sounddriver.asm"
 	else
-		include "Enhanced/s2.sounddriver.asm"
+		include "Enhancements/s2.sounddriver.asm"
 	endc
 		even
 
@@ -6053,7 +6053,7 @@ SoundDriver:
 
 	   rts
 
-		include   "Enhanced/ErrorHandler.asm"
+		include   "Enhancements/ErrorHandler.asm"
     endc ; if AdvancedDebugger>0
 EndOfRom:
 
