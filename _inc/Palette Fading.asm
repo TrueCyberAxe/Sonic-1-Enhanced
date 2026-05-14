@@ -33,14 +33,14 @@ PalFadeIn_Alt:				; start position and size are already set
 		rts
 	else
 		bsr.w	RunPLC
-		move.b	#$12,(v_vbla_routine).w
+		move.b	#$12,(v_vblank_routine).w
 		bsr.w	WaitforVBla
 		bchg	#$00,d6												; MJ: change delay counter
 		beq	.mainloop												; MJ: if null, delay a frame
 		bsr.s	FadeIn_FromBlack
 		subq.b	#$02,d4											; MJ: decrease colour check
 		bne	.mainloop												; MJ: if it has not reached null, branch
-		move.b	#$12,(v_vbla_routine).w			; MJ: wait for V-blank again (so colours transfer)
+		move.b	#$12,(v_vblank_routine).w			; MJ: wait for V-blank again (so colours transfer)
 		bra	WaitforVBla											; MJ: ''
 	endc
 ; End of function PaletteFadeIn
@@ -261,14 +261,14 @@ PaletteWhiteIn:
 		rts
 	else
 		bsr.w	RunPLC
-		move.b	#$12,(v_vbla_routine).w
+		move.b	#$12,(v_vblank_routine).w
 		bsr.w	WaitforVBla
 		bchg	#$00,d6				; MJ: change delay counter
 		beq	.mainloop			; MJ: if null, delay a frame
 		bsr.s	WhiteIn_FromWhite
 		subq.b	#$02,d4				; MJ: decrease colour check
 		bne	.mainloop			; MJ: if it has not reached null, branch
-		move.b	#$12,(v_vbla_routine).w		; MJ: wait for V-blank again (so colours transfer)
+		move.b	#$12,(v_vblank_routine).w		; MJ: wait for V-blank again (so colours transfer)
 		bra	WaitforVBla			; MJ: wait for V-blank again (so colours transfer)
 	endc
 ; End of function PaletteWhiteIn
