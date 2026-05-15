@@ -291,6 +291,72 @@ out_of_range:	macro exit,pos
 		endm
 
 ; ---------------------------------------------------------------------------
+; play a sound effect or music
+; input: track, queue type, branch/call type, move operand size
+; ---------------------------------------------------------------------------
+
+SoundDispatch_Call:	equ 0
+SoundDispatch_Branch:	equ 1
+sound:		macro track,queue,dispatch
+		if OptimiseSound=0
+			if "\track"<>"d0"
+		move.b	track,d0
+			endif
+			if queue=1
+				if dispatch=SoundDispatch_Branch
+		bsr.w	QueueSound2
+				else
+		jsr	(QueueSound2).l
+				endif
+			else
+				if dispatch=SoundDispatch_Branch
+		bsr.w	QueueSound1
+				else
+		jsr	(QueueSound1).l
+				endif
+			endif
+		else
+			if queue=1
+		move.b	#track,(v_snddriver_ram+zAbsVar.SFXToPlay).l
+			else
+		move.b	#track,(v_snddriver_ram+zAbsVar.QueueToPlay).l
+			endif
+		endif
+		endm
+
+music:		macro track,dispatch
+		sound	\track,0,\dispatch
+		endm
+
+sfx:		macro track,dispatch
+		sound	\track,1,\dispatch
+		endm
+
+QueueMusic:	macro track
+		music	\track,SoundDispatch_Branch
+		endm
+
+Music:		macro track
+		QueueMusic	\track
+		endm
+
+PlayMusic:	macro track
+		music	\track,SoundDispatch_Call
+		endm
+
+QueueSFX:	macro track
+		sfx	\track,SoundDispatch_Branch
+		endm
+
+SFX:		macro track
+		QueueSFX	\track
+		endm
+
+PlaySFX:	macro track
+		sfx	\track,SoundDispatch_Call
+		endm
+
+; ---------------------------------------------------------------------------
 ; bankswitch between SRAM and ROM
 ; (remember to enable SRAM in the header first!)
 ; ---------------------------------------------------------------------------

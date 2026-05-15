@@ -179,8 +179,7 @@ DLE_GHZ3_Boss:
 		move.w	#boss_ghz_y-$80,obY(a1)
 
 	.fail:
-		move.w	#bgm_Boss,d0
-		bsr.w	QueueSound1				; play boss music
+		Music	#bgm_Boss				; play boss music
 		move.b	#1,(f_lockscreen).w			; lock screen
 		addq.b	#2,(v_dle_routine).w			; goto DLE_GHZ3_End next
 		moveq	#plcid_Boss,d0
@@ -228,8 +227,7 @@ DLE_LZ3:
 		cmpi.b	#7,(a1)
 		beq.s	.skip_layout				; branch if already modified
 		move.b	#7,(a1)					; modify level layout
-		move.w	#sfx_Rumbling,d0
-		bsr.w	QueueSound2				; play rumbling sound
+		SFX	#sfx_Rumbling				; play rumbling sound
 
 	.skip_layout:
 		tst.b	(v_dle_routine).w
@@ -244,8 +242,7 @@ DLE_LZ3:
 		_move.b	#id_BossLabyrinth,obID(a1)		; load LZ boss object
 
 	.fail:
-		move.w	#bgm_Boss,d0
-		bsr.w	QueueSound1				; play boss music
+		Music	#bgm_Boss				; play boss music
 		move.b	#1,(f_lockscreen).w			; lock screen
 		addq.b	#2,(v_dle_routine).w			; don't load boss again
 		moveq	#plcid_Boss,d0
@@ -452,8 +449,7 @@ DLE_MZ3_Boss:
 		move.w	#boss_mz_y+$1C,obY(a1)
 
 	.fail:
-		move.w	#bgm_Boss,d0
-		bsr.w	QueueSound1				; play boss music
+		Music	#bgm_Boss				; play boss music
 		move.b	#1,(f_lockscreen).w			; lock screen
 		addq.b	#2,(v_dle_routine).w			; goto DLE_MZ3_End next
 		moveq	#plcid_Boss,d0
@@ -524,8 +520,7 @@ DLE_SLZ3_Boss:
 		move.b	#id_BossStarLight,obID(a1)		; load SLZ boss object
 
 	.fail:
-		move.w	#bgm_Boss,d0
-		bsr.w	QueueSound1				; play boss music
+		Music	#bgm_Boss				; play boss music
 		move.b	#1,(f_lockscreen).w			; lock screen
 		addq.b	#2,(v_dle_routine).w			; goto DLE_SLZ3_End next
 		moveq	#plcid_Boss,d0
@@ -618,8 +613,7 @@ DLE_SYZ3_Boss:
 		addq.b	#2,(v_dle_routine).w			; goto DLE_SYZ3_End next
 
 	.fail:
-		move.w	#bgm_Boss,d0
-		bsr.w	QueueSound1				; play boss music
+		Music	#bgm_Boss				; play boss music
 		move.b	#1,(f_lockscreen).w			; lock screen
 		moveq	#plcid_Boss,d0
 		bra.w	AddPLC					; load boss gfx

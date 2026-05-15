@@ -201,6 +201,7 @@ TweakConsistantLevelSelectClear:    equ 0 ; Based on https://forums.sonicretro.o
 
 TweakRemoveUselessZ80Commands:      equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
 TweakNavigationLevelSelect:         equ 0 ; Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
+OptimiseSound:                      equ 1 ; 1 = write directly to sound queue RAM instead of calling QueueSound routines
 
 ; @TODO Move Press Start Accordingly too
 
