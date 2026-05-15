@@ -225,7 +225,7 @@ Solid_Ignore:
 		beq.s	Solid_NotPushing		; if so, branch
 		cmpi.b	#id_Hurt,obAnim(a1)		; is Sonic in his hurt animation?
 		beq.s	Solid_NotPushing		; if so, branch
-	endc
+	endif
 
 	if (BugFixWalkJump<2)&(FixBugs=0)
 		; This causes the infamous "walk-jump bug"
@@ -273,7 +273,7 @@ Solid_Squash:
 		jsr	(KillSonic).l												; kill Sonic
 	else
 		jsr	(KillSonicByCrushing).l								; kill Sonic
-	endc
+	endif
 
 		movea.l	(sp)+,a0
 		moveq	#-1,d4

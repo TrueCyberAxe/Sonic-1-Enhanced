@@ -52,7 +52,7 @@ Pal_Title:		bincludeEndMarker	"palette/Title Screen.bin"
 Pal_LevelSel:		bincludeEndMarker	"palette/Level Select.bin"
 	else
 Pal_LevelSel:		bincludeEndMarker	"Enhancements/palette/Level Select - S2 Font.bin"
-	endc ; if ExtendedMenu=0
+	endif ; if ExtendedMenu=0
 Pal_Sonic:		bincludeEndMarker	"palette/Sonic.bin"
 Pal_GHZ:		bincludeEndMarker	"palette/Green Hill Zone.bin"
 Pal_LZ:			bincludeEndMarker	"palette/Labyrinth Zone.bin"

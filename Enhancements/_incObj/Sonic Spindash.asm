@@ -20,7 +20,7 @@ Sonic_SpinDash:
     move.w   #$C00,obInertia(a0)   ; Set Sonic's speed to Maximum Run Speed
   else
     move.w #$1F00,obAnim(a0)       ; changed from #$900
-  endc
+  endif
 
     move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
     move.w	#sfx_Spindash,d0			 ; spin sound ($E0 in s2)
@@ -34,7 +34,7 @@ Sonic_SpinDash:
   	cmpi.b	#$C,obSubtype(a0)		   ; ??? oxygen remaining?
   	bcs.s	@loc2_1AC84		           ; ??? branch if carry
   	move.b	#2,(obSmoke).w	       ; ??? $D11C is used for the smoke/dust object
-  endc
+  endif
 
   @loc2_1AC84:
 		bsr.w Sonic_LevelBound
@@ -66,7 +66,7 @@ Spindash_Charging: ; loc2_1AC8E
     move.b	v_charging(a0),d0		               ; copy charge count
     add.w	d0,d0			                           ; double it
     move.w	Dash_Speeds(pc,d0.w),obInertia(a0) ; get normal speed
-  endc ; if FeatureSpindash>1
+  endif ; if FeatureSpindash>1
 
     move.w	obInertia(a0),d0		               ; get inertia
     subi.w	#$800,d0		                       ; subtract $800
@@ -85,7 +85,7 @@ Spindash_Charging: ; loc2_1AC8E
   if FeatureSpindash>1
     bset	#bitSpinSmoke,obStatus(a0)		       ; set unused (in s1) flag
     move.b	#0,(obSmoke).w	                   ; clear $D11C (smoke)
-  endc ; if FeatureSpindash>1
+  endif ; if FeatureSpindash>1
 
     move.w	#$BC,d0			                       ; spin release sound
     jsr	(PlaySound_Special).l	                 ; play it!
@@ -120,7 +120,7 @@ loc2_1AD48:
 
   if FeatureSpindash>1
     move.w	#sfx_Spindash,d0			 ; Spindash Reving was $E0 in sonic 2
-  endc                             ; @TODO check this is the correct place for this endc
+  endif                             ; @TODO check this is the correct place for this endif
 
     jsr	(PlaySound_Special).l	     ; play charge sound
     addi.w	#$200,v_charging(a0)	 ; increase charge count
@@ -471,5 +471,5 @@ word_1E0EA:	dc 0
 word_1E0EC:	dc 1
   	dc $F0BA
   	even
-  endc
+  endif
 ; end of SpinDash_dust Routine

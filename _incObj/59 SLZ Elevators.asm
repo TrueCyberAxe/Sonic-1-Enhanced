@@ -252,9 +252,9 @@ Elev_MakeMulti:	; Routine 6
 .chkdel:
 	if BugFixRenderBeforeInit=0
 		addq.l	#4,sp
-	endc
+	endif
 		out_of_range.w	DeleteObject
 	if BugFixRenderBeforeInit>0
 		addq.l	#4,sp
-	endc
+	endif
 		rts

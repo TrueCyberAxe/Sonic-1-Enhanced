@@ -7,7 +7,7 @@ HUD_Update:
 		tst.w	(f_debugmode).w				; is debug mode	on?
 	else
 		tst.w	(v_debuguse).w				; is debug mode	on?
-	endc
+	endif
 
 		bne.w	HudDebug	; if yes, branch
 		tst.b	(f_scorecount).w ; does the score need updating?

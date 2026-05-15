@@ -6,7 +6,7 @@ ObjectFall:
 	if TweakFasterObjectMove=0
 		move.l	obX(a0),d2
 		move.l	obY(a0),d3
-	endc
+	endif
 		move.w	obVelX(a0),d0
 		ext.l	d0
 	if TweakFasterObjectMove=0
@@ -17,7 +17,7 @@ ObjectFall:
 		lsl.l	#8,d0
 		add.l	d0,obX(a0)
 		move.w	obVelY(a0),d0
-	endc
+	endif
 		addi.w	#$38,obVelY(a0)	; increase vertical speed
 		ext.l	d0
 	if TweakFasterObjectMove=0
@@ -28,6 +28,6 @@ ObjectFall:
 	else
 		lsl.l	#8,d0
 		add.l	d0,obY(a0)
-	endc
+	endif
 		rts
 ; End of function ObjectFall

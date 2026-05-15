@@ -63,7 +63,7 @@ BBall_Move:	; Routine 2
 		move.w	#$60,d1
 	else
 		moveq	#$60,d1
-	endc
+	endif
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
@@ -84,8 +84,8 @@ BBall_Move:	; Routine 2
 			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
 		else
 			moveq	#$60,d1 															; <- WTF??? Why is this here? It's not even used
-		endc
-	endc
+		endif
+	endif
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
@@ -93,7 +93,7 @@ BBall_Move:	; Routine 2
 		neg.w	d0
 	if TweakRemoveReduntantCode=0
 		addi.w	#$80,d0																; add $80 to osc value <-HEY why is this not $60?
-	endc
+	endif
 
 .noflip2:
 		move.w	bball_origY(a0),d1

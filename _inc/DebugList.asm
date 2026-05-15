@@ -24,7 +24,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -44,7 +44,7 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
 		dbug	Map_GRing,	id_GiantRing,	0,	0,	ArtTile_Giant_Ring|Tile_Pal2
 		dbug	Map_Bonus,	id_HiddenBonus,	1,	1,	ArtTile_Hidden_Points|Tile_Prio
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 .GHZend:
 
 .LZ:
@@ -54,7 +54,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -95,7 +95,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -122,7 +122,7 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Cat,	id_Caterkiller,	0,	0,	ArtTile_MZ_SYZ_Caterkiller|Tile_Pal2
 	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 .MZend:
 
 .SLZ:
@@ -132,7 +132,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -151,7 +151,7 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Orb,	id_Orbinaut,	0,	0,	ArtTile_SLZ_Orbinaut|Tile_Pal2
 	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 .SLZend:
 
 .SYZ:
@@ -161,7 +161,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -180,7 +180,7 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Cat,	id_Caterkiller,	0,	0,	ArtTile_MZ_SYZ_Caterkiller|Tile_Pal2
 	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 .SYZend:
 
 .SBZ:
@@ -190,7 +190,7 @@ dbug:	macro map,object,subtype,frame,vram
 		include "Enhancements/_inc/DebugListStart.asm"
 	else
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -223,7 +223,7 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Hog,	id_BallHog,	4,	0,	ArtTile_Ball_Hog|Tile_Pal2
 	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
-	endc ; if EnhancedDebug=0
+	endif ; if EnhancedDebug=0
 .SBZend:
 
 .Ending:
@@ -253,7 +253,7 @@ dbug:	macro map,object,subtype,frame,vram
 	else
 		if EnhancedDebug=0
 			dbug 	Map_Ring,	id_Rings,	0,	8,	ArtTile_Ring|Tile_Pal2
-		endc ; EnhancedDebug=0
+		endif ; EnhancedDebug=0
 	endif
 .Endingend:
 

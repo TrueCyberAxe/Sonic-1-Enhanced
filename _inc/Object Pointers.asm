@@ -148,7 +148,7 @@ id_EggmanCylinder:	objptr	EggmanCylinder		; 84
 id_BossFinal:		objptr	BossFinal		; 85
 id_BossPlasma:		objptr	BossPlasma		; 86
 id_EndSonic:		objptr	EndSonic		; 87
-id_EndChaos:		objptr	EndChaos		; 88
+id_endifhaos:		objptr	endifhaos		; 88
 id_EndSTH:		objptr	EndSTH			; 89
 id_CreditsText:		objptr	CreditsText		; 8A
 id_EndEggman:		objptr	EndEggman		; 8B

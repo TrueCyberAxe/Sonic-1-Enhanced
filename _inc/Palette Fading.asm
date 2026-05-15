@@ -21,7 +21,7 @@ PalFadeIn_Alt:				; start position and size are already set
 	else
 		moveq	#$0E,d4												; MJ: prepare maximum colour check
 		moveq	#$00,d6												; MJ: clear d6
-	endc
+	endif
 
 .mainloop:
 	if TweakBetterFadeEffects=0
@@ -42,7 +42,7 @@ PalFadeIn_Alt:				; start position and size are already set
 		bne	.mainloop												; MJ: if it has not reached null, branch
 		move.b	#$12,(v_vblank_routine).w			; MJ: wait for V-blank again (so colours transfer)
 		bra	WaitforVBla											; MJ: ''
-	endc
+	endif
 ; End of function PaletteFadeIn
 ; ===========================================================================
 
@@ -125,23 +125,23 @@ PaletteFadeOut:
 	else
 		moveq	#$07,d4		; MJ: set repeat times
 		moveq	#$00,d6		; MJ: clear d6
-	endc
+	endif
 
 
 .mainloop:
 	if TweakBetterFadeEffects
 		bsr.w	RunPLC
-	endc Cyber Axe: This set of Code seems to be the problem code
+	endif Cyber Axe: This set of Code seems to be the problem code
 		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
 	if TweakBetterFadeEffects>0
 		bchg	#$00,d6												; MJ: change delay counter
 		beq	.mainloop												; MJ: if null, delay a frame
-	endc
+	endif
 		bsr.s	FadeOut_ToBlack
 	if TweakBetterFadeEffects=0
 		bsr.w	RunPLC
-	endc
+	endif
 		dbf	d4,.mainloop
 		rts
 ; End of function PaletteFadeOut
@@ -222,7 +222,7 @@ else
 
 .nored:
 		move.w	d5,(a0)+	; MJ: save new colour
-	endc
+	endif
 		rts
 ; End of function FadeOut_DecColour
 
@@ -249,7 +249,7 @@ PaletteWhiteIn:
 	else
 		moveq	#$0E,d4		; MJ: prepare maximum colour check
 		moveq	#$00,d6		; MJ: clear d6
-	endc
+	endif
 
 .mainloop:
 	if TweakBetterFadeEffects=0
@@ -270,7 +270,7 @@ PaletteWhiteIn:
 		bne	.mainloop			; MJ: if it has not reached null, branch
 		move.b	#$12,(v_vblank_routine).w		; MJ: wait for V-blank again (so colours transfer)
 		bra	WaitforVBla			; MJ: wait for V-blank again (so colours transfer)
-	endc
+	endif
 ; End of function PaletteWhiteIn
 ; ===========================================================================
 
@@ -363,7 +363,7 @@ WhiteIn_DecColour:
 .dered:
    		move.w d3,(a0)+ 											; MJ: save colour
 
-	endc
+	endif
 		rts
 ; End of function WhiteIn_DecColour
 	else
@@ -390,7 +390,7 @@ WhiteIn_DecColour:
 .nored:
 		move.w	d3,(a0)+									; MJ: save colour
 		rts																; MJ: return
-	endc
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -404,24 +404,24 @@ PaletteWhiteOut:
 	else
 		moveq #$07,d4			; MJ: set repeat times
 		moveq #$00,d6			; MJ: clear d6
-	endc
+	endif
 
 .mainloop:
 	if TweakBetterFadeEffects
 		bsr.w	RunPLC
-	endc
+	endif
 		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
 
 	if TweakBetterFadeEffects
 		bchg #$00,d6 			; MJ: change delay counter
 		beq .mainloop 			; MJ: if null, delay a frame
-	endc
+	endif
 
 		bsr.s	WhiteOut_ToWhite
 	if TweakBetterFadeEffects=0
 		bsr.w	RunPLC
-	endc
+	endif
 		dbf	d4,.mainloop
 		rts
 ; End of function PaletteWhiteOut
@@ -512,6 +512,6 @@ WhiteOut_AddColour:
 .allred:
 		move.w d5,(a0)+ 		; MJ: save new colour
 
-	endc
+	endif
 		rts
 ; End of function WhiteOut_AddColour

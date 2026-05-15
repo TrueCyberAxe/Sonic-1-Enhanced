@@ -26,7 +26,7 @@ Lamp_Main:	; Routine 0
 		move.w	#ArtTile_Lamppost,obGfx(a0)
 	else ; Spindust glitch fix
 		move.w	#ArtTile_SpindashDust,obGfx(a0)
-	endc
+	endif
 		move.b	#4,obRender(a0)
 		move.b	#8,obActWid(a0)
 		move.b	#5,obPriority(a0)
@@ -97,7 +97,7 @@ Lamp_Blue:	; Routine 2
 		move.w	#ArtTile_Lamppost,obGfx(a1)
 	else
 		move.w	#ArtTile_SpindashDust,obGfx(a1)
-	endc
+	endif
 		move.b	#4,obRender(a1)
 		move.b	#8,obActWid(a1)
 		move.b	#4,obPriority(a1)

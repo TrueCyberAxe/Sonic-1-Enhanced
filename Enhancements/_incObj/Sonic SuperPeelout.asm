@@ -38,7 +38,7 @@ Sonic_DashLaunch:
     ; move.w   #$760,obInertia(a0)                  ; Set Sonic's speed to Maximum Run Speed
   else
     move.w   #$0F00,obInertia(a0)                   ; Set sonic's speed to Sonic CD Peelout Speed
-  endc
+  endif
 
     move.b   (v_jpadhold2).w,d0
     btst   #0,d0

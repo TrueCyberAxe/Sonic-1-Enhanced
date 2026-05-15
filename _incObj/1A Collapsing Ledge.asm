@@ -96,7 +96,7 @@ locret_8308:
 
 Ledge_TimeZero:
 		bsr.w	ObjectFall
-	if (BugFixRenderBeforeInit=0)|(FixBugs=0)
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite

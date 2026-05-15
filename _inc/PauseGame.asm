@@ -5,7 +5,7 @@
 PauseGame:
 	if TweakCodeOptimizations=0
 		nop
-	endc ; if TweakCodeOptimizations=0
+	endif ; if TweakCodeOptimizations=0
 
 		tst.b	(v_lives).w																; do you have any lives	left?
 
@@ -13,7 +13,7 @@ PauseGame:
 		beq.s	Unpause																		; if not, branch
 	else
 		beq.w	Unpause																		; if not, branch
-	endc
+	endif
 
 		tst.w	(f_pause).w																; is game already paused?
 		bne.s	Pause_StopGame														; if yes, branch
@@ -23,16 +23,16 @@ PauseGame:
 		beq.s	Pause_DoNothing														; if not, branch
 	else
 		beq.w	Pause_DoNothing														; if not, branch
-	endc
+	endif
 
 Pause_StopGame:
-	if EnhancedDebug>0
+	if EnhancedDebug
 		tst.b (v_debuguse).w 														; Is debug mode active?
 		beq.s @skip																			; if not, branch
 
 		bra.w GotoLevelSelect
 	@skip:
-	endc ; if EnhancedDebug>0
+	endif ; if EnhancedDebug
 
 		move.w	#1,(f_pause).w																; freeze time
 
@@ -44,8 +44,8 @@ Pause_StopGame:
 			waitZ80
 			move.b  #MusID_Pause,(Z80_RAM+zAbsVar.StopMusic).l  ; pause music
 			startZ80
-		endc ; if FeatureUseSonic2SoundDriver=0
-	endc ; if FeatureMusicWhilePaused=0
+		endif ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FeatureMusicWhilePaused=0
 
 Pause_Loop:
 		move.b	#id_VBlank_Paused,(v_vblank_routine).w
@@ -56,7 +56,7 @@ Pause_Loop:
 		beq.s	Pause_ChkStart														; if not, branch
 	else
 		beq.s	Pause_Check_Reset													; if not, branch
-	endc
+	endif
 
 		btst	#bitA,(v_jpadpress1).w 										; is button A pressed?
 		beq.s	Pause_ChkBC																; if not, branch
@@ -65,7 +65,7 @@ Pause_Loop:
 		bra.s	Pause_EndMusic
 ; ===========================================================================
 
-	if FeatureSonicCDPauseRestartLevel>0
+	if FeatureSonicCDPauseRestartLevel
 Pause_Check_Reset:
 		cmp.b #1,(v_lives).w    												; Check if you only have 1 life
  		beq.s Pause_ChkStart  													; If so branch (This way you don't get 0 lives and then underflow)
@@ -81,7 +81,7 @@ Pause_Reset:
 		lea (v_objspace).w,a0
 		jsr KillSonic																		; Kill Sonic
     bra.s Pause_EndMusic 														; Unpause
-	endc
+	endif ; if FeatureSonicCDPauseRestartLevel
 
 Pause_ChkBC:
 		btst	#bitB,(v_jpadhold1).w ; is button B held?
@@ -103,9 +103,9 @@ Pause_EndMusic:
 		waitZ80
 		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
 		startZ80
-	endc ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FeatureUseSonic2SoundDriver=0
 
-	endc ; if FeatureMusicWhilePaused=0
+	endif ; if FeatureMusicWhilePaused=0
 
 Unpause:
 		move.w	#0,(f_pause).w													; unpause the game
@@ -126,9 +126,9 @@ Pause_SlowMo:
 		waitZ80
 		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
 		startZ80
-	endc ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FeatureUseSonic2SoundDriver=0
 
-	endc ; if FeatureMusicWhilePaused=0
+	endif ; if FeatureMusicWhilePaused=0
 
 		rts
 ; End of function PauseGame

@@ -31,7 +31,7 @@ DemoRecorder:
 ; ===========================================================================
 
 MDemo_On:
-	if EnhancedDebug>0
+	if EnhancedDebug
 		btst	#bitA,(v_jpadhold1).w 						; check if A is pressed
 		beq.s	.checkC										; if not, branch
 
@@ -44,7 +44,7 @@ MDemo_On:
 		bra .quit
 
 .skip:
-	endc
+	endif ; if EnhancedDebug
 
 		tst.b	(v_jpadhold1).w	; is start button held?
 		bpl.s	.dontquit	; if not, branch

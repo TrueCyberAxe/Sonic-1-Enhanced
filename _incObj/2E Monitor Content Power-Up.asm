@@ -46,7 +46,7 @@ Pow_Checks:
 		include	"_incObj/2E Monitor Content Power-Up Checks.asm"
 	else
 		include	"Enhancements/_incObj/2E Monitor Content Power-Up Checks (Optimised).asm"
-	endc
+	endif
 ; ===========================================================================
 Pow_Delete:	; Routine 4
 		subq.w	#1,obTimeFrame(a0)

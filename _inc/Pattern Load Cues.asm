@@ -74,7 +74,7 @@ PLC_Main:	plcheader
 		plcm	Nem_Lamp,	ArtTile_Lamppost		; lamppost
 	else
 		plcm	Nem_Lamp,	$F800					; lamppost
-	endc ; if FeatureSpindash<2
+	endif ; if FeatureSpindash<2
 		plcm	Nem_Hud,	ArtTile_HUD				; HUD
 		plcm	Nem_Lives,	ArtTile_Lives_Counter	; lives counter
 		plcm	Nem_Ring,	ArtTile_Ring			; rings
@@ -114,8 +114,8 @@ PLC_GHZ:	plcheader
 			plcm	Gra_GHZ,	ArtTile_Level+$1CD		; GHZ secondary patterns
 		else
 			plcm	Gra_GHZ,	ArtTile_Level			; GHZ main patterns
-		endc
-	endc
+		endif
+	endif
 		plcm	Nem_Stalk,	ArtTile_GHZ_Flower_Stalk	; flower stalk
 		plcm	Nem_PplRock,	ArtTile_GHZ_Purple_Rock		; purple rock
 		plcm	Nem_Crabmeat,	ArtTile_Crabmeat		; crabmeat enemy
@@ -143,7 +143,7 @@ PLC_GHZ2_end:
 PLC_LZ:		plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_LZ,	ArtTile_Level					; LZ main patterns
-	endc
+	endif
 		plcm	Nem_LzBlock1,	ArtTile_LZ_Block_1		; block
 		plcm	Nem_LzBlock2,	ArtTile_LZ_Block_2		; blocks
 		plcm	Nem_Splash,	ArtTile_LZ_Splash		; waterfalls and splash
@@ -164,7 +164,7 @@ PLC_LZ2:	plcheader
 		plcm	Nem_Gargoyle,	ArtTile_LZ_Gargoyle		; gargoyle head
 	if (FeatureEnableUnusedArt>0)|(Revision=0)
 		plcm	Nem_LzSonic,	ArtTile_LZ_Sonic_Drowning	; Sonic holding his breath
-	endif
+	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
 		plcm	Nem_LzPlatfm,	ArtTile_LZ_Rising_Platform	; rising platform
 		plcm	Nem_Orbinaut,	ArtTile_LZ_Orbinaut		; orbinaut enemy
 		plcm	Nem_Jaws,	ArtTile_Jaws			; jaws enemy
@@ -181,7 +181,7 @@ PLC_LZ2_end:
 PLC_MZ:		plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_MZ, ArtTile_Level		; MZ main patterns
-	endc
+	endif
 		plcm	Nem_MzMetal,	ArtTile_MZ_Spike_Stomper	; metal blocks
 		plcm	Nem_MzFire,	ArtTile_MZ_Fireball		; fireballs
 		plcm	Nem_Swing,	ArtTile_GHZ_MZ_Swing		; swinging platform
@@ -207,7 +207,7 @@ PLC_MZ2_end:
 PLC_SLZ:	plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SLZ,	ArtTile_Level			; SLZ main patterns
-	endc
+	endif
 		plcm	Nem_Bomb,	ArtTile_Bomb			; bomb enemy
 		plcm	Nem_Orbinaut,	ArtTile_SLZ_Orbinaut		; orbinaut enemy
 		plcm	Nem_MzFire,	ArtTile_SLZ_Fireball		; fireballs
@@ -233,7 +233,7 @@ PLC_SLZ2_end:
 PLC_SYZ:	plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SYZ,	ArtTile_Level			; SYZ main patterns
-	endc
+	endif
 		plcm	Nem_Crabmeat,	ArtTile_Crabmeat		; crabmeat enemy
 		plcm	Nem_Buzz,	ArtTile_Buzz_Bomber		; buzz bomber enemy
 		plcm	Nem_Yadrin,	ArtTile_Yadrin			; yadrin enemy
@@ -260,7 +260,7 @@ PLC_SYZ2_end:
 PLC_SBZ:	plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_SBZ,	ArtTile_Level			; SBZ main patterns
-	endc
+	endif
 		plcm	Nem_Stomper,	ArtTile_SBZ_Moving_Block_Short	; moving platform and stomper
 		plcm	Nem_SbzDoor1,	ArtTile_SBZ_Door		; door
 		plcm	Nem_Girder,	ArtTile_SBZ_Girder		; girder
@@ -296,7 +296,7 @@ PLC_SBZ2_end:
 PLC_TitleCard:	plcheader
 	if TweakNonNemesisLevelArtLoad=0
 		plcm	Gra_TitleCard,	ArtTile_Title_Card
-	endc
+	endif
 PLC_TitleCard_end:
 
 ; ---------------------------------------------------------------------------
@@ -328,7 +328,7 @@ PLC_Warp:
 PLC_WarpRev0:	plcheader
 		plcm	Nem_Warp,	ArtTile_Warp
 PLC_WarpRev0_end:
-	endif
+	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
 
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - special stage
@@ -428,7 +428,7 @@ PLC_Ending:	plcheader
 		plcm	Nem_EndSonic,	ArtTile_Ending_Sonic		; Sonic
 	if (FeatureEnableUnusedArt>0)|(Revision=0)
 		plcm	Nem_EndEggman,	ArtTile_Ending_Eggman		; Eggman's death (unused)
-	endif
+	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
 		plcm	Nem_Rabbit,	ArtTile_Ending_Rabbit		; rabbit
 		plcm	Nem_Chicken,	ArtTile_Ending_Chicken		; chicken
 		plcm	Nem_Penguin,	ArtTile_Ending_Penguin		; penguin

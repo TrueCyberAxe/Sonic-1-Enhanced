@@ -73,7 +73,7 @@ LBall_ChkDel:
 		out_of_range.w	DeleteObject
 	else
 		out_of_range	LBall_Delete
-  	endc # if BugFixRenderBeforeInit=0
+  	endif # if BugFixRenderBeforeInit=0
 
 	if FixBugs
 		bra.w	DisplaySprite
@@ -172,7 +172,7 @@ LBall_Type08:
 ; ===========================================================================
 
 LBall_Delete:
-	if BugFixRenderBeforeInit>0 ; Bug 6
+	if BugFixRenderBeforeInit ; Bug 6
 		addq.l  #4,sp
-	endc
+	endif ; if BugFixRenderBeforeInit
 		bra.w	DeleteObject

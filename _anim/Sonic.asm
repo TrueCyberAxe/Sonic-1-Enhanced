@@ -333,4 +333,4 @@ SonAni_SpinDash:
 		dc.b fr_Spindash1, fr_Spindash6
 		dc.b afEnd
 		even
-	endc
+	endif

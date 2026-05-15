@@ -23,9 +23,9 @@ Sonic_Index:	dc.w Sonic_Main-Sonic_Index			; 0 - object init
 		dc.w Sonic_Hurt-Sonic_Index			; 4 - while being knocked back from damage
 		dc.w Sonic_Death-Sonic_Index			; 6 - while dying and falling off screen
 		dc.w Sonic_ResetLevel-Sonic_Index		; 8 - after having died and waiting for the level to restart
-	if BugFixScatteredRingsTimer>0
+	if BugFixScatteredRingsTimer
 		dc.w Sonic_Drowned-Sonic_Index
-	endc
+	endif ; if BugFixScatteredRingsTimer
 ; ===========================================================================
 
 ; Obj01_Main:
@@ -45,26 +45,26 @@ Sonic_Main:	; Routine 0
 
 ; Obj01_Control:
 Sonic_Control:	; Routine 2
-	if AdvancedDebugger>0
+	if AdvancedDebugger
 		btst #bitA+btnStart,(v_jpadpress1).w 			; is button B pressed?
 		beq.s @skip
 		RaiseError "Intentional crash test:%<endl>Level ID = %<.w $FFFFFE10>%<endl>Frame = %<.w $FFFFFE04>", SampleLevelDebugger
 	@skip:
-	endc ; if AdvancedDebugger>0
+	endif ; if AdvancedDebugger
 
-	if BugFixVictoryDebug>0
+	if BugFixVictoryDebug
 		tst.b	(f_victory).w												; is victory flag set?
 		bne.w	loc_12C58														; if yes, branch
-	endc ; if BugFixVictoryDebug>0
+	endif ; if BugFixVictoryDebug
 
 	if Debug=0
 		tst.w	(f_debugmode).w				; is debug cheat enabled?
 		beq.s	.nodebug				; if not, branch
-	endc ; if Debug=0
+	endif ; if Debug=0
 
-	if FeatureSonicCDExtendedCamera>0
+	if FeatureSonicCDExtendedCamera
 		bsr.s Sonic_PanCamera
-	endc ; if FeatureSonicCDExtendedCamera>0
+	endif ; if FeatureSonicCDExtendedCamera
 
 		btst	#bitB,(v_jpadpress1).w			; is button B pressed?
 		beq.s	.nodebug				; if not, branch
@@ -72,9 +72,11 @@ Sonic_Control:	; Routine 2
 		clr.b	(f_lockctrl).w				; unlock controls
 		rts
 
-	if FeatureSonicCDExtendedCamera>0
+	if FeatureSonicCDExtendedCamera
 		include "Enhancements/_incObj/Sonic_PanCamera.asm"
-	endc ; if FeatureSonicCDExtendedCamera>0						; return
+	endif ; if FeatureSonicCDExtendedCamera
+
+	; return
 ; ===========================================================================
 
 ; loc_12C58:
@@ -276,7 +278,7 @@ Sonic_Water:
 
 	if FeatureSpindash=1
 		move.w  #$100,($FFFFD1DC).w			; set the spin dash dust animation to splash
-	endc
+	endif
 
 		move.w	#sfx_Splash,d0				; set splash sound
 		jmp	(QueueSound2).l				; play it
@@ -317,12 +319,12 @@ Sonic_Water:
 
 ; Obj01_MdNormal:
 Sonic_MdNormal:	; While Sonic is on the ground and not rolling
-	if FeatureSpindash>0
+	if FeatureSpindash
 		bsr.w Sonic_SpinDash
-	endc
-	if FeatureSuperPeelout>0
+	endif ; if FeatureSpindash
+	if FeatureSuperPeelout
 		bsr.w Sonic_Peelout
-	endc
+	endif ; if FeatureSuperPeelout
 		bsr.w	Sonic_Jump				; check if we need to jump
 		bsr.w	Sonic_SlopeResistWalk			; handle resistance from running up slopes
 		bsr.w	Sonic_Move				; handle Sonic's left/right movement
@@ -336,9 +338,10 @@ Sonic_MdNormal:	; While Sonic is on the ground and not rolling
 
 ; Obj01_MdJump:
 Sonic_MdJump:
-	if FeatureSpindash>0 ; Fix See Saw Bug
+	if FeatureSpindash ; Fix See Saw Bug
 		clr.b	fr_Duck(a0)
-	endc	; While Sonic is in the air but not rolling
+	endif ; if FeatureSpindash				; Fix See Saw Bug
+		; While Sonic is in the air but not rolling
 		bsr.w	Sonic_JumpHeight			; handle Sonic's jump height based on whether the jump button is still held
 		bsr.w	Sonic_JumpDirection			; handle midair direction adjustments while jumping
 		bsr.w	Sonic_LevelBound			; make sure Sonic stays within level bounds and handle bottomless pits
@@ -353,7 +356,7 @@ Sonic_MdJump:
 		bsr.w	Sonic_Floor				; handle collision with level while airborne
 	if FeatureAirRoll
 		bsr.w   Sonic_AirRoll
-	endc
+	endif
 		rts						; return
 ; ===========================================================================
 
@@ -371,9 +374,9 @@ Sonic_MdRoll:	; While Sonic is on the ground and rolling
 
 ; Obj01_MdJump2:
 Sonic_MdJump2:	; While Sonic is in the air and rolling (usually, but not limited to, jumping)
-	if FeatureSpindash>0 ; Fix See Saw Bug
+	if FeatureSpindash ; Fix See Saw Bug
 		clr.b	fr_Duck(a0)
-	endc
+	endif ; if FeatureSpindash
 		bsr.w	Sonic_JumpHeight			; handle Sonic's jump height based on whether the jump button is still held
 		bsr.w	Sonic_JumpDirection			; handle midair direction adjustments while jumping
 		bsr.w	Sonic_LevelBound			; make sure Sonic stays within level bounds and handle bottomless pits
@@ -386,9 +389,9 @@ Sonic_MdJump2:	; While Sonic is in the air and rolling (usually, but not limited
 .notunderwater:
 		bsr.w	Sonic_JumpAngle				; steadily return Sonic's angle while jumping to 0
 		bsr.w	Sonic_Floor				; handle collision with level while airborne
-	if FeatureAirRoll>0
+	if FeatureAirRoll
 		bsr.w Sonic_AirRoll
-	endc
+	endif ; if FeatureAirRoll
 		rts						; return
 ; End of Sonic_Modes
 
@@ -715,7 +718,7 @@ Sonic_MoveLeft:
 	if FeatureSpindash>1
 		move.b  #6,($FFFFD1E4).w			; set the spin dash dust routine to skid dust
 		move.b  #$15,($FFFFD1DA).w
-	endc
+	endif
 
 ; locret_130E8:
 .nostopping:
@@ -781,7 +784,7 @@ Sonic_MoveRight:
 	if FeatureSpindash>1
 		move.b	#6,($FFFFD1E4).w			; change spin dash dust animation routine to skid dust
 		move.b	#$15,($FFFFD1DA).w			; set skid dust animation/frame duration
-	endc
+	endif
 
 ; locret_1314E:
 .nostopping:
@@ -985,7 +988,7 @@ Sonic_JumpDirection:
 		add.w	d5,d0					; +++ remove this frame's acceleration change
 		cmp.w	d1,d0					; +++ compare speed with top speed
 		ble.s	.notleft				; +++ if speed was already greater than the maximum, branch
-	endc
+	endif
 
 		move.w	d1,d0					; cap leftward X-speed to maximum
 
@@ -1002,7 +1005,7 @@ Sonic_JumpDirection:
 		sub.w	d5,d0					; +++ remove this frame's acceleration change
 		cmp.w	d6,d0					; +++ compare speed with top speed
 		bge.s	Obj01_JumpMove				; +++ if speed was already greater than the maximum, branch
-	endc
+	endif
 
 		move.w	d6,d0					; cap rightward X-speed to maximum
 
@@ -1060,11 +1063,11 @@ Sonic_AirDrag:
 
 	if FeatureSpindash>0
 		include "Enhancements/_incObj/Sonic Spindash.asm"
-	endc
+	endif
 
 	if FeatureSuperPeelout>0
 		include "Enhancements/_incObj/Sonic SuperPeelout.asm"
-	endc
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -1088,7 +1091,7 @@ Sonic_SquashUnused:
 		move.w	#0,obVelX(a0)				; clear Sonic's horizontal speed
 		move.w	#0,obVelY(a0)				; clear Sonic#s vertical speed
 		move.b	#id_Warp3,obAnim(a0)			; use "warping" animation
-	endc
+	endif
 
 ; locret_13302:
 .return:
@@ -1154,12 +1157,12 @@ Sonic_LevelBound:
 		move.w (v_limitbtm2).w,d1
 		cmp.w d0,d1 													; screen still scrolling down?
 		blt.s .dontkill												; if so, don't kill Sonic
-	endc ; if FeatureSpindash>0
+	endif ; if FeatureSpindash>0
 
 	if BugFixFallOffFinalZone
 		cmpi.w  #(id_SBZ<<8)+2,(v_zone).w 		; is level FZ ?
 		beq.s   .next
-	endc ; if BugFixFallOffFinalZone>0
+	endif ; if BugFixFallOffFinalZone>0
 
 		cmpi.w	#id_SBZ_act2,(v_zone).w			; is level SBZ2?
 
@@ -1207,7 +1210,7 @@ JumpTo_KillSonic:
 .next:
 		move.b  #id_Ending,(v_gamemode).w
 		rts
-	endc
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -1329,7 +1332,7 @@ Sonic_Jump:
 	if FeatureBetaVictoryAnimation>0
 		tst.b   (f_victory).w				; Has the victory animation flag been set?
 		bne.s   .victoryjump				; If yes, branch
-	endc ; if FeatureBetaVictoryAnimation>0
+	endif ; if FeatureBetaVictoryAnimation>0
 
 
 		btst	#2,obStatus(a0)				; is Sonic already in a ball state?
@@ -1352,7 +1355,7 @@ Jump_Regular:
 	if FeatureBetaVictoryAnimation>0
 		move.b  #id_Leap2,obAnim(a0) 					; Play the victory animation
 		rts
-	endc ; if FeatureBetaVictoryAnimation>0
+	endif ; if FeatureBetaVictoryAnimation>0
 
 ; ===========================================================================
 
@@ -1371,7 +1374,7 @@ Sonic_JumpHeight:
 	if FeatureBetaVictoryAnimation>0
 		tst.b (f_victory).w 							; Has the victory animation flag been set?
 		bne.s AirVictory 									; If yes, branch
-	endc
+	endif
 
 		tst.b	jumping(a0)				; is Sonic airborne specifically from a jump?
 		beq.s	.capyvel				; if not, just cap Y speed normally
@@ -1424,7 +1427,7 @@ AirRoll_Checks:
 	if FeatureAirRoll=1
 		cmpi.b #id_Spring,obAnim(a0) 			; Is Spring Jump Active?
 		beq.s locret_134D2 								; If so, branch.
-	endc
+	endif
 
     cmpi.b #id_roll,obAnim(a0) 				; Is animation 2 active?
     bne.s AirRoll_Set 								; If not, branch.
@@ -1435,7 +1438,7 @@ AirRoll_Checks:
 
 AirRoll_Set:
     move.b #id_roll,obAnim(a0) 				; Set Sonic's animation to the rolling animation.
-	endc ; if FeatureAirRoll>0
+	endif ; if FeatureAirRoll>0
 
 		rts						; return
 ; End of function Sonic_JumpHeight
@@ -1444,7 +1447,7 @@ AirVictory:
 	if FeatureBetaVictoryAnimation>0
 		move.b #id_leap2,obAnim(a0)
 		rts
-	endc
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -2273,7 +2276,7 @@ Sonic_Loops:
 
 	if BugFixScatteredRingsTimer>0
 		include "Enhancements/_incObj/Sonic Drowns.asm"
-	endc
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -2517,7 +2520,7 @@ Sonic_LoadGfx:
 		moveq	#0,d1					; clear d1
 		move.b	(a2)+,d1				; read "number of entries" value
 		subq.b	#1,d1					; subtract by 1 for first iteration
-	endc ; if FeatureEnhancedPLCQueue
+	endif ; if FeatureEnhancedPLCQueue
 
 		bmi.s	.nochange				; if this was an empty entry, nothing to do, branch
 
@@ -2527,7 +2530,7 @@ Sonic_LoadGfx:
 	else
 		lea	(v_sgfx_buffer).w,a3			; load Sonic's graphics transfer buffer
 		move.b	#1,(f_sonframechg).w			; set flag for VBlank to update Sonic graphics via DMA
-	endc ; if FeatureEnhancedPLCQueue
+	endif ; if FeatureEnhancedPLCQueue
 
 ; SPLC_ReadEntry:
 .readentry:
@@ -2566,7 +2569,7 @@ Sonic_LoadGfx:
 		add.w	d3,d4					; double because VRAM addresses are word-based
 		jsr	(QueueDMATransfer).l			; queue DMA transfer for this DPLC entry
 		dbf	d5,@readentry				; repeat for number of entries
-	endc ; if FeatureEnhancedPLCQueue=0
+	endif ; if FeatureEnhancedPLCQueue=0
 
 ; locret_13C96:
 .nochange:

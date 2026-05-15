@@ -78,14 +78,14 @@ v_sonicbubbles:	equ	v_objspace+object_size*13	; object variable space for the bu
 v_watersurface1:equ	v_objspace+object_size*30	; object variable space for the water surface #1 ($40 bytes)
 v_watersurface2:equ	v_objspace+object_size*31	; object variable space for the water surface #1 ($40 bytes)
 
-v_endcard:	equ	v_objspace+object_size*23	; object variable space for the level results card ($1C0 bytes)
-v_endcardsonic:	equ	v_endcard+object_size*0		; object variable space for the level results card "SONIC HAS" text ($40 bytes)
-v_endcardpassed:equ	v_endcard+object_size*1		; object variable space for the level results card "PASSED" text ($40 bytes)
-v_endcardact:	equ	v_endcard+object_size*2		; object variable space for the level results card act text ($40 bytes)
-v_endcardscore:	equ	v_endcard+object_size*3		; object variable space for the level results card score tally ($40 bytes)
-v_endcardtime:	equ	v_endcard+object_size*4		; object variable space for the level results card time bonus tally ($40 bytes)
-v_endcardring:	equ	v_endcard+object_size*5		; object variable space for the level results card ring bonus tally ($40 bytes)
-v_endcardoval:	equ	v_endcard+object_size*6		; object variable space for the level results card oval ($40 bytes)
+v_endifard:	equ	v_objspace+object_size*23	; object variable space for the level results card ($1C0 bytes)
+v_endifardsonic:	equ	v_endifard+object_size*0		; object variable space for the level results card "SONIC HAS" text ($40 bytes)
+v_endifardpassed:equ	v_endifard+object_size*1		; object variable space for the level results card "PASSED" text ($40 bytes)
+v_endifardact:	equ	v_endifard+object_size*2		; object variable space for the level results card act text ($40 bytes)
+v_endifardscore:	equ	v_endifard+object_size*3		; object variable space for the level results card score tally ($40 bytes)
+v_endifardtime:	equ	v_endifard+object_size*4		; object variable space for the level results card time bonus tally ($40 bytes)
+v_endifardring:	equ	v_endifard+object_size*5		; object variable space for the level results card ring bonus tally ($40 bytes)
+v_endifardoval:	equ	v_endifard+object_size*6		; object variable space for the level results card oval ($40 bytes)
 
 v_lvlobjspace:	equ	v_objspace+object_size*32	; level object variable space ($1800 bytes)
 v_lvlobjend:	equ	v_lvlobjspace+object_size*96

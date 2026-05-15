@@ -74,7 +74,7 @@ SpeedUpIndex:
 		dc.b 8		; SBZ
 		dc.b $FF	; Invincibility
 		dc.b 5		; Extra Life
-	if BugFixSoundDriverBugs>0
+	if BugFixSoundDriverBugs
 		; @TODO find the correct spedup tempos
 		; dc.b ?		; Special Stage
 		; dc.b ?		; Title Screen
@@ -87,7 +87,7 @@ SpeedUpIndex:
 		; dc.b ?		; Credits
 		; dc.b ?		; Drowning
 		; dc.b ?		; Get Emerald
-	endc
+	endif ; if BugFixSoundDriverBugs
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -765,7 +765,7 @@ PlaySegaSound:
 	return_PlayPCM:
 			addq.w	#4,sp
 			rts
-	endc
+	endif
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Play music track $81-$9F
@@ -849,11 +849,11 @@ Sound_PlayBGM:
 		moveq	#0,d7
 		move.b	2(a3),d7		; load number of FM+DAC tracks
 
-	if BugFixSongFadeRestoration>0
+	if BugFixSongFadeRestoration
 		move.b	4(a3),d4		; load tempo dividing timing
 		moveq	#TrackSz,d6
 		move.b	#1,d5			; Note duration for first "note"
-	endc
+	endif ; if BugFixSongFadeRestoration
 
 		beq.w	.bgm_fmdone		; branch if zero
 		subq.b	#1,d7
@@ -863,7 +863,7 @@ Sound_PlayBGM:
 		move.b	4(a3),d4		; load tempo dividing timing
 		moveq	#SMPS_Track.len,d6
 		move.b	#1,d5			; Note duration for first "note"
-	endc
+	endif
 
 	endif
 		lea	SMPS_RAM.v_music_fmdac_tracks(a6),a1
@@ -1001,7 +1001,7 @@ PSGInitBytes:	dc.b $80, $A0, $C0	; Specifically, these configure writes to the P
 ; ---------------------------------------------------------------------------
 ; Play normal sound effect
 ; ---------------------------------------------------------------------------
-	if ExtendedSoundEffects>0
+	if ExtendedSoundEffects
 Sound_PlaySFX2:
 		tst.b	f_1up_playing(a6)					; Is 1-up playing?
 		bne.w	clear_sndprio							; Exit is it is
@@ -1033,12 +1033,12 @@ Sound_PlaySFX2:
 		move.w	(sp)+,d0
 
 	@cont3:
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 
 		movea.l	(Go_SoundIndex).l,a0
 		sub.b	#$A1,d7
 		bra	SoundEffects_Common
-	endc ; if ExtendedSoundEffects>0
+	endif ; if ExtendedSoundEffects
 
 ; Sound_A0toCF:
 Sound_PlaySFX:
@@ -1051,7 +1051,7 @@ Sound_PlaySFX:
 
 	if FeatureSpindash>1
 		clr.b	(f_sfx_spinrev).w
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 
 		cmpi.b	#sfx_Ring,d7						; is ring sound	effect played?
 		bne.s	.sfx_notRing			; if not, branch
@@ -1124,7 +1124,7 @@ SoundEffects_Common:
 	else
 		lea	SFX_SFXChannelRAM(pc),a5
 		movea.l	(a5,d3.w),a5
-	endc ; if FeatureSpindash<2
+	endif ; if FeatureSpindash<2
 
 		movea.l	a5,a2
 		moveq	#(SMPS_Track.len/4)-1,d0	; $30 bytes
@@ -1145,7 +1145,7 @@ SoundEffects_Common:
 		move.w	(sp)+,d0
 
 .cont:
-	endc ; if FeatureSpindash<2
+	endif ; if FeatureSpindash<2
 
 		move.b	d5,SMPS_Track.TempoDivider(a5)		; Initial voice control bits
 		moveq	#0,d0
@@ -2832,7 +2832,7 @@ SpecSoundIndex:
 ptr_sndD0:	dc.l SoundD0
 	if FeatureSpindash>1
 ptr_sndD1:	dc.l SoundD1
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 ptr_specend
 
 ; ---------------------------------------------------------------------------
@@ -2943,7 +2943,7 @@ SoundD0:	include "sound/sfx/SndD0 - Waterfall.asm"
 	if FeatureSpindash>1
 SoundD1:	incbin	"Enhancements/sound/sfx/SndD1 - Spindash.asm"
 		even
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 
 ; ---------------------------------------------------------------------------
 ; 'Sega' chant PCM sample

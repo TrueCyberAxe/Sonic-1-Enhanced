@@ -51,7 +51,7 @@ Over_SetWait:
 
 	if BugFixGameOverFlicker
 		bra.w   DisplaySprite ; KoH additional line to prevent blinking.
-	endc
+	endif
 
 	if FixBugs=0
 		; this causes the text to briefly flicker when conjoining

@@ -117,7 +117,7 @@ OPL_Next:
 		subi.w #$80,d1
 		andi.w #$FF80,d1
 		move.w d1,(v_screenposx_coarse).w
-	endc
+	endif
 		lea	(v_objstate).w,a2
 		moveq	#0,d2
 		move.w	(v_screenposx).w,d6

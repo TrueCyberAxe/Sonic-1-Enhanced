@@ -351,7 +351,7 @@ flg__Last:  equ ((CmdPtr__End-zCommandIndex-2)/2)+flg__First
 
 sfx_Stop:   equ ((CmdPtr_StopSFX-zCommandIndex)/2)+flg__First
 
-  endc ; if FeatureUseSonic2SoundDriver=0
+  endif ; if FeatureUseSonic2SoundDriver=0
 
 bgm_GHZ:	equ ((ptr_mus81-MusicIndex)/4)+bgm__First
 bgm_LZ:		equ ((ptr_mus82-MusicIndex)/4)+bgm__First
@@ -805,7 +805,7 @@ fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)/2	; $5D
 sfx_Spindash:	equ sfx_Roll ; $BE
   else
 sfx_Spindash:	equ ((ptr_sndD1-SpecSoundIndex)/4)+spec__First
-  endc
+  endif
 
 obSmoke:      equ $FFFFD11C
 

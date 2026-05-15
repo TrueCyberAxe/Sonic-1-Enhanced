@@ -405,7 +405,7 @@ DrawFlipXY:
 		add.w	d5,d4
 		move.w	d4,(a6)
 		rts
-	endc ; if TweakRemoveReduntantCode=0
+	endif ; if TweakRemoveReduntantCode=0
 ; ===========================================================================
 
 ; Gets address of block at a certain coordinate

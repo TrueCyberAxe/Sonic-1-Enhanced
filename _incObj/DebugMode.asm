@@ -14,11 +14,11 @@ Debug_Index:
 ; ===========================================================================
 
 Debug_Main:	; Routine 0
-	if BugFixDebugMomentum>0
+	if BugFixDebugMomentum
 		clr.w   (v_objspace+$14).w ; Clear Inertia
 		clr.w   (v_objspace+$12).w ; Clear X/Y Speed
 		clr.w   (v_objspace+$10).w ; Clear X/Y Speed
-	endc
+	endif ; if BugFixDebugMomentum
 		addq.b	#2,(v_debuguse).w
 		move.w	(v_limittop2).w,(v_limittopdb).w ; buffer level x-boundary
 		move.w	(v_limitbtm1).w,(v_limitbtmdb).w ; buffer level y-boundary
@@ -193,11 +193,11 @@ Debug_Exit:
 		moveq	#0,d0
 		move.w	d0,(v_debuguse).w 		; deactivate debug mode
 
-	if EnhancedDebug>0
+	if EnhancedDebug
 		bsr.w   Hud_Base
 		move.b	#1,(f_scorecount).w 	; update score counter
 		move.b	#1,(f_ringcount).w  	; update rings counter
-	endc
+	endif ; if EnhancedDebug
 
 		move.l	#Map_Sonic,(v_player+obMap).w
 		move.w	#ArtTile_Sonic,(v_player+obGfx).w

@@ -45,7 +45,7 @@ Brick_Action:	; Routine 2
 	if Revision=0
 			if BugFixRenderBeforeInit=0 ; Bug 1
 				bsr.w	DisplaySprite
-			endc
+			endif
 
 			out_of_range.w	DeleteObject
 
@@ -53,7 +53,7 @@ Brick_Action:	; Routine 2
 				rts
 			else
 				bra.w	DisplaySprite
-			endc
+			endif
 	else
 		out_of_range.w	DeleteObject
 		bra.w	DisplaySprite

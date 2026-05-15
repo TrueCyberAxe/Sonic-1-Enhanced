@@ -82,7 +82,7 @@ loc_C610:
 ; ===========================================================================
 
 loc_C61A:
-		cmpi.b	#$E,(v_endcardring+obRoutine).w
+		cmpi.b	#$E,(v_endifardring+obRoutine).w
 		beq.s	loc_C610
 		cmpi.b	#4,obFrame(a0)
 		bne.s	loc_C5FE
@@ -216,7 +216,7 @@ Got_Boundary:	; Routine $10
 		beq.w	DeleteObject
 	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
 		clr.b  (f_victory).w 													; Unset victory animation flag
-	endc
+	endif
 		rts
 ; ===========================================================================
 		;    x-start, x-main, y-main,

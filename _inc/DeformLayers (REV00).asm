@@ -391,7 +391,7 @@ MoveScreenHoriz:
 		beq.s SH_ProperlyFramed
 	else
 		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-	endc
+	endif
 
 	if (FixCameraFollowBug)|(FixBugs)|(FeatureSonicCDExtendedCamera)
 		; Fix horizontal wrap bug
@@ -401,9 +401,9 @@ MoveScreenHoriz:
 		bcs.s	SH_BehindMid	; if yes, branch
 	endif
 
-	if FeatureSonicCDExtendedCamera>0
+	if FeatureSonicCDExtendedCamera
 		bra.s SH_AheadOfMid		; branch
-	endc ; if FeatureSonicCDExtendedCamera=0
+	endif ; if FeatureSonicCDExtendedCamera
 
 	if FeatureSonicCDExtendedCamera=0
 		subi.w	#16,d0			; is distance more than 160px?
@@ -416,9 +416,9 @@ MoveScreenHoriz:
 	else
     ; bcc.s	SH_AheadOfMid <-- should it be this?
 		bra.s	SH_AheadOfMid	; extended camera: move toward target
-	endif
+	endif ; if (FixCameraFollowBug)|(FixBugs)
 
-	endc ; if FeatureSonicCDExtendedCamera=0
+	endif ; if FeatureSonicCDExtendedCamera=0
 
 SH_ProperlyFramed:
 		clr.w	(v_scrshiftx).w
@@ -460,7 +460,7 @@ SH_BehindMid:
 		cmpi.w	#-16,d0		; is Sonic within -16px of middle area?
 		bgt.s	SH_Behind16	; if yes, branch
 		move.w	#-16,d0		; set to -16 if lower
-	endc
+	endif
 
 SH_Behind16:
 		add.w	(v_screenposx).w,d0

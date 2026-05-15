@@ -5,7 +5,7 @@
 ReactToItem:
 	if TweakCodeOptimizations=0
 		nop
-	endc ; if TweakCodeOptimizations=0
+	endif ; if TweakCodeOptimizations=0
 
 		move.w	obX(a0),d2									; load Sonic's x-axis position
 		move.w	obY(a0),d3									; load Sonic's y-axis position
@@ -180,7 +180,7 @@ React_Enemy:
 	if FeatureSpindash>0
 		tst.b	f_spindash(a0)								; is Sonic Spindashing?
 		bne.s	.donthurtsonic								; if yes, branch
-	endc
+	endif
 
 		cmpi.b	#id_Roll,obAnim(a0) 				; is Sonic rolling/jumping?
 		bne.w	React_ChkHurt									; if not, branch
@@ -259,7 +259,7 @@ React_ChkHurt:
 .notinvincible:
 	if TweakCodeOptimizations=0
 		nop
-	endc ; if TweakCodeOptimizations=0
+	endif ; if TweakCodeOptimizations=0
 		tst.w	flashtime(a0)		; is Sonic flashing?
 		bne.s	.isflashing	; if yes, branch
 		movea.l	a1,a2
@@ -279,7 +279,7 @@ HurtSonic:
 		move.b	#0,(f_goggles).w						; remove goggles
 
 .ringcheck:
-	endc
+	endif
 
 		tst.w	(v_rings).w										; does Sonic have any rings?
 		beq.w	.norings	; if not, branch
@@ -312,7 +312,7 @@ HurtSonic:
 .isleft:
 	if FeatureSpindash>0
 		move.b #0,f_spindash(a0) 					; clear Spin Dash flag
-	endc
+	endif
 		move.w	#0,obInertia(a0)
 		move.b	#id_Hurt,obAnim(a0)
 		move.w	#120,flashtime(a0)	; set temp invincible time to 2 seconds
@@ -354,7 +354,7 @@ KillSonic:
 		bne.w	.dontdie	; if yes, branch
 	else
 		bne.s	.dontdie	; if yes, branch													; if yes, branch
-	endc ; if FeatureContextualDeath=0
+	endif ; if FeatureContextualDeath=0
 		move.b	#0,(v_invinc).w	; remove invincibility
 		move.b	#6,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
@@ -406,7 +406,7 @@ KillSonic:
 .electricdeath:
 		move.b	#id_Shrink,obAnim(a0)
 		bra.s 	.deathcommon
-	endc ; if FeatureContextualDeath>0
+	endif ; if FeatureContextualDeath>0
 
 .normaldeath:
 		move.b	#id_Death,obAnim(a0)
@@ -469,7 +469,7 @@ KillSonicByCrushing:
 
 		moveq	#-1,d0
 		rts
-endc ; FeatureContextualDeath
+endif ; FeatureContextualDeath
 
 React_Special:
 		move.b	obColType(a1),d1

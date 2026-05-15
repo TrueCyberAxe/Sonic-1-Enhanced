@@ -34,9 +34,9 @@ LevelSizeLoad:
 		move.w	#$1010,(v_fg_xblock).w ; and v_fg_yblock
 		move.w	(a0)+,d0
 		move.w	d0,(v_lookshift).w
-	if FeatureSonicCDExtendedCamera>0
+	if FeatureSonicCDExtendedCamera
 		move.w    #160,(v_camera_pan).w    ; reset the horizontal camera pan value to 160 pixels
-	endc
+	endif ; if FeatureSonicCDExtendedCamera
 		bra.w	LevSz_ChkLamp
 
 ; ===========================================================================
@@ -112,7 +112,7 @@ LevSz_SonicPos:
 SetScreen:
 LevSz_SkipStartPos:
 
-	if FixCameraFollow>0
+	if FixCameraFollow
 		clr.w (v_trackpos).w 		; reset Sonic's position tracking index
 	    	lea (v_tracksonic).w,a2		; load the tracking array into a2
 	   	 moveq #63,d2			; begin a 64-step loop
@@ -121,7 +121,7 @@ LevSz_SkipStartPos:
 		move.w d1,(a2)+ 		; fill in X
 		move.w d0,(a2)+ 		; fill in Y
 		dbf d2,@loop 			; loop
-	endc
+	endif ; if FixCameraFollow
 
 		subi.w	#160,d1		; is Sonic more than 160px from left edge?
 		bcc.s	SetScr_WithinLeft ; if yes, branch

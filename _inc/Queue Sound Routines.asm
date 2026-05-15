@@ -21,7 +21,7 @@ QueueSound1:
 .skip:
 		move.b  d0,(Z80_RAM+zAbsVar.SFXUnknown).l   ; Queue sound
 		startZ80                    ; Start the Z80 back up again so the sound driver can continue functioning
-	endc
+	endif
 		rts
 ; End of function QueueSound1
 
@@ -45,7 +45,7 @@ QueueSound2:
 .skip:
 		move.b  d0,(Z80_RAM+zAbsVar.SFXStereoToPlay).l  ; Queue sound
 		startZ80                    ; Start the Z80 back up again so the sound driver can continue functioning
-	endc
+	endif
 		rts
 ; End of function QueueSound2
 

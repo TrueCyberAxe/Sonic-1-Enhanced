@@ -144,7 +144,7 @@ Spring_Flipped:
 	Face_Left:
     bset    #0,status(a1)
   Face_Cont: ; End of fix
-	endc
+	endif
 
 		btst	#2,obStatus(a1)
 		bne.s	loc_DC56
@@ -157,9 +157,9 @@ loc_DC56:
 		jsr	(QueueSound2).l	; play spring sound
 
 Spring_AniLR:	; Routine $A
-	if FeatureSpindash>0
+	if FeatureSpindash
 		clr.w (v_screendelay).w							; clear screen delay counter
-	endc
+	endif ; if FeatureSpindash
 
 		lea	(Ani_Spring).l,a1
 		bra.w	AnimateSprite
@@ -206,7 +206,7 @@ Spring_BounceDwn:
 
 	if BugFixSpringDownSpring=0
 		move.b	#id_roll,obAnim(a1)
-	endc ; if BugFixSpringDownSpring>0
+	endif ; if BugFixSpringDownSpring=0
 
 Spring_AniDwn: ; Routine $10
 	lea	(Ani_Spring).l,a1

@@ -37,10 +37,10 @@ ExecuteObjects:
 
 ; loc_D362:
 .sonic_dead:
-	if BugFixScatteredRingsTimer>0
+	if BugFixScatteredRingsTimer
 		cmpi.b  #$A,(v_player+obRoutine).w      ; Has Sonic drowned?
 		beq.s   loc_D348                        ; If so, run objects a little longer
-	endc
+	endif ; if BugFixScatteredRingsTimer
 		moveq	#(v_lvlobjspace-v_objspace)/object_size-1,d7 ; run first 32 objects normally (reserved objects like Sonic)
 		bsr.s	.run_object			; execute those objects and return here
 

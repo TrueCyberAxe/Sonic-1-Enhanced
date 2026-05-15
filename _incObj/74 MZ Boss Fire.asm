@@ -63,7 +63,7 @@ BossFire_Action:	; Routine 2
 BossFire_Delete:
 	if BugFixRenderBeforeInit>0 ; Bug 6 Fix
 		addq.l  #4,sp
-	endc
+	endif
 		jmp	(DeleteObject).l
 ; ===========================================================================
 BossFire_Index2:dc.w BossFire_Drop-BossFire_Index2
@@ -226,5 +226,5 @@ BossFire_Animate:
 BossFire_TempFireDel:	; Routine 6
 	if BugFixRenderBeforeInit	; Bug 6 Fix
 		addq.l  #4,sp
-	endc
+	endif
 		jmp	(DeleteObject).l

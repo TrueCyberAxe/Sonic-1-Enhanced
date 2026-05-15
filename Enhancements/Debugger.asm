@@ -95,7 +95,7 @@ RaiseError &
 	else
 		dc.b	\opts+0						; otherwise, just specify \opts for error handler, +0 will generate dc.b 0 ...
 		even								; ... in case \opts argument is empty or skipped
-	endc
+	endif
 	even
 
 	endm
@@ -110,7 +110,7 @@ Console &
 		movem.l	a0-a2/d7, -(sp)
 		if (__sp>0)
 			lea		4*4(sp), a2
-		endc
+		endif
 		lea		@str\@(pc), a1
 		jsr		ErrorHandler.__global__console_\0\_formatted
 		movem.l	(sp)+, a0-a2/d7
@@ -118,7 +118,7 @@ Console &
 			lea		__sp(sp), sp
 		elseif (__sp>0)
 			addq.w	#__sp, sp
-		endc
+		endif
 		move.w	(sp)+, sr
 		bra.w	@instr_end\@
 	@str\@:
@@ -149,7 +149,7 @@ Console &
 	else
 		inform	2,"""\0"" isn't a member of ""Console"""
 
-	endc
+	endif
 	endm
 
 ; ---------------------------------------------------------------
@@ -179,7 +179,7 @@ __FSTRING_GenerateArgumentsCode &
     	__midpos:	set		instr(__pos+5,\string,' ')
     	if (__midpos<1)|(__midpos>__endpos)
 			__midpos: = __endpos
-    	endc
+    	endif
 		__substr:	substr	__pos+1+1,__endpos-1,\string			; .type ea param
 		__type:		substr	__pos+1+1,__pos+1+1+1,\string			; .type
 
@@ -206,8 +206,8 @@ __FSTRING_GenerateArgumentsCode &
 
 			else
 				fatal 'Unrecognized type in string operand: %<\__substr>'
-			endc
-		endc
+			endif
+		endif
 
 		__pos:	set		instr(__pos+1,\string,'%<')
 	endw
@@ -238,7 +238,7 @@ __FSTRING_GenerateDecodedString &
     	__midpos:	set		instr(__pos+5,\string,' ')
     	if (__midpos<1)|(__midpos>__endpos)
 			__midpos: = __endpos
-    	endc
+    	endif
 		__type:		substr	__pos+1+1,__pos+1+1+1,\string			; .type
 
 		; Expression is an effective address (e.g. %<.w d0 hex> )
@@ -246,20 +246,20 @@ __FSTRING_GenerateDecodedString &
 			__param:	substr	__midpos+1,__endpos-1,\string			; param
 			if strlen("\__param")<1
 				__param: substr ,,"hex"			; if param is ommited, set it to "hex"
-			endc
+			endif
 			if "\__type"=".b"
 				dc.b	\__param
 			elseif "\__type"=".w"
 				dc.b	\__param|1
 			else
 				dc.b	\__param|3
-			endc
+			endif
 
 		; Expression is an inline constant (e.g. %<endl> )
 		else
 			__substr:	substr	__pos+1+1,__endpos-1,\string
 			dc.b	\__substr
-		endc
+		endif
 
 		__lpos:	set		__endpos+1
 		__pos:	set		instr(__pos+1,\string,'%<')

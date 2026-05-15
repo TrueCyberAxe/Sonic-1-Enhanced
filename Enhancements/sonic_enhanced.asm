@@ -11,13 +11,13 @@ AdvancedDebugger				equ 1 ; Vladik's Advanced Error Handler and Debugger 2.0
 Debug:          				equ 1 ; Debug Mode Always Enabled
 EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 EnhancedDebugMenu: 			equ 0
-	endc
+	endif
 
 if Original=1
     include "Features_Original.asm"
 else
     include "Features.asm"
-endc
+endif
 
 ; ============================================================================
 	if TweakUncompressedChunkMapping>0
@@ -26,7 +26,7 @@ TweakMergedArt:											equ 1
 TweakMergedArt:											equ 1
 	else
 TweakMergedArt:											equ 0
-	endc
+	endif
 
 	if TweakLevelCompressionMode<2
 TweakNonNemesisLevelArtLoad: 				equ 0
@@ -34,7 +34,7 @@ TweakNonNemesisLevelArtLoad: 				equ 0
 TweakNonNemesisLevelArtLoad: 				equ 0
 	else
 TweakNonNemesisLevelArtLoad: 				equ 1
-	endc
+	endif
 
 	if TweakSonic2LevelArtLoader>0
 FeatureEnhancedPLCQueue: 						equ 1
@@ -42,7 +42,7 @@ FeatureEnhancedPLCQueue: 						equ 1
 FeatureEnhancedPLCQueue: 						equ 1
 	else
 FeatureEnhancedPLCQueue: 						equ 1
-	endc
+	endif
 
 	if Revision=0
 FeatureEnableUnusedArt: 						equ 1
@@ -50,59 +50,59 @@ FeatureEnableUnusedArt: 						equ 1
 FeatureEnableUnusedArt: 						equ 1
 	else
 FeatureEnableUnusedArt: 						equ 0
-	endc
+	endif
 
 	if (BugFixCameraFollow+FeatureSpindash)>0
 FixCameraFollow: 										equ 1
 	else
 FixCameraFollow: 										equ 0
-	endc
+	endif
 
 	if (BugFixInvincibilityDelayDeath)>0
 OptimizeMonitorOrder:								equ 1
 	else
 OptimizeMonitorOrder: 							equ 0
-	endc
+	endif
 
 	if (FeatureSonicCDExtendedCamera+BugFixCameraFollow)>0
 FixCameraFollowBug: 								equ 1
 	else
 FixCameraFollowBug: 								equ 0
-	endc
+	endif
 
 	if EnhancedDebugMenu>0
 ExtendedMenu: 											equ 1
 	else
 ExtendedMenu: 											equ 0
-	endc
+	endif
 
 	if ExtendedMenu>0
 AsciiMenu: 													equ 1
 	else
 AsciiMenu: 													equ 0
-	endc
+	endif
 
 	if EnhancedDebug>0
 ExtendedGameModeArray:							equ 1	;	Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-the-gamemodearray.1983/#post-31703
 	else
 ExtendedGameModeArray:							equ 0
-	endc
+	endif
 
 	if EnhancedDebug>0
 ExtendedLevelSelect:								equ 1
 	else
 ExtendedLevelSelect:								equ 0
-	endc
+	endif
 
 	if FeatureSpindash>1
 SonicExpanded:											equ 1
 	else
 SonicExpanded:											equ 1
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 
 	if FeatureSpindash>1
 ExtendedSoundEffects:								equ 1
 	else
 ExtendedSoundEffects:								equ 1
-	endc ; if FeatureSpindash>1
+	endif ; if FeatureSpindash>1
 

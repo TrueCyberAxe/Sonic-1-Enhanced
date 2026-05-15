@@ -12,9 +12,9 @@ Gra_Title:			incbin	"artnem/8x8 - GHZ1.bin"	; GHZ primary patterns
 Blk256_TITLE:		incbin	"map256/GHZ.bin"
 		else
 Blk256_TITLE:		incbin	"Enhancements/map256/GHZ.unc"
-		endc ; if TweakUncompressedChunkMapping=0
+		endif ; if TweakUncompressedChunkMapping=0
 		even
-	endc ; if TweakMergedArt=0
+	endif ; if TweakMergedArt=0
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
@@ -26,16 +26,16 @@ Gra_Title:		incbin	"artnem/8x8 - GHZ1.bin"	; GHZ primary patterns
 Gra_GHZ:			incbin	"artnem/8x8 - GHZ2.bin"	; GHZ secondary patterns
 	else
 Gra_GHZ:	  	incbin	"Enhancements/artnem/8x8 - GHZ.nem"	; GHZ combined patterns
-	endc ; if TweakMergedArt=0
+	endif ; if TweakMergedArt=0
 		even
 	if TweakMergedArt=0
 Blk256_TITLE:
-	endc ; if TweakMergedArt=0
+	endif ; if TweakMergedArt=0
 	if TweakUncompressedChunkMapping=0
 Blk256_GHZ:		incbin	"map256/GHZ.bin"
 	else
 Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.unc"
-	endc ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Labyrinth Zone
@@ -48,7 +48,7 @@ Gra_LZ:				incbin	"artnem/8x8 - LZ.bin"	; LZ primary patterns
 Blk256_LZ:		incbin	"map256/LZ.bin"
 	else
 Blk256_LZ:		incbin	"map256/LZ.unc"
-	endc ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Marble Zone
@@ -63,14 +63,14 @@ Blk256_MZ:
 							incbin	"map256/MZ.bin"
 		else
 							incbin	"map256/MZ.unc"
-		endc
+		endif
 	else
 		if TweakUncompressedChunkMapping=0
 							incbin	"map256/MZ (JP1).bin"
 		else
 							incbin	"map256/MZ (JP1).unc"
-		endc
-	endc ; if TweakUncompressedChunkMapping=0
+		endif
+	endif ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Star Light Zone
@@ -83,7 +83,7 @@ Gra_SLZ:			incbin	"artnem/8x8 - SLZ.bin"	; SLZ primary patterns
 Blk256_SLZ:		incbin	"map256/SLZ.bin"
 	else
 Blk256_SLZ:		incbin	"map256/SLZ.unc"
-	endc ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Spring Yard Zone
@@ -96,7 +96,7 @@ Gra_SYZ:			incbin	"artnem/8x8 - SYZ.bin"	; SYZ primary patterns
 Blk256_SYZ:		incbin	"map256/SYZ.bin"
 	else
 Blk256_SYZ:		incbin	"map256/SYZ.unc"
-	endc ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping=0
 		even
 ; ---------------------------------------------------------------------------
 ; Scrap Brain Zone
@@ -111,12 +111,12 @@ Blk256_SBZ:
 							incbin	"map256/SBZ.bin"
 		else
 							incbin	"map256/SBZ.unc"
-		endc
+		endif
 	else
 		if TweakUncompressedChunkMapping=0
 							incbin	"map256/SBZ (JP1).bin"
 		else
 							incbin	"map256/SBZ (JP1).unc"
-		endc
-	endc ; if TweakUncompressedChunkMapping=0
+		endif
+	endif ; if TweakUncompressedChunkMapping=0
 		even

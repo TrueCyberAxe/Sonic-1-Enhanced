@@ -134,7 +134,7 @@ Swing_SetSolid:	; Routine 2
 
 Swing_Action:	; Routine $C
 		bsr.w	Swing_Move
-	if (BugFixRenderBeforeInit=0)|(FixBugs=0) ; Bug 2
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif
@@ -152,7 +152,7 @@ Swing_Action2:	; Routine 4
 		move.b	obHeight(a0),d3
 		addq.b	#1,d3
 		bsr.w	MvSonicOnPtfm
-	if (BugFixRenderBeforeInit=0)|(FixBugs=0) ; Bug 2
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif

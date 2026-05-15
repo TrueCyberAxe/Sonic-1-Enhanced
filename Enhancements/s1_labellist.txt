@@ -574,7 +574,7 @@ Level_ChkWaterPal Level_ChkWaterPal
            SS_End         SS_Finish 
        SS_EndLoop        SS_FinLoop 
          loc_47D4          loc_47D4 
-  SS_EndClrObjRam   SS_EndClrObjRam 
+  SS_endiflrObjRam   SS_endiflrObjRam
     SS_NormalExit     SS_NormalExit 
   SS_ToSegaScreen   SS_ToSegaScreen 
         SS_BGLoad         SS_BGLoad 
@@ -682,7 +682,7 @@ Obj80_MiniSonLoop CSI_MiniSonicLoop
         byte_551C         byte_551C 
         byte_552A         byte_552A 
         byte_5534         byte_5534 
-            Obj88          EndChaos 
+            Obj88          endifhaos
       Obj88_Index        ECha_Index 
        Obj88_Main         ECha_Main 
       Obj88_Main2    ECha_CreateEms 

@@ -10,19 +10,19 @@ Signpost:
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
 
-	if (BugFixRenderBeforeInit=0)|(~FixBugs)		; Bug 1
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
 		bsr.w	DisplaySprite
-	endc
+	endif
 
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range	DeleteObject
 
-	if (BugFixRenderBeforeInit=0)|(~FixBugs)		; Bug 1
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
 		rts
 	else
 		bra.w	DisplaySprite
-	endc
+	endif
 ; ===========================================================================
 Sign_Index:
 		dc.w Sign_Main-Sign_Index
@@ -61,11 +61,11 @@ Sign_Touch:	; Routine 2
 ; ===========================================================================
 
 Sign_Spin:	; Routine 4
-	if (FeatureBetaVictoryAnimation)>0
+	if FeatureBetaVictoryAnimation
 		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
-	endc
+	endif
 
-	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
+	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
 		move.b  #1,(f_victory).w 											; Set victory animation flag
 
 		tst.w	(v_debuguse).w													; is debug mode	on?
@@ -74,7 +74,7 @@ Sign_Spin:	; Routine 4
 		jsr	Debug_Exit																; if yes, branch
 
 .skip:
-	endc ; if FeatureBetaVictoryAnimation>0
+	endif ; if FeatureBetaVictoryAnimation
 
 		subq.w	#1,spintime(a0)	; subtract 1 from spin time
 		bpl.s	.chksparkle	; if time remains, branch
@@ -125,14 +125,14 @@ Sign_SparkPos:	dc.b -$18,-$10										; x-position, y-position
 ; ===========================================================================
 
 Sign_SonicRun:	; Routine 6
-	if (BugFixVictoryDebug+FeatureBetaVictoryAnimation)>0
+	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
 		clr.b  (f_lockscreen).w 											; Unset Prevent Sonic Leaving the Screen
-	endc
+	endif ; if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
 
 	if BugFixVictoryDebug=0
 		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	locret_ECEE		; if yes, branch													; if yes, branch
-	endc
+	endif ; if BugFixVictoryDebug=0
 
 	if FixBugs
 		; This function's checks are a mess, creating an edgecase where it's
@@ -146,8 +146,6 @@ Sign_SonicRun:	; Routine 6
 	else
 		btst	#1,(v_player+obStatus).w
 		bne.s	loc_EC70
-	endif
-
 	endif
 		move.b	#1,(f_lockctrl).w ; lock controls
 		move.w	#btnR<<8,(v_jpadhold2).w ; make Sonic run to the right
@@ -165,7 +163,7 @@ loc_EC70:
 		blo.s	locret_ECEE
 	else
 		bcs.w	locret_ECEE
-	endc
+	endif ; if TweakUncompressedTitleCards=0
 
 loc_EC86:
 		addq.b	#2,obRoutine(a0)
@@ -176,12 +174,12 @@ loc_EC86:
 ; ---------------------------------------------------------------------------
 
 GotThroughAct:
-		tst.b	(v_endcard).w
+		tst.b	(v_endifard).w
 		bne.s	locret_ECEE
 		move.w	(v_limitright2).w,(v_limitleft2).w
 		clr.b	(v_invinc).w	; disable invincibility
 		clr.b	(f_timecount).w	; stop time counter
-		move.b	#id_GotThroughCard,(v_endcard).w
+		move.b	#id_GotThroughCard,(v_endifard).w
 
 	if TweakUncompressedTitleCards=0
 		moveq	#plcid_TitleCard,d0

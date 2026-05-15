@@ -679,7 +679,7 @@ MoveScreenHoriz:
 		; Fix horizontal wrap bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-	endc
+	endif
 
 	if (FixCameraFollowBug)|(FixBugs)|(FeatureSonicCDExtendedCamera)
 		; Fix horizontal wrap bug
@@ -691,7 +691,7 @@ MoveScreenHoriz:
 
 	if FeatureSonicCDExtendedCamera
 		bra.s SH_AheadOfMid    					; branch
-	endc ; if FeatureSonicCDExtendedCamera=0
+	endif ; if FeatureSonicCDExtendedCamera=0
 
 	if FeatureSonicCDExtendedCamera=0
 		subi.w	#16,d0							; is distance more than 160px?
@@ -700,8 +700,8 @@ MoveScreenHoriz:
 			bge.s	SH_AheadOfMid				; if yes, branch
 		else
 			bcc.s	SH_AheadOfMid				; if yes, branch
-		endc ; if(FixCameraFollowBug)|(FixBugs)
-	endc ; if FeatureSonicCDExtendedCamera=0
+		endif ; if(FixCameraFollowBug)|(FixBugs)
+	endif ; if FeatureSonicCDExtendedCamera=0
 
 SH_ProperlyFramed:
 		clr.w	(v_scrshiftx).w

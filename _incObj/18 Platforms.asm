@@ -64,7 +64,7 @@ loc_7EE0:
 Plat_Action:	; Routine 8
 		bsr.w	Plat_Move
 		bsr.w	Plat_Nudge
-	if (BugFixRenderBeforeInit=0)|(FixBugs=0) ; Bug 2
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif
@@ -85,7 +85,7 @@ loc_7F06:
 		bsr.w	Plat_Nudge
 		move.w	(sp)+,d2
 		bsr.w	MvSonicOnPtfm2
-	if (BugFixRenderBeforeInit=0)|(FixBugs=0) ; Bug 2
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif

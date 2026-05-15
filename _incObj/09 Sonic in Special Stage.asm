@@ -64,7 +64,7 @@ SonicSS_Modes:	dc.w SonicSS_OnWall-SonicSS_Modes
 SonicSS_OnWall:
 	if TweakBetterBonusStageControls
 		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endc
+	endif
 		bsr.w	SonicSS_Jump
 		bsr.w	SonicSS_Move
 		bsr.w	SonicSS_Fall
@@ -86,7 +86,7 @@ SonicSS_Display:
 		move.w	(v_ssangle).w,d0
 	if FeatureDisableSpecialStageRotation=0
 		add.w	(v_ssrotate).w,d0
-	endc
+	endif
 		move.w	d0,(v_ssangle).w
 		jsr	(Sonic_Animate).l
 		rts
@@ -232,7 +232,7 @@ SonicSS_Jump:
 		bset	#1,obStatus(a0)
 	if TweakBetterBonusStageControls>0
 		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endc
+	endif
 		move.w	#sfx_Jump,d0
 		jsr	(QueueSound2).l	; play jumping sound
 
@@ -671,7 +671,7 @@ SonicSS_ChkBumper:
 		bset	#1,obStatus(a0)
 	if TweakBetterBonusStageControls>0
 		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endc
+	endif
 		bsr.w	SS_RemoveCollectedItem
 		bne.s	SonicSS_BumpSnd
 		move.b	#2,(a2)

@@ -192,10 +192,10 @@ RLoss_Count:	; Routine 0
 			lea (v_objspace).w,a2    					; a2=character
 			btst #6,status(a2)       					; is Sonic underwater?
 			bne.s .underwater_Scatter					; if so, branch
-		endc ; if TweakFasterUnderwaterRings>0
+		endif ; if TweakFasterUnderwaterRings>0
 
 		lea	SpillRingData32(pc),a3						; use normal fast scatter table
-	endc ; if TweakFasterRingScatter>0
+	endif ; if TweakFasterRingScatter>0
 		moveq	#max_ring_scatter,d0					; scatter a max of 32 rings
 
 	if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)
@@ -206,7 +206,7 @@ RLoss_Count:	; Routine 0
 		moveq	#(max_ring_scatter/2),d0       			; lose a max of half the rings when underwater
 
 .continue_scatter:
-	endc ; if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)
+	endif ; if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)
 
 		cmp.w	d0,d5		; do you have 32 or more?
 		blo.s	.belowmax	; if not, branch
@@ -218,7 +218,7 @@ RLoss_Count:	; Routine 0
 
 	if TweakFasterRingScatter=0
 		move.w	#$288,d4
-	endc ; if TweakFasterRingScatter=0
+	endif ; if TweakFasterRingScatter=0
 
 		bra.s	.makerings
 ; ===========================================================================
@@ -239,7 +239,7 @@ RLoss_Count:	; Routine 0
 		move.b	#4,obRender(a1)
 	if TweakFasterRingScatter=0
 		move.b	#3,obPriority(a1)
-	endc
+	endif
 		move.b	#$47,obColType(a1)
 		move.b	#8,obActWid(a1)
 	if FixBugs=0
@@ -266,7 +266,7 @@ RLoss_Count:	; Routine 0
 			asr.w	d0						; Half d0. Makes the ring's x_vel bounce to the left/right slower
 			asr.w	d1						; Half d1. Makes the ring's y_vel bounce up/down slower
 .skiphalvingvel:
-		endc ; if TweakFixUnderwaterRingPhysics>0
+		endif ; if TweakFixUnderwaterRingPhysics>0
 
 		asl.w	d2,d0
 		asl.w	d2,d1
@@ -286,7 +286,7 @@ RLoss_Count:	; Routine 0
 	else
 		move.w  (a3)+,obVelX(a1)     						; move the data contained in the array to the x velocity and increment the address in a3
 		move.w  (a3)+,obVelY(a1)     						; move the data contained in the array to the y velocity and increment the address in a3
-	endc ; if TweakFasterRingScatter=0
+	endif ; if TweakFasterRingScatter=0
 		dbf	d5,.loop	; repeat for number of rings (max 31)
 
 .resetcounter:
@@ -318,7 +318,7 @@ RLoss_Bounce:	; Routine 2
 		bgt.s	.skipbounceslow										; If not, branch and skip underwater commands
 		subi.w	#$E,obVelY(a0)									; Reduce gravity by $E ($18-$E=$A), giving the underwater effect
 .skipbounceslow:
-	endc ; if TweakFixUnderwaterRingPhysics>0
+	endif ; if TweakFixUnderwaterRingPhysics>0
 
 		bmi.s	.chkdel
 		move.b	(v_vblank_byte).w,d0
@@ -368,7 +368,7 @@ RLoss_Bounce:	; Routine 2
 		move.w	a0,(a1)									; insert RAM address for object
 .rtn_bounce:
 		rts
-	endc ; if TweakFasterRingScatter=0
+	endif ; if TweakFasterRingScatter=0
 ; ===========================================================================
 
 RLoss_Collect:	; Routine 4 ; Obj_37_sub_4
@@ -376,7 +376,7 @@ RLoss_Collect:	; Routine 4 ; Obj_37_sub_4
 		move.b	#0,obColType(a0)
 	if TweakFasterRingScatter=0
 		move.b	#1,obPriority(a0)
-	endc ; if TweakFasterRingScatter=0
+	endif ; if TweakFasterRingScatter=0
 		bsr.w	CollectRing
 
 RLoss_Sparkle:	; Routine 6 ; Obj_37_sub_6
@@ -393,7 +393,7 @@ RLoss_Sparkle:	; Routine 6 ; Obj_37_sub_6
 		move.w	a0,(a1)									; insert RAM address for object
 .rtn_sparkle:
 		rts
-	endc ; if TweakFasterRingScatter=0
+	endif ; if TweakFasterRingScatter=0
 ; ===========================================================================
 
 RLoss_Delete:	; Routine 8
@@ -409,7 +409,7 @@ SpillRingData32:
 		dc.w    $03EC,$00C4, $FC14,$00C4, $0350,$0238, $FCB0,$0238 ; 12
 		dc.w    $0238,$0350, $FDC8,$0350, $00C4,$03EC, $FF3C,$03EC ; 16
 		even
-	endc ; if TweakFasterRingScatter>0
+	endif ; if TweakFasterRingScatter>0
 
 	if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)
 SpillRingData16:
@@ -418,4 +418,4 @@ SpillRingData16:
 		dc.w    $01F8,$0060, $FE08,$0060, $01A8,$011C, $FE58,$011C ; 12
 		dc.w    $011C,$01A8, $FEE4,$01A8, $0064,$01F4, $FF9C,$01F4 ; 16
 		even
-	endc ; if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)
+	endif ; if (TweakFasterRingScatter>0)&(TweakFasterUnderwaterRings>0)

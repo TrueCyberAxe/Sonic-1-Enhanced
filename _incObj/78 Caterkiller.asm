@@ -365,7 +365,7 @@ loc_16C64:
 .delete:
 	if (BugFixCaterkillerDeath+FeatureSpindash)>0
 		clr.b	obColType(a1)	; immediately remove all touch response values when destroying the head to avoid taking damage
-	endc
+	endif
 		; Mark self for deletion.
 		move.b	#$A,obRoutine(a0)
 

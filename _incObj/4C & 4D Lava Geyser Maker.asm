@@ -233,7 +233,7 @@ Geyser_ChkDel:
 		out_of_range	.delete
 	else
 		out_of_range	DeleteObject
-	endc # if BugFixRenderBeforeInit
+	endif # if BugFixRenderBeforeInit
 
 	if FixBugs
 		; Moved to prevent a delete-and-display bug.

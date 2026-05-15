@@ -131,7 +131,7 @@ FindNearestTile: ; XREF: FindFloor; et al
 		moveq	#0,d1
 		bsr.w	Floor_ChkTile_LocateBlock
 		add.l	#Blk256_GHZ,d1
-	endc ; if TweakUncompressedChunkMapping>0
+	endif ; if TweakUncompressedChunkMapping>0
 
 		movea.l	d1,a1
 		rts

@@ -22,7 +22,7 @@ Seesaw:
 		sub.w	d1,d0 										; approx distance between object and screen
 	else
 		sub.w (v_screenposx_coarse).w,d0
-	endc
+	endif
 		bmi.w	DeleteObject
 		cmpi.w	#$280,d0
 		bhi.w	DeleteObject

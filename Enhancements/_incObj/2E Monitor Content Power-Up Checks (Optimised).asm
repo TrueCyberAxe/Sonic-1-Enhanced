@@ -42,7 +42,7 @@ Pow_ChkS:
 		bsr.w Pow_ShoesActivate
 		jsr	(PlaySound_Special).l										; Ensure Music is Sped Up
 		jmp Pow_InvincibleActivate
-	endc
+	endif
   
 ; ===========================================================================
 
@@ -125,7 +125,7 @@ Pow_ChkGoggles:
 		cmpi.b	#8,d0															  ; does monitor contain Goggles?
 		bne.s	Pow_ChkEnd													  ; if not, branch to Pow_ChkEnd
 		move.b	#1,(f_goggles).w 							      ; move 1 to the goggle check
-	endc
+	endif
   
 ; ===========================================================================
 

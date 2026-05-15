@@ -182,12 +182,12 @@ Drown_Countdown:; Routine $A
 	if FeatureRestoreMonitorScubaGear>0
 		tst.b	(f_goggles).w							; Do We Have Goggles?
 		bne.w	No_Countdown							; if yes, branch
-	endc
+	endif
 
 	if BugFixDrownInDebug>0
 		tst.w	(v_debuguse).w						; Are we in Debug?
 		bne.w	No_Countdown							; if yes, branch
-	endc
+	endif
 
 		tst.w	objoff_2C(a0)
 		bne.w	.loc_13F86
@@ -202,7 +202,7 @@ Drown_Countdown:; Routine $A
 
 		move.b	#id_Surf,obAnim(a0)			; use Sonic's drowning animation
 	@skip:
-	endc
+	endif
 
 		subq.w	#1,drown_time(a0)	; decrement timer
 		bpl.w	.nochange	; branch if time remains
@@ -223,7 +223,7 @@ Drown_Countdown:; Routine $A
 
 	if FeatureAirAnimation>0
 		move.b	#id_Surf,obAnim(a0)			; use Sonic's drowning animation
-	endc
+	endif
 
 		bne.s	.skipmusic	; if air is less than 12, branch
 		move.w	#bgm_Drowning,d0
@@ -279,7 +279,7 @@ Drown_Countdown:; Routine $A
 		bne.s	.loc_13F94
 	else
 		bne.s	.nochange
-	endc
+	endif
 
 		move.b	#6,(v_player+obRoutine).w
 		rts
@@ -292,7 +292,7 @@ Drown_Countdown:; Routine $A
 		addi.w	#$10,obVelY(a0)
 		movea.l	(sp)+,a0
 		bra.s	.nochange
-	endc
+	endif
 ; ===========================================================================
 
 .gotomakenum:
