@@ -68,8 +68,7 @@ loc_1670E:
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		clr.b	objoff_32(a0)
-		move.w	#sfx_Roll,d0
-		jsr	(QueueSound2).l	; play Sonic rolling sound
+		sfx	#sfx_Roll,snd_jsr	; play Sonic rolling sound
 
 locret_1675C:
 		rts
@@ -89,8 +88,7 @@ Tele_Bump:	; Routine 4
 		bne.s	locret_16796
 		bsr.w	sub_1681C
 		addq.b	#2,obRoutine(a0)
-		move.w	#sfx_Teleport,d0
-		jsr	(QueueSound2).l	; play teleport sound
+		sfx	#sfx_Teleport,snd_jsr	; play teleport sound
 
 locret_16796:
 		rts

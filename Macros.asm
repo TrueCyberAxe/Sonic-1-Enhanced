@@ -378,3 +378,125 @@ bincludeEndMarker: macro *,path
 		binclude \path
 \*_end:
 		endm
+
+; ---------------------------------------------------------------------------
+; Play a sound effect or music
+;
+; track:
+;	#bgm_Boss, #sfx_Ring, d0, etc.
+;
+; routine:
+;	QueueSound1 or QueueSound2
+;
+; queue:
+;	sndq_music or sndq_sfx
+;
+; load:
+;	snd_load_none	= d0 already contains sound ID
+;	snd_load_b	= move.b track,d0
+;	snd_load_w	= move.w track,d0
+;
+; dispatch:
+;	snd_bsr		= bsr.w routine
+;	snd_bra		= bra.w routine
+;	snd_jsr		= jsr (routine).l
+;	snd_jmp		= jmp (routine).l
+; ---------------------------------------------------------------------------
+
+_sound:	macro track,routine,queue,load,dispatch
+	if OptimiseSound=1
+
+		move.b	\track,(v_snddriver_ram+\queue).l
+
+		if (dispatch=snd_bra)|(dispatch=snd_jmp)
+			rts
+		endif
+
+	else
+
+		if load=snd_load_b
+			move.b	\track,d0
+		endif
+		if load=snd_load_w
+			move.w	\track,d0
+		endif
+
+		if dispatch=snd_bsr
+			bsr.w	\routine
+		endif
+		if dispatch=snd_bra
+			bra.w	\routine
+		endif
+		if dispatch=snd_jsr
+			jsr	(\routine).l
+		endif
+		if dispatch=snd_jmp
+			jmp	(\routine).l
+		endif
+
+	endif
+	endm
+
+queue_music:	macro track,load
+	if narg=1
+		move.w	track,d0
+	elseif load=snd_load_b
+		move.b	track,d0
+	elseif load=snd_load_w
+		move.w	track,d0
+	endif
+	endm
+
+queue_sfx:	macro track,load
+	if narg=1
+		move.w	track,d0
+	elseif load=snd_load_b
+		move.b	track,d0
+	elseif load=snd_load_w
+		move.w	track,d0
+	endif
+	endm
+
+play_queued_music:	macro dispatch,routine
+	if narg=0
+		_sound	d0,QueueSound1,sndq_music,snd_load_none,snd_jsr
+	elseif narg=1
+		_sound	d0,QueueSound1,sndq_music,snd_load_none,dispatch
+	else
+		_sound	d0,routine,sndq_music,snd_load_none,dispatch
+	endif
+	endm
+
+play_queued_sfx:	macro dispatch,routine
+	if narg=0
+		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,snd_jsr
+	elseif narg=1
+		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,dispatch
+	else
+		_sound	d0,routine,sndq_sfx,snd_load_none,dispatch
+	endif
+	endm
+
+music:	macro track,dispatch,load,routine
+	if narg=1
+		_sound	track,QueueSound1,sndq_music,snd_load_w,snd_bsr
+	elseif narg=2
+		_sound	track,QueueSound1,sndq_music,snd_load_w,dispatch
+	elseif narg=3
+		_sound	track,QueueSound1,sndq_music,load,dispatch
+	else
+		_sound	track,routine,sndq_music,load,dispatch
+	endif
+	endm
+
+sfx:	macro track,dispatch,load,routine
+	if narg=1
+		_sound	track,QueueSound2,sndq_sfx,snd_load_w,snd_bsr
+	elseif narg=2
+		_sound	track,QueueSound2,sndq_sfx,snd_load_w,dispatch
+	elseif narg=3
+		_sound	track,QueueSound2,sndq_sfx,load,dispatch
+	else
+		_sound	track,routine,sndq_sfx,load,dispatch
+	endif
+	endm

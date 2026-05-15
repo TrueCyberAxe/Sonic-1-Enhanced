@@ -172,8 +172,7 @@ DynWater_LZ3:
 		move.w	#$4C8,d1									; set new water height
 		move.b	#$4B,(v_lvllayout_fg+((layout_row*2)+6)).w ; update chunk at row 2, column 6 (zero-based)
 		move.b	#1,(v_wtr_routine).w 			; use second routine next
-		move.w	#sfx_Rumbling,d0
-		bsr.w	QueueSound2 ; play sound $B7 (rumbling)
+		sfx	#sfx_Rumbling ; play sound $B7 (rumbling)
 
 .setwaterlz3:
 		move.w	d1,(v_waterpos3).w
@@ -306,22 +305,21 @@ LZWindTunnels:
 		blo.s	.chknext
 	endif
 		cmp.w	6(a2),d2
-		bhs.s	.chknext	; branch if Sonic is outside a range
+		bhs.s	.chknext						; branch if Sonic is outside a range
 	if FixBugs
 		; d0 is overwritten but later used as if it wasn't!
 		move.w	d0,d1
 	endif
 		move.b	(v_vblank_byte).w,d0
-		andi.b	#$3F,d0										; does VInt counter fall on 0, $40, $80 or $C0?
-		bne.s	.skipsound	; if not, branch
-		move.w	#sfx_Waterfall,d0
-		jsr	(QueueSound2).l	; play rushing water sound (only every $40 frames)
+		andi.b	#$3F,d0							; does VInt counter fall on 0, $40, $80 or $C0?
+		bne.s	.skipsound						; if not, branch
+		sfx	#sfx_Waterfall,snd_jsr					; play rushing water sound (only every $40 frames)
 
 .skipsound:
 		tst.b	(f_wtunnelallow).w 					; are wind tunnels disabled?
-		bne.w	.quit	; if yes, branch
+		bne.w	.quit							; if yes, branch
 		cmpi.b	#4,obRoutine(a1) 					; is Sonic hurt/dying?
-		bhs.s	.clrquit	; if yes, branch
+		bhs.s	.clrquit						; if yes, branch
 		move.b	#1,(f_wtunnelmode).w
 	if FixBugs
 		; See above.
@@ -431,13 +429,12 @@ loc_3F84:
 
 loc_3F9A:
 		clr.b	obInertia+1(a1)
-		move.b	#id_Slide,obAnim(a1) ; use Sonic's "water slide" animation
-		move.b	#1,(f_slidemode).w	; set water slide flag
+		move.b	#id_Slide,obAnim(a1) 		; use Sonic's "water slide" animation
+		move.b	#1,(f_slidemode).w		; set water slide flag
 		move.b	(v_vblank_byte).w,d0
 		andi.b	#$1F,d0
 		bne.s	locret_3FBE
-		move.w	#sfx_Waterfall,d0
-		jsr	(QueueSound2).l	; play water sound
+		sfx	#sfx_Waterfall,snd_jsr		; play water sound
 
 locret_3FBE:
 		rts

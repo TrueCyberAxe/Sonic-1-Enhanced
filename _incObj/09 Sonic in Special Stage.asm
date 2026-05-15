@@ -233,8 +233,7 @@ SonicSS_Jump:
 	if TweakBetterBonusStageControls>0
 		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
 	endif
-		move.w	#sfx_Jump,d0
-		jsr	(QueueSound2).l	; play jumping sound
+		sfx	#sfx_Jump,snd_jsr	; set jump sound and play it
 
 ; Obj09_NoJump:
 SonicSS_NoJump:
@@ -512,13 +511,12 @@ SonicSS_ChkCont:
 ; Obj09_GetCont:
 SonicSS_GetCont:
 		jsr	(CollectRing).l
-		cmpi.w	#50,(v_rings).w	; check if you have 50 rings
+		cmpi.w	#50,(v_rings).w			; check if you have 50 rings
 		blo.s	SonicSS_NoCont
 		bset	#0,(v_lifecount).w
 		bne.s	SonicSS_NoCont
-		addq.b	#1,(v_continues).w ; add 1 to number of continues
-		move.w	#sfx_Continue,d0
-		jsr	(QueueSound1).l	; play extra continue sound
+		addq.b	#1,(v_continues).w		; add 1 to number of continues
+		sfx	#sfx_Continue,snd_jsr		; play continue sound
 
 ; Obj09_NoCont:
 SonicSS_NoCont:
@@ -537,10 +535,9 @@ SonicSS_Chk1Up:
 
 ; Obj09_Get1Up:
 SonicSS_Get1Up:
-		addq.b	#1,(v_lives).w	; add 1 to number of lives
-		addq.b	#1,(f_lifecount).w ; update the lives counter
-		move.w	#bgm_ExtraLife,d0
-		jsr	(QueueSound1).l	; play extra life music
+		addq.b	#1,(v_lives).w				; add 1 to number of lives
+		addq.b	#1,(f_lifecount).w			; update the lives counter
+		music	#bgm_ExtraLife,snd_jsr			; play extra life music
 		moveq	#0,d4
 		rts
 ; ===========================================================================
@@ -569,8 +566,7 @@ SonicSS_GetEmer:
 
 ; Obj09_NoEmer:
 SonicSS_NoEmer:
-		move.w	#bgm_Emerald,d0
-		jsr	(QueueSound2).l ; play emerald music
+		music	#bgm_Emerald,snd_jsr,snd_load_w,QueueSound2	; play emerald music
 		moveq	#0,d4
 		rts
 ; ===========================================================================
@@ -681,8 +677,7 @@ SonicSS_ChkBumper:
 
 ; Obj09_BumpSnd:
 SonicSS_BumpSnd:
-		move.w	#sfx_Bumper,d0
-		jmp	(QueueSound2).l	; play bumper sound
+		sfx	#sfx_Bumper,snd_jmp			; play bumper sound
 ; ===========================================================================
 
 ; Obj09_GOAL:
@@ -690,8 +685,7 @@ SonicSS_GOAL:
 		cmpi.b	#$27,d0		; is the item a "GOAL"?
 		bne.s	SonicSS_UPblock
 		addq.b	#2,obRoutine(a0) ; run routine "SonicSS_ExitStage"
-		move.w	#sfx_SSGoal,d0
-		jsr	(QueueSound2).l	; play "GOAL" sound
+		sfx	#sfx_SSGoal,snd_jsr	; play "GOAL" sound
 		rts
 ; ===========================================================================
 
@@ -711,8 +705,8 @@ SonicSS_UPblock:
 
 ; Obj09_UPsnd:
 SonicSS_UPsnd:
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play up/down sound
+		sfx	#sfx_SSItem,snd_jmp	; play up/down sound
+
 ; ===========================================================================
 
 ; Obj09_DOWNblock:
@@ -731,8 +725,7 @@ SonicSS_DOWNblock:
 
 ; Obj09_DOWNsnd:
 SonicSS_DOWNsnd:
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play up/down sound
+		sfx	#sfx_SSItem,snd_jmp	; play up/down sound
 ; ===========================================================================
 
 ; Obj09_Rblock:
@@ -752,8 +745,7 @@ SonicSS_Rblock:
 ; Obj09_RevStage:
 SonicSS_RevStage:
 		neg.w	(v_ssrotate).w	; reverse stage rotation
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play sound
+		sfx	#sfx_SSItem,snd_jmp	; play sound
 ; ===========================================================================
 
 ; Obj09_ChkGlass:
@@ -787,8 +779,7 @@ SonicSS_GlassUpdate:
 
 ; Obj09_GlassSnd:
 SonicSS_GlassSnd:
-		move.w	#sfx_SSGlass,d0
-		jmp	(QueueSound2).l	; play glass block sound
+		sfx	#sfx_SSGlass,snd_jmp	; play glass block sound
 ; ===========================================================================
 
 ; Obj09_NoGlass:

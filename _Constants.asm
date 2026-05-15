@@ -786,13 +786,6 @@ fr_Injury:	equ $55
 fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
 
-bitHorizontal:	 equ 0
-bitVertical:	   equ 1
-bitSpinSmoke:	   equ 2
-bitStandingOn:	 equ 3
-bitPushing:	     equ 5
-bitObjectFlag:	 equ 7
-
 ; ------- Additional -------
 fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)/2	; $58
 fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)/2	; $59
@@ -807,6 +800,13 @@ sfx_Spindash:	equ sfx_Roll ; $BE
 sfx_Spindash:	equ ((ptr_sndD1-SpecSoundIndex)/4)+spec__First
   endif
 
+bitHorizontal:	 equ 0
+bitVertical:	   equ 1
+bitSpinSmoke:	   equ 2
+bitStandingOn:	 equ 3
+bitPushing:	     equ 5
+bitObjectFlag:	 equ 7
+
 obSmoke:      equ $FFFFD11C
 
 max_ring_scatter: equ $20 ; 32
@@ -814,3 +814,16 @@ max_demo:         equ 4
 
 bit_in_air:       equ 1
 bit_pushing:      equ 5
+
+; Sound macro constants
+snd_load_none:	equ 0		; d0 already contains sound ID
+snd_load_b:	equ 1		; move.b track,d0
+snd_load_w:	equ 2		; move.w track,d0
+
+snd_bsr:	equ 0		; bsr.w routine
+snd_bra:	equ 1		; bra.w routine
+snd_jsr:	equ 2		; jsr (routine).l
+snd_jmp:	equ 3		; jmp (routine).l
+
+snd_queue1:	equ 1		; QueueSound1
+snd_queue2:	equ 2		; QueueSound2

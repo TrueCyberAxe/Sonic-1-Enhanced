@@ -194,7 +194,7 @@ Sonic_Display:
 .music:
 		lea	(MusicList2).l,a1			; load music list for post-invincibility
 		move.b	(a1,d0.w),d0				; get entry for current zone
-		jsr	(QueueSound1).l				; resume normal level music
+		play_queued_music snd_jsr			; resume normal level music
 
 ; Obj01_RmvInvin:
 .removeinvincible:
@@ -212,8 +212,8 @@ Sonic_Display:
 		move.w	#$C,(v_sonspeedacc).w			; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w			; restore Sonic's deceleration
 		move.b	#0,(v_shoes).w				; cancel speed shoes
-		move.w	#bgm_Slowdown,d0			; resume music...
-		jmp	(QueueSound1).l				; ...at normal speed
+		music	#bgm_Slowdown,snd_jmp			; resume music at normal speed
+
 ; ===========================================================================
 
 ; Obj01_ExitChk:
@@ -280,8 +280,7 @@ Sonic_Water:
 		move.w  #$100,($FFFFD1DC).w			; set the spin dash dust animation to splash
 	endif
 
-		move.w	#sfx_Splash,d0				; set splash sound
-		jmp	(QueueSound2).l				; play it
+		sfx	#sfx_Splash,snd_jmp			; set splash sound and play it
 ; ===========================================================================
 
 ; Obj01_OutWater:
@@ -307,8 +306,8 @@ Sonic_Water:
 
 ; loc_12E0E:
 .belowmaxspeed:
-		move.w	#sfx_Splash,d0				; set splash sound
-		jmp	(QueueSound2).l				; play it
+		sfx	#sfx_Splash,snd_jmp			; set splash sound and play it
+
 ; End of function Sonic_Water
 
 
@@ -712,8 +711,7 @@ Sonic_MoveLeft:
 		blt.s	.nostopping				; if not, don't play skidding animation/sound
 		move.b	#id_Stop,obAnim(a0)			; use "stopping" animation
 		bclr	#0,obStatus(a0)				; clear X-flip flag (Sonic is now facing right)
-		move.w	#sfx_Skid,d0				; set skidding sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Skid,snd_jsr,snd_load_w,QueueSound2	; set skidding sound and play it
 
 	if FeatureSpindash>1
 		move.b  #6,($FFFFD1E4).w			; set the spin dash dust routine to skid dust
@@ -778,8 +776,7 @@ Sonic_MoveRight:
 
 		move.b	#id_Stop,obAnim(a0)			; use "stopping" animation
 		bset	#0,obStatus(a0)				; set X-flip flag (Sonic is now facing left)
-		move.w	#sfx_Skid,d0				; set skidding sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Skid,snd_jsr,snd_load_w,QueueSound2	; set skidding sound and play it
 
 	if FeatureSpindash>1
 		move.b	#6,($FFFFD1E4).w			; change spin dash dust animation routine to skid dust
@@ -1269,8 +1266,7 @@ Sonic_ChkRoll:
 		move.b	#sonic_roll_width,obWidth(a0)		; set Sonic's hitbox width to rolling size
 		move.b	#id_Roll,obAnim(a0)			; use "rolling" animation
 		addq.w	#sonic_height-sonic_roll_height,obY(a0)	; adjust Y-position to align Sonic to the floor
-		move.w	#sfx_Roll,d0				; set rolling sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Roll,snd_jsr,snd_load_w,QueueSound2	; set rolling sound and play it
 
 		tst.w	obInertia(a0)				; is current speed zero?
 		bne.s	.ismoving				; if not, branch
@@ -1320,8 +1316,8 @@ Sonic_Jump:
 		addq.l	#4,sp					; run in-air subroutines when we return
 		move.b	#1,jumping(a0)				; set jump flag
 		clr.b	sticktoconvex(a0)			; detach Sonic from the gears in SBZ
-		move.w	#sfx_Jump,d0				; set jump sound
-		jsr	(QueueSound2).l				; play jumping sound
+		sfx	#sfx_Jump,snd_jsr,snd_load_w,QueueSound2	; set jump sound and play it
+
 	if (FeatureBetaVictoryAnimation>0)|(FixBugs=0)
 		; This sets Sonic's hitbox to standing size when roll-jumping.
 		; A leftover from the victory animation in prototypes.
@@ -2138,8 +2134,7 @@ Sonic_HandleDeath:
 
 ; loc_138C2:
 .gameOverBgmAndPatterns:
-		move.w	#bgm_GameOver,d0			; set GAME OVER music
-		jsr	(QueueSound1).l				; play it
+		music	#bgm_GameOver,snd_jsr			; set GAME OVER music and play it
 		moveq	#plcid_GameOver,d0			; set game over patterns
 		jmp	(AddPLC).l				; load them
 ; ===========================================================================

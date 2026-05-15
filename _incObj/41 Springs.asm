@@ -91,8 +91,7 @@ Spring_BounceUp:
 		move.b	#2,obRoutine(a1)
 		bclr	#3,obStatus(a0)
 		clr.b	obSolid(a0)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play spring sound
+		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
 Spring_AniUp:	; Routine 4
 		lea	(Ani_Spring).l,a1
@@ -153,8 +152,7 @@ Spring_Flipped:
 loc_DC56:
 		bclr	#5,obStatus(a0)
 		bclr	#5,obStatus(a1)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play spring sound
+		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
 Spring_AniLR:	; Routine $A
 	if FeatureSpindash
@@ -201,8 +199,7 @@ Spring_BounceDwn:
 		move.b	#2,obRoutine(a1)
 		bclr	#3,obStatus(a0)
 		clr.b	obSolid(a0)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play spring sound
+		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
 	if BugFixSpringDownSpring=0
 		move.b	#id_roll,obAnim(a1)

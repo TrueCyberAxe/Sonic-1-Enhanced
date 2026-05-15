@@ -258,8 +258,7 @@ See_Spring:
 		clr.b	jumping(a2)
 		move.b	#id_Spring,obAnim(a2) ; change Sonic's animation to "spring" ($10)
 		move.b	#2,obRoutine(a2)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play spring sound
+		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
 loc_1192C:
 		clr.w	obVelX(a0)

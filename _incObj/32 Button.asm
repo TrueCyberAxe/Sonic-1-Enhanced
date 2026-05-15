@@ -62,8 +62,7 @@ loc_BDBE:
 loc_BDC8:
 		tst.b	(a3)
 		bne.s	loc_BDD6
-		move.w	#sfx_Switch,d0
-		jsr	(QueueSound2).l	; play switch sound
+		sfx	#sfx_Switch,snd_jsr	; play switch sound
 
 loc_BDD6:
 		bset	d3,(a3)

@@ -210,8 +210,7 @@ loc_B872:
 		bne.s	loc_B892
 		tst.b	obRender(a0)
 		bpl.s	loc_B892
-		move.w	#sfx_ChainRise,d0
-		jsr	(QueueSound2).l	; play rising chain sound
+		sfx	#sfx_ChainRise,snd_jsr	; play rising chain sound
 
 loc_B892:
 		subi.w	#$80,objoff_32(a0)
@@ -236,8 +235,7 @@ loc_B8A8:
 		move.w	#0,obVelY(a0)	; stop object falling
 		tst.b	obRender(a0)
 		bpl.s	CStom_Restart
-		move.w	#sfx_ChainStomp,d0
-		jsr	(QueueSound2).l	; play stomping sound
+		sfx	#sfx_ChainStomp,snd_jsr	; play stomping sound
 
 CStom_Restart:
 		moveq	#0,d0
@@ -262,8 +260,7 @@ loc_B902:
 		bne.s	loc_B91C
 		tst.b	obRender(a0)
 		bpl.s	loc_B91C
-		move.w	#sfx_ChainRise,d0
-		jsr	(QueueSound2).l	; play rising chain sound
+		sfx	#sfx_ChainRise,snd_jsr	; play rising chain sound
 
 loc_B91C:
 		subi.w	#$80,objoff_32(a0)
@@ -289,8 +286,7 @@ loc_B938:
 		move.w	#$3C,objoff_38(a0)
 		tst.b	obRender(a0)
 		bpl.s	loc_B97C
-		move.w	#sfx_ChainStomp,d0
-		jsr	(QueueSound2).l	; play stomping sound
+		sfx	#sfx_ChainStomp,snd_jsr	; play stomping sound
 
 loc_B97C:
 		bra.w	CStom_Restart

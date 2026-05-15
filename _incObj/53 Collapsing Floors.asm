@@ -202,8 +202,7 @@ loc_84EE:
 
 loc_84F2:
 		bsr.w	DisplaySprite
-		move.w	#sfx_Collapse,d0
-		jmp	(QueueSound2).l	; play collapsing sound
+		sfx	#sfx_Collapse,snd_jmp	; play collapsing sound
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Disintegration data for collapsing ledges (MZ, SLZ, SBZ)

@@ -20,8 +20,7 @@ Sonic_Peelout:
 
     move.w   #0,v_charging(a0)
     ; move.w   #$82,d0
-    move.w	#$BE,d0			                            ; spin sound ($E0 in s2)
-    jsr    (PlaySound_Special).l                    ; Play peelout charge sound
+    sfx	#$BE,snd_jsr	; Play peelout charge sound
     addq.l #4,sp
 
     bset   #1,f_superpeelout(a0)
@@ -65,9 +64,9 @@ Sonic_DashLaunch:
     ;bset   #2,obStatus(a0)                         ; apparently with this commented out, it won't cause extreme camera lag. weird that it's even here.
     bclr   #7,obStatus(a0)
     move.w   #$D3,d0
-    ;jsr       (PlaySound_Special).l
+    ;play_queued_music snd_jsr
     move.w   #$D4,d0
-    ;jsr       (PlaySound_Special).l
+    ;play_queued_music snd_jsr
     bra.w   Sonic_DashResetScr
 ; ---------------------------------------------------------------------------
 Sonic_DashCharge:                                   ; If still charging the dash...
@@ -78,7 +77,7 @@ Sonic_DashCharge:                                   ; If still charging the dash
 
 Sonic_Dash_Stop_Sound:
     move.w   #$D3,d0
-    ;jsr       (PlaySound_Special).l
+    ;play_queued_music snd_jsr
 
 Sonic_DashResetScr:
     addq.l   #4,sp                                  ; increase stack ptr ; was 4

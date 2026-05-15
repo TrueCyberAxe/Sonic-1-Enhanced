@@ -23,8 +23,7 @@ Sonic_SpinDash:
   endif
 
     move.b #id_Spindash,obAnim(a0) ; set Spin Dash anim (9 in s2)
-    move.w	#sfx_Spindash,d0			 ; spin sound ($E0 in s2)
-  	jsr	(PlaySound_Special).l	     ; play spin sound
+    sfx	#sfx_Spindash,snd_jsr	; play spin sound
 
   	addq.l	#4,sp			             ; Add 4 bytes to the stack return address to skip Sonic_Jump on next rts to Obj01_MdNormal, preventing conflicts with button presses.
   	move.b	#1,f_spindash(a0)		   ; set Spin Dash flag
@@ -87,8 +86,7 @@ Spindash_Charging: ; loc2_1AC8E
     move.b	#0,(obSmoke).w	                   ; clear $D11C (smoke)
   endif ; if FeatureSpindash>1
 
-    move.w	#$BC,d0			                       ; spin release sound
-    jsr	(PlaySound_Special).l	                 ; play it!
+    sfx	#$BC,snd_jsr	; play it!
 		bra.s loc2_1AD78
 
 ;===========================================================================
@@ -122,7 +120,7 @@ loc2_1AD48:
     move.w	#sfx_Spindash,d0			 ; Spindash Reving was $E0 in sonic 2
   endif                             ; @TODO check this is the correct place for this endif
 
-    jsr	(PlaySound_Special).l	     ; play charge sound
+    play_queued_sfx	     		; play charge sound
     addi.w	#$200,v_charging(a0)	 ; increase charge count
     cmpi.w	#$800,v_charging(a0)	 ; check if it's maxed
     bcs.s	loc2_1AD78		           ; if not, then branch
@@ -311,7 +309,7 @@ loc_1DF0A:				; CODE XREF: h+6FBE?j
 		move	(a2)+,d1
 		move	d1,d3
 		lsr.w	#8,d3
-		and	#$F0,d3	; 'ð'
+		and	#$F0,d3	; '?'
 		add	#$10,d3
 		and	#$FFF,d1
 		lsl.l	#5,d1

@@ -1929,12 +1929,13 @@ WaitForVBlank:
 GM_Sega:
 		; fading out from previous game mode
 
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#bgm_Stop,d0			; set stop music command
-		bsr.w	QueueSound2			; stop music
-	else
-		music	bgm_Stop,0,1,1 ; stop music
-	endif ; if FeatureUseSonic2SoundDriver=0
+;	if FeatureUseSonic2SoundDriver=0
+;		move.b	#bgm_Stop,d0			; set stop music command
+;		bsr.w	QueueSound2			; stop music
+;	else
+;		music	bgm_Stop,0,1,1 ; stop music
+;	endif ; if FeatureUseSonic2SoundDriver=0
+		music	#bgm_Stop,snd_bsr,snd_load_b,QueueSound2		; stop music
 		bsr.w	ClearPLC			; stop any potential in-progress PLC
 
 	if TweakBetterFadeEffects
@@ -2019,8 +2020,7 @@ Sega_WaitPal:	; while light scanning effect is active
 ; ---------------------------------------------------------------------------
 
 		; while "SEGA" sound is playing
-		move.b	#sfx_Sega,d0			; set "SEGA" sound
-		bsr.w	QueueSound2			; queue it
+		sfx	#sfx_Sega,snd_bsr,snd_load_b 	; set "SEGA" sound and play it
 
 	if FeatureUseSonic2SoundDriver=0
 		move.b	#id_VBlank_SegaPCM,(v_vblank_routine).w ; set VBlank routine to $14
@@ -2067,13 +2067,13 @@ Sega_GotoTitle:	; transition to title screen
 
 ; TitleScreen:
 GM_Title:	; fading out from previous game mode
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#bgm_Stop,d0		; set stop music command
-		bsr.w	QueueSound2			; stop music
-	else
-		music	bgm_Stop,0,1,1 													; stop music
-	endif ; if FeatureUseSonic2SoundDriver=0
-
+;	if FeatureUseSonic2SoundDriver=0
+;		move.b	#bgm_Stop,d0		; set stop music command
+;		bsr.w	QueueSound2			; stop music
+;	else
+;		music	bgm_Stop,0,1,1 													; stop music
+;	endif ; if FeatureUseSonic2SoundDriver=0
+		music	#bgm_Stop,snd_bsr,snd_load_b,QueueSound2		; stop music
 		bsr.w	ClearPLC			; stop any potential in-progress PLC
 		bsr.w	PaletteFadeOut		; fade-out previous game mode
 ; ---------------------------------------------------------------------------
@@ -2210,8 +2210,7 @@ Tit_LoadText:
 
 		moveq	#palid_Title,d0			; load title screen palette...
 		bsr.w	PalLoad_Fade			; ...to fade-in buffer
-		move.b	#bgm_Title,d0			; set title screen music
-		bsr.w	QueueSound2			; play title screen music
+		music	#bgm_Title,snd_bsr,snd_load_b,QueueSound2	; play title screen music
 		move.b	#0,(f_debugmode).w		; disable debug mode (cheat remains active though)
 		move.w	#376,(v_generictimer).w		; run title screen for 376 frames (6 seconds plus some change)
 
@@ -2342,8 +2341,7 @@ Tit_ActivateCheat:
 
 Tit_PlayRing:
 		move.b	#1,(a0,d1.w)			; activate cheat depending on C-press count
-		move.b	#sfx_Ring,d0			; set ring sound when code is entered
-		bsr.w	QueueSound2			; play it
+		sfx	#sfx_Ring,snd_bsr,snd_load_b	; play title screen music
 		bra.s	Tit_CountC			; skip over cheat reset
 ; ===========================================================================
 
@@ -2493,7 +2491,7 @@ LevSel_NoCheat:
 LevSel_PlaySnd:
 	endif
 
-		bsr.w	QueueSound2			; play selected sound
+		play_queued_sfx	snd_bsr			; play selected sound
 		bra.s	LevelSelect			; loop level select
 ; ===========================================================================
 
@@ -2505,8 +2503,7 @@ LevSel_Ending:
 
 LevSel_Credits:
 		move.b	#id_Credits,(v_gamemode).w	; set screen mode to $1C (Credits)
-		move.b	#bgm_Credits,d0			; set credits music
-		bsr.w	QueueSound2			; play it
+		music	#bgm_Credits,snd_bsr,snd_load_b,QueueSound2	; set credits music and play it
 		move.w	#0,(v_creditsnum).w		; start at the first credits page
 		rts
 ; ===========================================================================
@@ -2579,8 +2576,7 @@ PlayLevel:
 	if Revision<>0
 		move.l	#5000,(v_scorelife).w		; extra life is awarded at 50000 points
 	endif
-		move.b	#bgm_Fade,d0			; set music fade-out command
-		bsr.w	QueueSound2			; fade out music
+		music	#bgm_Fade,snd_bsr,snd_load_b,QueueSound2	; fade out music
 		rts					; return to MainGameLoop to start level
 ; End of function GM_Title
 
@@ -2689,8 +2685,7 @@ GotoDemo_ChkLoop:
 ; ---------------------------------------------------------------------------
 
 		; start loading demo now
-		move.b	#bgm_Fade,d0			; set music fade-out command
-		bsr.w	QueueSound2			; fade out music
+		music	#bgm_Fade,snd_bsr,snd_load_b,QueueSound2	; fade out music
 
 		move.w	(v_demonum).w,d0		; load demo number
 		andi.w	#7,d0				; limit to four demo entries
@@ -3204,8 +3199,7 @@ GM_Level:	; fading out from previous game mode
 		tst.b    (f_levelreload).w
 		bne.w    Level_NoMusicFade
 	endif ; if TweakFastLevelReload
-		move.b	#bgm_Fade,d0			; queue music fade-out command
-		bsr.w	QueueSound2			; fade out music
+		music	#bgm_Fade,snd_bsr,snd_load_b,QueueSound2	; fade out music
 
 Level_NoMusicFade:
 		bsr.w	ClearPLC			; clear any remaining PLC entries
@@ -3349,10 +3343,10 @@ Level_BgmNotLZ4:
 Level_PlayBgm:
 		lea	(MusicList).l,a1		; load music playlist
 		move.b	(a1,d0.w),d0			; get music ID for current level
-		bsr.w	QueueSound1			; play music
+		play_queued_music			; play music
 		move.b	#id_TitleCard,(v_titlecard).w	; load title card object
 	if TweakNoWaitingonPLCForLevelTiles
-	  move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
+	  	move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
 	endif ; if TweakNoWaitingonPLCForLevelTiles
 
 ; ---------------------------------------------------------------------------
@@ -3787,8 +3781,7 @@ Demo_SS:	include	"demodata/Intro - Special Stage.asm"
 
 ; SpecialStage:
 GM_Special:	; white fade-out from previous game mode
-		move.w	#sfx_EnterSS,d0			; set special stage entry sound
-		bsr.w	QueueSound2			; play it
+		sfx	#sfx_EnterSS			; set special stage entry sound and play it
 		bsr.w	PaletteWhiteOut			; fade-out to white
 ; ---------------------------------------------------------------------------
 
@@ -3825,8 +3818,7 @@ GM_Special:	; white fade-out from previous game mode
 		bsr.w	PalCycle_SS			; initialize palette cycle and background for fade-in
 		clr.w	(v_ssangle).w			; set stage angle to "upright"
 		move.w	#$40,(v_ssrotate).w		; set stage rotation speed
-		move.w	#bgm_SS,d0			; play special stage BG music
-		bsr.w	QueueSound1			; play it
+		music	#bgm_SS				; play special stage BG music and play it
 
 		move.w	#0,(v_btnpushtime1).w		; clear button push counters for demos
 		lea	(DemoDataPtr).l,a1		; load demo data
@@ -3971,8 +3963,7 @@ SS_FinLoop_NoBrighten:
 		mulu.w	#10,d0				; award 100 bonus points per collected ring
 		move.w	d0,(v_ringbonus).w		; set rings bonus
 
-		move.w	#bgm_GotThrough,d0		; play end-of-level music
-		jsr	(QueueSound2).l	 		; play it
+		music	#bgm_GotThrough,snd_jsr,snd_load_w,QueueSound2	; play end-of-level music
 
 		clearRAM v_objspace			; clear object RAM
 
@@ -3993,8 +3984,7 @@ SS_NormalExit:	; Special Stage results screen loop
 ; ---------------------------------------------------------------------------
 
 		; Exit Special Stage normally
-		move.w	#sfx_EnterSS,d0			; play special stage exit sound
-		bsr.w	QueueSound2 			; play it
+		sfx	#sfx_EnterSS			; play special stage exit sound
 		bsr.w	PaletteWhiteOut			; fade-out to white
 		rts					; return to MainGameLoop
 ; ===========================================================================
@@ -4067,8 +4057,7 @@ GM_Continue:
 
 		moveq	#palid_Continue,d0		; load continue screen palette...
 		bsr.w	PalLoad_Fade			; ...into fade-in buffer
-		move.b	#bgm_Continue,d0		; play continue screen music
-		bsr.w	QueueSound1			; play it
+		music	#bgm_Continue,snd_bsr,snd_load_b	; load continue screen music and play it
 
 		move.w	#659,(v_generictimer).w		; show continue screen for 11 seconds in total
 
@@ -4154,13 +4143,14 @@ Cont_GotoLevel:
 
 ; EndingSequence:
 GM_Ending:
-	if FeatureUseSonic2SoundDriver=0
-		; fading out from previous game mode
-		move.b	#bgm_Stop,d0			; set stop music command
-		bsr.w	QueueSound2			; stop music
-	else
-		music	bgm_Stop,0,1,1 ; stop music
-	endif
+;	if FeatureUseSonic2SoundDriver=0
+;		; fading out from previous game mode
+;		move.b	#bgm_Stop,d0			; set stop music command
+;		bsr.w	QueueSound2			; stop music
+;	else
+;		music	bgm_Stop,0,1,1 ; stop music
+;	endif
+		music	#bgm_Stop,snd_bsr,snd_load_b,QueueSound2		; stop music
 		bsr.w	PaletteFadeOut			; fade-out previous game mode
 ; ---------------------------------------------------------------------------
 
@@ -4221,8 +4211,7 @@ End_LoadData:
 	endif
 		moveq	#palid_Sonic,d0			; load Sonic's palette...
 		bsr.w	PalLoad_Fade			; ...to fade-in buffer
-		move.w	#bgm_Ending,d0			; play ending sequence music
-		bsr.w	QueueSound1			; play it
+		music	#bgm_Ending			; load ending sequence music and play it
 
 	if (BugFixFZDebugCreditTransition)|(FixBugs)
 		; Fix being able to enable debug mode without having entered the cheat code for it
@@ -4299,8 +4288,7 @@ End_MainLoop:
 		beq.s	End_ChkEmerald			; if yes, branch
 
 		move.b	#id_Credits,(v_gamemode).w	; change game mode to credits
-		move.b	#bgm_Credits,d0			; play credits music
-		bsr.w	QueueSound2			; play it
+		music	#bgm_Credits,snd_bsr,snd_load_b,QueueSound2	; play it
 		move.w	#0,(v_creditsnum).w		; set credits page number to 0 ("Sonic Team Staff")
 		rts					; return to MainGameLoop
 ; ===========================================================================

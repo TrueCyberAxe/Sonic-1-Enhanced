@@ -334,7 +334,7 @@ HurtSonic:
 	endif
 
 .sound:
-		jsr	(QueueSound2).l
+		play_queued_sfx
 		moveq	#-1,d0
 		rts
 ; ===========================================================================
@@ -433,7 +433,7 @@ KillSonic:
 	endif
 
 .sound:
-		jsr	(QueueSound2).l
+		play_queued_sfx
 
 .dontdie:
 		moveq	#-1,d0
@@ -465,7 +465,7 @@ KillSonicByCrushing:
 
 		move.w	#sfx_Death,d0				; play normal death sound
 
-		jsr	(PlaySound_Special).l
+		play_queued_sfx
 
 		moveq	#-1,d0
 		rts
