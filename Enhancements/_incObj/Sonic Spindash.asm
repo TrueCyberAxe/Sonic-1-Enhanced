@@ -2,9 +2,11 @@
 ;Subroutine to make Sonic perform a spindash
 ;---------------------------------------------------------------------------
 
+; loc_1AC3E:
+; Sonic_CheckSpindash:
 Sonic_SpinDash:
 		tst.b	f_spindash(a0)			; already Spin Dashing?
-		bne.s	Spindash_Charging		; if set, branch
+		bne.s	Sonic_UpdateSpindash		; if set, branch
 
 		cmpi.b	#id_duck,obAnim(a0)		; is anim duck
 		bne.s	.end				; if not, return
@@ -29,7 +31,7 @@ Sonic_SpinDash:
 		move.w	#0,v_charging(a0)		; set charge count to 0
 
 	if FeatureSpindash>1
-		cmpi.b	#$C,obSubtype(a0)		; ??? oxygen remaining?
+		cmpi.b	#$C,obSubtype(a0)		; if he's drowning, branch to not make dust
 		bcs.s	.loc2_1AC84			; ??? branch if carry
 		move.b	#2,(obSmoke).w			; ??? $D11C is used for the smoke/dust object
 	endif
@@ -40,31 +42,37 @@ Sonic_SpinDash:
 
 		move.w	#$60,(v_lookshift).w
 
-.end:; locret2_1AC8C
+; locret2_1AC8C
+; return_1AC8C:
+.end:
 		rts
 
 ;---------------------------------------------------------------------------
 
-Spindash_Charging:; loc2_1AC8E
-		move.b #id_Spindash,obAnim(a0)		; set Spin Dash anim (9 in s2)
+; loc2_1AC8E
+Sonic_UpdateSpindash:
+		move.b #id_Spindash,obAnim(a0)			; set Spin Dash anim (9 in s2)
 
-		move.b	(v_jpadhold2).w,d0		; read controller
-		btst	#bitDn,d0			; check down button
-		bne.w	Spindash_Charge_Add		; if set, branch
+		move.b	(v_jpadhold2).w,d0			; read controller
+		btst	#bitDn,d0				; check down button
+		bne.w	Sonic_ChargingSpindash			; if set, branch
 
 .Release_Spindash:
-		move.b	#$E,$16(a0)			; $16(a0) is height/2
-		move.b	#7,$17(a0)			; $17(a0) is width/2
-		move.b	#id_roll,obAnim(a0)		; set animation to roll
+		; unleash the charged spindash and start rolling quickly:
+		move.b	#$E,y_radius(a0)			; y_radius(a0) is height/2
+		move.b	#7,x_radius(a0)				; x_radius(a0) is width/2
+		move.b	#id_roll,obAnim(a0)			; set animation to roll
 
-		addq.w	#5,$C(a0)			; $C(a0) is Y coordinate
-		move.b	#0,f_spindash(a0)		; clear Spin Dash flag
+		; add the difference between Sonic's rolling and standing heights
+		addq.w	#5,$C(a0)				; $C(a0) is Y coordinate
+		move.b	#0,f_spindash(a0)			; clear Spin Dash flag
 		moveq	#0,d0
 
+		; Sonic 2 Style Extra Charging
 	if FeatureSpindash>1
 		move.b	v_charging(a0),d0			; copy charge count
 		add.w	d0,d0					; double it
-		move.w	Dash_Speeds(pc,d0.w),obInertia(a0)	; get normal speed
+		move.w	SpindashSpeeds(pc,d0.w),obInertia(a0)	; get normal speed
 	endif	; if FeatureSpindash>1
 
 		move.w	obInertia(a0),d0			; get inertia
@@ -87,36 +95,52 @@ Spindash_Charging:; loc2_1AC8E
 	endif	; if FeatureSpindash>1
 
 		sfx	#$BC,snd_jsr				; play it!
-		bra.s	loc2_1AD78
+		bra.s	Obj01_Spindash_ResetScr
 
 ;===========================================================================
 
-Dash_Speeds:
-		dc.w $800
-		dc.w $880
-		dc.w $900
-		dc.w $980
-		dc.w $A00
-		dc.w $A80
-		dc.w $B00
-		dc.w $B80
-		dc.w $C00
+; word_1AD0C:
+SpindashSpeeds:
+		dc.w  $800	; 0
+		dc.w  $880	; 1
+		dc.w  $900	; 2
+		dc.w  $980	; 3
+		dc.w  $A00	; 4
+		dc.w  $A80	; 5
+		dc.w  $B00	; 6
+		dc.w  $B80	; 7
+		dc.w  $C00	; 8
+
+; word_1AD1E:
+SpindashSpeedsSuper:
+		dc.w  $B00	; 0
+		dc.w  $B80	; 1
+		dc.w  $C00	; 2
+		dc.w  $C80	; 3
+		dc.w  $D00	; 4
+		dc.w  $D80	; 5
+		dc.w  $E00	; 6
+		dc.w  $E80	; 7
+		dc.w  $F00	; 8
 
 ;===========================================================================
 
-Spindash_Charge_Add:; loc2_1AD30 If still charging the dash...
+; If still charging the dash...
+; loc2_1AD30
+Sonic_ChargingSpindash:
 		tst.w	v_charging(a0)				; check charge count
-		beq.s	loc2_1AD48				; if zero, branch
+		beq.s	Obj01_Spindash_ResetScr			; if zero, branch
 		move.w	v_charging(a0),d0			; otherwise put it in d0
 		lsr.w	#5,d0					; shift right 5 (divide it by 32)
 		sub.w	d0,v_charging(a0)			; subtract from charge count
-		bcc.s	loc2_1AD48				; ??? branch if carry clear
+		bcc.s	Obj01_Spindash_ResetScr			; ??? branch if carry clear
 		move.w	#0,v_charging(a0)			; set charge count to 0
 
-loc2_1AD48:
+; loc_1AD78:
+Obj01_Spindash_ResetScr:
 		move.b	(v_jpadpress2).w,d0			; read controller
 		andi.b	#btnABC,d0				; pressing A/B/C?
-		beq.w	loc2_1AD78				; if not, branch
+		beq.w	Obj01_Spindash_ResetScr			; if not, branch
 
 	if FeatureSpindash>1
 		queue_sfx	#sfx_Spindash			; Spindash Reving was $E0 in sonic 2
@@ -125,28 +149,31 @@ loc2_1AD48:
 		play_queued_sfx					; play charge sound
 		addi.w	#$200,v_charging(a0)			; increase charge count
 		cmpi.w	#$800,v_charging(a0)			; check if it's maxed
-		bcs.s	loc2_1AD78				; if not, then branch
+		bcs.s	Obj01_Spindash_ResetScr			; if not, then branch
 		move.w	#$800,v_charging(a0)			; reset it to max
 
-loc2_1AD78:
+; loc_1AD78:
+Obj01_Spindash_ResetScr:
 		addq.l	#4,sp					; Add 4 bytes to the stack return address to skip Sonic_Jump on next rts to Obj01_MdNormal, preventing conflicts with button presses.
 		cmpi.w	#$60,(v_lookshift).w
-		beq.s	loc2_1AD8C				; to be used in Spin Dash
-		bcc.s	loc2_1AD88
+		beq.s	Obj01_Spindash_Skip2			; to be used in Spin Dash
+		bcc.s	Obj01_Spindash_Skip
 		addq.w	#4,(v_lookshift).w
 
-loc2_1AD88:
+;loc_1AD88:
+Obj01_Spindash_Skip:
 		subq.w	#2,(v_lookshift).w
 
-loc2_1AD8C:
+;loc_1AD8C:
+Obj01_Spindash_Skip2:
 		bsr.w	Sonic_LevelBound
 		bsr.w	Sonic_AnglePos
 		move.w	#$60,(v_lookshift).w			; reset looking up/down
 rts
 
-; End of subroutine Sonic_SpinDash
+; End of subroutine Sonic_UpdateSpindash
 
-	if FeatureSpindash>2
+	if FeatureSpindash>1
 ; DATA XREF: ROM:0001600C?o
 ; Sprite_1DD20:
 SpinDash_dust:
@@ -162,7 +189,7 @@ off_1DD2E:
 		dc	loc_1DD90-off_1DD2E
 		dc	loc_1DE46-off_1DD2E
 		dc	loc_1DE4A-off_1DD2E
-;-------------obPriority-----------------------------------------------------------
+;-------------obPriority----------------------------------------------------
 
 ; DATA XREF: h+6DBA?o
 loc_1DD36:
@@ -198,7 +225,8 @@ loc_1DD90:
 ;---------------------------------------------------------------------------
 
 ; DATA XREF: h+6E30?o h+6E32?o ...
-off_1DDA4:dc	loc_1DE28-off_1DDA4
+off_1DDA4:
+		dc	loc_1DE28-off_1DDA4
 		dc	loc_1DDAC-off_1DDA4
 		dc	loc_1DDCC-off_1DDA4
 		dc	loc_1DE20-off_1DDA4
@@ -329,7 +357,8 @@ loc_1DEE4:
 		bmi.w	locret_1DF36
 		move	$3C(a0),d4
 
-loc_1DF0A:; CODE XREF: h+6FBE?j
+; CODE XREF: h+6FBE?j
+loc_1DF0A:
 		moveq	#0,d1
 		move	(a2)+,d1
 		move	d1,d3
