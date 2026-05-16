@@ -1,4 +1,4 @@
-Size_of_Snd_driver_guess =	$DFA ; approximate post-compressed size of the Z80 sound driver
+Size_of_Snd_driver_guess =	$DFA ; reserved size for the assembled Z80 sound driver
 
 id function ptr,((ptr-offset)/ptrsize+idstart)
 
@@ -69,8 +69,10 @@ SndID_RingLeft	= sfx_RingLeft
 ;
 MusID_Pause = $7F
 MusID_Unpause = $80
+S2QueueEmpty = MusID_Unpause
+;	| QueueToPlay empty marker
 
-SndID_Push = sfx_push
+SndID_Push = sfx_Push
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to load the sound driver
@@ -81,7 +83,10 @@ SoundDriverLoad:
 	resetZ80
 	lea	Snd_Driver(pc),a0
 	lea	(Z80_RAM).l,a1
-	jsr	(KosDec).l
+	move.w	#(Snd_Driver_End-Snd_Driver)-1,d0	; copy the raw assembled Sonic 2 Z80 driver
+.copy:
+	move.b	(a0)+,(a1)+
+	dbf	d0,.copy
 	btst	#0,(VDP_control_port+1).l	; check video mode
 	sne	(Z80_RAM+zPalModeByte).l	; set if PAL
 	resetZ80a
@@ -100,7 +105,7 @@ SoundDriverLoad:
 ; loc_EC0E8:
 Snd_Driver:
 	save
-	include "s2.sounddriver.asm" ; CPU Z80
+	include "Enhancements/s2.sounddriver.asm" ; CPU Z80
 	restore
 	padding off
 	!org (Snd_Driver+Size_of_Snd_driver_guess) ; don't worry; I know what I'm doing
@@ -148,7 +153,29 @@ SndDAC_Sample7_End
 ; Music pointers
 ; ------------------------------------------------------------------------------
 
-MusicPoint:	startBank
+MusicPoint2:	startBank
+MusicPoint:	equ MusicPoint2
+MusicPoint1:	equ MusicPoint2
+
+MusPtr_GHZ:		rom_ptr_z80	Mus_GHZ
+MusPtr_LZ:		rom_ptr_z80	Mus_LZ
+MusPtr_MZ:		rom_ptr_z80	Mus_MZ
+MusPtr_SLZ:		rom_ptr_z80	Mus_SLZ
+MusPtr_SYZ:		rom_ptr_z80	Mus_SYZ
+MusPtr_SBZ:		rom_ptr_z80	Mus_SBZ
+MusPtr_Invincible:	rom_ptr_z80	Mus_Invincible
+MusPtr_ExtraLife:	rom_ptr_z80	Mus_ExtraLife
+MusPtr_SS:		rom_ptr_z80	Mus_SS
+MusPtr_Title:		rom_ptr_z80	Mus_Title
+MusPtr_Ending:		rom_ptr_z80	Mus_Ending
+MusPtr_Boss:		rom_ptr_z80	Mus_Boss
+MusPtr_FZ:		rom_ptr_z80	Mus_FZ
+MusPtr_GotThrough:	rom_ptr_z80	Mus_GotThrough
+MusPtr_GameOver:	rom_ptr_z80	Mus_GameOver
+MusPtr_Continue:	rom_ptr_z80	Mus_Continue
+MusPtr_Credits:		rom_ptr_z80	Mus_Credits
+MusPtr_Drowning:	rom_ptr_z80	Mus_Drowning
+MusPtr_Emerald:		rom_ptr_z80	Mus_Emerald
 
 Mus_GHZ:	include		"sound/music/Mus81 - GHZ.asm"
 Mus_LZ:		include		"sound/music/Mus82 - LZ.asm"
@@ -237,6 +264,10 @@ ptr_sndCC:		rom_ptr_z80	SoundCC
 ptr_sndCD:		rom_ptr_z80	SoundCD
 ptr_sndCE:		rom_ptr_z80	SoundCE
 ptr_sndCF:		rom_ptr_z80	SoundCF
+ptr_sndD0:		rom_ptr_z80	SoundD0
+	if FeatureSpindash>1
+ptr_sndD1:		rom_ptr_z80	SoundD1
+	endif ; if FeatureSpindash>1
 SndPtr__End:
 
 SoundA0:	include		"sound/sfx/SndA0 - Jump.asm"
@@ -293,10 +324,12 @@ SoundCF:	include		"sound/sfx/SndCF - Signpost.asm"
 ; ------------------------------------------------------------------------------------------
 
 SpecSoundIndex:
-ptr_sndD0:		rom_ptr_z80	SoundD0
 SpecPtr__End:
 
 SoundD0:	include		"sound/sfx/SndD0 - Waterfall.asm"
+	if FeatureSpindash>1
+SoundD1:	incbin	"Enhancements/sound/sfx/SndD1 - Spindash.asm"
+	endif ; if FeatureSpindash>1
 
 
 	finishBank

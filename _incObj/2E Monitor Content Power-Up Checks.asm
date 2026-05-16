@@ -10,9 +10,9 @@ Pow_ChkEggman:
 		; Fix the Eggman monitor
 		; https://info.sonicretro.org/SCHG_How-to:Have_a_functional_Eggman_monitor_in_Sonic_1
 		move.w	obX(a0),spik_origX(a0)			; needed to display the icon properly
-    bra		Spik_Hurt					; Eggman monitor hits Sonic
+		bra	Spik_Hurt				; Eggman monitor hits Sonic
 	else
-		    rts						; Eggman monitor does nothing
+		rts						; Eggman monitor does nothing
 	endif
   
 ; ===========================================================================
@@ -106,21 +106,22 @@ Pow_ChkS:
 		cmpi.b	#7,d0																; does monitor contain 'S'?
 		bne.s	Pow_ChkGoggles												; if not, branch to Goggle code
     
-	if FeatureRestoreMonitorSuper=0
-		nop
+	if FeatureRestoreMonitorSuper
+		; The S monitor combines speed shoes and invincibility.
+		bsr.w	Pow_ShoesActivate
+		play_queued_sfx					; ensure music is sped up
+		jmp	Pow_InvincibleActivate
 	else
-		bsr.w Pow_ShoesActivate
-		play_queued_sfx			; Ensure Music is Sped Up
-		jmp Pow_InvincibleActivate
-	endif
+		nop
+	endif ; if FeatureRestoreMonitorSuper
   
 ; ===========================================================================
 
 Pow_ChkGoggles:
-	if FeatureRestoreMonitorScubaGear>0
-		cmpi.b	#8,d0															  ; does monitor contain Goggles?
-		bne.s	Pow_ChkEnd													  ; if not, branch to Pow_ChkEnd
-		move.b	#1,(f_goggles).w 							      ; move 1 to the goggle check
+	if FeatureRestoreMonitorScubaGear
+		cmpi.b	#8,d0					; does monitor contain Goggles?
+		bne.s	Pow_ChkEnd				; if not, branch to Pow_ChkEnd
+		move.b	#1,(f_goggles).w			; mark goggles as active
 	endif
   
 ; ===========================================================================

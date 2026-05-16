@@ -363,7 +363,7 @@ loc_16C64:
 
 ;loc_16C7C:
 .delete:
-	if (BugFixCaterkillerDeath+FeatureSpindash)>0
+	if (BugFixCaterkillerDeath)|(FeatureSpindash)
 		clr.b	obColType(a1)	; immediately remove all touch response values when destroying the head to avoid taking damage
 	endif
 		; Mark self for deletion.

@@ -282,10 +282,16 @@ out_of_range:	macro exit,pos
 		move.w	obX(a0),d0	; get object position
 		endif
 		andi.w	#$FF80,d0	; round down to nearest $80
+	if TweakS2OffscreenDelete
+		; Use the object manager's cached rounded camera X like Sonic 2.
+		sub.w	(v_opl_screen).w,d0
+		addi.w	#128,d0		; approx distance between object and screen
+	else
 		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#128,d1
 		andi.w	#$FF80,d1
 		sub.w	d1,d0		; approx distance between object and screen
+	endif ; if TweakS2OffscreenDelete
 		cmpi.w	#128+320+192,d0
 		bhi.\0	exit
 		endm
@@ -408,29 +414,29 @@ _sound:	macro track,routine,queue,load,dispatch
 
 		move.b	\track,(v_snddriver_ram+\queue).l
 
-		if (dispatch=snd_bra)|(dispatch=snd_jmp)
+		if (\dispatch=snd_bra)|(\dispatch=snd_jmp)
 			rts
 		endif
 
 	else
 
-		if load=snd_load_b
+		if \load=snd_load_b
 			move.b	\track,d0
 		endif
-		if load=snd_load_w
+		if \load=snd_load_w
 			move.w	\track,d0
 		endif
 
-		if dispatch=snd_bsr
+		if \dispatch=snd_bsr
 			bsr.w	\routine
 		endif
-		if dispatch=snd_bra
+		if \dispatch=snd_bra
 			bra.w	\routine
 		endif
-		if dispatch=snd_jsr
+		if \dispatch=snd_jsr
 			jsr	(\routine).l
 		endif
-		if dispatch=snd_jmp
+		if \dispatch=snd_jmp
 			jmp	(\routine).l
 		endif
 
@@ -439,21 +445,21 @@ _sound:	macro track,routine,queue,load,dispatch
 
 queue_music:	macro track,load
 	if narg=1
-		move.w	track,d0
-	elseif load=snd_load_b
-		move.b	track,d0
-	elseif load=snd_load_w
-		move.w	track,d0
+		move.w	\track,d0
+	elseif \load=snd_load_b
+		move.b	\track,d0
+	elseif \load=snd_load_w
+		move.w	\track,d0
 	endif
 	endm
 
 queue_sfx:	macro track,load
 	if narg=1
-		move.w	track,d0
-	elseif load=snd_load_b
-		move.b	track,d0
-	elseif load=snd_load_w
-		move.w	track,d0
+		move.w	\track,d0
+	elseif \load=snd_load_b
+		move.b	\track,d0
+	elseif \load=snd_load_w
+		move.w	\track,d0
 	endif
 	endm
 
@@ -461,9 +467,9 @@ play_queued_music:	macro dispatch,routine
 	if narg=0
 		_sound	d0,QueueSound1,sndq_music,snd_load_none,snd_jsr
 	elseif narg=1
-		_sound	d0,QueueSound1,sndq_music,snd_load_none,dispatch
+		_sound	d0,QueueSound1,sndq_music,snd_load_none,\dispatch
 	else
-		_sound	d0,routine,sndq_music,snd_load_none,dispatch
+		_sound	d0,\routine,sndq_music,snd_load_none,\dispatch
 	endif
 	endm
 
@@ -471,32 +477,32 @@ play_queued_sfx:	macro dispatch,routine
 	if narg=0
 		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,snd_jsr
 	elseif narg=1
-		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,dispatch
+		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,\dispatch
 	else
-		_sound	d0,routine,sndq_sfx,snd_load_none,dispatch
+		_sound	d0,\routine,sndq_sfx,snd_load_none,\dispatch
 	endif
 	endm
 
 music:	macro track,dispatch,load,routine
 	if narg=1
-		_sound	track,QueueSound1,sndq_music,snd_load_w,snd_bsr
+		_sound	\track,QueueSound1,sndq_music,snd_load_w,snd_bsr
 	elseif narg=2
-		_sound	track,QueueSound1,sndq_music,snd_load_w,dispatch
+		_sound	\track,QueueSound1,sndq_music,snd_load_w,\dispatch
 	elseif narg=3
-		_sound	track,QueueSound1,sndq_music,load,dispatch
+		_sound	\track,QueueSound1,sndq_music,\load,\dispatch
 	else
-		_sound	track,routine,sndq_music,load,dispatch
+		_sound	\track,\routine,sndq_music,\load,\dispatch
 	endif
 	endm
 
 sfx:	macro track,dispatch,load,routine
 	if narg=1
-		_sound	track,QueueSound2,sndq_sfx,snd_load_w,snd_bsr
+		_sound	\track,QueueSound2,sndq_sfx,snd_load_w,snd_bsr
 	elseif narg=2
-		_sound	track,QueueSound2,sndq_sfx,snd_load_w,dispatch
+		_sound	\track,QueueSound2,sndq_sfx,snd_load_w,\dispatch
 	elseif narg=3
-		_sound	track,QueueSound2,sndq_sfx,load,dispatch
+		_sound	\track,QueueSound2,sndq_sfx,\load,\dispatch
 	else
-		_sound	track,routine,sndq_sfx,load,dispatch
+		_sound	\track,\routine,sndq_sfx,\load,\dispatch
 	endif
 	endm

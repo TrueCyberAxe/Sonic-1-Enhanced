@@ -3,10 +3,10 @@
 ; ---------------------------------------------------------------------------
 
 HUD_Update:
-	if EnhancedDebug=0
-		tst.w	(f_debugmode).w				; is debug mode	on?
-	else
+	if EnhancedDebug
 		tst.w	(v_debuguse).w				; is debug mode	on?
+	else
+		tst.w	(f_debugmode).w				; is debug mode	on?
 	endif
 
 		bne.w	HudDebug	; if yes, branch

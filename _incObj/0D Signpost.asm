@@ -18,10 +18,10 @@ Signpost:
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range	DeleteObject
 
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
-		rts
-	else
+	if (BugFixRenderBeforeInit)|(FixBugs)			; Bug 1
 		bra.w	DisplaySprite
+	else
+		rts
 	endif
 ; ===========================================================================
 Sign_Index:
@@ -51,7 +51,6 @@ Sign_Touch:	; Routine 2
 		cmpi.w	#$20,d0		; is Sonic within $20 pixels of the signpost?
 		bhs.s	.notouch	; if not, branch
 		sfx	#sfx_Signpost,snd_jsr,snd_load_w,QueueSound1	; play signpost sound
-	fi
 		clr.b	(f_timecount).w	; stop time counter
 		move.w	(v_limitright2).w,(v_limitleft2).w ; lock screen position
 		addq.b	#2,obRoutine(a0)
@@ -159,11 +158,11 @@ loc_EC70:
 		addi.w	#$128,d1
 		cmp.w	d1,d0
 
-	if TweakUncompressedTitleCards=0
-		blo.s	locret_ECEE
-	else
+	if TweakUncompressedTitleCards
 		bcs.w	locret_ECEE
-	endif ; if TweakUncompressedTitleCards=0
+	else
+		blo.s	locret_ECEE
+	endif ; if TweakUncompressedTitleCards
 
 loc_EC86:
 		addq.b	#2,obRoutine(a0)
@@ -174,24 +173,24 @@ loc_EC86:
 ; ---------------------------------------------------------------------------
 
 GotThroughAct:
-		tst.b	(v_endifard).w
+		tst.b	(v_endcard).w
 		bne.s	locret_ECEE
 		move.w	(v_limitright2).w,(v_limitleft2).w
 		clr.b	(v_invinc).w	; disable invincibility
 		clr.b	(f_timecount).w	; stop time counter
-		move.b	#id_GotThroughCard,(v_endifard).w
+		move.b	#id_GotThroughCard,(v_endcard).w
 
-	if TweakUncompressedTitleCards=0
-		moveq	#plcid_TitleCard,d0
-		jsr	(NewPLC).l																				; load title card patterns
+	if TweakUncompressedTitleCards
+		move.l	a0,-(sp)				; save object address to stack
+		locVRAM	ArtTile_Title_Card*tile_size		; set VRAM target location for title cards
+		lea	Gra_TitleCard,a0			; load title card patterns
+		move.l	#((Gra_TitleCard_End-Gra_TitleCard)/tile_size)-1,d0 ; title card art length, in tiles
+		jsr	LoadUncArt				; load uncompressed art
+		move.l	(sp)+,a0				; get object address from stack
 	else
-		move.l  a0,-(sp)            													; save object address to stack
-		move.l  #$70000002,(vdp_control_port)        					; set mode "VRAM Write to $B000"
-		lea Gra_TitleCard,a0        													; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art lenght, in tiles
-		jsr LoadUncArt          															; load uncompressed art
-		move.l  (sp)+,a0            													; get object address from stack
-	endif ; if TweakUncompressedTitleCards=0
+		moveq	#plcid_TitleCard,d0
+		jsr	(NewPLC).l				; load title card patterns
+	endif ; if TweakUncompressedTitleCards
 
 		move.b	#1,(f_endactbonus).w
 		moveq	#0,d0

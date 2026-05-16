@@ -177,7 +177,7 @@ React_Enemy:
 		tst.b	(v_invinc).w									; is Sonic invincible?
 		bne.s	.donthurtsonic	; if yes, branch
 
-	if FeatureSpindash>0
+	if FeatureSpindash
 		tst.b	f_spindash(a0)								; is Sonic Spindashing?
 		bne.s	.donthurtsonic								; if yes, branch
 	endif
@@ -273,7 +273,7 @@ HurtSonic:
 		tst.b	(v_shield).w									; does Sonic have a shield?
 		bne.s	.hasshield	; if yes, branch
 
-	if FeatureRestoreMonitorScubaGear>0
+	if FeatureRestoreMonitorScubaGear
 		tst.b	(f_goggles).w									; does Sonic have a Goggle Flag?
 		beq.s	.ringcheck										; if not, branch
 		move.b	#0,(f_goggles).w						; remove goggles
@@ -310,7 +310,7 @@ HurtSonic:
 		neg.w	obVelX(a0)										; if Sonic is right of the object, reverse
 
 .isleft:
-	if FeatureSpindash>0
+	if FeatureSpindash
 		move.b #0,f_spindash(a0) 					; clear Spin Dash flag
 	endif
 		move.w	#0,obInertia(a0)
@@ -371,7 +371,7 @@ KillSonic:
 		move.w	obY(a0),objoff_38(a0)
 	endif
 
-	if FeatureContextualDeath>0
+	if FeatureContextualDeath
 		cmpi.b	#id_Electro,obID(a2)										; was damage caused by a Fire Object?
 		beq.s	.electricdeath											; if yes, branch
 
@@ -406,7 +406,7 @@ KillSonic:
 .electricdeath:
 		move.b	#id_Shrink,obAnim(a0)
 		bra.s 	.deathcommon
-	endif ; if FeatureContextualDeath>0
+	endif ; if FeatureContextualDeath
 
 .normaldeath:
 		move.b	#id_Death,obAnim(a0)
@@ -441,7 +441,7 @@ KillSonic:
 ; End of function KillSonic
 ; ===========================================================================
 
-	if FeatureContextualDeath>0
+	if FeatureContextualDeath
 KillSonicByCrushing:
 		move.b	#0,(v_invinc).w				; remove invincibility
 		move.b	#0,(v_shield).w				; remove shield

@@ -104,17 +104,6 @@ plane_size_64x32: equ 64*32*2	; size of plane in 512x256 mode
 layout_row_interlaced:	equ $40			; size of a single level layout row (FG/BG alternating)
 layout_row:	equ layout_row_interlaced*2	; size of a single level layout row (skipping over other plane)
 
-; Game modes
-id_Sega:	equ ptr_GM_Sega-GameModeArray	                 ; $00
-id_Title:	equ ptr_GM_Title-GameModeArray	               ; $04
-id_Demo:	equ ptr_GM_Demo-GameModeArray	                 ; $08
-id_Level:	equ ptr_GM_Level-GameModeArray	               ; $0C
-id_Special:	equ ptr_GM_Special-GameModeArray             ; $10
-id_Continue:	equ ptr_GM_Cont-GameModeArray	             ; $14
-id_Ending:	equ ptr_GM_Ending-GameModeArray	             ; $18
-id_Credits:	equ ptr_GM_Credits-GameModeArray             ; $1C
-id_LevelSelect:	equ ptr_GM_Level_Select-GameModeArray
-
 ; Levels (zones)
 id_GHZ:		equ 0
 id_LZ:		equ 1
@@ -320,38 +309,103 @@ aniXFlip:	equ $20 ; horizontally mirrors the current frame
 aniYFlip:	equ $40 ; vertically mirrors the current frame
 
 ; Background music
-  if FeatureUseSonic2SoundDriver=0
+	if FeatureUseSonic2SoundDriver
+		; Keep the game-facing Sonic 1 IDs stable while the Sonic 2 driver remaps them internally.
 bgm__First:	equ $81
-bgm__Last:	equ ((ptr_musend-MusicIndex-4)/4)+bgm__First
+bgm_GHZ:	equ bgm__First+$00
+bgm_LZ:		equ bgm__First+$01
+bgm_MZ:		equ bgm__First+$02
+bgm_SLZ:	equ bgm__First+$03
+bgm_SYZ:	equ bgm__First+$04
+bgm_SBZ:	equ bgm__First+$05
+bgm_Invincible:	equ bgm__First+$06
+bgm_ExtraLife:	equ bgm__First+$07
+bgm_SS:		equ bgm__First+$08
+bgm_Title:	equ bgm__First+$09
+bgm_Ending:	equ bgm__First+$0A
+bgm_Boss:	equ bgm__First+$0B
+bgm_FZ:		equ bgm__First+$0C
+bgm_GotThrough:	equ bgm__First+$0D
+bgm_GameOver:	equ bgm__First+$0E
+bgm_Continue:	equ bgm__First+$0F
+bgm_Credits:	equ bgm__First+$10
+bgm_Drowning:	equ bgm__First+$11
+bgm_Emerald:	equ bgm__First+$12
+bgm__Last:	equ bgm_Emerald
 
 ; Sound effects
 sfx__First:	equ $A0
-sfx__Last:	equ ((ptr_sndend-SoundIndex-4)/4)+sfx__First
+sfx_Jump:	equ sfx__First+$00
+sfx_Lamppost:	equ sfx__First+$01
+sfx_A2:		equ sfx__First+$02
+sfx_Death:	equ sfx__First+$03
+sfx_Skid:	equ sfx__First+$04
+sfx_A5:		equ sfx__First+$05
+sfx_HitSpikes:	equ sfx__First+$06
+sfx_Push:	equ sfx__First+$07
+sfx_SSGoal:	equ sfx__First+$08
+sfx_SSItem:	equ sfx__First+$09
+sfx_Splash:	equ sfx__First+$0A
+sfx_AB:		equ sfx__First+$0B
+sfx_HitBoss:	equ sfx__First+$0C
+sfx_Bubble:	equ sfx__First+$0D
+sfx_Fireball:	equ sfx__First+$0E
+sfx_Shield:	equ sfx__First+$0F
+sfx_Saw:	equ sfx__First+$10
+sfx_Electric:	equ sfx__First+$11
+sfx_Drown:	equ sfx__First+$12
+sfx_Flamethrower:equ sfx__First+$13
+sfx_Bumper:	equ sfx__First+$14
+sfx_Ring:	equ sfx__First+$15
+sfx_SpikesMove:	equ sfx__First+$16
+sfx_Rumbling:	equ sfx__First+$17
+sfx_B8:		equ sfx__First+$18
+sfx_Collapse:	equ sfx__First+$19
+sfx_SSGlass:	equ sfx__First+$1A
+sfx_Door:	equ sfx__First+$1B
+sfx_Teleport:	equ sfx__First+$1C
+sfx_ChainStomp:	equ sfx__First+$1D
+sfx_Roll:	equ sfx__First+$1E
+sfx_Continue:	equ sfx__First+$1F
+sfx_Basaran:	equ sfx__First+$20
+sfx_BreakItem:	equ sfx__First+$21
+sfx_Warning:	equ sfx__First+$22
+sfx_GiantRing:	equ sfx__First+$23
+sfx_Bomb:	equ sfx__First+$24
+sfx_Cash:	equ sfx__First+$25
+sfx_RingLoss:	equ sfx__First+$26
+sfx_ChainRise:	equ sfx__First+$27
+sfx_Burning:	equ sfx__First+$28
+sfx_Bonus:	equ sfx__First+$29
+sfx_EnterSS:	equ sfx__First+$2A
+sfx_WallSmash:	equ sfx__First+$2B
+sfx_Spring:	equ sfx__First+$2C
+sfx_Switch:	equ sfx__First+$2D
+sfx_RingLeft:	equ sfx__First+$2E
+sfx_Signpost:	equ sfx__First+$2F
 
 ; Special sound effects
 spec__First:	equ $D0
-spec__Last:	equ ((ptr_specend-SpecSoundIndex-4)/4)+spec__First
+sfx_Waterfall:	equ spec__First+$00
+	if FeatureSpindash>1
+spec__Last:	equ spec__First+$01
+	else
+spec__Last:	equ sfx_Waterfall
+	endif ; if FeatureSpindash>1
+sfx__Last:	equ spec__Last
 
-flg__First:	equ $E0
-flg__Last:	equ ((ptr_flgend-Sound_ExIndex-4)/4)+flg__First
-  else
-bgm__First:	equ $01
-bgm__Last:	equ ((zMusIDPtr__End-zMasterPlaylist-4)/4)+bgm__First
+flg__First:	equ $78
+sfx_Stop:	equ flg__First+$00
+bgm_Fade:	equ flg__First+$01
+sfx_Sega:	equ flg__First+$02
+bgm_Speedup:	equ flg__First+$03
+bgm_Slowdown:	equ flg__First+$04
+bgm_Stop:	equ flg__First+$05
+flg__Last:	equ bgm_Stop
 
-; Sound effects
-sfx__First:	equ bgm__Last+1
-sfx__Last:	equ ((SndPtr__End-SoundIndex-2)/2)+sfx__First
+	else
 
-; Special sound effects
-spec__First:	equ sfx__Last+1
-spec__Last:	equ ((SpecPtr__End-SpecSoundIndex-4)/4)+spec__First
-
-flg__First  equ $FA
-flg__Last:  equ ((CmdPtr__End-zCommandIndex-2)/2)+flg__First
-
-sfx_Stop:   equ ((CmdPtr_StopSFX-zCommandIndex)/2)+flg__First
-
-  endif ; if FeatureUseSonic2SoundDriver=0
+bgm__First:	equ $81
 
 bgm_GHZ:	equ ((ptr_mus81-MusicIndex)/4)+bgm__First
 bgm_LZ:		equ ((ptr_mus82-MusicIndex)/4)+bgm__First
@@ -438,6 +492,7 @@ bgm_Speedup:	equ ((ptr_flgE2-Sound_ExIndex)/4)+flg__First
 bgm_Slowdown:	equ ((ptr_flgE3-Sound_ExIndex)/4)+flg__First
 bgm_Stop:	equ ((ptr_flgE4-Sound_ExIndex)/4)+flg__First
 flg__Last:	equ ((ptr_flgend-Sound_ExIndex-4)/4)+flg__First
+	endif ; if FeatureUseSonic2SoundDriver
 
 ; Boss locations
 ; The main values are based on where the camera boundaries mainly lie
@@ -604,7 +659,7 @@ ArtTile_Points:			equ $797
 ArtTile_Lamppost:		equ $7A0
 ArtTile_Ring:			equ $7B2
 ArtTile_Lives_Counter:		equ $7D4
-ArtTile_SpindashDust:     equ ($D800/$20) ; $6C0
+ArtTile_SpindashDust:     	equ ($D800/$20) ; $6C0
 
 ; Eggman
 ArtTile_Eggman:			equ $400
@@ -693,9 +748,7 @@ ArtTile_Credits_Font:		equ $5A0
 
 ; Error Handler
 ArtTile_Error_Handler_Font:	equ $7C0
-		plcm	Nem_GHZ_1st, 0		; GHZ main patterns
-		plcm	Nem_GHZ_2nd, $39A0	; GHZ secondary	patterns
-Gra_LZ Nem_LZ
+
 ; Sonic frame IDs
 fr_Null:	equ 0
 fr_Stand:	equ 1
@@ -795,9 +848,13 @@ fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)/2	; $5C
 fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)/2	; $5D
 
   if FeatureSpindash=1
-sfx_Spindash:	equ sfx_Roll ; $BE
+sfx_Spindash:	equ sfx_Roll 				; $BE
   else
+	if FeatureUseSonic2SoundDriver
+sfx_Spindash:	equ spec__First+$01
+	else
 sfx_Spindash:	equ ((ptr_sndD1-SpecSoundIndex)/4)+spec__First
+	endif ; if FeatureUseSonic2SoundDriver
   endif
 
 bitHorizontal:	 equ 0
@@ -809,7 +866,7 @@ bitObjectFlag:	 equ 7
 
 obSmoke:      equ $FFFFD11C
 
-max_ring_scatter: equ $20 ; 32
+max_ring_scatter: equ $20 				; 32
 max_demo:         equ 4
 
 bit_in_air:       equ 1

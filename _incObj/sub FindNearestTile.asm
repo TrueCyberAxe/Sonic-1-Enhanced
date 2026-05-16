@@ -10,7 +10,9 @@
 ;	     (refers to a 16x16 tile number)
 ; ---------------------------------------------------------------------------
 
-	if TweakUncompressedChunkMapping=0
+	if TweakUncompressedChunkMapping
+Floor_ChkTile_LocateBlock:
+	else
 FindNearestTile:
 		move.w	d2,d0					; get y-pos. of bottom edge of object
 		lsr.w	#1,d0
@@ -18,11 +20,9 @@ FindNearestTile:
 		move.w	d3,d1					; get x-pos. of object
 		lsr.w	#8,d1
 		andi.w	#$7F,d1
-		add.w	d1,d0						; combine
-		moveq	#$FFFFFFFF,d1	; = -1 (prefill to prepare creating a RAM address)
-	else
-Floor_ChkTile_LocateBlock:
-	endif # if TweakUncompressedChunkMapping=0
+		add.w	d1,d0					; combine
+		moveq	#$FFFFFFFF,d1				; = -1 (prefill to prepare creating a RAM address)
+	endif ; if TweakUncompressedChunkMapping
 		lea	(v_lvllayout_fg).w,a1
 		move.b	(a1,d0.w),d1	; get 256x256 tile number
 		beq.s	.blanktile	; branch if 0 (blank chunk)
@@ -39,12 +39,13 @@ Floor_ChkTile_LocateBlock:
 		andi.w	#$1E,d0
 		add.w	d0,d1
 
-.blanktile:
-    if FixBugs
-		if TweakUncompressedChunkMapping=0
+	if FixBugs
+		if TweakUncompressedChunkMapping
+	.blanktile:
+			movea.l	d1,a1
+			rts
+		else
 		movea.l	d1,a1
-		endif
-	endif
 		rts
 
 		; The regular branch to .blanktile will result in d1 being set to $FFFFFF00,
@@ -62,11 +63,12 @@ Floor_ChkTile_LocateBlock:
 
 	.chunk0:
 		dc.w 0
-    else
+		endif ; if TweakUncompressedChunkMapping
+	else
 	.blanktile:
 		movea.l	d1,a1
 		rts
-    endif
+	endif ; if FixBugs
 
 ; ===========================================================================
 
@@ -90,7 +92,7 @@ Floor_ChkTile_LocateBlock:
 		lsr.w	#3,d0
 		andi.w	#$1E,d0
 		add.w	d0,d1
-	if TweakUncompressedChunkMapping>0 ; @TODO Double check this is correct
+	if TweakUncompressedChunkMapping ; @TODO Double check this is correct
 
 ; ===========================================================================
 
@@ -131,7 +133,7 @@ FindNearestTile: ; XREF: FindFloor; et al
 		moveq	#0,d1
 		bsr.w	Floor_ChkTile_LocateBlock
 		add.l	#Blk256_GHZ,d1
-	endif ; if TweakUncompressedChunkMapping>0
+	endif ; if TweakUncompressedChunkMapping
 
 		movea.l	d1,a1
 		rts

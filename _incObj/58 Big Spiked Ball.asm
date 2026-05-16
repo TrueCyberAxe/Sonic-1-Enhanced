@@ -59,11 +59,11 @@ BBall_Move:	; Routine 2
 ; ===========================================================================
 
 .type01:
-	if TweakMathOptimizations=0
-		move.w	#$60,d1
-	else
+	if TweakMathOptimizations
 		moveq	#$60,d1
-	endif
+	else
+		move.w	#$60,d1
+	endif ; if TweakMathOptimizations
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
@@ -80,11 +80,11 @@ BBall_Move:	; Routine 2
 
 .type02:
 	if TweakRemoveReduntantCode=0
-		if TweakMathOptimizations=0
-			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
-		else
+		if TweakMathOptimizations
 			moveq	#$60,d1 															; <- WTF??? Why is this here? It's not even used
-		endif
+		else
+			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
+		endif ; if TweakMathOptimizations
 	endif
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0

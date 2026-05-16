@@ -20,11 +20,11 @@ dbug:	macro map,object,subtype,frame,vram
 .GHZ:
 		dc.w (.GHZend-.GHZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -50,11 +50,11 @@ dbug:	macro map,object,subtype,frame,vram
 .LZ:
 		dc.w (.LZend-.LZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -91,11 +91,11 @@ dbug:	macro map,object,subtype,frame,vram
 .MZ:
 		dc.w (.MZend-.MZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -128,11 +128,11 @@ dbug:	macro map,object,subtype,frame,vram
 .SLZ:
 		dc.w (.SLZend-.SLZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -157,11 +157,11 @@ dbug:	macro map,object,subtype,frame,vram
 .SYZ:
 		dc.w (.SYZend-.SYZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -186,11 +186,11 @@ dbug:	macro map,object,subtype,frame,vram
 .SBZ:
 		dc.w (.SBZend-.SBZ-2)/8
 
-	if EnhancedDebug=0
-		include "Enhancements/_inc/DebugListStart.asm"
-	else
+	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	endif ; if EnhancedDebug=0
+	else
+		include "Enhancements/_inc/DebugListStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2

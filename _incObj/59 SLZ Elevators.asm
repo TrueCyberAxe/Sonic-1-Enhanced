@@ -254,7 +254,7 @@ Elev_MakeMulti:	; Routine 6
 		addq.l	#4,sp
 	endif
 		out_of_range.w	DeleteObject
-	if BugFixRenderBeforeInit>0
+	if BugFixRenderBeforeInit
 		addq.l	#4,sp
 	endif
 		rts

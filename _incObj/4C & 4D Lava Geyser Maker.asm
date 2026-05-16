@@ -18,7 +18,7 @@ GeyserMaker:
 		addq.l	#4,sp					; discard return address from stack to safely exit early
 	else
 		bra.w	Geyser_ChkDel			; branch to object deletion check routine
-	endif # if BugFixRenderBeforeInit
+	endif ; if BugFixRenderBeforeInit
 ; ===========================================================================
 GMake_Index:	dc.w GMake_Main-GMake_Index
 		dc.w GMake_Wait-GMake_Index
@@ -232,7 +232,7 @@ Geyser_ChkDel:
 		out_of_range	.delete
 	else
 		out_of_range	DeleteObject
-	endif # if BugFixRenderBeforeInit
+	endif ; if BugFixRenderBeforeInit
 
 	if FixBugs
 		; Moved to prevent a delete-and-display bug.
@@ -245,7 +245,7 @@ Geyser_ChkDel:
 .delete:
 		addq.l	#4,sp				; remove one longword return address from the stack
     	bra.w   DeleteObject
-	endif # if BugFixRenderBeforeInit
+	endif ; if BugFixRenderBeforeInit
 ; ===========================================================================
 Geyser_Types:	dc.w Geyser_Type00-Geyser_Types
 		dc.w Geyser_Type01-Geyser_Types

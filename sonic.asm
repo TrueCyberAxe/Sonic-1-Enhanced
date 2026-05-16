@@ -86,7 +86,7 @@ StartOfRom:
 	endif
 
 	if AdvancedDebugger
-		include   "Debugger.asm"
+		include   "Enhancements/Debugger.asm"
 	endif ; if AdvancedDebugger
 Vectors:
 		dc.l v_systemstack&$FFFFFF	; Initial stack pointer value
@@ -172,13 +172,13 @@ loc_E0:		; Relocated code from Spik_Hurt. REVXB was a nasty hex-edit.
 		dc.b "SEGA MEGA DRIVE " ; Hardware system ID (Console name)
 	endif ; if AdvancedDebugger=0
 		dc.b "(C)SEGA 1991.APR" ; Copyright holder and release date (generally year)
-	if FeatureUpdateHeader=0
-		dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
-		dc.b "SONIC THE               HEDGEHOG                " ; International name
-	else
+	if FeatureUpdateHeader
 		dc.b "SONIC THE HEDGEHOG                              " ; Domestic name
 		dc.b "SONIC THE HEDGEHOG                              " ; International name
-	endif ; if FeatureUpdateHeader=0
+	else
+		dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
+		dc.b "SONIC THE               HEDGEHOG                " ; International name
+	endif ; if FeatureUpdateHeader
 	if Revision=0
 		dc.b "GM 00001009-00"   ; Serial/version number (Rev 0)
 	else
@@ -202,11 +202,11 @@ RomEndLoc:	dc.l EndOfRom-1		; End address of ROM
 	endif
 		dc.l $20202020		; SRAM start ($200001)
 		dc.l $20202020		; SRAM end ($20xxxx)
-	if FeatureUpdateHeader=0
-		dc.b "                                                    " ; Notes (unused, anything can be put in this space, but it has to be 52 bytes.)
-	else
+	if FeatureUpdateHeader
 		dc.b "GITHUB DISSASEMBLY WITH ENHANCEMENT OPTIONS         " ; Notes (unused, anything can be put in this space, but it has to be 52 bytes.)
-	endif ; if FeatureUpdateHeader=0
+	else
+		dc.b "                                                    " ; Notes (unused, anything can be put in this space, but it has to be 52 bytes.)
+	endif ; if FeatureUpdateHeader
 		dc.b "JUE             " ; Region (Country code)
 EndOfHeader:
 
@@ -451,9 +451,9 @@ id_Special:	gmptr	GM_Special	; Special Stage ($10)
 id_Continue:	gmptr	GM_Continue	; Continue Screen ($14)
 id_Ending:	gmptr	GM_Ending	; End of game sequence ($18)
 id_Credits:	gmptr	GM_Credits	; Credits ($1C)
-		if EnhancedDebug
-ptr_GM_Level_Select:	dc.l	GM_Level_Select	; Level Select
-		endif ; if EnhancedDebug
+	if (EnhancedDebug)|(ExtendedLevelSelect)
+id_LevelSelect:	gmptr	GM_Level_Select	; Level Select
+	endif ; if ExtendedLevelSelect
 		rts	; redundant rts
 
 ; ===========================================================================
@@ -646,7 +646,7 @@ ErrorWaitForC:
 	if AsciiMenu=0
 Art_Text:	bincludeEndMarker	"artunc/Level Select & Debug Text.unc"
 	else
-Art_Text:	bincludeEndMarker	"Enhancements/artunc/menutext - ascii.bin" 	; text used in level select and debug mode
+Art_Text:	bincludeEndMarker	"Enhancements/artunc/menutext - ascii.unc" 	; text used in level select and debug mode
 	endif ; if ExtendedMenu=0
 
 ; ===========================================================================
@@ -787,15 +787,16 @@ VBlank_Sega:
 ; loc_C36: VBla_14:
 VBlank_SegaPCM:
 	if FeatureUseSonic2SoundDriver
-		move.b  (v_vbla_count+3).w,d0
-		andi.w  #$F,d0
-		bne.s   .skipread
+		; Poll Start during the longer Sonic 2 SEGA chant without reading every frame.
+		move.b	(v_vbla_count+3).w,d0
+		andi.w	#$0F,d0
+		bne.s	.skipread
 
 	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
-		bsr.w   ReadJoypads
+		bsr.w	ReadJoypads
 	if TweakRemoveUselessZ80Commands=0
 		startZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
@@ -870,14 +871,14 @@ VBlank_Levels:
 		writeVRAM	v_hscrolltablebuffer,vram_hscroll
 		writeVRAM	v_spritetablebuffer,vram_sprites
 
-	if FeatureEnhancedPLCQueue=0
+	if FeatureEnhancedPLCQueue
+		jsr	(ProcessDMAQueue).l
+	else
 		tst.b	(f_sonframechg).w		; has Sonic's sprite changed?
 		beq.s	.nochg				; if not, branch
 		writeVRAM	v_sgfx_buffer,ArtTile_Sonic*tile_size ; load new Sonic gfx
 		move.b	#0,(f_sonframechg).w
-	else
-		jsr	(ProcessDMAQueue).l
-	endif ; if FeatureEnhancedPLCQueue=0
+	endif ; if FeatureEnhancedPLCQueue
 
 	;  #$83,(v_vdp_buffer2).w
 
@@ -944,14 +945,14 @@ VBlank_SpecialStage:
 	endif ; if TweakRemoveUselessZ80Commands=0
 		bsr.w	PalCycle_SS
 
-	if FeatureEnhancedPLCQueue=0
+	if FeatureEnhancedPLCQueue
+		jsr	(ProcessDMAQueue).l
+	else
 		tst.b	(f_sonframechg).w		; has Sonic's sprite changed?
 		beq.s	.nochg				; if not, branch
 		writeVRAM	v_sgfx_buffer,ArtTile_Sonic*tile_size ; load new Sonic gfx
 		move.b	#0,(f_sonframechg).w
-	else
-		jsr	(ProcessDMAQueue).l
-	endif ; if FeatureEnhancedPLCQueue=0
+	endif ; if FeatureEnhancedPLCQueue
 
 .nochg:
 		tst.w	(v_generictimer).w		; is there time left on the demo?
@@ -988,14 +989,14 @@ VBlank_Ending:
 		writeVRAM	v_hscrolltablebuffer,vram_hscroll
 		writeVRAM	v_spritetablebuffer,vram_sprites
 
-	if FeatureEnhancedPLCQueue=0
+	if FeatureEnhancedPLCQueue
+		jsr	(ProcessDMAQueue).l
+	else
 		tst.b	(f_sonframechg).w
 		beq.s	.nochg
 		writeVRAM	v_sgfx_buffer,ArtTile_Sonic*tile_size
 		move.b	#0,(f_sonframechg).w
-	else
-		jsr	(ProcessDMAQueue).l
-	endif ; if FeatureEnhancedPLCQueue=0
+	endif ; if FeatureEnhancedPLCQueue
 
 .nochg:
 	if TweakRemoveUselessZ80Commands=0
@@ -1054,14 +1055,14 @@ VBlank_Continue:
 		startZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
 
-	if FeatureEnhancedPLCQueue=0
+	if FeatureEnhancedPLCQueue
+		jsr	(ProcessDMAQueue).l
+	else
 		tst.b	(f_sonframechg).w
 		beq.s	.nochg
 		writeVRAM	v_sgfx_buffer,ArtTile_Sonic*tile_size
 		move.b	#0,(f_sonframechg).w
-	else
-		jsr	(ProcessDMAQueue).l
-	endif ; if FeatureEnhancedPLCQueue=0
+	endif ; if FeatureEnhancedPLCQueue
 
 .nochg:
 		tst.w	(v_generictimer).w
@@ -1303,23 +1304,27 @@ ClearScreen:
 
 ; SoundDriverLoad: <--- old misnomer
 DACDriverLoad:
+	if FeatureUseSonic2SoundDriver
+		jmp	(SoundDriverLoad).l		; load the full Sonic 2 Z80 sound driver
+	else
 		nop					; delay
-	if TweakRemoveUselessZ80Commands=0
-		stopZ80                                 ; request Z80 stop on
-		deassertZ80Reset                        ; request Z80 reset off
-	endif ; if TweakRemoveUselessZ80Commands=0
+	    if TweakRemoveUselessZ80Commands=0
+		    stopZ80                                 ; request Z80 stop on
+		    deassertZ80Reset                        ; request Z80 reset off
+	    endif ; if TweakRemoveUselessZ80Commands=0
 		lea	(DACDriver).l,a0                ; load compressed DAC driver address as source
 		lea	(z80_ram).l,a1	                ; set Z80 RAM address as target
 		bsr.w	KosDec		                ; decompress the DAC driver into Z80 RAM
-	if TweakRemoveUselessZ80Commands=0
-		assertZ80Reset                          ; request Z80 reset on
-		nop	                                ; delay (while the Z80 resets)
-		nop	                                ; ''
-		nop	                                ; ''
-		nop	                                ; ''
-		deassertZ80Reset                        ; request Z80 reset off
-		startZ80                                ; request Z80 stop off
-	endif ; if TweakRemoveUselessZ80Commands=0
+	    if TweakRemoveUselessZ80Commands=0
+		    assertZ80Reset                          ; request Z80 reset on
+		    nop	                                ; delay (while the Z80 resets)
+		    nop	                                ; ''
+		    nop	                                ; ''
+		    nop	                                ; ''
+		    deassertZ80Reset                        ; request Z80 reset off
+		    startZ80                                ; request Z80 stop off
+	    endif ; if TweakRemoveUselessZ80Commands=0
+	endif ; if FeatureUseSonic2SoundDriver
 		rts                                     ; return
 ; End of function DACDriverLoad
 
@@ -1364,11 +1369,11 @@ Tilemap_Cell:
 
 ; ===========================================================================
 ; >>> Nemesis decompression algorithm, primarily (but not exclusively) used for PLCs
-	if TweakImproovedDecompression=0
-		include	"_inc/Decompression/Nemesis Decompression.asm"
-	else
+	if TweakImproovedDecompression
 		include	"Enhancements/_inc/Decompression Nemesis (Improved).asm"
-	endif ; if TweakImproovedDecompression=0
+	else
+		include	"_inc/Decompression/Nemesis Decompression.asm"
+	endif ; if TweakImproovedDecompression
 ; ---------------------------------------------------------------------------
 ; Subroutine to add entries from a given Pattern Load Cue list ID to the
 ; PLC decompression queue (decompressed later during VBlank)
@@ -1479,7 +1484,7 @@ RunPLC:
 .skipXor:
 		andi.w	#$7FFF,d2			; clear XOR flag
 
-	if (BugFixPatternLoadCueRaceCondition=0)&(FixBugs=0)
+	if (BugFixPLCRaceCondition=0)&(FixBugs=0)
 		; Relocated to bugfix below
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
 	endif
@@ -1496,7 +1501,7 @@ RunPLC:
 		move.l	d0,(v_plc_previousrow).w	; clear previous XOR dump
 		move.l	d5,(v_plc_dataword).w		; store lookup field
 		move.l	d6,(v_plc_shiftvalue).w		; store bit shift counter
-	if (BugFixPatternLoadCueRaceCondition)|(FixBugs)
+	if (BugFixPLCRaceCondition)|(FixBugs)
 		; Fix a race condition with Pattern Load Cues
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
@@ -1580,29 +1585,29 @@ ProcessPLC_Return:
 ; loc_16DC:
 ProcessPLC_ShiftCue:
 		lea	(v_plc_queue_base).w,a0		; load PLC process list
-	if BugFixPatternLoadCueShifting=0
-		moveq	#(v_plc_queue_end-v_plc_buffer-v_plc_buffer_dest)/4-1,d0 ; set size of list
+	if BugFixPLCShifting
+		lea	6(a0),a1
+		moveq	#$E,d0					; do $F cues
 	else
-		lea 6(a0),a1
-		moveq   #$E,d0      ; do $F cues
-	endif ; if BugFixPatternLoadCueShifting=0
+		moveq	#(v_plc_queue_end-v_plc_buffer-v_plc_buffer_dest)/4-1,d0 ; set size of list
+	endif ; if BugFixPLCShifting
 
 ; loc_16E2:
 .loop:
-	if BugFixPatternLoadCueShifting=0
-		move.l	plc_slot_size(a0),(a0)+		; shift contents of PLC buffer up 6 bytes
-	else
+	if BugFixPLCShifting
 		move.l	(a1)+,(a0)+
 		move.w	(a1)+,(a0)+
-	endif ; if BugFixPatternLoadCueShifting=0
+	else
+		move.l	plc_slot_size(a0),(a0)+		; shift contents of PLC buffer up 6 bytes
+	endif ; if BugFixPLCShifting
 
 		dbf	d0,.loop			; repeat til done
 
-	if BugFixPatternLoadCueShifting
+	if BugFixPLCShifting
 		moveq   #0,d0
 		move.l  d0,(a0)+    ; clear the last cue to avoid overcopying it
 		move.w  d0,(a0)+    ;
-	endif ; if BugFixPatternLoadCueShifting
+	endif ; if BugFixPLCShifting
 
 	if FixBugs
 		; The above code does not properly 'pop' the 16th PLC entry.
@@ -1653,11 +1658,11 @@ QuickPLC:
 ; >>> Other decompression algorithms
 	include	"_inc/Decompression/Enigma Decompression.asm"
 
-	if TweakImproovedDecompression=0
-		include	"_inc/Decompression/Kosinski Decompression.asm"
-	else
+	if TweakImproovedDecompression
 		include	"Enhancements/_inc/Decompression Kosinski (Improved).asm"
-	endif ; if TweakImproovedDecompression=0
+	else
+		include	"_inc/Decompression/Kosinski Decompression.asm"
+	endif ; if TweakImproovedDecompression
 
 	if TweakLevelCompressionMode>2
 		include	"Enhancements/_inc/Decompression COMPER.asm"
@@ -1884,7 +1889,7 @@ PalLoad_Water:
 
 	if FeatureEnhancedPLCQueue
 
-	include	"Enhancements/PLCQueue.asm"
+	include	"Enhancements/_inc/DMA-Queue.asm"
 
 	endif ; if FeatureEnhancedPLCQueue
 
@@ -1939,6 +1944,7 @@ GM_Sega:
 		bsr.w	ClearPLC			; stop any potential in-progress PLC
 
 	if TweakBetterFadeEffects
+		; Let demo transitions use the improved fade-to-white path when requested.
 		if TweakSegaLogoWhiteFade>1
 			bsr.w	PaletteWhiteOut		; fade-out previous game mode
 		else
@@ -2022,28 +2028,28 @@ Sega_WaitPal:	; while light scanning effect is active
 		; while "SEGA" sound is playing
 		sfx	#sfx_Sega,snd_bsr,snd_load_b 	; set "SEGA" sound and play it
 
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#id_VBlank_SegaPCM,(v_vblank_routine).w ; set VBlank routine to $14
+	if FeatureUseSonic2SoundDriver
+		move.b	#id_VBlank_Sega,(v_vblank_routine).w ; use normal Sega VBlank when the Z80 driver owns sound
 	else
-		move.b	#$2,(v_vblank_routine).w
-	endif ; if FeatureUseSonic2SoundDriver=0
+		move.b	#id_VBlank_SegaPCM,(v_vblank_routine).w ; set VBlank routine to $14
+	endif ; if FeatureUseSonic2SoundDriver
 
 		bsr.w	WaitForVBlank			; wait for VBlank to play the sound (CPU is frozen here until sound finished playing)
 ; ---------------------------------------------------------------------------
 
 		; after sound has finished playing
-	if FeatureUseSonic2SoundDriver=0
-		move.w	#30,(v_generictimer).w		; wait 30 frames before automatic fade-out
+	if FeatureUseSonic2SoundDriver
+		move.w	#180,(v_generictimer).w		; let the Sonic 2 sound driver finish the SEGA chant
 	else
-		move.w	#$B4,(v_generictimer).w
-	endif ; if FeatureUseSonic2SoundDriver=0
+		move.w	#30,(v_generictimer).w		; wait 30 frames before automatic fade-out
+	endif ; if FeatureUseSonic2SoundDriver
 
 Sega_WaitEnd:
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#id_VBlank_Sega,(v_vblank_routine).w ; set VBlank routine to $02
+	if FeatureUseSonic2SoundDriver
+		move.b	#id_VBlank_SegaPCM,(v_vblank_routine).w ; wait in the Sega PCM VBlank slot for the extended timer
 	else
-		move.b	#$14,(v_vblank_routine).w
-	endif ; if FeatureUseSonic2SoundDriver=0
+		move.b	#id_VBlank_Sega,(v_vblank_routine).w ; set VBlank routine to $02
+	endif ; if FeatureUseSonic2SoundDriver
 		bsr.w	WaitForVBlank			; wait for VBlank to finish
 		tst.w	(v_generictimer).w		; has post-chant timer expired?
 		beq.s	Sega_GotoTitle			; if yes, go to title screen
@@ -2062,7 +2068,7 @@ Sega_GotoTitle:	; transition to title screen
 ; Title screen
 ; ---------------------------------------------------------------------------
 	if ExtendedLevelSelect
-		include "Enhancements/LevelSelect.asm"
+		include "Enhancements/LevelSelect.asm" ; This needs reimplemented? not removed
 	endif ; if ExtendedLevelSelect
 
 ; TitleScreen:
@@ -2197,16 +2203,16 @@ Tit_LoadText:
 
 		lea	(GHZ_1st).l,a0 			; load first half of GHZ patterns
 
-	if (TweakTitleCompress=0)|(TweakLevelCompressionMode<2)
-			bsr.w	NemDec				; decompress Nemesis-compressed patterns directly to VRAM
-	else
+	if (TweakTitleCompress)&(TweakLevelCompressionMode>1)
 		;if TweakLevelCompressionMode=2 					; @NOTE needs proper implementation
 		; 	bsr.w	KosDec
 		;else
 			; bsr.w CompDec
 			bsr.w	LoadCompArt 													; @NOTE Doesnt work
 		;endif ; if TweakLevelCompressionMode=2
-	endif ; if (TweakTitleCompress=0)|(TweakLevelCompressionMode<2)
+	else
+			bsr.w	NemDec				; decompress Nemesis-compressed patterns directly to VRAM
+	endif ; if (TweakTitleCompress)&(TweakLevelCompressionMode>1)
 
 		moveq	#palid_Title,d0			; load title screen palette...
 		bsr.w	PalLoad_Fade			; ...to fade-in buffer
@@ -2295,14 +2301,14 @@ Tit_MainLoop:
 		cmpi.w	#$1C00,d0				; has Sonic object passed $1C00 on x-axis?
 		blo.s	Tit_ChkRegion			; if not, branch
 
-	if TweakRemoveReduntantCode=0
+	if TweakRemoveReduntantCode
+		bsr.w	SS_ToSegaScreen
+	else
 		; Will never happen due to the short title screen generic timer.
 		; This likely was an old failsafe before Demos were introduced.
 		move.b	#id_Sega,(v_gamemode).w		; return to Sega screen
 		rts
-	else
-		bsr.w	SS_ToSegaScreen
-	endif ; if TweakRemoveReduntantCode=0
+	endif ; if TweakRemoveReduntantCode
 ; ===========================================================================
 
 Tit_ChkRegion:
@@ -2399,22 +2405,22 @@ Tit_EnterLevelSelect:
 ; ---------------------------------------------------------------------------
 
 LevelSelect:
-	if BugFixLevelSelectCorruption=0
-		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
-	else
+	if BugFixLevelSelectCorruption
 		move.b	#(id_VBlank_Title-2),(v_vblank_routine).w
-	endif ; if BugFixLevelSelectCorruption=0
+	else
+		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
+	endif ; if BugFixLevelSelectCorruption
 		bsr.w	WaitForVBlank			; wait for VBlank to finish
 		bsr.w	LevSelControls			; update selected line if necessary
 		bsr.w	RunPLC				; run any potential PLC
 		tst.l	(v_plc_queue_base).w		; are any patterns in the PLC still left to be loaded?
 		bne.s	LevelSelect			; if yes, block quitting level select until finished
 
-	if TweakNavigationLevelSelect=0
-		andi.b	#btnABC+btnStart,(v_jpadpress1).w	; is A, B, C, or Start pressed?
-	else
+	if TweakNavigationLevelSelect
 		andi.b	#btnB+btnStart,(v_jpadpress1).w		; is B or Start pressed?
-	endif ; if TweakNavigationLevelSelect=0
+	else
+		andi.b	#btnABC+btnStart,(v_jpadpress1).w	; is A, B, C, or Start pressed?
+	endif ; if TweakNavigationLevelSelect
 
 		beq.s	LevelSelect			; if not, loop level select
 
@@ -2422,27 +2428,27 @@ LevSel_SelectionMade:
 		move.w	(v_levselitem).w,d0		; get currently selected line
 
 	if ExtendedMenu
-		tst.b (v_levelselect_buffer)
-	  beq SkipLSelect
+		tst.b	(v_levelselect_buffer)		; has the level select already been entered?
+		beq.s	SkipLSelect			; if not, handle option menu selection
 	endif ; if ExtendedMenu
 
 		cmpi.w	#levsel_sndtest_row,d0		; have you selected item $14 (sound test)?
 	if TweakNavigationLevelSelect
-		beq.s   @checkB             									; if so, branch
-		andi.b  #btnStart,(v_jpadpress1).w  					; is start pressed?
-		beq.s   LevelSelect         									; if not, branch
-		bra.s   LevSel_Level_SS         							; go to  Level/SS subroutine
+		beq.s	@checkB				; if so, branch
+		andi.b	#btnStart,(v_jpadpress1).w	; is Start pressed?
+		beq.s	LevelSelect			; if not, branch
+		bra.s	LevSel_Level_SS			; go to Level/SS subroutine
 
 	@checkB:
-		andi.b  #btnB,(v_jpadpress1).w  							; is B pressed?
-		beq.s   LevelSelect     											; if not, branch
+		andi.b	#btnB,(v_jpadpress1).w		; is B pressed?
+		beq.s	LevelSelect			; if not, branch
 
 	else
 		bne.s	LevSel_Level_SS			; if not, go to Level/SS subroutine
 	endif
 
 	if ExtendedMenu
-		bra JapCredits
+		bra.s	JapCredits			; option menu routes through the credits cheat checks
 	endif ; if ExtendedMenu
 
 		move.w	(v_levselsound).w,d0	; get currently selected sound test entry
@@ -2453,8 +2459,8 @@ LevSel_SelectionMade:
 
 	if ExtendedMenu
 SkipLSelect:
-		cmpi.w	 #$14,d0  			; have you selected item $14 (sound test)?
-		bne.w 	Option_Level_SS			; if not, skip the pointers, return to LevelSelect
+		cmpi.w	#levsel_sndtest_row,d0		; have you selected the sound test option?
+		bne.w	Option_Level_SS		; if not, skip the sound test and return to LevelSelect
 
 JapCredits:
 	endif ; if ExtendedMenu
@@ -2468,17 +2474,17 @@ JapCredits:
 
 	if ExtendedMenu
 LevSel_TheLevelSelect:
-	  cmpi.b #1,(v_levelselect_buffer)
-	  beq LevSel_NoMove
-	  cmpi.w #$02,(v_levselitem).w ; is item $14 selected?
-	  bne LevSel_SndTest ; if not, branch
-	  move.b (v_jpadpress1).w,d1
-	  andi.b #btnStart,d1  ; is left/right pressed?
-	  beq.w LevSel_NoMove
+		cmpi.b	#$01,(v_levelselect_buffer)	; has the level select already been entered?
+		beq	LevSel_NoMove			; if yes, branch
+		cmpi.w	#$02,(v_levselitem).w		; is the level select option highlighted?
+		bne	LevSel_SndTest			; if not, branch
+		move.b	(v_jpadpress1).w,d1
+		andi.b	#btnStart,d1			; is Start pressed?
+		beq.w	LevSel_NoMove			; if not, branch
 
-	  Move.b #1,(v_levelselect_buffer)
-	  jsr GM_Title
-	  rts
+		move.b	#$01,(v_levelselect_buffer)	; mark the level select as entered
+		jsr	GM_Title
+		rts
 	endif ; if ExtendedMenu
 
 LevSel_NoCheat:
@@ -2509,9 +2515,9 @@ LevSel_Credits:
 ; ===========================================================================
 
 LevSel_Level_SS:
-	if TweakConsistantLevelSelectClear
+	if TweakConsistLevelSelClear
 		move.w  (v_zone).w,d0
-	endif ; if TweakConsistantLevelSelectClear
+	endif ; if TweakConsistLevelSelClear
 		add.w	d0,d0				; double selected line for word-based indexing
 		move.w	LevSel_Ptrs(pc,d0.w),d0		; find relevant level pointer from table
 		bmi.w	LevelSelect			; if it's an invalid entry, branch back to main loop
@@ -2524,14 +2530,14 @@ LevSel_Level_SS:
 		move.w	d0,(v_rings).w			; clear rings
 		move.l	d0,(v_time).w			; clear time
 		move.l	d0,(v_score).w			; clear score
-	if TweakConsistantLevelSelectClear
+	if TweakConsistLevelSelClear
 		move.l d0,(v_startscore).w		; clear start score
 		move.b d0,(v_continues).w		; clear continues
 		;move.b d0,(v_lastspecial).w 	; clear special stage number
 		;move.b d0,(v_emeralds).w 		; clear emeralds
 		;move.l d0,(v_emldlist).w 		; clear emeralds
 		;move.l d0,(v_emldlist+4).w 	; clear emeralds
-	endif ; if TweakConsistantLevelSelectClear
+	endif ; if TweakConsistLevelSelClear
 	if Revision<>0
 		move.l	#5000,(v_scorelife).w		; extra life is awarded at 50000 points
 	endif
@@ -2565,9 +2571,9 @@ PlayLevel:
 		move.w	d0,(v_rings).w			; clear rings
 		move.l	d0,(v_time).w			; clear time
 		move.l	d0,(v_score).w			; clear score
-	if TweakConsistantLevelSelectClear
+	if TweakConsistLevelSelClear
 		move.l  d0,(v_startscore).w 			; clear start score
-	endif ; if TweakConsistantLevelSelectClear
+	endif ; if TweakConsistLevelSelClear
 		move.b	d0,(v_lastspecial).w		; clear special stage number
 		move.b	d0,(v_emeralds).w		; clear emeralds
 		move.l	d0,(v_emldlist).w		; clear emeralds
@@ -2666,14 +2672,14 @@ GotoDemo_PreDelayLoop:
 		cmpi.w	#$1C00,d0			; has Sonic object passed $1C00 on x-axis?
 		blo.s	GotoDemo_ChkLoop		; if not, branch
 
-	if TweakRemoveReduntantCode=0
+	if TweakRemoveReduntantCode
+		bsr.w	SS_ToSegaScreen
+	else
 		; Will never happen due to the short title screen generic timer.
 		; This likely was an old failsafe before Demos were introduced.
 		move.b	#id_Sega,(v_gamemode).w		; return to Sega screen
 		rts
-	else
-		bsr.w	SS_ToSegaScreen
-	endif ; if TweakRemoveReduntantCode=0
+	endif ; if TweakRemoveReduntantCode
 ; ===========================================================================
 
 ; loc_33E4:
@@ -2786,11 +2792,11 @@ LevSel_SndTest:
 		bne.s	LevSel_NoMove			; if not, branch
 		move.b	(v_jpadpress1).w,d1		; get currently pressed buttons
 
-	if FeatureUseSonic2SoundDriver=0
+	if FeatureUseSonic2SoundDriver ; @TODO Add dedicated Navigation Variable
+		andi.b	#btnA+btnC+btnR+btnL,d1		; Sonic 2 sound IDs also use A/C for wider navigation
+	else
 		andi.b	#btnR+btnL,d1			; is left/right pressed?
-	else ; @TODO Add dedicated Navigation Variable
-		andi.b	#btnA+btnC+btnR+btnL,d1				; is left/right	pressed?
-	endif ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FeatureUseSonic2SoundDriver
 
 		beq.s	LevSel_NoMove			; if not, branch
 
@@ -2808,25 +2814,25 @@ LevSel_Right:
 		beq.s	LevSel_Refresh2		; if not, branch
 		addq.w	#1,d0				; add 1 to sound test
 
-	if TweakNavigationLevelSelect=0
-		cmpi.w	#sfx__Last-$80+1,d0		; is result now past the last entry?
-		blo.s	LevSel_Refresh2			; if not, branch
-	else
+	if TweakNavigationLevelSelect
 LevSel_ButtonA:
-		btst    #bitA,d1					;  is A pressed?
-		beq.s   LevSel_ButtonC				; if not, branch
-		addi.b  #$10,d0						; add $10 to sound test
-		bcc.s   LevSel_ButtonC				; did the addition overflow?
-		moveq   #0,d0						; if so, set value to $00
+		btst	#bitA,d1			; is A pressed?
+		beq.s	LevSel_ButtonC			; if not, branch
+		addi.b	#$10,d0				; add $10 to sound test
+		bcc.s	LevSel_ButtonC			; did the addition overflow?
+		moveq	#$00,d0				; if so, set value to $00
 
 LevSel_ButtonC:
-		btst    #bitC,d1					; is C pressed?
-		beq.s   LevSel_Refresh2				; if not, branch
-		subi.b  #$10,d0						; subtract $10 from sound test
-		bcc.s   LevSel_Refresh2
-		cmpi.b  #$F0,d0
-		beq.s   LevSel_Refresh2				; do not set to 0 if already at 0
-	endif ; if TweakNavigationLevelSelect=0
+		btst	#bitC,d1			; is C pressed?
+		beq.s	LevSel_Refresh2			; if not, branch
+		subi.b	#$10,d0				; subtract $10 from sound test
+		bcc.s	LevSel_Refresh2			; if it did not underflow, keep the new value
+		cmpi.b	#$F0,d0
+		beq.s	LevSel_Refresh2			; do not wrap if already at $00
+	else
+		cmpi.w	#sfx__Last-$80+1,d0		; is result now past the last entry?
+		blo.s	LevSel_Refresh2			; if not, branch
+	endif ; if TweakNavigationLevelSelect
 
 		moveq	#0,d0				; if sound test moves above last entry, set to 0
 
@@ -2860,11 +2866,12 @@ levsel_yellow:		equ ArtTile_Level_Select_Font|Tile_Pal3|Tile_Prio ; VRAM setting
 
 LevSelTextLoad:
 	if EnhancedDebugMenu
-		cmpi.b #1,(v_levelselect_buffer) 						; Is this the level select?
-		beq LevSelLoad   											; if so, load level select text
-		lea (ExtendedMenuText).l,a1 					; Load the Option text
-		bra TextRead   												; continue here
-		LevSelLoad: lea (LevelMenuText).l,a1 	; load level select text
+		cmpi.b	#$01,(v_levelselect_buffer)	; is this the level select?
+		beq.s	LevSelLoad			; if so, load level select text
+		lea	(ExtendedMenuText).l,a1		; load the option menu text
+		bra.s	TextRead			; continue here
+LevSelLoad:
+		lea	(LevelMenuText).l,a1		; load level select text
 	endif ; if EnhancedDebugMenu
 
 TextRead:
@@ -2888,10 +2895,10 @@ TextRead:
 		swap	d0				; swap so that line now becomes VRAM nametable offset
 		add.l	d0,d4				; add that to base VRAM location
 	if EnhancedDebugMenu
-		cmpi.b #1,(v_levelselect_buffer)
-		beq LevSelLoad2
-		lea (ExtendedMenuText).l,a1
-		bra TextRead2
+		cmpi.b	#$01,(v_levelselect_buffer)	; is this the level select?
+		beq.s	LevSelLoad2			; if so, load level select text
+		lea	(ExtendedMenuText).l,a1		; load the option menu text
+		bra.s	TextRead2			; continue here
 LevSelLoad2:
 		lea	(LevelMenuText).l,a1		; load menu text offset
 TextRead2:
@@ -3167,9 +3174,16 @@ Level_ClrStuff:
 		clr.b	(f_victory).w
 	endif ; if FeatureBetaVictoryAnimation
 
-	if TweakUncompressedTitleCards=0
-		locVRAM	$B000
-		lea	(Gra_TitleCard).l,a0 																					; load title card patterns
+	if TweakUncompressedTitleCards
+		; Uncompressed Level Code by Aurora Fields - Fixes Title Card Corruption in Github Disassembly (however has a slightly animation bug with act number, happens with original title card code too)
+		locVRAM	ArtTile_Title_Card*tile_size,vdp_control_port
+		lea	Gra_TitleCard,a0				; load title card patterns
+		; @TODO change this to work like the uncompressed chunk code
+		move.l	#((Gra_TitleCard_End-Gra_TitleCard)/tile_size)-1,d0 ; the title card art length in tiles
+		jsr	LoadUncArt				; load uncompressed art
+	else
+		locVRAM	ArtTile_Title_Card*tile_size
+		lea	(Gra_TitleCard).l,a0			; load title card patterns
 		; if TweakLevelCompressionMode<2
 			bsr.w	NemDec
 		; elseif TweakLevelCompressionMode=2
@@ -3177,13 +3191,7 @@ Level_ClrStuff:
 		; else
 		; 	bsr.w	CompDec
 		; endif ; if TweakLevelCompressionMode<2
-	else ; Uncompressed Level Code by Aurora Fields - Fixes Title Card Corruption in Github Disassembly (however has a slightly animation bug with act number, happens with original title card code too)
-		locVRAM	$B000,vdp_control_port
-		lea	Gra_TitleCard,a0 																							; load title card patterns
-		; @TODO change this to work like the uncompressed chunk code
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0							; the title card art length in tiles
-		jsr LoadUncArt          																					; load uncompressed art
-	endif ; if TweakUncompressedTitleCards=0
+	endif ; if TweakUncompressedTitleCards
 
 	 	jsr    (Hud_Base).l
 	  bra.w    Level_ClrRam
@@ -3217,7 +3225,13 @@ Level_NoMusicFade:
 
 		disable_ints				; disable interrupts
 
-	if TweakUncompressedTitleCards=0
+	if TweakUncompressedTitleCards
+		locVRAM	ArtTile_Title_Card*tile_size,vdp_control_port
+		lea	Gra_TitleCard,a0			; load title card patterns
+		; @TODO change this to work like the uncompressed chunk code
+		move.l	#((Gra_TitleCard_End-Gra_TitleCard)/tile_size)-1,d0 ; the title card art length in tiles
+		jsr	LoadUncArt				; load uncompressed art
+	else
 		locVRAM	ArtTile_Title_Card*tile_size	; set VRAM target location for title cards
 		lea	(Gra_TitleCard).l,a0		; load title card patterns
 		; if TweakLevelCompressionMode<2
@@ -3227,13 +3241,7 @@ Level_NoMusicFade:
 		; else
 		; 	bsr.w	CompDec
 		; endif ; if TweakLevelCompressionMode<2
-	else
-		locVRAM	$B000,vdp_control_port
-		lea	Gra_TitleCard,a0 																							; load title card patterns
-		; @TODO change this to work like the uncompressed chunk code
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0							; the title card art length in tiles
-		jsr LoadUncArt          																					; load uncompressed art
-	endif ; if TweakUncompressedTitleCards=0
+	endif ; if TweakUncompressedTitleCards
 
 		enable_ints				; enable interrupts again
 
@@ -3258,11 +3266,11 @@ Level_ClrRam:
 		clearRAM v_timingandscreenvariables	; clear various timing and screen RAM (for animated tiles, etc.)
 
 	; @TODO figure out where this goes after the clearRAM stuff above was added
-	if TweakNoWaitingonPLCForLevelTiles=0
-		move.w  #((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 												; length of the PLC queue RAM
+	if TweakNoWaitPLCLevelTiles
+		move.w	#((v_plc_queue_base-$FFFFF628)/4)-1,d1
 	else
-		move.w  #((v_plc_queue_base-$FFFFF628)/4)-1,d1
-	endif
+		move.w	#((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 ; length of the PLC queue RAM
+	endif ; if TweakNoWaitPLCLevelTiles
 
 		disable_ints				; disable interrupts
 		bsr.w	ClearScreen			; wipe the screen
@@ -3345,9 +3353,9 @@ Level_PlayBgm:
 		move.b	(a1,d0.w),d0			; get music ID for current level
 		play_queued_music			; play music
 		move.b	#id_TitleCard,(v_titlecard).w	; load title card object
-	if TweakNoWaitingonPLCForLevelTiles
+	if TweakNoWaitPLCLevelTiles
 	  	move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
-	endif ; if TweakNoWaitingonPLCForLevelTiles
+	endif ; if TweakNoWaitPLCLevelTiles
 
 ; ---------------------------------------------------------------------------
 
@@ -3379,15 +3387,15 @@ Level_CheckTtlCard:
 		dbf	d1,Level_CheckTtlCard		; loop until every element has reached its target position
 	endif
 
-	if TweakNoWaitingonPLCForLevelTiles=0
-		tst.l	(v_plc_queue_base).w		; have patterns been fully decompressed and loaded?
-	else
-		move.w  (v_objspace+$C08).w,d0  																	; fix for FZ crash and title card issue
-		cmp.w   (v_objspace+$C30).w,d0    																; has title card sequence finished?
-		bne.s   Level_TtlCardLoop       																	; if not, branch
+	if TweakNoWaitPLCLevelTiles
+		move.w	(v_objspace+$C08).w,d0		; fix for FZ crash and title card issue
+		cmp.w	(v_objspace+$C30).w,d0		; has title card sequence finished?
+		bne.s	Level_TtlCardLoop		; if not, branch
 
-		subi.w  #1,v_framecount.w      																		; substract 1 from timer
-	endif
+		subi.w	#1,v_framecount.w		; subtract 1 from timer
+	else
+		tst.l	(v_plc_queue_base).w		; have patterns been fully decompressed and loaded?
+	endif ; if TweakNoWaitPLCLevelTiles
 		bne.s	Level_TtlCardLoop		; if not, loop until they have
 ; ---------------------------------------------------------------------------
 
@@ -3860,12 +3868,12 @@ SS_MainLoop:
 		bsr.w	SS_BGAnimate			; animate Special Stage background
 
 	; If Better Bonus Stage Controls are Enabled it leaves the timer off as sonic will collect the chaos emerald within a couple of extra seconds
-	if (DebugDisableDemoTime+TweakBetterBonusStageControls)=0
+	if (DebugDisableDemoTime=0)&(TweakBetterBonusStageControls=0)
 		tst.w	(f_demo).w			; is demo mode on?
 		beq.s	SS_ChkEnd			; if not, branch
 		tst.w	(v_generictimer).w		; is there time left on the demo?
 		beq.w	SS_ToSegaScreen			; if not, return to Sega screen
-	endif ; if (EnhancedDebug+DebugDisableDemoTime+TweakBetterBonusStageControls)=0
+	endif ; if (DebugDisableDemoTime=0)&(TweakBetterBonusStageControls=0)
 
 SS_ChkEnd:
 		cmpi.b	#id_Special,(v_gamemode).w	; is game mode still the Special Stage?
@@ -3923,7 +3931,13 @@ SS_FinLoop_NoBrighten:
 		move.w	#$9001,(a6)			; 64-cell hscroll size
 		bsr.w	ClearScreen			; wipe screen
 
-	if TweakUncompressedTitleCards=0
+	if TweakUncompressedTitleCards
+		;locVRAM	$B000,vdp_control_port		; set mode "VRAM Write to $B000"
+		locVRAM	ArtTile_Title_Card*tile_size,vdp_control_port ; set VRAM location for title card font
+		lea	Gra_TitleCard,a0			; load title card patterns
+		move.l	#((Gra_TitleCard_End-Gra_TitleCard)/tile_size)-1,d0 ; the title card art length in tiles
+		jsr	LoadUncArt				; load uncompressed art
+	else
 		locVRAM	ArtTile_Title_Card*tile_size	; set VRAM location for title card font
 		lea	(Nem_TitleCard).l,a0		; load title card patterns
 		; if TweakLevelCompressionMode<2
@@ -3933,13 +3947,7 @@ SS_FinLoop_NoBrighten:
 		; else
 		; 	bsr.w	CompDec
 		; endif
-	else
-		;locVRAM	$B000,vdp_control_port												; set mode "VRAM Write to $B000"
-		move.l  #$70000002,($C00004)
-		lea	Gra_TitleCard,a0 																		; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0		; the title card art length in tiles
-		jsr LoadUncArt          																; load uncompressed art
-	endif ; if TweakUncompressedTitleCards=0
+	endif ; if TweakUncompressedTitleCards
 
 		jsr	(Hud_Base).l			; load basic HUD graphics
 
@@ -4027,7 +4035,12 @@ GM_Continue:
 
 		clearRAM v_objspace			; clear object RAM
 
-	if TweakUncompressedTitleCards=0
+	if TweakUncompressedTitleCards
+		locVRAM	ArtTile_Title_Card*tile_size,vdp_control_port
+		lea	Gra_TitleCard,a0			; load title card patterns
+		move.l	#((Gra_TitleCard_End-Gra_TitleCard)/tile_size)-1,d0 ; the title card art length in tiles
+		jsr	LoadUncArt				; load uncompressed art
+	else
 		locVRAM	ArtTile_Title_Card*tile_size	; set VRAM location for title card patterns
 		lea	(Nem_TitleCard).l,a0		; load title card patterns
 		; if TweakLevelCompressionMode<2
@@ -4037,12 +4050,7 @@ GM_Continue:
 		; else
 		; 	bsr.w	CompDec
 		; endif
-	else
-		locVRAM	$B000,vdp_control_port
-		lea	Gra_TitleCard,a0 																	; load title card patterns
-		move.l  #((Gra_TitleCard_End-Gra_TitleCard)/32)-1,d0	; the title card art length in tiles
-		jsr LoadUncArt          ; load uncompressed art
-	endif ; if TweakUncompressedTitleCards=0
+	endif ; if TweakUncompressedTitleCards
 
 		locVRAM	$A000
 		lea	(Nem_ContSonic).l,a0		; load Sonic patterns
@@ -4109,11 +4117,11 @@ Cont_NoCountdown:
 		bne.w	Cont_MainLoop			; if not, loop game mode
 
 		; Continue wasn't used. Game Over.
-	if TweakRemoveReduntantCode=0
+	if TweakRemoveReduntantCode
+		bsr.w	SS_ToSegaScreen
+	else
 		move.b	#id_Sega,(v_gamemode).w		; go to Sega screen
 		rts					; return to MainGameLoop
-	else
-		bsr.w	SS_ToSegaScreen
 	endif
 ; ===========================================================================
 
@@ -4161,11 +4169,11 @@ GM_Ending:
 		clearRAM v_timingandscreenvariables	; clear various timing and screen RAM (for animated tiles, etc.)
 
 	; @TODO Figure out where this goes in the new code
-	if TweakNoWaitingonPLCForLevelTiles=0
-		move.w  #((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 												; length of the PLC queue RAM
+	if TweakNoWaitPLCLevelTiles
+		move.w	#((v_plc_queue_base-$FFFFF628)/4)-1,d1
 	else
-		move.w  #((v_plc_queue_base-$FFFFF628)/4)-1,d1
-	endif
+		move.w	#((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 ; length of the PLC queue RAM
+	endif ; if TweakNoWaitPLCLevelTiles
 
 		disable_ints				; disable interrupts
 		disable_display				; disable screeen output
@@ -4194,7 +4202,7 @@ End_LoadData:
 		bsr.w	LevelSizeLoad			; load level size and set default level boundaries
 		bsr.w	DeformLayers			; initialize background deformation
 		bset	#2,(v_fg_scroll_flags).w	; draw an extra column at the left side of the screen during level start
-	if TweakNonNemesisLevelArtLoad>0
+	if TweakNonNemesisLevelArtLoad
 		bsr.w	LoadZoneTiles										; load level art
 	endif
 		bsr.w	LevelDataLoad			; load block mappings and palettes
@@ -4618,16 +4626,16 @@ TryAg_MainLoop:
 		jsr	(BuildSprites).l		; build sprites for end objects
 
 		andi.b	#btnStart,(v_jpadpress1).w	; has Start button been pressed?
-	if TweakRemoveReduntantCode=0
-		bne.s	TryAg_Exit			; if yes, exit end screen
-	else
+	if TweakRemoveReduntantCode
 		bne.w	SS_ToSegaScreen										; if yes, branch
+	else
+		bne.s	TryAg_Exit			; if yes, exit end screen
 	endif
 		tst.w	(v_generictimer).w		; have 30 seconds elapsed?
-	if TweakRemoveReduntantCode=0
-		beq.s	TryAg_Exit			; if yes, exit end screen
-	else
+	if TweakRemoveReduntantCode
 		beq.w	SS_ToSegaScreen										; if yes, branch
+	else
+		beq.s	TryAg_Exit			; if yes, exit end screen
 	endif
 		cmpi.b	#id_Credits,(v_gamemode).w	; is game mode still set to show the end screen?
 		beq.s	TryAg_MainLoop			; if yes, loop
@@ -5160,19 +5168,19 @@ Art_Sonic:	incbin	"Enhancements/artunc/Sonic - Expanded.unc"	; Sonic
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
-	if (FeatureEnableUnusedArt>0)|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 Nem_Smoke:	binclude	"artnem/Unused - Smoke.nem"
 		even
 Nem_SyzSparkle:	binclude	"artnem/Unused - SYZ Sparkles.nem"
 		even
-	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
+	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
 
 Nem_Shield:	binclude	"artnem/Shield.nem"
 		even
 Nem_Stars:	binclude	"artnem/Invincibility Stars.nem"
 		even
 
-	if (FeatureEnableUnusedArt>0)|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 Nem_LzSonic:	binclude	"artnem/Unused - LZ Sonic.nem" ; Sonic holding his breath
 		even
 Nem_UnkFire:	binclude	"artnem/Unused - Fireball.nem" ; unused fireball
@@ -5181,7 +5189,7 @@ Nem_Warp:	binclude	"artnem/Unused - SStage Flash.nem" ; entry to special stage f
 		even
 Nem_Goggle:	binclude	"artnem/Unused - Goggles.nem" ; unused goggles
 		even
-	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
+	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
 
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - special stage
@@ -5418,18 +5426,20 @@ Nem_Cater:	binclude	"artnem/Enemy Caterkiller.nem"
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
-	if TweakUncompressedTitleCards=0
-		if TweakLevelCompressionMode=0
-Gra_TitleCard:	binclude	"artnem/Title Cards.nem"
-		elseif TweakLevelCompressionMode=1
-Gra_TitleCard:	binclude	"Enhancements/artnem/Recompressed/Title Cards.nem"
-		elseif TweakLevelCompressionMode=2
-Gra_TitleCard:	binclude	"Enhancements/artkos/Recompressed/Title Cards.nem"
-		else
-Gra_TitleCard:	binclude	"Enhancements/artcom/Title Cards.nem"
-		endif
-	else
+	if TweakUncompressedTitleCards
 Gra_TitleCard:	binclude	"Enhancements/artunc/Decompressed/Title Cards.nem"
+	else
+		if TweakLevelCompressionMode
+			if TweakLevelCompressionMode=1
+Gra_TitleCard:	binclude	"Enhancements/artnem/Recompressed/Title Cards.nem"
+			elseif TweakLevelCompressionMode=2
+Gra_TitleCard:	binclude	"Enhancements/artkos/Recompressed/Title Cards.nem"
+			else
+Gra_TitleCard:	binclude	"Enhancements/artcom/Title Cards.nem"
+			endif
+		else
+Gra_TitleCard:	binclude	"artnem/Title Cards.nem"
+		endif
 	endif
 Gra_TitleCard_End:
 		even
@@ -5490,11 +5500,15 @@ Nem_Squirrel:	binclude	"artnem/Animal Squirrel.nem"
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
 
-    if TweakLevelCompressionMode=0
+	if TweakLevelCompressionMode
+		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings.asm"
+	else
 Blk16_GHZ:	binclude	"map16/GHZ.eni"
 		even
+Gra_Title:
 Nem_GHZ_1st:	binclude	"artnem/8x8 - GHZ1.nem"	; GHZ primary patterns
 		even
+Gra_GHZ:
 Nem_GHZ_2nd:	binclude	"artnem/8x8 - GHZ2.nem"	; GHZ secondary patterns
 		even
 Blk256_GHZ:	binclude	"map256/GHZ.kos"
@@ -5502,6 +5516,7 @@ Blk256_GHZ:	binclude	"map256/GHZ.kos"
 
 Blk16_LZ:	binclude	"map16/LZ.eni"
 		even
+Gra_LZ:
 Nem_LZ:		binclude	"artnem/8x8 - LZ.nem"	; LZ primary patterns
 		even
 Blk256_LZ:	binclude	"map256/LZ.kos"
@@ -5509,6 +5524,7 @@ Blk256_LZ:	binclude	"map256/LZ.kos"
 
 Blk16_MZ:	binclude	"map16/MZ.eni"
 		even
+Gra_MZ:
 Nem_MZ:		binclude	"artnem/8x8 - MZ.nem"	; MZ primary patterns
 		even
 Blk256_MZ:
@@ -5522,6 +5538,7 @@ Blk256_MZ:
 
 Blk16_SLZ:	binclude	"map16/SLZ.eni"
 		even
+Gra_SLZ:
 Nem_SLZ:	binclude	"artnem/8x8 - SLZ.nem"	; SLZ primary patterns
 		even
 Blk256_SLZ:	binclude	"map256/SLZ.kos"
@@ -5529,6 +5546,7 @@ Blk256_SLZ:	binclude	"map256/SLZ.kos"
 
 Blk16_SYZ:	binclude	"map16/SYZ.eni"
 		even
+Gra_SYZ:
 Nem_SYZ:	binclude	"artnem/8x8 - SYZ.nem"	; SYZ primary patterns
 		even
 Blk256_SYZ:	binclude	"map256/SYZ.kos"
@@ -5536,6 +5554,7 @@ Blk256_SYZ:	binclude	"map256/SYZ.kos"
 
 Blk16_SBZ:	binclude	"map16/SBZ.eni"
 		even
+Gra_SBZ:
 Nem_SBZ:	binclude	"artnem/8x8 - SBZ.nem"	; SBZ primary patterns
 		even
 Blk256_SBZ:
@@ -5546,13 +5565,7 @@ Blk256_SBZ:
 		binclude	"map256/SBZ (REV01).kos"
 		even
 	endif
-    elseif TweakLevelCompressionMode=1
-		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (Recompressed).asm"
-    elseif TweakLevelCompressionMode=2
-		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (Kosinski).asm"
-    else
-		include "Enhancements/_inc/Graphics - Primary Patterns and Block Mappings (COMPER).asm"
-    endif ; if TweakLevelCompressionMode<2
+	endif ; if TweakLevelCompressionMode
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - bosses and ending sequence
 ; ---------------------------------------------------------------------------
@@ -5586,7 +5599,7 @@ Nem_EndSonic:	binclude	"artnem/Ending - Sonic.nem"
 Gra_TryAgain:
 Nem_TryAgain:	binclude	"artnem/Ending - Try Again.nem"
 		even
-	if (FeatureEnableUnusedArt>)0|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 Gra_EndEggman:
 Nem_EndEggman:
 		binclude	"artnem/Unused - Eggman Ending.nem"
@@ -5819,7 +5832,7 @@ Art_BigRing:	binclude	"artunc/Giant Ring.unc"
 		even
 
 	if FeatureSpindash>1
-Art_Dust:	binclude	"Enhancements/artunc/spindust.bin"
+Art_Dust:	binclude	"Enhancements/artunc/spindust.unc"
 		even
 	endif ; if FeatureSpindash>1
 ; ---------------------------------------------------------------------------
@@ -6012,10 +6025,10 @@ ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
 ; ---------------------------------------------------------------------------
 
 SoundDriver:
-	if FeatureUseSonic2SoundDriver=0
-		include "s1.sounddriver.asm"
+	if FeatureUseSonic2SoundDriver
+		include "Enhancements/s2.sounddriver.stuff.asm"
 	else
-		include "Enhancements/s2.sounddriver.asm"
+		include "s1.sounddriver.asm"
 	endif
 		even
 
@@ -6024,23 +6037,24 @@ SoundDriver:
 ; end of 'ROM'
 
     if AdvancedDebugger
-	SampleLevelDebugger:
-	   Console.WriteLine "Camera (FG): %<.w $FFFFF700>-%<.w $FFFFF704>"
-	   Console.WriteLine "Camera (BG): %<.w $FFFFF708>-%<.w $FFFFF70C>"
-	   Console.BreakLine
+    ; @NOTE this shouldnt be removed
+SampleLevelDebugger:
+		Console.WriteLine	"Camera (FG): %<.w $FFFFF700>-%<.w $FFFFF704>"
+		Console.WriteLine	"Camera (BG): %<.w $FFFFF708>-%<.w $FFFFF70C>"
+		Console.BreakLine
 
-	   Console.WriteLine "%<pal1>Objects IDs in slots:%<pal0>"
-	   Console.Write "%<setw,39>"       ; format slots table nicely ...
+		Console.WriteLine	"%<pal1>Objects IDs in slots:%<pal0>"
+		Console.Write		"%<setw,39>"       ; format slots table nicely ...
 
-	   lea       $FFFFD000, a0
-	   move.w   #$2000/$40-1, d0
+		lea	$FFFFD000,a0
+		move.w	#$2000/$40-1,d0
 
-	   @DisplayObjSlot:
-	       Console.Write "%<.b (a0)> "
-	       lea       $40(a0), a0
-	       dbf       d0, @DisplayObjSlot
+.DisplayObjSlot:
+		Console.Write "%<.b (a0)> "
+		lea	$40(a0),a0
+		dbf	d0,.DisplayObjSlot
 
-	   rts
+		rts
 
 		include   "Enhancements/ErrorHandler.asm"
     endif ; if AdvancedDebugger

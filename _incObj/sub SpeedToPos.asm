@@ -9,21 +9,21 @@ SpeedToPos:
 	endif
 		move.w	obVelX(a0),d0	; load horizontal speed
 		ext.l	d0
-	if TweakFasterObjectMove=0
-		asl.l	#8,d0			; multiply speed by $100
-		add.l	d0,d2			; add to x-axis	position
-	else
+	if TweakFasterObjectMove
 		lsl.l	#8,d0			; multiply speed by $100
 		add.l	d0,obX(a0)		; add to x-axis	position
-	endif
+	else
+		asl.l	#8,d0			; multiply speed by $100
+		add.l	d0,d2			; add to x-axis	position
+	endif ; if TweakFasterObjectMove
 		move.w	obVelY(a0),d0	; load vertical	speed
 		ext.l	d0
-	if TweakFasterObjectMove=0
-		asl.l	#8,d0			; multiply by $100
-	else
+	if TweakFasterObjectMove
 		lsl.l	#8,d0			; multiply by $100
 		add.l	d0,obY(a0)		; add to y-axis	position
-	endif
+	else
+		asl.l	#8,d0			; multiply by $100
+	endif ; if TweakFasterObjectMove
 	if TweakFasterObjectMove=0
 		add.l	d0,d3			; add to y-axis	position
 		move.l	d2,obX(a0)		; update x-axis	position

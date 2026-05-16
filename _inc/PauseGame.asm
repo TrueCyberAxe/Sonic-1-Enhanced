@@ -9,20 +9,20 @@ PauseGame:
 
 		tst.b	(v_lives).w																; do you have any lives	left?
 
-	if (EnhancedDebug+FeatureSonicCDPauseRestartLevel)=0
-		beq.s	Unpause																		; if not, branch
-	else
+	if (EnhancedDebug)|(FeatureCDPauseRestartLevel)
 		beq.w	Unpause																		; if not, branch
+	else
+		beq.s	Unpause																		; if not, branch
 	endif
 
 		tst.w	(f_pause).w																; is game already paused?
 		bne.s	Pause_StopGame														; if yes, branch
 		btst	#bitStart,(v_jpadpress1).w 								; is Start button pressed?
 
-	if (EnhancedDebug+FeatureSonicCDPauseRestartLevel)=0
-		beq.s	Pause_DoNothing														; if not, branch
-	else
+	if (EnhancedDebug)|(FeatureCDPauseRestartLevel)
 		beq.w	Pause_DoNothing														; if not, branch
+	else
+		beq.s	Pause_DoNothing														; if not, branch
 	endif
 
 Pause_StopGame:
@@ -37,14 +37,15 @@ Pause_StopGame:
 		move.w	#1,(f_pause).w																; freeze time
 
 	if FeatureMusicWhilePaused=0
-		if FeatureUseSonic2SoundDriver=0
-			move.b	#1,(v_snddriver_ram.f_pausemusic).w ; pause music				; pause music
-		else
+		if FeatureUseSonic2SoundDriver
+			; Tell the Sonic 2 sound driver to pause from inside its own Z80 RAM.
 			stopZ80
 			waitZ80
-			move.b  #MusID_Pause,(Z80_RAM+zAbsVar.StopMusic).l  ; pause music
+			move.b	#MusID_Pause,(Z80_RAM+zAbsVar.StopMusic).l	; pause music
 			startZ80
-		endif ; if FeatureUseSonic2SoundDriver=0
+		else
+			move.b	#1,(v_snddriver_ram.f_pausemusic).w ; pause music				; pause music
+		endif ; if FeatureUseSonic2SoundDriver
 	endif ; if FeatureMusicWhilePaused=0
 
 Pause_Loop:
@@ -52,10 +53,10 @@ Pause_Loop:
 		bsr.w	WaitForVBlank
 		tst.b	(f_slomocheat).w 													; is slow-motion cheat on?
 
-	if FeatureSonicCDPauseRestartLevel=0
-		beq.s	Pause_ChkStart														; if not, branch
-	else
+	if FeatureCDPauseRestartLevel
 		beq.s	Pause_Check_Reset													; if not, branch
+	else
+		beq.s	Pause_ChkStart														; if not, branch
 	endif
 
 		btst	#bitA,(v_jpadpress1).w 										; is button A pressed?
@@ -65,23 +66,23 @@ Pause_Loop:
 		bra.s	Pause_EndMusic
 ; ===========================================================================
 
-	if FeatureSonicCDPauseRestartLevel
+	if FeatureCDPauseRestartLevel
 Pause_Check_Reset:
-		cmp.b #1,(v_lives).w    												; Check if you only have 1 life
- 		beq.s Pause_ChkStart  													; If so branch (This way you don't get 0 lives and then underflow)
+		cmpi.b	#$01,(v_lives).w		; check if only 1 life remains
+		beq.s	Pause_ChkStart			; if so, avoid underflowing to 0 lives
 		btst	#bitA,(v_jpadpress1).w 										; is button A pressed?
 		bne.s	Pause_Reset																; if so, branch
 		btst	#bitB,(v_jpadpress1).w 										; is button B pressed?
 		bne.s	Pause_Reset																; if so, branch
 		btst	#bitC,(v_jpadpress1).w 										; is button C pressed?
 		bne.s	Pause_Reset																; if so, branch
-		bra.s	Pause_ChkStart														; Check Start Buttom
+		bra.s	Pause_ChkStart			; check Start button
 
 Pause_Reset:
-		lea (v_objspace).w,a0
-		jsr KillSonic																		; Kill Sonic
-    bra.s Pause_EndMusic 														; Unpause
-	endif ; if FeatureSonicCDPauseRestartLevel
+		lea	(v_objspace).w,a0
+		jsr	KillSonic			; kill Sonic to restart the level
+		bra.s	Pause_EndMusic			; unpause
+	endif ; if FeatureCDPauseRestartLevel
 
 Pause_ChkBC:
 		btst	#bitB,(v_jpadhold1).w ; is button B held?
@@ -96,14 +97,15 @@ Pause_ChkStart:
 Pause_EndMusic:
 	if FeatureMusicWhilePaused=0
 
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; unpause the music
-	else
+	if FeatureUseSonic2SoundDriver
+		; Tell the Sonic 2 sound driver to unpause from inside its own Z80 RAM.
 		stopZ80
 		waitZ80
-		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+		move.b	#MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
 		startZ80
-	endif ; if FeatureUseSonic2SoundDriver=0
+	else
+		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; unpause the music
+	endif ; if FeatureUseSonic2SoundDriver
 
 	endif ; if FeatureMusicWhilePaused=0
 
@@ -119,14 +121,15 @@ Pause_SlowMo:
 
 	if FeatureMusicWhilePaused=0
 
-	if FeatureUseSonic2SoundDriver=0
-		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; Unpause the music
-	else
+	if FeatureUseSonic2SoundDriver
+		; Slow motion advances one frame, so unpause the Sonic 2 sound driver here too.
 		stopZ80
 		waitZ80
-		move.b  #MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
+		move.b	#MusID_Unpause,(Z80_RAM+zAbsVar.StopMusic).l
 		startZ80
-	endif ; if FeatureUseSonic2SoundDriver=0
+	else
+		move.b	#$80,(v_snddriver_ram.f_pausemusic).w	; Unpause the music
+	endif ; if FeatureUseSonic2SoundDriver
 
 	endif ; if FeatureMusicWhilePaused=0
 

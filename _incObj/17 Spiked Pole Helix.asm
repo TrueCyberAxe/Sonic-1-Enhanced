@@ -109,10 +109,10 @@ locret_7DA6:
 
 Hel_ChkDel:
 		out_of_range.w	Hel_DelAll
-	if BugFixRenderBeforeInit=0 ; Bug 2
-		rts
-	else
+	if BugFixRenderBeforeInit ; Bug 2
 		bra.w	DisplaySprite
+	else
+		rts
 	endif
 ; ===========================================================================
 

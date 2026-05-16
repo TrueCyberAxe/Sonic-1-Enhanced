@@ -49,10 +49,10 @@ Brick_Action:	; Routine 2
 
 			out_of_range.w	DeleteObject
 
-			if BugFixRenderBeforeInit=0 ; Bug 1
-				rts
-			else
+			if BugFixRenderBeforeInit ; Bug 1
 				bra.w	DisplaySprite
+			else
+				rts
 			endif
 	else
 		out_of_range.w	DeleteObject

@@ -35,13 +35,13 @@ MDemo_On:
 		btst	#bitA,(v_jpadhold1).w 						; check if A is pressed
 		beq.s	.checkC										; if not, branch
 
-		bra .quit
+		bra	.quit
 
-	@checkC:
+.checkC:
 		btst	#bitC,(v_jpadhold1).w 						; check if C is pressed
 		beq.s	.skip										; if not, branch
 
-		bra .quit
+		bra	.quit
 
 .skip:
 	endif ; if EnhancedDebug

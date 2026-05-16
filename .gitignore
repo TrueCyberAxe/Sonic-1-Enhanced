@@ -24,6 +24,7 @@ sonic.lst
 sonic.log
 errors.txt
 sonic.p
+nom.log
 
 # Built ROMs.
 s1built.bin

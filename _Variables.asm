@@ -24,9 +24,7 @@ v_16x16:		ds.b	$1800		; 16x16 tile mappings
 v_sgfx_buffer:		ds.b	tile_size*23	; buffered Sonic graphics ($17 cells)
 v_sgfx_buffer_end:
 
-if Enhanced=0
-			ds.b	$20		; unused
-else
+	if Enhanced
 
 ; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
 ; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.
@@ -37,7 +35,9 @@ v_sfx_frequency:	ds.b	1		; spin dash rev SFX frequency		$FFFFC902
 v_screendelay_v:	ds.b	1		; vertical screen delay timer		$FFFFC903
 v_screendelay:		ds.b	1		; screen delay timer			$FFFFC904
 			ds.b	$1B		; unused
-endif
+	else
+			ds.b	$20		; unused
+	endif
 
 v_tracksonic:		ds.b	$100		; position tracking data for Sonic
 v_hscrolltablebuffer:	ds.b	$380		; scrolling table data
@@ -78,14 +78,14 @@ v_sonicbubbles:	equ	v_objspace+object_size*13	; object variable space for the bu
 v_watersurface1:equ	v_objspace+object_size*30	; object variable space for the water surface #1 ($40 bytes)
 v_watersurface2:equ	v_objspace+object_size*31	; object variable space for the water surface #1 ($40 bytes)
 
-v_endifard:	equ	v_objspace+object_size*23	; object variable space for the level results card ($1C0 bytes)
-v_endifardsonic:	equ	v_endifard+object_size*0		; object variable space for the level results card "SONIC HAS" text ($40 bytes)
-v_endifardpassed:equ	v_endifard+object_size*1		; object variable space for the level results card "PASSED" text ($40 bytes)
-v_endifardact:	equ	v_endifard+object_size*2		; object variable space for the level results card act text ($40 bytes)
-v_endifardscore:	equ	v_endifard+object_size*3		; object variable space for the level results card score tally ($40 bytes)
-v_endifardtime:	equ	v_endifard+object_size*4		; object variable space for the level results card time bonus tally ($40 bytes)
-v_endifardring:	equ	v_endifard+object_size*5		; object variable space for the level results card ring bonus tally ($40 bytes)
-v_endifardoval:	equ	v_endifard+object_size*6		; object variable space for the level results card oval ($40 bytes)
+v_endcard:	equ	v_objspace+object_size*23	; object variable space for the level results card ($1C0 bytes)
+v_endcardsonic:	equ	v_endcard+object_size*0		; object variable space for the level results card "SONIC HAS" text ($40 bytes)
+v_endcardpassed:equ	v_endcard+object_size*1		; object variable space for the level results card "PASSED" text ($40 bytes)
+v_endcardact:	equ	v_endcard+object_size*2		; object variable space for the level results card act text ($40 bytes)
+v_endcardscore:	equ	v_endcard+object_size*3		; object variable space for the level results card score tally ($40 bytes)
+v_endcardtime:	equ	v_endcard+object_size*4		; object variable space for the level results card time bonus tally ($40 bytes)
+v_endcardring:	equ	v_endcard+object_size*5		; object variable space for the level results card ring bonus tally ($40 bytes)
+v_endcardoval:	equ	v_endcard+object_size*6		; object variable space for the level results card oval ($40 bytes)
 
 v_lvlobjspace:	equ	v_objspace+object_size*32	; level object variable space ($1800 bytes)
 v_lvlobjend:	equ	v_lvlobjspace+object_size*96
@@ -156,11 +156,11 @@ f_pause:		ds.w	1		; flag set to pause the game
 			ds.b	4		; unused
 v_vdp_buffer2:		ds.w	1		; VDP instruction buffer
 
-    if Enhanced=0
-			ds.b	2		; unused
-    else
+	if Enhanced
 v_startscore:		ds.w	1		; score as of checkpoint
-    endif
+	else
+			ds.b	2		; unused
+	endif
 
 f_hblank_pal:		ds.w	1		; flag set to change palette during HBlank (0000 = no; 0001 = change) (previously called f_hbla_pal)
 v_waterpos1:		ds.w	1		; water height, actual
@@ -191,10 +191,10 @@ v_plc_buffer_end:
 ; ===========================================================================
 ; PLC Queue Enhancement
 ; ===========================================================================
-	if TweakNoWaitingonPLCForLevelTiles=0
-v_plc_queue_base:	equ	v_plc_buffer		; beginning of RAM allocated for PLC
-	else
+	if TweakNoWaitPLCLevelTiles
 v_plc_queue_base:	equ	v_pal_buffer		; beginning of RAM allocated for PLC
+	else
+v_plc_queue_base:	equ	v_plc_buffer		; beginning of RAM allocated for PLC
 	endif
 
 v_plc_queue_end:	equ	v_plc_ptrnemcode	; end of PLC queue / start of decompression state
@@ -278,11 +278,11 @@ v_palss_time:		ds.w	1		; palette cycling in Special Stage - time until next chan
 v_palss_index:		ds.w	1		; palette cycling in Special Stage - index into palette cycle 2 (unused?)
 v_ssbganim:		ds.w	1		; Special Stage background animation
 
-    if Enhanced=0
-			ds.b	2		; unused
-    else
+	if Enhanced
 v_camera_pan:		ds.w	1		; extended camera pan offset
-    endif
+	else
+			ds.b	2		; unused
+	endif
 
 v_obj31ypos:		ds.w	1		; y-position of object 31 (MZ stomper)
 			ds.b	1		; unused
@@ -494,11 +494,11 @@ f_creditscheat:		ds.b	1		; hidden credits & press start cheat flag
 v_title_dcount:		ds.w	1		; number of times the d-pad is pressed on title screen
 v_title_ccount:		ds.w	1		; number of times C is pressed on title screen
 
-	if Enhanced=0
-			ds.b	2		; unused
-	else
+	if Enhanced
 f_victory:		ds.b	1		; victory condition flag
 f_levelreload:		ds.b	1		; reload level flag
+	else
+			ds.b	2		; unused
 	endif
 
 v_unused2:		ds.w	1		; unused

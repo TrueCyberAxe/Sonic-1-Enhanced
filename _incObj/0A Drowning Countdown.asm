@@ -179,13 +179,15 @@ Drown_WobbleData:
 ; ===========================================================================
 
 Drown_Countdown:; Routine $A
-	if FeatureRestoreMonitorScubaGear>0
-		tst.b	(f_goggles).w					; Do We Have Goggles?
+	if FeatureRestoreMonitorScubaGear
+		; Scuba gear bypasses the normal air countdown while goggles are active.
+		tst.b	(f_goggles).w					; do we have goggles?
 		bne.w	No_Countdown					; if yes, branch
 	endif
 
-	if BugFixDrownInDebug>0
-		tst.w	(v_debuguse).w					; Are we in Debug?
+	if BugFixDrownInDebug
+		; Debug mode should not keep draining the player's air timer.
+		tst.w	(v_debuguse).w					; are we in debug mode?
 		bne.w	No_Countdown					; if yes, branch
 	endif
 
@@ -196,12 +198,12 @@ Drown_Countdown:; Routine $A
 		btst	#6,(v_player+obStatus).w			; is Sonic underwater?
 		beq.w	.nocountdown					; if not, branch
 
-	if FeatureAirAnimation>0
-		cmpi.b #id_roll,obAnim(a0) 				; Is animation 2 active?
-		beq.s @skip						; If so, branch.
+	if FeatureAirAnimation
+		cmpi.b	#id_roll,obAnim(a0)				; is the rolling animation active?
+		beq.s	.airanimskip					; if so, branch
 
 		move.b	#id_Surf,obAnim(a0)				; use Sonic's drowning animation
-	@skip:
+.airanimskip:
 	endif
 
 		subq.w	#1,drown_time(a0)				; decrement timer
@@ -221,7 +223,7 @@ Drown_Countdown:; Routine $A
 		cmpi.w	#12,d0
 		bhi.s	.reduceair					; if air is above 12, branch
 
-	if FeatureAirAnimation>0
+	if FeatureAirAnimation
 		move.b	#id_Surf,obAnim(a0)				; use Sonic's drowning animation
 	endif
 
@@ -262,7 +264,7 @@ Drown_Countdown:; Routine $A
 		move.b	#1,(f_nobgscroll).w
 	if FixBugs
 		; Correct Drowning Bugs
-		move.b	#2,obRoutine(a0)	; make sure Sonic is in his default state (Sonic_Control)
+		move.b	#$02,obRoutine(a0)	; make sure Sonic is in his default state (Sonic_Control)
 		clr.b	(f_timecount).w		; also stop the timer immediately to avoid double deaths from Time Overs
 	endif
 		movea.l	(sp)+,a0
@@ -272,11 +274,12 @@ Drown_Countdown:; Routine $A
 .loc_13F86:
 		subq.w	#1,objoff_2C(a0)
 
-	if BugFixDrowningTimer=0
-		bne.s	.loc_13F94
-	else
+	if BugFixDrowningTimer
+		; Keep Sonic from moving during the countdown delay before the drowning state starts.
 		bne.s	.nochange
-	endif
+	else
+		bne.s	.loc_13F94
+	endif ; if BugFixDrowningTimer
 
 		move.b	#6,(v_player+obRoutine).w
 		rts

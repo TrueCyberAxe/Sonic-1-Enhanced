@@ -1,108 +1,86 @@
 ; Bug Fixes, Tweaks and Feature Options Implemented by Cyber Axe
 ; any code based on the work done by the community is given where possible.
 
-	if Original=1
-AdvancedDebugger				equ 0
-Debug:          				equ 0 ; Debug Mode Always Enabled
-EnhancedDebug:  				equ 0 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-EnhancedDebugMenu: 			equ 0
-	else
-AdvancedDebugger				equ 1 ; Vladik's Advanced Error Handler and Debugger 2.0
-Debug:          				equ 1 ; Debug Mode Always Enabled
-EnhancedDebug:  				equ 1 ; Some Additions Based on Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-EnhancedDebugMenu: 			equ 0
-	endif
+DebugDisableDemoTime:						equ 0
+OptimiseSound:							equ 0
 
-if Original=1
-    include "Features_Original.asm"
-else
-    include "Features.asm"
-endif
+    include "Enhancements/Features.asm"
 
 ; ============================================================================
-	if TweakUncompressedChunkMapping>0
-TweakMergedArt:											equ 1
-	elseif TweakLevelCompressionMode>1
-TweakMergedArt:											equ 1
+	if (TweakUncompressedChunkMapping)|(TweakLevelCompressionMode>1)
+TweakMergedArt:								equ 1
 	else
-TweakMergedArt:											equ 0
+TweakMergedArt:								equ 0
 	endif
 
-	if TweakLevelCompressionMode<2
-TweakNonNemesisLevelArtLoad: 				equ 0
-	elseif TweakSonic2LevelArtLoader=0
-TweakNonNemesisLevelArtLoad: 				equ 0
+	if (TweakLevelCompressionMode>1)&(TweakS2LevelArtLoader)
+TweakNonNemesisLevelArtLoad: 						equ Enhanced
 	else
-TweakNonNemesisLevelArtLoad: 				equ 1
+TweakNonNemesisLevelArtLoad: 						equ 0
 	endif
 
-	if TweakSonic2LevelArtLoader>0
-FeatureEnhancedPLCQueue: 						equ 1
-	elseif FeatureSpindash>1
-FeatureEnhancedPLCQueue: 						equ 1
+	if (TweakS2LevelArtLoader)|(FeatureSpindash>1)
+FeatureEnhancedPLCQueue: 						equ 0
 	else
-FeatureEnhancedPLCQueue: 						equ 1
+FeatureEnhancedPLCQueue: 						equ 0
 	endif
 
-	if Revision=0
-FeatureEnableUnusedArt: 						equ 1
-	elseif Revision>2
+	if (Revision=0)|(Revision>2)
 FeatureEnableUnusedArt: 						equ 1
 	else
-FeatureEnableUnusedArt: 						equ 0
+FeatureEnableUnusedArt: 						equ Enhanced
 	endif
 
-	if (BugFixCameraFollow+FeatureSpindash)>0
-FixCameraFollow: 										equ 1
+	if (BugFixCameraFollow)|(FeatureSpindash)
+FixCameraFollow: 							equ 1
 	else
-FixCameraFollow: 										equ 0
+FixCameraFollow: 							equ 0
 	endif
 
-	if (BugFixInvincibilityDelayDeath)>0
-OptimizeMonitorOrder:								equ 1
+	if BugFixInvincibilityDelayDeath
+OptimizeMonitorOrder:							equ 1
 	else
 OptimizeMonitorOrder: 							equ 0
 	endif
 
-	if (FeatureSonicCDExtendedCamera+BugFixCameraFollow)>0
-FixCameraFollowBug: 								equ 1
+	if (FeatureSonicCDExtendedCamera)|(BugFixCameraFollow)
+FixCameraFollowBug: 							equ 1
 	else
-FixCameraFollowBug: 								equ 0
+FixCameraFollowBug: 							equ 0
 	endif
 
-	if EnhancedDebugMenu>0
-ExtendedMenu: 											equ 1
+	if EnhancedDebugMenu
+ExtendedMenu: 								equ 1
 	else
-ExtendedMenu: 											equ 0
+ExtendedMenu: 								equ 0
 	endif
 
-	if ExtendedMenu>0
-AsciiMenu: 													equ 1
+	if ExtendedMenu
+AsciiMenu: 								equ 1
 	else
-AsciiMenu: 													equ 0
+AsciiMenu: 								equ 0
 	endif
 
-	if EnhancedDebug>0
+	if EnhancedDebug
 ExtendedGameModeArray:							equ 1	;	Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-the-gamemodearray.1983/#post-31703
 	else
 ExtendedGameModeArray:							equ 0
 	endif
 
-	if EnhancedDebug>0
-ExtendedLevelSelect:								equ 1
+	if EnhancedDebugMenu
+ExtendedLevelSelect:							equ 1
 	else
-ExtendedLevelSelect:								equ 0
+ExtendedLevelSelect:							equ 0
 	endif
 
 	if FeatureSpindash>1
-SonicExpanded:											equ 1
+SonicExpanded:								equ 1
 	else
-SonicExpanded:											equ 1
+SonicExpanded:								equ 0
 	endif ; if FeatureSpindash>1
 
 	if FeatureSpindash>1
-ExtendedSoundEffects:								equ 1
+ExtendedSoundEffects:							equ 1
 	else
-ExtendedSoundEffects:								equ 1
+ExtendedSoundEffects:							equ Enhanced
 	endif ; if FeatureSpindash>1
-

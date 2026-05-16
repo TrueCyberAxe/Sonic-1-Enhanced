@@ -160,7 +160,7 @@ zVar STRUCT DOTS
 	FadeOutDelay:		ds.b 1
 	Communication:		ds.b 1	; Unused byte used to synchronise gameplay events with music
 	DACUpdating:		ds.b 1	; Set to FFh while DAC is updating, then back to 00h
-	QueueToPlay:		ds.b 1	; if NOT set to 80h, means new index was requested by 68K
+	QueueToPlay:		ds.b 1	; if NOT set to S2QueueEmpty, means new index was requested by 68K
 	SFXToPlay:		ds.b 1	; When Genesis wants to play "normal" sound, it writes it here
 	SFXStereoToPlay:	ds.b 1	; When Genesis wants to play alternating stereo sound, it writes it here
 	SFXUnknown:		ds.b 1	; Unknown type of sound queue, but it's in Genesis code like it was once used
@@ -413,11 +413,11 @@ zUpdateEverything:
 	or	(ix+zVar.SFXUnknown)		; zComRange+0Bh -- "unknown" slot
 	call	nz,zCycleQueue			; If any of those are non-zero, cycle queue
 
-	; Apparently if this is 80h, it does not play anything new,
+	; Apparently if this is S2QueueEmpty, it does not play anything new,
 	; otherwise it cues up the next play (flag from 68K for new item)
 	ld	a,(zAbsVar.QueueToPlay)
-	cp	80h
-	call	nz,zPlaySoundByIndex		; If not 80h, we need to play something new!
+	cp	S2QueueEmpty
+	call	nz,zPlaySoundByIndex		; If not S2QueueEmpty, we need to play something new!
 
 	; Spindash update
 	ld	a,(zSpindashPlayingCounter)
@@ -1395,7 +1395,7 @@ zResumeTrack:
 ;zsub_674
 zCycleQueue:
 	ld	a,(zAbsVar.QueueToPlay)		; Check if a sound request was made zComRange+08h
-	cp	80h				; Is queue slot equal to 80h?
+	cp	S2QueueEmpty			; Is the queue slot empty?
 	ret	nz				; If not, return
 	ld	hl,zAbsVar.SFXToPlay		; Get address of next sound
 	ld	a,(zAbsVar.SFXPriorityVal)	; Get current SFX priority
@@ -1406,10 +1406,13 @@ zCycleQueue:
 	ld	e,a				; 'a' -> 'e'
 	ld	(hl),0				; Clear it back to zero (we got it)
 	inc	hl				; hl = pointer to next queue item
+	cp	CmdID__First			; Is this a Sonic 1-compatible command ID?
+	jr	c,.notcommand			; If not, test music/SFX ranges
+	cp	CmdID__End			; Is this still within the command range?
+	jr	c,zlocQueueItem			; If so, queue it without SFX priority checks
+.notcommand:
 	cp	MusID__First			; Is it before first music?
 	jr	c,zlocQueueNext			; if so, branch
-	cp	CmdID__First			; Is it a special command?
-	jr	nc,zlocQueueItem		; If so, branch
 	sub	SndID__First			; Subtract first SFX index
 	jr	c,zlocQueueItem			; If it was music, branch
 	add	a,zSFXPriority&0FFh		; a = low byte of pointer to SFX priority
@@ -1443,28 +1446,43 @@ zlocQueueItem:
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 ; zsub_6B2:
 zPlaySoundByIndex:
-	or	a				; is it sound 00?
-	jp	z,zClearTrackPlaybackMem	; if yes, branch to RESET EVERYTHING!!
-    if MusID__First-1 == 80h
-	ret	p				; return if it was (invalidates 00h-7Fh; maybe we don't want that someday?)
-    else
-	cp	MusID__First
-	ret	c				; return if id is less than the first music id
-    endif
+	    or	a				; is it sound 00?
+	    jp	z,zClearTrackPlaybackMem	; if yes, branch to RESET EVERYTHING!!
+	if CmdID__First<MusID__First
+	    cp	CmdID__First			; Is this before Sonic 1-compatible command IDs?
+	    ret	c				; If yes, return
+	    cp	CmdID__End			; Is this a Sonic 1-compatible command ID?
+	    jr	c,zPlaySound_Command		; If yes, branch to the command table
+	    cp	MusID__First			; Is this before first music?
+	    ret	c				; If yes, return
+	elseif MusID__First-1 == 80h
+	    ret	p				; return if it was (invalidates 00h-7Fh; maybe we don't want that someday?)
+	else
+	    cp	MusID__First
+	    ret	c				; return if id is less than the first music id
+	endif
 
-	ld	(ix+zVar.QueueToPlay),80h	; Rewrite zComRange+8 flag so we know nothing new is coming in
-	cp	MusID__End			; is it music (less than index 20)?
-	jp	c,zPlayMusic			; if yes, branch to play the music
-	cp	SndID__First			; is it not a sound? (this check is redundant if MusID__End == SndID__First...)
-	ret	c				; if it isn't a sound, return (do nothing)
-	cp	SndID__End			; is it a sound (less than index 71)?
-	jp	c,zPlaySound_CheckRing		; if yes, branch to play the sound
-	cp	CmdID__First			; is it after the last regular sound but before the first special sound command (between 71 and 78)?
+	; Rewrite zComRange+8 flag so we know nothing new is coming in.
+	    ld	(ix+zVar.QueueToPlay),S2QueueEmpty
+	    cp	MusID__End			; is it music (less than index 20)?
+	    jp	c,zPlayMusic			; if yes, branch to play the music
+	    cp	SndID__First			; is it not a sound? (this check is redundant if MusID__End == SndID__First...)
+	    ret	c				; if it isn't a sound, return (do nothing)
+	    cp	SndID__End			; is it within the SFX ID range?
+	    jp	c,zPlaySound_CheckRing		; if yes, branch to play the sound
+	if CmdID__First<MusID__First
+	ret					; IDs above the SFX range are unused by this compatibility table
+	else
+	cp	CmdID__First			; is it after the last SFX but before the first command ID?
 	ret	c				; if yes, return (do nothing)
 	cp	MusID_Pause			; is it sound 7E or 7F (pause all or resume all)
 	ret	nc				; if yes, return (those get handled elsewhere)
+	endif
 	; Otherwise, this is a special command to the music engine...
-	sub	CmdID__First	; convert index 78-7D to a lookup into the following jump table
+zPlaySound_Command:
+	; Rewrite zComRange+8 flag so we know nothing new is coming in.
+	ld	(ix+zVar.QueueToPlay),S2QueueEmpty
+	sub	CmdID__First			; convert index $78-$7D to a lookup into the following jump table
 	add	a,a
 	add	a,a
 	ld	(zloc_6D5+1),a	; store into the instruction after zloc_6D5 (self-modifying code)
@@ -1474,17 +1492,17 @@ zloc_6D5:
 ; ---------------------------------------------------------------------------
 zCommandIndex:
 
-CmdPtr_StopSFX:		jp	zStopSoundEffects ; sound test index 78
+CmdPtr_StopSFX:		jp	zStopSoundEffects ; sound test index $78
 			db	0
-CmdPtr_FadeOut:		jp	zFadeOutMusic ; 79
+CmdPtr_FadeOut:		jp	zFadeOutMusic ; $79
 			db	0
-CmdPtr_SegaSound:	jp	zPlaySegaSound ; 7A
+CmdPtr_SegaSound:	jp	zPlaySegaSound ; $7A
 			db	0
-CmdPtr_SpeedUp:		jp	zSpeedUpMusic ; 7B
+CmdPtr_SpeedUp:		jp	zSpeedUpMusic ; $7B
 			db	0
-CmdPtr_SlowDown:	jp	zSlowDownMusic ; 7C
+CmdPtr_SlowDown:	jp	zSlowDownMusic ; $7C
 			db	0
-CmdPtr_Stop:		jp	zStopSoundAndMusic ; 7D
+CmdPtr_Stop:		jp	zStopSoundAndMusic ; $7D
 			db	0
 CmdPtr__End:
 ; ---------------------------------------------------------------------------
@@ -1507,7 +1525,7 @@ zPlaySegaSound:
 	ld	de,(Snd_Sega_End - Snd_Sega)/2	; was: 30BAh
 	ld	a,2Ah			; DAC data register
 	ld	(zYM2612_A0),a		; Select it
-	ld	c,80h			; If QueueToPlay is not this, stops Sega PCM
+	ld	c,S2QueueEmpty		; If QueueToPlay is not this, stops Sega PCM
 
 @loop:	ld	a,(hl)			; Get next PCM byte
 	ld	(zYM2612_D0),a		; Send to DAC
@@ -1518,7 +1536,7 @@ zPlaySegaSound:
 
 	nop
 	ld	a,(zAbsVar.QueueToPlay)	; Get next item to play
-	cp	c			; Is it 80h?
+	cp	c			; Is it S2QueueEmpty?
 	jr	nz,@skip			; If not, stop Sega PCM
 	ld	a,(hl)			; Get next PCM byte
 	ld	(zYM2612_D0),a		; Send to DAC
@@ -2355,7 +2373,7 @@ zClearTrackPlaybackMem:
 	ld	(hl),0				; Starting byte is 00h
 	ld	bc,(zTracksSFXEnd-zAbsVar)-1	; For 695 bytes...
 	ldir					; 695 bytes of clearing!  (Because it will keep copying the byte prior to the byte after; thus 00h repeatedly)
-	ld	a,80h
+	ld	a,S2QueueEmpty
 	ld	(zAbsVar.QueueToPlay),a		; Nothing is queued
 	call	zFMSilenceAll			; Silence FM
 	jp	zPSGSilenceAll			; Silence PSG
@@ -2400,7 +2418,7 @@ zInitMusicPlayback:
 	pop	bc
 	ld	(ix+zVar.SFXPriorityVal),b
 	ld	(ix+zVar.1upPlaying),c		; 1-up playing flag
-	ld	a,80h
+	ld	a,S2QueueEmpty
 	ld	(zAbsVar.QueueToPlay),a
 
     if FixDriverBugs
@@ -3521,50 +3539,37 @@ idstart :=	80h
 ; note: +20h means uncompressed, here
 ; +40h is a flag that forces PAL mode off when set
 
-zMusIDPtr_2PResult:	db	id(MusPtr_2PResult)	; 92
-zMusIDPtr_EHZ:		db	id(MusPtr_EHZ)		; 81
-zMusIDPtr_MCZ_2P:	db	id(MusPtr_MCZ_2P)	; 85
-zMusIDPtr_OOZ:		db	id(MusPtr_OOZ)		; 8F
-zMusIDPtr_MTZ:		db	id(MusPtr_MTZ)		; 82
-zMusIDPtr_HTZ:		db	id(MusPtr_HTZ)		; 94
-zMusIDPtr_ARZ:		db	id(MusPtr_ARZ)		; 86
-zMusIDPtr_CNZ_2P:	db	id(MusPtr_CNZ_2P)	; 80
-zMusIDPtr_CNZ:		db	id(MusPtr_CNZ)		; 83
-zMusIDPtr_DEZ:		db	id(MusPtr_DEZ)		; 87
-zMusIDPtr_MCZ:		db	id(MusPtr_MCZ)		; 84
-zMusIDPtr_EHZ_2P:	db	id(MusPtr_EHZ_2P)	; 91
-zMusIDPtr_SCZ:		db	id(MusPtr_SCZ)		; 8E
-zMusIDPtr_CPZ:		db	id(MusPtr_CPZ)		; 8C
-zMusIDPtr_WFZ:		db	id(MusPtr_WFZ)		; 90
-zMusIDPtr_HPZ:		db	id(MusPtr_HPZ)		; 9B
-zMusIDPtr_Options:	db	id(MusPtr_Options)	; 89
-zMusIDPtr_SpecStage:	db	id(MusPtr_SpecStage)	; 88
-zMusIDPtr_Boss:		db	id(MusPtr_Boss)		; 8D
-zMusIDPtr_EndBoss:	db	id(MusPtr_EndBoss)	; 8B
-zMusIDPtr_Ending:	db	id(MusPtr_Ending)	; 8A
-zMusIDPtr_SuperSonic:	db	id(MusPtr_SuperSonic)	; 93
-zMusIDPtr_Invincible:	db	id(MusPtr_Invincible)	; 99
-zMusIDPtr_ExtraLife:	db	id(MusPtr_ExtraLife)+20h; B5
-zMusIDPtr_Title:	db	id(MusPtr_Title)	; 96
-zMusIDPtr_EndLevel:	db	id(MusPtr_EndLevel)	; 97
-zMusIDPtr_GameOver:	db	id(MusPtr_GameOver)+20h	; B8
-zMusIDPtr_Continue:	db	(MusPtr_Continue-MusicPoint1)/ptrsize	; 0
-zMusIDPtr_Emerald:	db	id(MusPtr_Emerald)+20h	; BA
-zMusIDPtr_Credits:	db	id(MusPtr_Credits)+20h	; BD
-zMusIDPtr_Countdown:	db	id(MusPtr_Drowning)+40h	; DC
+	; Sonic 1-compatible music IDs. These entries point at an S1-format pointer table
+	; supplied by s2.sounddriver.stuff.asm, and $20 marks each song as uncompressed.
+zMusIDPtr_GHZ:		db	id(MusPtr_GHZ)+20h		; 81
+zMusIDPtr_LZ:		db	id(MusPtr_LZ)+20h		; 82
+zMusIDPtr_MZ:		db	id(MusPtr_MZ)+20h		; 83
+zMusIDPtr_SLZ:		db	id(MusPtr_SLZ)+20h		; 84
+zMusIDPtr_SYZ:		db	id(MusPtr_SYZ)+20h		; 85
+zMusIDPtr_SBZ:		db	id(MusPtr_SBZ)+20h		; 86
+zMusIDPtr_Invincible:	db	id(MusPtr_Invincible)+20h	; 87
+zMusIDPtr_ExtraLife:	db	id(MusPtr_ExtraLife)+20h	; 88
+zMusIDPtr_SS:		db	id(MusPtr_SS)+20h		; 89
+zMusIDPtr_Title:	db	id(MusPtr_Title)+20h		; 8A
+zMusIDPtr_Ending:	db	id(MusPtr_Ending)+20h		; 8B
+zMusIDPtr_Boss:		db	id(MusPtr_Boss)+20h		; 8C
+zMusIDPtr_FZ:		db	id(MusPtr_FZ)+20h		; 8D
+zMusIDPtr_GotThrough:	db	id(MusPtr_GotThrough)+20h	; 8E
+zMusIDPtr_GameOver:	db	id(MusPtr_GameOver)+20h		; 8F
+zMusIDPtr_Continue:	db	id(MusPtr_Continue)+20h		; 90
+zMusIDPtr_Credits:	db	id(MusPtr_Credits)+20h		; 91
+zMusIDPtr_Drowning:	db	id(MusPtr_Drowning)+20h		; 92
+zMusIDPtr_Emerald:	db	id(MusPtr_Emerald)+20h		; 93
 zMusIDPtr__End:
 
 ; Tempo with speed shoe tempo for each song
 ;zbyte_1214
 zSpedUpTempoTable:
-	db	 68h,0BEh,0FFh,0F0h
-	db	0FFh,0DEh,0FFh,0DDh
-	db	 68h, 80h,0D6h, 7Bh
-	db	 7Bh,0FFh,0A8h,0FFh
-	db	 87h,0FFh,0FFh,0C9h
-	db	 97h,0FFh,0FFh,0CDh
-	db	0CDh,0AAh,0F2h,0DBh
-	db	0D5h,0F0h, 80h
+	db	07h,72h,73h,26h
+	db	15h,08h,0FFh,05h
+	db	0FFh,0FFh,0FFh,0FFh
+	db	0FFh,0FFh,0FFh,0FFh
+	db	0FFh,0FFh,0FFh
 
 	; DAC sample pointers and lengths
 	ensure1byteoffset 1Ch

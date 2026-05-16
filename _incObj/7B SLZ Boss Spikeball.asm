@@ -9,16 +9,18 @@ BossSpikeball:
 		jsr	BossSpikeball_Index(pc,d0.w)
 		move.w	obBossX(a0),d0
 		andi.w	#$FF80,d0
-	if TweakSonic2OffScreenDeletionCode=0
+	if TweakS2OffscreenDelete
+		; Use the object manager's cached rounded camera X like Sonic 2.
+		sub.w	(v_opl_screen).w,d0
+		addi.w	#$80,d0 ; approx distance between object and screen
+	else
 		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#$80,d1
 		andi.w	#$FF80,d1
 		sub.w	d1,d0 ; approx distance between object and screen
-	else
-		sub.w (v_screenposx_coarse).w,d0
 	endif
 		bmi.w	BossStarLight_Delete
-		cmpi.w	#$280,d0
+		cmpi.w	#$280,d0		; 128+320+192
 		bhi.w	BossStarLight_Delete
 		jmp	(DisplaySprite).l
 ; ===========================================================================
@@ -399,7 +401,7 @@ BossSpikeball_MoveFrag:	; Routine $A
 		bra.w	BossStarLight_Delete
 	else
 		bpl.w	BossStarLight_Delete
-	endif # if (BugFixRenderBeforeInit)|(FixBugs)
+	endif ; if (BugFixRenderBeforeInit)|(FixBugs)
 
 .return:
 		rts

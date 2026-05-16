@@ -47,7 +47,7 @@ ESon_MakeEmeralds:
 		bne.s	ESon_Wait
 		addq.b	#2,ob2ndRout(a0)
 		move.w	#1,obAnim(a0)
-		move.b	#id_endifhaos,(v_endemeralds).w ; load chaos emeralds objects
+		move.b	#id_Chaos,(v_endemeralds).w ; load chaos emeralds objects
 
 ESon_Wait:
 		rts
@@ -126,7 +126,7 @@ ESon_Wait4:
 ; Object 88 - chaos emeralds on the ending sequence
 ; ---------------------------------------------------------------------------
 
-endifhaos:
+Chaos:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
 		move.w	ECha_Index(pc,d0.w),d1
@@ -158,7 +158,7 @@ ECha_CreateEms:
 		moveq	#5,d1
 
 ECha_LoadLoop:
-		move.b	#id_endifhaos,obID(a1) ; load chaos emerald object
+		move.b	#id_Chaos,obID(a1) ; load chaos emerald object
 		addq.b	#2,obRoutine(a1)
 		move.l	#Map_ECha,obMap(a1)
 		move.w	#ArtTile_Ending_Emeralds,obGfx(a1)

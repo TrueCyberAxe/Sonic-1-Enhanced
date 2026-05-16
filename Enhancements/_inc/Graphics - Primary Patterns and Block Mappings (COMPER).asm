@@ -1,45 +1,45 @@
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
-	if TweakMergedArt=0
-Blk16_TITLE:
-	else
+	if TweakMergedArt
 Blk16_TITLE:		incbin	"Enhancements/Enhancements/map16/GHZ.eni"
 		even
-		if TweakTitleCompress=0
-Gra_Title:			incbin	"Enhancements/artnem/8x8 - GHZ1.nem"	; GHZ primary patterns
-		else
+		if TweakTitleCompress
 Gra_Title:			incbin	"Enhancements/artcom/8x8 - GHZ1.comp"	; GHZ primary patterns
+		else
+Gra_Title:			incbin	"Enhancements/artnem/8x8 - GHZ1.nem"	; GHZ primary patterns
 		endif
 		even
-		if TweakUncompressedChunkMapping=0
-Blk256_TITLE:		incbin	"Enhancements/map256/GHZ.kosp"
-		else
+		if TweakUncompressedChunkMapping
 Blk256_TITLE:		incbin	"Enhancements/map256/GHZ.unc"
-		endif ; if TweakUncompressedChunkMapping=0
+		else
+Blk256_TITLE:		incbin	"Enhancements/map256/GHZ.kosp"
+		endif ; if TweakUncompressedChunkMapping
 		even
-	endif ; if TweakMergedArt=0
+	else
+Blk16_TITLE:
+	endif ; if TweakMergedArt
 ; ---------------------------------------------------------------------------
 ; Green Hill Zone
 ; ---------------------------------------------------------------------------
 Blk16_GHZ:		incbin	"Enhancements/map16/GHZ.eni"
 		even
-	if TweakMergedArt=0
+	if TweakMergedArt
+Gra_GHZ:	  	incbin	"Enhancements/artcom/8x8 - GHZ.comp"	; GHZ combined patterns
+	else
 Gra_Title:		incbin	"Enhancements/artnem/8x8 - GHZ1.nem"	; GHZ primary patterns
 		even
 Gra_GHZ:			incbin	"Enhancements/artcom/8x8 - GHZ2.comp"	; GHZ secondary patterns
-	else
-Gra_GHZ:	  	incbin	"Enhancements/artcom/8x8 - GHZ.comp"	; GHZ combined patterns
-	endif ; if TweakMergedArt=0
+	endif ; if TweakMergedArt
 		even
 	if TweakMergedArt=0
 Blk256_TITLE:
 	endif ; if TweakMergedArt=0
-	if TweakUncompressedChunkMapping=0
-Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.kosp"
-	else
+	if TweakUncompressedChunkMapping
 Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.unc"
-	endif ; if TweakUncompressedChunkMapping=0
+	else
+Blk256_GHZ:		incbin	"Enhancements/map256/GHZ.kosp"
+	endif ; if TweakUncompressedChunkMapping
 		even
 ; ---------------------------------------------------------------------------
 ; Labyrinth Zone
@@ -48,11 +48,11 @@ Blk16_LZ:			incbin	"Enhancements/map16/LZ.eni"
 		even
 Gra_LZ:				incbin	"Enhancements/artcom/8x8 - LZ.comp"	; LZ primary patterns
 		even
-	if TweakUncompressedChunkMapping=0
-Blk256_LZ:		incbin	"Enhancements/map256/LZ.kosp"
-	else
+	if TweakUncompressedChunkMapping
 Blk256_LZ:		incbin	"Enhancements/map256/LZ.unc"
-	endif ; if TweakUncompressedChunkMapping=0
+	else
+Blk256_LZ:		incbin	"Enhancements/map256/LZ.kosp"
+	endif ; if TweakUncompressedChunkMapping
 		even
 ; ---------------------------------------------------------------------------
 ; Marble Zone
@@ -63,18 +63,18 @@ Gra_MZ:				incbin	"Enhancements/artcom/8x8 - MZ.comp"	; MZ primary patterns
 		even
 Blk256_MZ:
 	if Revision=0
-		if TweakUncompressedChunkMapping=0
-							incbin	"Enhancements/map256/MZ.kosp"
-		else
+		if TweakUncompressedChunkMapping
 							incbin	"Enhancements/map256/MZ.unc"
+		else
+							incbin	"Enhancements/map256/MZ.kosp"
 		endif
 	else
-		if TweakUncompressedChunkMapping=0
-							incbin	"Enhancements/map256/MZ (JP1).kosp"
-		else
+		if TweakUncompressedChunkMapping
 							incbin	"Enhancements/map256/MZ (JP1).unc"
+		else
+							incbin	"Enhancements/map256/MZ (JP1).kosp"
 		endif
-	endif ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping
 		even
 ; ---------------------------------------------------------------------------
 ; Star Light Zone
@@ -83,11 +83,11 @@ Blk16_SLZ:		incbin	"Enhancements/map16/SLZ.eni"
 		even
 Gra_SLZ:			incbin	"Enhancements/artcom/8x8 - SLZ.comp"	; SLZ primary patterns
 		even
-	if TweakUncompressedChunkMapping=0
-Blk256_SLZ:		incbin	"Enhancements/map256/SLZ.kosp"
-	else
+	if TweakUncompressedChunkMapping
 Blk256_SLZ:		incbin	"Enhancements/map256/SLZ.unc"
-	endif ; if TweakUncompressedChunkMapping=0
+	else
+Blk256_SLZ:		incbin	"Enhancements/map256/SLZ.kosp"
+	endif ; if TweakUncompressedChunkMapping
 		even
 ; ---------------------------------------------------------------------------
 ; Spring Yard Zone
@@ -96,11 +96,11 @@ Blk16_SYZ:		incbin	"Enhancements/map16/SYZ.eni"
 		even
 Gra_SYZ:			incbin	"Enhancements/artcom/8x8 - SYZ.comp"	; SYZ primary patterns
 		even
-	if TweakUncompressedChunkMapping=0
-Blk256_SYZ:		incbin	"Enhancements/map256/SYZ.kosp"
-	else
+	if TweakUncompressedChunkMapping
 Blk256_SYZ:		incbin	"Enhancements/map256/SYZ.unc"
-	endif ; if TweakUncompressedChunkMapping=0
+	else
+Blk256_SYZ:		incbin	"Enhancements/map256/SYZ.kosp"
+	endif ; if TweakUncompressedChunkMapping
 		even
 ; ---------------------------------------------------------------------------
 ; Scrap Brain Zone
@@ -111,16 +111,16 @@ Gra_SBZ:			incbin	"Enhancements/artcom/8x8 - SBZ.comp"	; SBZ primary patterns
 		even
 Blk256_SBZ:
 	if Revision=0
-		if TweakUncompressedChunkMapping=0
-							incbin	"Enhancements/map256/SBZ.kosp"
-		else
+		if TweakUncompressedChunkMapping
 							incbin	"Enhancements/map256/SBZ.unc"
+		else
+							incbin	"Enhancements/map256/SBZ.kosp"
 		endif
 	else
-		if TweakUncompressedChunkMapping=0
-							incbin	"Enhancements/map256/SBZ (JP1).kosp"
-		else
+		if TweakUncompressedChunkMapping
 							incbin	"Enhancements/map256/SBZ (JP1).unc"
+		else
+							incbin	"Enhancements/map256/SBZ (JP1).kosp"
 		endif
-	endif ; if TweakUncompressedChunkMapping=0
+	endif ; if TweakUncompressedChunkMapping
 		even

@@ -269,11 +269,11 @@ Solid_Squash:
 		move.l	a0,-(sp)
 		movea.l	a1,a0
 
-	if FeatureContextualDeath=0
-		jsr	(KillSonic).l												; kill Sonic
-	else
+	if FeatureContextualDeath
 		jsr	(KillSonicByCrushing).l								; kill Sonic
-	endif
+	else
+		jsr	(KillSonic).l												; kill Sonic
+	endif ; if FeatureContextualDeath
 
 		movea.l	(sp)+,a0
 		moveq	#-1,d4

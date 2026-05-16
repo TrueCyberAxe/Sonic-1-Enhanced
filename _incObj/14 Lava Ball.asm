@@ -68,11 +68,11 @@ LBall_Action:	; Routine 2
 		bsr.w	AnimateSprite
 
 LBall_ChkDel:
-	if BugFixRenderBeforeInit=0 ; Bug 6
-		out_of_range.w	DeleteObject
-	else
+	if BugFixRenderBeforeInit ; Bug 6
 		out_of_range	LBall_Delete
-  	endif # if BugFixRenderBeforeInit=0
+	else
+		out_of_range.w	DeleteObject
+	endif ; if BugFixRenderBeforeInit
 
 	if FixBugs
 		bra.w	DisplaySprite

@@ -109,11 +109,11 @@ PLC_GameOver_end:
 ; ---------------------------------------------------------------------------
 PLC_GHZ:	plcheader
 	if TweakNonNemesisLevelArtLoad=0
-		if TweakMergedArt=0
+		if TweakMergedArt
+			plcm	Gra_GHZ,	ArtTile_Level			; GHZ main patterns
+		else
 			plcm	Gra_Title,	ArtTile_Level			; GHZ main patterns
 			plcm	Gra_GHZ,	ArtTile_Level+$1CD		; GHZ secondary patterns
-		else
-			plcm	Gra_GHZ,	ArtTile_Level			; GHZ main patterns
 		endif
 	endif
 		plcm	Nem_Stalk,	ArtTile_GHZ_Flower_Stalk	; flower stalk
@@ -162,9 +162,9 @@ PLC_LZ2:	plcheader
 		plcm	Nem_LzDoor2,	ArtTile_LZ_Blocks		; large horizontal door
 		plcm	Nem_LzWheel,	ArtTile_LZ_Conveyor_Belt	; wheel
 		plcm	Nem_Gargoyle,	ArtTile_LZ_Gargoyle		; gargoyle head
-	if (FeatureEnableUnusedArt>0)|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 		plcm	Nem_LzSonic,	ArtTile_LZ_Sonic_Drowning	; Sonic holding his breath
-	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
+	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
 		plcm	Nem_LzPlatfm,	ArtTile_LZ_Rising_Platform	; rising platform
 		plcm	Nem_Orbinaut,	ArtTile_LZ_Orbinaut		; orbinaut enemy
 		plcm	Nem_Jaws,	ArtTile_Jaws			; jaws enemy
@@ -324,11 +324,11 @@ PLC_Signpost_end:
 ; Pattern load cues - beta special stage warp effect
 ; ---------------------------------------------------------------------------
 PLC_Warp:
-	if (FeatureEnableUnusedArt>0)|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 PLC_WarpRev0:	plcheader
 		plcm	Nem_Warp,	ArtTile_Warp
 PLC_WarpRev0_end:
-	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
+	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
 
 ; ---------------------------------------------------------------------------
 ; Pattern load cues - special stage
@@ -426,9 +426,9 @@ PLC_Ending:	plcheader
 		plcm	Nem_EndFlower,	ArtTile_Ending_Flowers		; flowers
 		plcm	Nem_EndEm,	ArtTile_Ending_Emeralds		; emeralds
 		plcm	Nem_EndSonic,	ArtTile_Ending_Sonic		; Sonic
-	if (FeatureEnableUnusedArt>0)|(Revision=0)
+	if (FeatureEnableUnusedArt)|(Revision=0)
 		plcm	Nem_EndEggman,	ArtTile_Ending_Eggman		; Eggman's death (unused)
-	endif ; if (FeatureEnableUnusedArt>0)|(Revision=0)
+	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
 		plcm	Nem_Rabbit,	ArtTile_Ending_Rabbit		; rabbit
 		plcm	Nem_Chicken,	ArtTile_Ending_Chicken		; chicken
 		plcm	Nem_Penguin,	ArtTile_Ending_Penguin		; penguin

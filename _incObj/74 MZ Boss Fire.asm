@@ -60,7 +60,7 @@ BossFire_Action:	; Routine 2
 ; ===========================================================================
 
 BossFire_Delete:
-	if BugFixRenderBeforeInit>0 ; Bug 6 Fix
+	if BugFixRenderBeforeInit ; Bug 6 Fix
 		addq.l  #4,sp
 	endif
 		jmp	(DeleteObject).l

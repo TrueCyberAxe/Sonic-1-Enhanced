@@ -133,17 +133,17 @@ Spring_Flipped:
 		move.w	#15,locktime(a1)
 		move.w	obVelX(a1),obInertia(a1)
 
-	if BugFixSpringFaceWrongDirection=0
-		bchg	#0,obStatus(a1)
+	if BugFixSpringFaceWrongDirection
+		tst.w	obVelX(a1)				; is Sonic moving left?
+		bmi.s	.faceleft				; if yes, branch
+		bclr	#0,obStatus(a1)				; face Sonic right
+		bra.s	.facecont
+.faceleft:
+		bset	#0,obStatus(a1)				; face Sonic left
+.facecont:
 	else
-		cmp.w   #0,x_vel(a1)
-		bmi.s   Face_Left    								; if Sonic is running left, branch
-		bclr    #0,status(a1)
-		bra.s   Face_cont
-	Face_Left:
-    bset    #0,status(a1)
-  Face_Cont: ; End of fix
-	endif
+		bchg	#0,obStatus(a1)
+	endif ; if BugFixSpringFaceWrongDirection
 
 		btst	#2,obStatus(a1)
 		bne.s	loc_DC56

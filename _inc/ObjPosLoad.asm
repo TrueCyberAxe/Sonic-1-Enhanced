@@ -112,12 +112,6 @@ OPL_Main:
 ; ---------------------------------------------------------------------------
 
 OPL_Next:
-	if TweakSonic2OffScreenDeletionCode
-		move.w (v_screenposx).w,d1
-		subi.w #$80,d1
-		andi.w #$FF80,d1
-		move.w d1,(v_screenposx_coarse).w
-	endif
 		lea	(v_objstate).w,a2
 		moveq	#0,d2
 		move.w	(v_screenposx).w,d6

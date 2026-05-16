@@ -166,12 +166,12 @@ CStom_Ceiling:	; Routine 6
 
 CStom_ChkDel:
 		out_of_range.w	DeleteObject
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 1 / 2 / 6 Fix
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1 / 2 / 6 Fix
+		rts
+	else
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bra.w	DisplaySprite
-	else
-		rts
 	endif
 ; ===========================================================================
 

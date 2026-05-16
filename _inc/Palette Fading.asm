@@ -16,33 +16,34 @@ PalFadeIn_Alt:				; start position and size are already set
 .fill:
 		move.w	d1,(a0)+
 		dbf	d0,.fill 	; fill palette with black
-	if TweakBetterFadeEffects=0
-		move.w	#$16-1,d4
+	if TweakBetterFadeEffects
+		moveq	#cRed,d4											; MJ: prepare maximum colour check
+		moveq	#$00,d6												; MJ: clear delay counter
 	else
-		moveq	#$0E,d4												; MJ: prepare maximum colour check
-		moveq	#$00,d6												; MJ: clear d6
+		move.w	#$16-1,d4
 	endif
 
 .mainloop:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		bsr.w	RunPLC
+		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
+		bsr.w	WaitForVBlank
+		; Only apply a colour step every other frame to keep the fade speed close to the original.
+		bchg	#$00,d6												; MJ: change delay counter
+		beq	.mainloop												; MJ: if null, delay a frame
+		bsr.s	FadeIn_FromBlack
+		subq.b	#$02,d4											; MJ: decrease colour check
+		bne	.mainloop												; MJ: if it has not reached null, branch
+		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w	; MJ: wait for V-blank again (so colours transfer)
+		bra	WaitForVBlank											; MJ: ''
+	else
 		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
 		bsr.s	FadeIn_FromBlack
 		bsr.w	RunPLC
 		dbf	d4,.mainloop
 		rts
-	else
-		bsr.w	RunPLC
-		move.b	#$12,(v_vblank_routine).w
-		bsr.w	WaitforVBla
-		bchg	#$00,d6												; MJ: change delay counter
-		beq	.mainloop												; MJ: if null, delay a frame
-		bsr.s	FadeIn_FromBlack
-		subq.b	#$02,d4											; MJ: decrease colour check
-		bne	.mainloop												; MJ: if it has not reached null, branch
-		move.b	#$12,(v_vblank_routine).w			; MJ: wait for V-blank again (so colours transfer)
-		bra	WaitforVBla											; MJ: ''
-	endif
+	endif ; if TweakBetterFadeEffects
 ; End of function PaletteFadeIn
 ; ===========================================================================
 
@@ -80,7 +81,30 @@ FadeIn_FromBlack:
 ; ===========================================================================
 
 FadeIn_AddColour:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		move.b	(a1),d5		; MJ: load blue
+		move.w	(a1)+,d1	; MJ: load green and red
+		move.b	d1,d2		; MJ: load red
+		lsr.b	#$04,d1		; MJ: get only green
+		andi.b	#cRed,d2	; MJ: get only red
+		move.w	(a0),d3		; MJ: load current colour in buffer
+		cmp.b	d5,d4		; MJ: is it time for blue to fade?
+		bhi	.noblue		; MJ: if not, branch
+		addi.w	#$0200,d3	; MJ: increase blue
+
+.noblue:
+		cmp.b	d1,d4		; MJ: is it time for green to fade?
+		bhi	.nogreen	; MJ: if not, branch
+		addi.b	#$20,d3		; MJ: increase green
+
+.nogreen:
+		cmp.b	d2,d4		; MJ: is it time for red to fade?
+		bhi	.nored		; MJ: if not, branch
+		addq.b	#$02,d3		; MJ: increase red
+
+.nored:
+		move.w	d3,(a0)+	; MJ: save colour
+	else
 .addblue:
 		move.w	(a1)+,d2
 		move.w	(a0),d3
@@ -110,7 +134,8 @@ FadeIn_AddColour:
 
 .next:
 		addq.w	#2,a0		; next colour
-		rts
+	endif
+		rts			; MJ: return
 ; End of function FadeIn_AddColour
 
 ; ===========================================================================
@@ -120,21 +145,22 @@ FadeIn_AddColour:
 
 PaletteFadeOut:
 		move.w	#$003F,(v_pfade_start).w ; start position = 0; size = $40
-	if TweakBetterFadeEffects=0
-		move.w	#$16-1,d4
+	if TweakBetterFadeEffects
+		moveq	#cRed/2,d4	; MJ: set repeat times
+		moveq	#$00,d6		; MJ: clear delay counter
 	else
-		moveq	#$07,d4		; MJ: set repeat times
-		moveq	#$00,d6		; MJ: clear d6
+		move.w	#$16-1,d4
 	endif
 
 
 .mainloop:
 	if TweakBetterFadeEffects
 		bsr.w	RunPLC
-	endif Cyber Axe: This set of Code seems to be the problem code
+	endif ; Cyber Axe: This set of Code seems to be the problem code
 		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
-	if TweakBetterFadeEffects>0
+	if TweakBetterFadeEffects
+		; Only apply a colour step every other frame to keep the fade speed close to the original.
 		bchg	#$00,d6												; MJ: change delay counter
 		beq	.mainloop												; MJ: if null, delay a frame
 	endif
@@ -172,7 +198,28 @@ FadeOut_ToBlack:
 ; ===========================================================================
 
 FadeOut_DecColour:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		move.w	(a0),d5		; MJ: load colour
+		move.w	d5,d1		; MJ: copy to d1
+		move.b	d1,d2		; MJ: load green and red
+		move.b	d1,d3		; MJ: load red
+		andi.w	#cBlue,d1	; MJ: get only blue
+		beq	.noblue		; MJ: if blue is finished, branch
+		subi.w	#$0200,d5	; MJ: decrease blue
+
+.noblue:
+		andi.w	#cGreen,d2	; MJ: get only green (needs to be word)
+		beq	.nogreen	; MJ: if green is finished, branch
+		subi.b	#$20,d5		; MJ: decrease green
+
+.nogreen:
+		andi.b	#cRed,d3	; MJ: get only red
+		beq	.nored		; MJ: if red is finished, branch
+		subq.b	#$02,d5		; MJ: decrease red
+
+.nored:
+		move.w	d5,(a0)+	; MJ: save new colour
+	else
 .dered:
 		move.w	(a0),d2
 		beq.s	.next
@@ -201,27 +248,6 @@ FadeOut_DecColour:
 
 .next:
 		addq.w	#2,a0
-else
-		move.w	(a0),d5		; MJ: load colour
-		move.w	d5,d1		; MJ: copy to d1
-		move.b	d1,d2		; MJ: load green and red
-		move.b	d1,d3		; MJ: load red
-		andi.w	#$0E00,d1	; MJ: get only blue
-		beq	.noblue		; MJ: if blue is finished, branch
-		subi.w	#$0200,d5	; MJ: decrease blue
-
-.noblue:
-		andi.w	#$00E0,d2	; MJ: get only green (needs to be word)
-		beq	.nogreen	; MJ: if green is finished, branch
-		subi.b	#$20,d5		; MJ: decrease green
-
-.nogreen:
-		andi.b	#$0E,d3		; MJ: get only red
-		beq	.nored		; MJ: if red is finished, branch
-		subq.b	#$02,d5		; MJ: decrease red
-
-.nored:
-		move.w	d5,(a0)+	; MJ: save new colour
 	endif
 		rts
 ; End of function FadeOut_DecColour
@@ -244,32 +270,32 @@ PaletteWhiteIn:
 		move.w	d1,(a0)+
 		dbf	d0,.fill 	; fill palette with white
 
-	if TweakBetterFadeEffects=0
-		move.w	#$16-1,d4
+	if TweakBetterFadeEffects
+		moveq	#cRed,d4	; MJ: prepare maximum colour check
+		moveq	#$00,d6		; MJ: clear delay counter
 	else
-		moveq	#$0E,d4		; MJ: prepare maximum colour check
-		moveq	#$00,d6		; MJ: clear d6
+		move.w	#$16-1,d4
 	endif
 
 .mainloop:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		bsr.w	RunPLC
+		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
+		bsr.w	WaitForVBlank
+		bchg	#$00,d6				; MJ: change delay counter
+		beq	.mainloop			; MJ: if null, delay a frame
+		bsr.s	WhiteIn_FromWhite
+		subq.b	#$02,d4				; MJ: decrease colour check
+		bne	.mainloop			; MJ: if it has not reached null, branch
+		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w	; MJ: wait for V-blank again (so colours transfer)
+		bra	WaitForVBlank			; MJ: wait for V-blank again (so colours transfer)
+	else
 		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w
 		bsr.w	WaitForVBlank
 		bsr.s	WhiteIn_FromWhite
 		bsr.w	RunPLC
 		dbf	d4,.mainloop
 		rts
-	else
-		bsr.w	RunPLC
-		move.b	#$12,(v_vblank_routine).w
-		bsr.w	WaitforVBla
-		bchg	#$00,d6				; MJ: change delay counter
-		beq	.mainloop			; MJ: if null, delay a frame
-		bsr.s	WhiteIn_FromWhite
-		subq.b	#$02,d4				; MJ: decrease colour check
-		bne	.mainloop			; MJ: if it has not reached null, branch
-		move.b	#$12,(v_vblank_routine).w		; MJ: wait for V-blank again (so colours transfer)
-		bra	WaitforVBla			; MJ: wait for V-blank again (so colours transfer)
 	endif
 ; End of function PaletteWhiteIn
 ; ===========================================================================
@@ -307,7 +333,31 @@ WhiteIn_FromWhite:
 ; ===========================================================================
 
 WhiteIn_DecColour:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		move.b	(a1),d5		; MJ: load blue
+		move.w	(a1)+,d1	; MJ: load green and red
+		move.b	d1,d2		; MJ: load red
+		lsr.b	#$04,d1		; MJ: get only green
+		andi.b	#cRed,d2	; MJ: get only red
+		move.w	(a0),d3		; MJ: load current colour in buffer
+		cmp.b	d5,d4		; MJ: is it time for blue to fade?
+		bls	.deblue		; MJ: if not, branch
+		subi.w	#$0200,d3	; MJ: dencrease blue
+
+.deblue:
+		cmp.b	d1,d4		; MJ: is it time for green to fade?
+		bls	.degreen	; MJ: if not, branch
+		subi.b	#$20,d3		; MJ: dencrease green
+
+.degreen:
+		cmp.b	d2,d4		; MJ: is it time for red to fade?
+		bls	.dered		; MJ: if not, branch
+		subq.b	#$02,d3		; MJ: dencrease red
+
+.dered:
+		move.w	d3,(a0)+	; MJ: save colour
+
+	else
 .deblue:
 		move.w	(a1)+,d2
 		move.w	(a0),d3
@@ -339,58 +389,9 @@ WhiteIn_DecColour:
 
 .next:
 		addq.w	#2,a0
-	else
-		move.b (a1),d5 												; MJ: load blue
-		move.w (a1)+,d1 											; MJ: load green and red
-		move.b d1,d2 													; MJ: load red
-		lsr.b #$04,d1 												; MJ: get only green
-		andi.b #$0E,d2 												; MJ: get only red
-		move.w (a0),d3 												; MJ: load current colour in buffer
-		cmp.b d5,d4 													; MJ: is it time for blue to fade?
-		bls .deblue 													; MJ: if not, branch
-		subi.w #$0200,d3 											; MJ: dencrease blue
-
-.deblue:
-		cmp.b d1,d4 													; MJ: is it time for green to fade?
-		bls .degreen 													; MJ: if not, branch
-		subi.b #$20,d3 												; MJ: dencrease green
-
-.degreen:
-		cmp.b d2,d4 													; MJ: is it time for red to fade?
-		bls .dered 														; MJ: if not, branch
-		subq.b #$02,d3 												; MJ: dencrease red
-
-.dered:
-   		move.w d3,(a0)+ 											; MJ: save colour
-
 	endif
 		rts
 ; End of function WhiteIn_DecColour
-	else
-		move.b	(a1),d5										; MJ: load blue
-		move.w	(a1)+,d1									; MJ: load green and red
-		move.b	d1,d2											; MJ: load red
-		lsr.b	#$04,d1											; MJ: get only green
-		andi.b	#$0E,d2										; MJ: get only red
-		move.w	(a0),d3										; MJ: load current colour in buffer
-		cmp.b	d5,d4												; MJ: is it time for blue to fade?
-		bhi	.noblue												; MJ: if not, branch
-		addi.w	#$0200,d3									; MJ: increase blue
-
-.noblue:
-		cmp.b	d1,d4												; MJ: is it time for green to fade?
-		bhi	.nogreen											; MJ: if not, branch
-		addi.b	#$20,d3										; MJ: increase green
-
-.nogreen:
-		cmp.b	d2,d4												; MJ: is it time for red to fade?
-		bhi	.nored												; MJ: if not, branch
-		addq.b	#$02,d3										; MJ: increase red
-
-.nored:
-		move.w	d3,(a0)+									; MJ: save colour
-		rts																; MJ: return
-	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -399,11 +400,11 @@ WhiteIn_DecColour:
 
 PaletteWhiteOut:
 		move.w	#$003F,(v_pfade_start).w ; start position = 0; size = $40
-	if TweakBetterFadeEffects=0
-		move.w	#$16-1,d4
+	if TweakBetterFadeEffects
+		moveq	#cRed/2,d4		; MJ: set repeat times
+		moveq	#$00,d6			; MJ: clear delay counter
 	else
-		moveq #$07,d4			; MJ: set repeat times
-		moveq #$00,d6			; MJ: clear d6
+		move.w	#$16-1,d4
 	endif
 
 .mainloop:
@@ -414,8 +415,9 @@ PaletteWhiteOut:
 		bsr.w	WaitForVBlank
 
 	if TweakBetterFadeEffects
-		bchg #$00,d6 			; MJ: change delay counter
-		beq .mainloop 			; MJ: if null, delay a frame
+		; Only apply a colour step every other frame to keep the fade speed close to the original.
+		bchg	#$00,d6 				; MJ: change delay counter
+		beq	.mainloop 			; MJ: if null, delay a frame
 	endif
 
 		bsr.s	WhiteOut_ToWhite
@@ -452,7 +454,34 @@ WhiteOut_ToWhite:
 ; ===========================================================================
 
 WhiteOut_AddColour:
-	if TweakBetterFadeEffects=0
+	if TweakBetterFadeEffects
+		move.w	(a0),d5		; MJ: load colour
+		cmpi.w	#cWhite,d5
+		beq.s	.allred
+		move.w	d5,d1		; MJ: copy to d1
+		move.b	d1,d2		; MJ: load green and red
+		move.b	d1,d3		; MJ: load red
+		andi.w	#cBlue,d1	; MJ: get only blue
+		cmpi.w	#cBlue,d1
+		beq	.allblue	; MJ: if blue is finished, branch
+		addi.w	#$0200,d5	; MJ: increase blue
+
+.allblue:
+		andi.w	#cGreen,d2	; MJ: get only green (needs to be word)
+		cmpi.w	#cGreen,d2
+		beq	.allgreen	; MJ: if green is finished, branch
+		addi.b	#$20,d5		; MJ: increase green
+
+.allgreen:
+		andi.b	#cRed,d3	; MJ: get only red
+		cmpi.b	#cRed,d3
+		beq	.allred		; MJ: if red is finished, branch
+		addq.b	#$02,d5		; MJ: increase red
+
+.allred:
+		move.w	d5,(a0)+	; MJ: save new colour
+
+	else
 .addred:
 		move.w	(a0),d2
 		cmpi.w	#cWhite,d2
@@ -485,33 +514,6 @@ WhiteOut_AddColour:
 
 .next:
 		addq.w	#2,a0
-	else
-		move.w (a0),d5 			; MJ: load colour
-		cmpi.w #$EEE,d5
-		beq.s .allred
-		move.w d5,d1 			; MJ: copy to d1
-		move.b d1,d2 			; MJ: load green and red
-		move.b d1,d3 			; MJ: load red
-		andi.w #$0E00,d1 		; MJ: get only blue
-		cmpi.w #$0E00,d1
-		beq .allblue 			; MJ: if blue is finished, branch
-		addi.w #$0200,d5 		; MJ: increase blue
-
-.allblue:
-		andi.w #$00E0,d2 		; MJ: get only green (needs to be word)
-		cmpi.w #$00E0,d2
-		beq  .allgreen 			; MJ: if green is finished, branch
-		addi.b #$20,d5 			; MJ: increase green
-
-.allgreen:
-		andi.b #$0E,d3 			; MJ: get only red
-		cmpi.b #$0E,d3
-		beq  .allred 			; MJ: if red is finished, branch
-		addq.b #$02,d5 			; MJ: increase red
-
-.allred:
-		move.w d5,(a0)+ 		; MJ: save new colour
-
 	endif
 		rts
 ; End of function WhiteOut_AddColour
