@@ -1,0 +1,351 @@
+path,size,sha1,source,offset,note
+Enhancements/Sonic Jam/Common/artnem/8x8 - GHZ1.nem,5727,8f9365fb8967ef71496904e3ec0de178c988b14a,DATA.SN1,0x1FBD0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - GHZ2.nem,5031,c0eb1c2bc32ae082b536b0eb7e50703dc974695d,DATA.SN1,0x21230,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - LZ.nem,6984,dd92f1b8b9deefa71544bef98600442f02744f18,DATA.SN1,0x24A12,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - MZ.nem,10308,c90a917b7931e07eb301014ccea818a826504c31,DATA.SN1,0x29554,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - SBZ.nem,10155,fd57ab6afc408d15e07263f1bcdb7b0fca384116,DATA.SN1,0x3AF84,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - SLZ.nem,15188,f742b306ed4d17bdf5d375404515833eee3a339e,DATA.SN1,0x2DD1C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/8x8 - SYZ.nem,14124,0445a4a89bfc352b44e43301e68fcdea8311979f,DATA.SN1,0x3460E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Chicken.nem,348,dc57c4e87f192b2209ef8b4575116f4ffed2bb54,DATA.SN1,0x1EA70,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Flicky.nem,314,67932ffcb022f4e5e7994a79878894d70098b107,DATA.SN1,0x1EF9A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Penguin.nem,380,72d150b4dd9fc5995c95fc3c3b887a1d1f2d8cde,DATA.SN1,0x1EBCC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Pig.nem,309,3ff9744ce19e3009ae1556b0cb25a48b22bb9383,DATA.SN1,0x1EE64,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Rabbit.nem,343,25e23204483286dcd364e369c8fb23c9660081ae,DATA.SN1,0x1E918,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Seal.nem,284,fa1a6721e219de6ddedb265e5b8e1c255a7e3ecc,DATA.SN1,0x1ED48,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Animal Squirrel.nem,348,9a489bb556d517b062d72ae40d9b1a8a1e0a9b18,DATA.SN1,0x1F0D4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Eggman after FZ Fight.nem,1407,2177d92b990dcabc0ee238bb42e0fef623f264fe,DATA.SN1,0x424F6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Eggman in SBZ2 & FZ.nem,2091,27676eca8505894e1b4b635069d273523846c9ec,DATA.SN1,0x41562,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Exhaust Flame.nem,288,e52cc26c6076c678a48b1aad055277bbd4cb87cf,DATA.SN1,0x42A76,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Final Zone.nem,1895,4ff6ab874cb40a46f45c1a2351938521bc3954d3,DATA.SN1,0x41D8E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Main.nem,2148,7cf090f0ba4a63c9433a66382d0997521f4ba55f,DATA.SN1,0x40190,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Boss - Weapons.nem,745,62efa33932a479c636dd84007572cb20406ed713,DATA.SN1,0x409F4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Continue Screen Sonic.nem,688,199436ac17ae3b514f2d4deadf5ba153f1ef5887,DATA.SN1,0x1E42E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Continue Screen Stuff.nem,570,29700f4820474ce8f57c8eff45c0df12d713f6aa,DATA.SN1,0x1E6DE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - Credits.nem,1534,bbdfe8fd82cc567bdb48b0989131f122ae169f0e,DATA.SN1,0x450CE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - Emeralds.nem,509,5d92fac23bf0f1c388edf41c22315a3d63f78b75,DATA.SN1,0x42B96,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - Flowers.nem,647,f12f3d32405c18d0e67ccd6e1cc6ce464157d2fe,DATA.SN1,0x44E46,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - Sonic.nem,4574,988ce891ccb5414deea95c621d4ee21d9f0caae7,DATA.SN1,0x42D94,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - StH Logo.nem,647,1a5b2e406d2bb7ac238129af62cf97a7ba3911d8,DATA.SN1,0x456CC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Ending - Try Again.nem,2371,e05aec9d33c37005e63d4ee54fa961deffc6fa86,DATA.SN1,0x43F72,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Ball Hog.nem,960,b14ef5a4d80515a543bf766aea6f6a537a5631b8,DATA.SN1,0x18B84,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Basaran.nem,763,a49706592a76d35e0a73e726bf6f4b0b089ad1f5,DATA.SN1,0x1B750,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Bomb.nem,664,4075ca21fe5b0a7c9e6e33368dcf767a4613f695,DATA.SN1,0x1BC94,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Burrobot.nem,1769,5f7fa9792bf1445e37d0fe0ca2223070f504cd06,DATA.SN1,0x199C0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Buzz Bomber.nem,934,a8610fd4d955dfb81f8f341e2b605585c2ced047,DATA.SN1,0x19432,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Caterkiller.nem,398,ffda4ae8f3766f2b717db4bd2b610169da9f72a5,DATA.SN1,0x1C10A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Chopper.nem,616,0797e8d3cf9ffb08436ddd3253c9c2121ace6f6d,DATA.SN1,0x1A0AA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Crabmeat.nem,1261,3bc2cd6f3dc22266697bd75e1b3b6685387a5177,DATA.SN1,0x18F44,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Jaws.nem,650,261cdbaf8d76780f44725beb7049cffda0140bef,DATA.SN1,0x1A312,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Motobug.nem,649,44d30f95c57f3a52511da1290a4ad2a3024387c9,DATA.SN1,0x1AAC0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Newtron.nem,1565,a330bdd5a0919052fb84f77dbf6812b8d0bb6168,DATA.SN1,0x1AD4A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Orbinaut.nem,478,52b6a8d5ead0cbc8fe8ae013dc6507ffdf0b56e0,DATA.SN1,0x1BF2C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Roller.nem,1316,162bdf8e1b9c9b8e4793efc8f7a8eae67e92f8f3,DATA.SN1,0x1A59C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Splats.nem,584,6c274528491b7225374f3ae67b20d8cf881e4304,DATA.SN1,0x1BA4C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Enemy Yadrin.nem,999,604ebf7e33cdf63b662b2be88175fe87616b273b,DATA.SN1,0x1B368,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Explosion.nem,1638,33632cb591619be9e75acf1403f9299be3f7e9f7,DATA.SN1,0x1CFF6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Fireballs.nem,734,8e3605741209d7f31d50876908ff0563cdfed703,DATA.SN1,0x15B10,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Breakable Wall.nem,157,e5729eccb851ded1b19e1838ba7758ac58ed0ace,DATA.SN1,0x1327C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Bridge.nem,235,a4276646bd0ec681d9d8c861b30e98c51a8afdd0,DATA.SN1,0x12AC0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Edge Wall.nem,96,e592fbefee19ec1dc75e4ae5f986effc38a4f5bd,DATA.SN1,0x1331A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Flower Stalk.nem,74,2c7fe1fe49a66965222f0d7c0eac1f45916cf683,DATA.SN1,0x1295C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Giant Ball.nem,413,5e17332fe58d3c5e3d99c990c0d4fb54b3f41955,DATA.SN1,0x12BF4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Purple Rock.nem,302,0476d0a07fa1a7f781400ebd83789a43cd5568a2,DATA.SN1,0x1314E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Spiked Log.nem,300,4d157471ae3557f13de5eb507e027b0affb6c333,DATA.SN1,0x13022,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/GHZ Swinging Platform.nem,281,5c477912fe15aa6ec0b38cff5a45e2983714e9d6,DATA.SN1,0x129A6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Game Over.nem,401,d8465f7375821585c2ea7ac88539e629b865bbca,DATA.SN1,0x1D70C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Giant Ring Flash.nem,371,7d328b4ffd3eaf4dd21b5818c90acdd497f8a595,DATA.SN1,0x1DFB8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/HUD - Life Counter Icon.nem,262,0a18d5be601bc9248c31d1b2c871ca56ff3c176d,DATA.SN1,0x1C99C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/HUD.nem,245,fd3e830f653e0255c1fad5bd7b1a6ca1d41f4ea5,DATA.SN1,0x1C8A6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Hidden Bonuses.nem,769,6c5ee111d52369abe6a30e51ba38dd1034e73a19,DATA.SN1,0x1E12C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Hidden Japanese Credits.nem,1192,ee09b6db70f73b77fa4632369b0ffb1d6c187249,DATA.SN1,0x314C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Invincibility Stars.nem,328,0c69b5aaeb636268090dce7040ba96ff7f891abb,DATA.SN1,0xEE16,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ 32x16 Block.nem,182,0ab738ac04cf80a769c5950c29b1d517941da59c,DATA.SN1,0x145D2,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ 32x32 Block.nem,271,52fa828a2894659b8072692efd5b334a2d13b502,DATA.SN1,0x155A8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Blocks.nem,695,17af03669f929ac39fedd7157f5cf4dabcd59e8e,DATA.SN1,0x1508E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Breakable Pole.nem,100,577ede0795f9e90b3fb73bfaff1f057f2f28f988,DATA.SN1,0x14886,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Bubbles & Countdown.nem,1622,a3f54d98e3305c1088cc52bc23c68e143e5536f3,DATA.SN1,0x13F7C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Cork.nem,298,42f9b1e86bbb3df6d1a7f334336c467900e87163,DATA.SN1,0x1547E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Flapping Door.nem,362,30540932f3357d30b9715fd43e3b4a9077b05fbd,DATA.SN1,0x13E12,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Gargoyle & Fireball.nem,367,69ee0f8e43733e0792f535657d5118fd457683c6,DATA.SN1,0x14F1E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Harpoon.nem,347,537580425c362923d9c0bbed779110646e0c82fe,DATA.SN1,0x1472A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Horizontal Door.nem,338,a516acdafa3cd481eb673049b3c2ffe73ca6a68d,DATA.SN1,0x148EA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Rising Platform.nem,312,d1ed494f4ca954b4bab56ae48ba50f7d27657f40,DATA.SN1,0x15346,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Spiked Ball & Chain.nem,384,02cd96796048be960b73c72f820bf9aa5c577c77,DATA.SN1,0x13C92,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Vertical Door.nem,161,fdeec348893d18190cd91ea89acab5cc22e50f4a,DATA.SN1,0x14688,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Water & Splashes.nem,2036,3fc6fd736ab4951cbc5636a6c753fd7d3d24c76e,DATA.SN1,0x1349E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Water Surface.nem,292,c4b16f10d085912d3062235bf1f2c4b4b0bc98cd,DATA.SN1,0x1337A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/LZ Wheel.nem,1249,0d97e2726252ed5a72866f97921b0f852eb642c3,DATA.SN1,0x14A3C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Lamppost.nem,192,f4b0e9781f693b3b8a593e0490b642e8e22a7e4b,DATA.SN1,0x1DEF8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/MZ Green Glass Block.nem,183,0f452c67be1f40f1fa3f7fb29b230ab76720251f,DATA.SN1,0x15A04,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/MZ Green Pushable Block.nem,356,2169cbbed2f1342998a37fc949d07b1a40b9b4d2,DATA.SN1,0x16704,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/MZ Lava.nem,2325,40a63e0406757a3b30536291b56b70b50b1c0299,DATA.SN1,0x15DEE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/MZ Metal Blocks.nem,654,a582a92e0f76e361b40b7163bfce2be548a8b183,DATA.SN1,0x156B8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/MZ Switch.nem,190,07b723c7b445b2b27568c681616be35978670d95,DATA.SN1,0x15946,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Monitors.nem,1120,a1bcbf30525618e7ca48f95000f0c9c8f03f98e7,DATA.SN1,0x1CB96,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Points.nem,175,2e04b625c137e00b31e8d35e4c404be5ce81303a,DATA.SN1,0x1D65C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Prison Capsule.nem,2179,fb1e71fc6bcb140a0bba711a523547b19d439536,DATA.SN1,0x40CDE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Rings.nem,243,fb715390e27aab08dac0cd2a28f6092f194c1157,DATA.SN1,0x1CAA2,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Collapsing Floor.nem,88,f7a480a209ba206c88da4c63fa4d4262345d9104,DATA.SN1,0x18468,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Crushing Girder.nem,277,6fe40790d4ef8807eda0e1f41bd9a9a3808cbc60,DATA.SN1,0x18A6E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Electrocuter.nem,384,765df268b1af325ee3b9d6e980f764b6a253fe32,DATA.SN1,0x184C0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Flaming Pipe.nem,395,b632a8b5e8d58365439b9ecbccc9ba592a2a4028,DATA.SN1,0x1873E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Junction Wheel.nem,668,302c876ceb88189796b18a33583b0e768a664c8e,DATA.SN1,0x1791C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Large Horizontal Door.nem,252,a5d06c5b39763f0e900d80fa9f84d61e1804a805,DATA.SN1,0x18972,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Pizza Cutter.nem,515,841da90d2d097841a4b85b683f20b4fccec941f7,DATA.SN1,0x17BB8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Running Disc.nem,83,5d684a91f5fd5c2224a11612fd47143601a06422,DATA.SN1,0x178C8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Sliding Floor Trap.nem,88,6cae9159c5b8c49be6c716991bc2ab9dd4c8ec1e,DATA.SN1,0x1891A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Small Vertical Door.nem,79,aaf0881b37131a5f5271b5cfad1c87cbf89e6369,DATA.SN1,0x188CA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Spinning Platform.nem,816,5dae68e5bca0e95f41426acd84855cb6223eb367,DATA.SN1,0x17F5A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Stomper.nem,413,85a88e9f55037cb4a6dcd6246b5eeea1e3b1c2a2,DATA.SN1,0x17DBC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Trapdoor.nem,477,056b02688dec9854739468f7501cf6ffd1348f62,DATA.SN1,0x1828A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SBZ Vanishing Block.nem,253,87a218ca1bb0756085bc1f8bed11d6146a92d6f4,DATA.SN1,0x18640,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ 32x32 Block.nem,267,db36219f1a0a8561417c6aa3bdbed098ab7e0edd,DATA.SN1,0x171DC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Breakable Wall.nem,97,608c4fc9667c4a4b66cd926dd555967091984257,DATA.SN1,0x16EB6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Cannon.nem,163,935a656a2a67cf490207215cc3ec9bb18addce9c,DATA.SN1,0x172E8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Fan.nem,579,daa1924ff628d6ff081b764e71b50bb9f6975ea4,DATA.SN1,0x16C72,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Little Spikeball.nem,326,d457ef13929979e7a33d4a6724f7b6407502feba,DATA.SN1,0x16B2C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Pylon.nem,225,c4b9a653d252f9ab76c2c06e1437f56164486337,DATA.SN1,0x16F18,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Seesaw.nem,572,86233fe7c1b65ba56e253571d82ae5617119acce,DATA.SN1,0x168F0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SLZ Swinging Platform.nem,482,43ff7584ead30ece820e81b5d7a61de34ea4d398,DATA.SN1,0x16FFA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SYZ Bumper.nem,362,e2680b451fd6a894fccb656002af57ef6742f08b,DATA.SN1,0x1738C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SYZ Large Spikeball.nem,654,60f86929315d852cd8bdf942c10e2af943a94ae0,DATA.SN1,0x1763A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/SYZ Small Spikeball.nem,98,81cdb71aee4ada13fb045c5205123d3535386509,DATA.SN1,0x174F6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Sega Logo (REV01).nem,1136,304871ec2cbc32a51342508dfb1516dae8b75efd,DATA.SN1,0x0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Shield.nem,405,9e860698f2a471632de0041f686cc144202cac98,DATA.SN1,0xEC80,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Signpost.nem,1147,f151d282204385ac50d9950019ec4152ca7a8883,DATA.SN1,0x1DA7C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special 1UP.nem,245,3c229029cc22ef2feb2dcc6254ccf3afd38ad43b,DATA.SN1,0x11BCE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Birds & Fish.nem,3215,aea45dd7ff06764ff8ed3301276e8bee82c2553b,DATA.SN1,0x1058C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Clouds.nem,1268,4a88337da70162fad3db6032a4f5087fd591d395,DATA.SN1,0x1151C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Emerald Twinkle.nem,93,b20217dc225d3664ca10353b7ad9ebf50b04344a,DATA.SN1,0x11CC4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Emeralds.nem,359,d93874b91bb5dd73274dcebe30ef12eb457e584a,DATA.SN1,0x12466,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special GOAL.nem,237,3c5f9628b78858fa26b8eb5f1bca0cb2e90b2dec,DATA.SN1,0x11A10,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Ghost.nem,176,2cabf076ad623afd1256a55e749053d01c357573,DATA.SN1,0x125CE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Glass.nem,131,466e20d0bf367006598a69c0ecc78e594edd021d,DATA.SN1,0x12758,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special R.nem,207,4cc95e5a0f36280f86773b83090610c571288606,DATA.SN1,0x11AFE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Red-White.nem,145,dc7851e033d2fb316f07c30d7a1b336c05e396aa,DATA.SN1,0x11D22,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Result Emeralds.nem,382,370dfd7f4f070cd26e2341438b8f9a6901b7ddad,DATA.SN1,0x127DC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special UP-DOWN.nem,500,889894316dd61a22af4f450439d2f1ee7a70cfba,DATA.SN1,0x12272,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special W.nem,218,2a745023b34aa3ebbce93f4869f7bc81fd68efd2,DATA.SN1,0x1267E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special Walls.nem,2360,30cc6f2624299bab114e3d87ecdb02dde5ae62d7,DATA.SN1,0xFB20,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE1.nem,193,2ff869e5f2ed0c960514c9b094f771335c407442,DATA.SN1,0x11DB4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE2.nem,206,3d672a171bc0fb766292a5cbf6bd55e64f7b85ac,DATA.SN1,0x11E76,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE3.nem,203,a7e2597ad3d14f6fd2565b717ca8803d6f685e3d,DATA.SN1,0x11F44,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE4.nem,199,2c4d06178958ec470aba0fc28714d311697fb92e,DATA.SN1,0x12010,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE5.nem,201,3c4839d6c7db71de3f80492b0276b80cb95dba51,DATA.SN1,0x120D8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Special ZONE6.nem,207,d4aabd6de8c0b2e8fd9c3bab8c3d84f8050e478a,DATA.SN1,0x121A2,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Spikes.nem,123,1ebae77ba4deb3ba4f7b5053c95b22e07df6193f,DATA.SN1,0x12D92,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Spring Horizontal.nem,257,a2b4d3ff5c04fad4ba6f2729178aea2b8e8161a1,DATA.SN1,0x1D89E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Spring Vertical.nem,219,56dcc87d24f1ba19dc37be54892b412774a6c4fa,DATA.SN1,0x1D9A0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Switch.nem,225,2cd8367a1f17cef93537ec7445ff556465346874,DATA.SN1,0x17558,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Title Cards.nem,1550,23a6e83c565b85829375b6f08c6bd793334ff674,DATA.SN1,0x1C298,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Title Screen Foreground.nem,4107,bca9c3430794309043153e2046027d04246e02df,DATA.SN1,0x680,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Title Screen Sonic.nem,6606,ece213fb1a319006f07d6ba073d082589f9715ab,DATA.SN1,0x168C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Title Screen TM.nem,51,865d677dfe72c3d14812f5621a5aaeba5d583a7e,DATA.SN1,0x305A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Unused - Explosion.nem,488,c63b908fbda30de14c66a417102b910cff5476bb,DATA.SN1,0x197D8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Unused - GHZ Block.nem,72,1d639c1c083ba53bab9eb40be2977955f2063bc4,DATA.SN1,0x12BAC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Unused - GHZ Log.nem,531,b6d2821d0d4b9873853ef8d32ad3c0a7109d6c20,DATA.SN1,0x12E0E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Unused - Grass.nem,83,208031eea49ce329a6b4d5b5511c357d034e6a9e,DATA.SN1,0x15ABC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artnem/Unused - MZ Background.nem,135,c6cf1c65a88f32d54b10944b82d13163c783feb3,DATA.SN1,0x16868,exact byte match to repo path
+Enhancements/Sonic Jam/Common/artkos/Flowers at Ending.kos,1424,a2d5360f715d0f8d2bd1d1c77f0ee4e1b482a8dd,DATA.SN1,0x448B5,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map16/GHZ.eni,2464,980f96dfbd009d6e562e9843cef7287b281b9e74,DATA.SN1,0x1F230,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map16/LZ.eni,810,a1f31a05c31229b2204e9fa3a9b53084aeadee2c,DATA.SN1,0x246E8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map16/SBZ.eni,3738,36e450196fed6172c3d31f44ff27e1ed260a2e69,DATA.SN1,0x3A0EA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map16/SLZ.eni,2020,66aa9bb29ce62e80ff5eda7897f3405b88baa1da,DATA.SN1,0x2D538,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/GHZ.kos,8464,5d98ba0f1031b468096476c36a151f6cfd56d9c5,DATA.SN1,0x225D7,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/LZ.kos,10224,36f6b8b59b30b3242d47355121361b3497b01d61,DATA.SN1,0x2655A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/MZ (REV01).kos,6048,3bcb7be9b6593afa6da360b9173fd14d91e2c1e7,DATA.SN1,0x2BD98,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/SBZ (REV01).kos,10848,cf848edaecd6553c4371990a640d495c516b40b6,DATA.SN1,0x3D72F,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/SLZ.kos,9264,e313ef2f4ea43ffd56086e0209ed237aa6ba427c,DATA.SN1,0x31870,exact byte match to repo path
+Enhancements/Sonic Jam/Common/map256/SYZ.kos,9136,8b7cdfaacc7f5fce1563a4459479b60423455f29,DATA.SN1,0x37D3A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/tilemaps/Hidden Japanese Credits.eni,190,e41c2643e4d21bc64e1b3ad69900702ae7166711,DATA.SN1,0x308E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/tilemaps/Title Screen.eni,276,bb206b0c596a82ce10d80b2c5a478790b7631533,DATA.SN1,0x56C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - GHZ.bin,32,51741c166e5ef311a7b07b22dd76dd26445780c7,AC.SN1,0x23F8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - LZ Conveyor Belt Underwater.bin,18,98a0bb2c45f535310f50164f8a68bdd735eda68a,AC.SN1,0x244A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - LZ Conveyor Belt.bin,18,e2810873cd0cc642fc2e15e71198913e29430324,AC.SN1,0x2438,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - LZ Waterfall.bin,32,667ec574de4408a090acd9ddafd0080e490cd26d,AC.SN1,0x2418,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - MZ (Unused).bin,72,1b3894954273bc3de83eacc8abd9d9077e130754,AC.SN1,0x247C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 1.bin,16,e16811d93990bd09b87463dfb2256edef3924eb0,AC.SN1,0x257C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 10.bin,12,7480926bb606edf5b04ee9dbc51aa25adb575265,AC.SN1,0x2612,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 2.bin,16,e2700a563d70b72658498253d3d4dd8b26d35252,AC.SN1,0x258C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 3.bin,16,b97b26937a669f68edc9ca29ba71ca06edd0b36d,AC.SN1,0x259C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 4.bin,12,854ce1fcd8d5cccfde7f3d1e9e0b2f6e26da7f06,AC.SN1,0x25AC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 5.bin,16,b842f735aaf4448ab901a4437384235d61d8208b,AC.SN1,0x25B8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 6.bin,16,a86f01dd24548761ce800745f6da5af6790b8732,AC.SN1,0x25C8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 7.bin,32,7a6146b6dbd569e1321cd1f5a479aa447577af73,AC.SN1,0x25D8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 8.bin,10,d8960667ce8a039047beb2e333eb22a3e2472d93,AC.SN1,0x25F8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ 9.bin,16,e88cff8ce209805396796ef8556f4fe25f23dc3e,AC.SN1,0x2602,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SBZ3 Waterfall.bin,32,624901fa35adbfc03c13d542eeb88d4cc1a7a9ef,AC.SN1,0x245C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SLZ.bin,36,80e4713a47a0e72986ce23fea057c0830b1140a6,AC.SN1,0x24C4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SYZ1.bin,32,7dccc832d5cccafbbf79c93934b2f17839b96641,AC.SN1,0x24E8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - SYZ2.bin,16,9561add4e62265cf47d0f7f6b411ad9e83d4318a,AC.SN1,0x2508,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - Special Stage 1.bin,72,5c80967b706b1a77096010807ddc59d50b0575d7,AC.SN1,0x6D7E,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - Special Stage 2.bin,210,8f415009dbf01681afc9f89d7fddf061535657a2,AC.SN1,0x6DC6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Cycle - Title Screen Water.bin,32,e216dbb1759fc2b79a0880dc0df00b9b5c270459,AC.SN1,0x23D8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Ending.bin,128,a0d86dc7bb43d1519b8c2d7615158c0df04a764b,AC.SN1,0x3600,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Green Hill Zone.bin,96,fb733f896ac9ae9ab1691e42cce2e0fbec286d7f,AC.SN1,0x3080,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Labyrinth Zone Underwater.bin,128,6cb101ae229564e9a61e3fb7e3af033a395ce3cc,AC.SN1,0x3140,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Labyrinth Zone.bin,96,7bebf00066113fedcb6f7c8e4778065bba5fadd2,AC.SN1,0x30E0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Level Select.bin,128,b9e4b7e4983674ce85beaafe3c2653943eee9850,AC.SN1,0x2FE0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Marble Zone.bin,96,80f9fed86b1e665a7a1655036e8681db0c26c847,AC.SN1,0x31C0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/SBZ Act 1.bin,96,2a99fda30a6fc3f76cbad39a46a99edb03d6ad51,AC.SN1,0x32E0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/SBZ Act 2.bin,96,9c50cea63937e78ed4dc54298e0dd50ac73c15c6,AC.SN1,0x3340,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/SBZ Act 3 Underwater.bin,128,007ae4697c1eccf87a8cf9126d02d36a6f5a0234,AC.SN1,0x3480,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/SBZ Act 3.bin,96,81848cfb6ed0d6e20e58fd80373d8137f53d8750,AC.SN1,0x3420,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sega Background.bin,128,2a4800dee5b57b6d8c1ce24ffd271ea89136724d,AC.SN1,0x2EE0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sega1.bin,12,97f3d97ce55056759a9a007ba27dabc89ebede98,AC.SN1,0x2CF0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sega2.bin,48,1bb9fa57cc89824e5908284a05c50cc1994a5cd0,AC.SN1,0x2CFC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sonic - LZ Underwater.bin,32,7aca7367c53779c42ad9209eac83392f0ffc5ddd,AC.SN1,0x3140,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sonic - SBZ3 Underwater.bin,32,9b62c54aacf3164daca9db92539cae97cb488028,AC.SN1,0x3480,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Sonic.bin,32,370674410537a0aa32e002707bc8f1dec92e1974,AC.SN1,0x3060,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Special Stage Continue Bonus.bin,64,95b6788af5426e919f98903c676e9595f21a5244,AC.SN1,0x35C0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Special Stage Results.bin,128,33750954cf78e8a02ef3aeda23c02b419e463c12,AC.SN1,0x3540,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Special Stage.bin,128,7b0f579a70ca84e68bf91b56287713c405259aa3,AC.SN1,0x33A0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Spring Yard Zone.bin,96,b6c57fa77ed39a444d5e90e3443b11170ac12822,AC.SN1,0x3280,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Star Light Zone.bin,96,e8a778a7b3c123f280a4398e9ac2819265faf6c2,AC.SN1,0x3220,exact byte match to repo path
+Enhancements/Sonic Jam/Common/palette/Title Screen.bin,128,2ab1aba063597f9054b94bbf379bda288be40369,AC.SN1,0x2F60,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/Angle Map.bin,256,e3eea911f65d7de05b21d9fbcfdc88d71f97dcb0,TBL.SN1,0x0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/Collision Array (Normal).bin,4096,bd73bc481818f97ef8583dd6a4f87a59e568465a,TBL.SN1,0x100,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/Collision Array (Rotated).bin,4096,b636f2e0dc13c591beb7ac6d7544c56ba23adb6d,TBL.SN1,0x1100,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/GHZ.bin,410,5c94f04497066fa789fc50d6fce794f59a78871f,TBL.SN1,0x2100,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/LZ.bin,200,3fb1ea791c3560154ea06f5af41d8f33b867b02f,TBL.SN1,0x229A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/MZ.bin,400,c05480df406ce896832f7f36769a632eba532914,TBL.SN1,0x2362,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/SBZ.bin,600,4d206a0b1149e2a0698e729044a98308b1109797,TBL.SN1,0x28DA,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/SLZ.bin,500,457673ae46ff59b3b902f5502ed47cdf8231f6bb,TBL.SN1,0x24F2,exact byte match to repo path
+Enhancements/Sonic Jam/Common/collide/SYZ.bin,500,6d1ba45b755d4abcd7d33f0a3b09d8ad2cc1d9c4,TBL.SN1,0x26E6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/ending.bin,32,8745e250183e6eba57231f8fd0d6082308daf960,TBL.SN1,0x79AD,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/ghz1.bin,242,5515c9b7d27ad6f9651af3f0c51f0e4a57ae60e5,TBL.SN1,0x6340,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/ghz2.bin,200,7e30d170a07a8ab497ae929236a2a44baa052907,TBL.SN1,0x6435,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/ghz3.bin,290,f8c17305f146e0101e30a966d53fb0171425486f,TBL.SN1,0x6500,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/ghzbg.bin,34,56c4dfbbfcc49183f124430fe7d0cca5839052f3,TBL.SN1,0x6622,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/lz1.bin,258,cbc50fb0c0c6a1536da3afce33bcb9d3c04b0a9a,TBL.SN1,0x664A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/lz2.bin,154,1d79ad2b925341d3bbc1cc66ad5da0b2b736cdd8,TBL.SN1,0x6851,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/lz3.bin,282,423fa0b3d38379b9b8b0a19ed8e8e93b4e2ece98,TBL.SN1,0x68EE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/lzbg.bin,258,167ed5315bfe13ce935a0da8d354973c06054da6,TBL.SN1,0x674C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz1.bin,158,171514a4ada5923f3f593e06ace8f0afc30153a0,TBL.SN1,0x6AC8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz1bg.bin,122,768788ba5b4fe63efe9d3d8d7c0fb0cd2d345fd4,TBL.SN1,0x6B66,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz2.bin,164,dd68dbe41bdca78166f32de185cbb9ca9997b881,TBL.SN1,0x6BE0,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz2bg.bin,146,12be297ffdb3887900213aa506f413b1d5dbcebc,TBL.SN1,0x6C84,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz3.bin,226,9a5f6e92aaeab7b9f0c510f3aa8df5a2e07976b2,TBL.SN1,0x6D19,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/mz3bg.bin,164,b30cd031f350e02a84649fc72c37d4845639fe86,TBL.SN1,0x6DFB,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/sbz1.bin,290,89cef148305c2ff2ad11a4bbc5158dfb6cfd40f9,TBL.SN1,0x759B,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/sbz1bg.bin,62,40de101d93e35722e738e0a4ad45e72f9b519420,TBL.SN1,0x76BD,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/sbz2.bin,322,157357917880edefa1ba9adb866a7a4b461d1837,TBL.SN1,0x76FB,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/sbz2bg.bin,362,bc32526d3b87e3d0a8e8f6e63963bb292293a3a4,TBL.SN1,0x783D,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/sbz3.bin,186,ad9e9ac9db40b6f7f2a478d7c7dc9e42beadadc2,TBL.SN1,0x6A0B,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/slz1.bin,274,7c7667216e82f6e1d2b60b0ef982200a7461c4ed,TBL.SN1,0x6EA4,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/slz2.bin,240,cda828a4b8c6edb035215b71b36f0c5190fcc5b1,TBL.SN1,0x7030,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/slz3.bin,282,44da4f98a45988ce771873d702551c9e76294130,TBL.SN1,0x7120,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/slzbg.bin,122,36aad9a3c5ff7640a595378f41b311c2e81007f9,TBL.SN1,0x6FB6,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/syz2.bin,260,033219ba039f6cdbbf4129933a2704bd43cac50c,TBL.SN1,0x7335,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/syz3.bin,346,8b949ec9c55ed6ae8e1546ba81ec7e3f50644ed7,TBL.SN1,0x743C,exact byte match to repo path
+Enhancements/Sonic Jam/Common/levels/syzbg (REV01).bin,58,6bcae6507078c35e5c0ac542b42de17216283a85,TBL.SN1,0x72F8,exact byte match to repo path
+Enhancements/Sonic Jam/Common/sslayout/1.eni,634,f2eec18691779dd25e36f5c9e14360e7c42d8f09,TBL.SN1,0x2B32,exact byte match to repo path
+Enhancements/Sonic Jam/Common/sslayout/2.eni,1042,12d68a7b492d914c62c2e1660debe7046972911c,TBL.SN1,0x2DAC,exact byte match to repo path
+Enhancements/Sonic Jam/Common/sslayout/3.eni,860,ccb22f83fca56ce32e7dd0717dd825a96320a8ae,TBL.SN1,0x31BE,exact byte match to repo path
+Enhancements/Sonic Jam/Common/sslayout/4.eni,1242,d1abddf4bdec97e209de40a85a336d5deee72af6,TBL.SN1,0x351A,exact byte match to repo path
+Enhancements/Sonic Jam/Common/sslayout/5 (REV01).eni,1200,07344275e7428913854b3f483e025a1c4439e9be,TBL.SN1,0x39F4,Sonic Jam payload at expected ss layout slot; differs from AS repo
+Enhancements/Sonic Jam/Common/sslayout/6 (REV01).eni,754,66c45ff40b233488439528349e707e585608799d,TBL.SN1,0x3EA4,Sonic Jam payload at expected ss layout slot; differs from AS repo
+Enhancements/Sonic Jam/Common/_unmatched/TBL_4196_633F.bin,8618,bcf7583a07d1016a0818ea46c8ec8cd9dcc7f524,TBL.SN1,0x4196,unmatched nonzero TBL region between sslayout and levels; preserved for analysis
+Enhancements/Sonic Jam/Original/objpos/ghz1.bin,1290,08da1398c7a7200584e2218d3bdc800aefe6509d,ACTTBL(1).SN1,0x96,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/ghz2.bin,1470,44114486c0576c60385d5a9606bd2797f98b02f9,ACTTBL(1).SN1,0x5A0,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/ghz3 (REV01).bin,1722,9625f96f187581122b3302bb6dd73407f97083b7,ACTTBL(1).SN1,0xB5E,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/lz1 (REV01).bin,1140,484dae619d6c387684c8904a061615b4cffd34a5,ACTTBL(1).SN1,0x1218,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/lz2.bin,834,427911150d7b6410e628a95e5dcd0e2b490a7f8d,ACTTBL(1).SN1,0x168C,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/lz3 (REV01).bin,1476,fca73b2ac66d365cff580c43ba3388aeb603e28b,ACTTBL(1).SN1,0x19CE,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/sbz3.bin,1176,6c8c09f5d6d2b99f5e6805abab1932cb1d4f2ba7,ACTTBL(1).SN1,0x1F92,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/mz1 (REV01).bin,876,a92aab9d57e0cb8319064f3cf7f3834c478fcd30,ACTTBL(1).SN1,0x257A,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/mz2.bin,1194,4a391c5382133bdb535b3dabd109883c08394426,ACTTBL(1).SN1,0x28E6,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/mz3.bin,1398,ed37abea0e641ca9e07af509bd5c950470dd4b87,ACTTBL(1).SN1,0x2D90,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/slz1.bin,1344,26af509eacc703eac83ae4295995b6d0901da12d,ACTTBL(1).SN1,0x3306,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/slz2.bin,1134,4781b0bf30168046e0a1ba095367c0461dd63b22,ACTTBL(1).SN1,0x3846,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Original/objpos/slz3.bin,1506,d122e2cc50724f68284c2723d1f895785998d3af,ACTTBL(1).SN1,0x3CB4,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/syz1.bin,1164,4cc6ac25987f04d2a951bd8458f98e360f6ab435,ACTTBL(1).SN1,0x4296,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/syz2.bin,1386,2acf4b565734c8e5adfee9d46ec9fda5fba7f587,ACTTBL(1).SN1,0x4722,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/syz3 (REV01).bin,1548,d9f3afe2804ef5d4ccfcd89205bea73ee43bce07,ACTTBL(1).SN1,0x4C8C,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/sbz1 (REV01).bin,1854,2a3454d83f5411f4359083efa360040108900fbe,ACTTBL(1).SN1,0x5298,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/sbz2.bin,1758,25c63843fe1adfb4ef118340d66c8ecf4d5a1d66,ACTTBL(1).SN1,0x59D6,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/fz.bin,18,84e292cb4ee2a620783cb321504325a176096c96,ACTTBL(1).SN1,0x60B4,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/ending.bin,354,4ea826064ccd8e51f614f69e0c959b4bcb406bcf,ACTTBL(1).SN1,0x61F8,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Original/objpos/platforms/lz1pf1.bin,50,5baa8fe12a766e1fdd59fb35fdaf6c0c688cbe51,ACTTBL(1).SN1,0x242A,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/lz1pf2.bin,50,9e4a7f5e5e2f8dddacf3de4b841cfced6900d226,ACTTBL(1).SN1,0x245C,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/lz2pf1.bin,50,66983868bc6fea9ac36fe49dbe9edc9c983b6826,ACTTBL(1).SN1,0x248E,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/lz2pf2.bin,50,8eb062c3758d787da8dfdac7dbc9e876d151121e,ACTTBL(1).SN1,0x24C0,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/lz3pf1.bin,74,4e83cabaea6bbc23e72d3a64d68f2a2da0b1a4b1,ACTTBL(1).SN1,0x24F2,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/lz3pf2.bin,62,488703fbbb659977fb483e038c20d52ebda9f977,ACTTBL(1).SN1,0x253C,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf1.bin,50,08ca56d1cb725e95d21e1a23f91037bc112450d8,ACTTBL(1).SN1,0x60C6,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf2.bin,50,5e4418fef0e7a73686ffd3b31b01b5acdc73b92c,ACTTBL(1).SN1,0x60F8,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf3.bin,50,830b7a3d09394cb602529bf9c17502c8ebe96017,ACTTBL(1).SN1,0x612A,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf4.bin,50,177224d42ff8259d10468190dd3a31e6574dc93b,ACTTBL(1).SN1,0x615C,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf5.bin,50,5ef6c7a21809933a4ed081e8205a2bb0d5db8d34,ACTTBL(1).SN1,0x618E,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Original/objpos/platforms/sbz1pf6.bin,56,e5660788ed581f3559a13db5406fec58e246a66c,ACTTBL(1).SN1,0x61C0,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/ghz1.bin,1290,08da1398c7a7200584e2218d3bdc800aefe6509d,ACTTBL_N(1).SN1,0x96,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/ghz2.bin,1494,d6544bfef228a10880bf5f4fb409075023b1c76f,ACTTBL_N(1).SN1,0x5A0,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/ghz3 (REV01).bin,1764,40f7899f2ba656221213e594aca5077a5edbfd73,ACTTBL_N(1).SN1,0xB76,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/lz1 (REV01).bin,1104,5dfb79222cc95b6a57719eb1ee066b62fa70a1fa,ACTTBL_N(1).SN1,0x125A,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/lz2.bin,810,780684576304c9b9143005d033e71b54f170613d,ACTTBL_N(1).SN1,0x16AA,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/lz3 (REV01).bin,1386,d7965135468fc376311fcf682784a7deee693b78,ACTTBL_N(1).SN1,0x19D4,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/sbz3.bin,1122,d8843f2ad128e361a1a4d640094683004c81c986,ACTTBL_N(1).SN1,0x1F3E,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/mz1 (REV01).bin,858,c9dc20f20aea55ce57272a8f21213588c8e3b12d,ACTTBL_N(1).SN1,0x24F0,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/mz2.bin,1170,8b8872cb95dc1cb8c582ff376d4641f536413dc5,ACTTBL_N(1).SN1,0x284A,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/mz3.bin,1380,297e6bc3ef1a8f98f7a500103097684cb7688464,ACTTBL_N(1).SN1,0x2CDC,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/slz1.bin,1344,94b089225321884b662eec4f53411f52c36ef7d3,ACTTBL_N(1).SN1,0x3240,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/slz2.bin,1116,2be712899146fd9d6f3251ea535cc64a0e6f512e,ACTTBL_N(1).SN1,0x3780,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/slz3.bin,1458,611328f39a4c3c050f4d09c26f74f8b407f336c0,ACTTBL_N(1).SN1,0x3BDC,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/syz1.bin,1146,37398941d472de338fd3ceb1c66e9a4f824a6343,ACTTBL_N(1).SN1,0x418E,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/syz2.bin,1362,4628574bd6fe405ee79c926fb6e01806abaec13f,ACTTBL_N(1).SN1,0x4608,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/syz3 (REV01).bin,1500,831f7cded786960e77e6e4f40727c93fe179a1ba,ACTTBL_N(1).SN1,0x4B5A,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/sbz1 (REV01).bin,1842,14dd6baba24fed05ad7e11092c3afbc7bc2c54b3,ACTTBL_N(1).SN1,0x5136,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/sbz2.bin,1698,30c8281c874c9043bbf9521898b34b4874127d24,ACTTBL_N(1).SN1,0x5868,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/fz.bin,24,0902759cda1cc145d52da9f0990287a4a706d4f8,ACTTBL_N(1).SN1,0x5F0A,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/ending.bin,354,4ea826064ccd8e51f614f69e0c959b4bcb406bcf,ACTTBL_N(1).SN1,0x6054,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz1pf1.bin,50,5baa8fe12a766e1fdd59fb35fdaf6c0c688cbe51,ACTTBL_N(1).SN1,0x23A0,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz1pf2.bin,50,9e4a7f5e5e2f8dddacf3de4b841cfced6900d226,ACTTBL_N(1).SN1,0x23D2,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz2pf1.bin,50,66983868bc6fea9ac36fe49dbe9edc9c983b6826,ACTTBL_N(1).SN1,0x2404,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz2pf2.bin,50,8eb062c3758d787da8dfdac7dbc9e876d151121e,ACTTBL_N(1).SN1,0x2436,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz3pf1.bin,74,4e83cabaea6bbc23e72d3a64d68f2a2da0b1a4b1,ACTTBL_N(1).SN1,0x2468,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/lz3pf2.bin,62,488703fbbb659977fb483e038c20d52ebda9f977,ACTTBL_N(1).SN1,0x24B2,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf1.bin,50,08ca56d1cb725e95d21e1a23f91037bc112450d8,ACTTBL_N(1).SN1,0x5F22,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf2.bin,50,5e4418fef0e7a73686ffd3b31b01b5acdc73b92c,ACTTBL_N(1).SN1,0x5F54,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf3.bin,50,830b7a3d09394cb602529bf9c17502c8ebe96017,ACTTBL_N(1).SN1,0x5F86,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf4.bin,50,177224d42ff8259d10468190dd3a31e6574dc93b,ACTTBL_N(1).SN1,0x5FB8,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf5.bin,50,5ef6c7a21809933a4ed081e8205a2bb0d5db8d34,ACTTBL_N(1).SN1,0x5FEA,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Normal/objpos/platforms/sbz1pf6.bin,56,e5660788ed581f3559a13db5406fec58e246a66c,ACTTBL_N(1).SN1,0x601C,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/ghz1.bin,1248,6073b08c1d70e41200619e3adc6a3604f3b41b08,ACTTBL_E(1).SN1,0x96,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/ghz2.bin,1476,2bcfc1e4b1fd55eb9c7fa1024f3e1397f1922bfb,ACTTBL_E(1).SN1,0x576,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/ghz3 (REV01).bin,1644,5751aa3393d141b3f5130bafbd1593fed802d4c9,ACTTBL_E(1).SN1,0xB3A,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/lz1 (REV01).bin,1140,484dae619d6c387684c8904a061615b4cffd34a5,ACTTBL_E(1).SN1,0x11A6,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/lz2.bin,834,427911150d7b6410e628a95e5dcd0e2b490a7f8d,ACTTBL_E(1).SN1,0x161A,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/lz3 (REV01).bin,1362,dcfeeb38c3082350a2addb58c1e551f977d1dabe,ACTTBL_E(1).SN1,0x195C,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/sbz3.bin,1176,6c8c09f5d6d2b99f5e6805abab1932cb1d4f2ba7,ACTTBL_E(1).SN1,0x1EAE,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/mz1 (REV01).bin,864,cd38043b5a887a76c31df7708c80bd6716039b14,ACTTBL_E(1).SN1,0x2496,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/mz2.bin,1152,66d5f9c92390a743f76c4aeac6f02d687c764719,ACTTBL_E(1).SN1,0x27F6,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/mz3.bin,1302,94d2f1ebf29c00bde421b4e9e4aab3214fa4a0ed,ACTTBL_E(1).SN1,0x2C76,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/slz1.bin,1344,26af509eacc703eac83ae4295995b6d0901da12d,ACTTBL_E(1).SN1,0x318C,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/slz2.bin,1164,89fe2102d8ad9a89d77686a8ef2bcc1454fc54e3,ACTTBL_E(1).SN1,0x36CC,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/slz3.bin,1506,d122e2cc50724f68284c2723d1f895785998d3af,ACTTBL_E(1).SN1,0x3B58,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/syz1.bin,1164,4cc6ac25987f04d2a951bd8458f98e360f6ab435,ACTTBL_E(1).SN1,0x413A,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/syz2.bin,1326,1e6ce073d70c7fd7ee75acfa2e3d654fb5e61984,ACTTBL_E(1).SN1,0x45C6,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/syz3 (REV01).bin,1548,d9f3afe2804ef5d4ccfcd89205bea73ee43bce07,ACTTBL_E(1).SN1,0x4AF4,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/sbz1 (REV01).bin,1794,1b1693670864d651f1de918975f3b4decf8e8741,ACTTBL_E(1).SN1,0x5100,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/sbz2.bin,1758,25c63843fe1adfb4ef118340d66c8ecf4d5a1d66,ACTTBL_E(1).SN1,0x5802,object placement segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/fz.bin,30,c7420a950f1f6355793c9a4480187a88b6fb3e9a,ACTTBL_E(1).SN1,0x5EE0,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/ending.bin,354,4ea826064ccd8e51f614f69e0c959b4bcb406bcf,ACTTBL_E(1).SN1,0x6030,object placement segment from pointer table; differs from AS baseline
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz1pf1.bin,50,5baa8fe12a766e1fdd59fb35fdaf6c0c688cbe51,ACTTBL_E(1).SN1,0x2346,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz1pf2.bin,50,9e4a7f5e5e2f8dddacf3de4b841cfced6900d226,ACTTBL_E(1).SN1,0x2378,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz2pf1.bin,50,66983868bc6fea9ac36fe49dbe9edc9c983b6826,ACTTBL_E(1).SN1,0x23AA,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz2pf2.bin,50,8eb062c3758d787da8dfdac7dbc9e876d151121e,ACTTBL_E(1).SN1,0x23DC,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz3pf1.bin,74,4e83cabaea6bbc23e72d3a64d68f2a2da0b1a4b1,ACTTBL_E(1).SN1,0x240E,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/lz3pf2.bin,62,488703fbbb659977fb483e038c20d52ebda9f977,ACTTBL_E(1).SN1,0x2458,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf1.bin,50,08ca56d1cb725e95d21e1a23f91037bc112450d8,ACTTBL_E(1).SN1,0x5EFE,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf2.bin,50,5e4418fef0e7a73686ffd3b31b01b5acdc73b92c,ACTTBL_E(1).SN1,0x5F30,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf3.bin,50,830b7a3d09394cb602529bf9c17502c8ebe96017,ACTTBL_E(1).SN1,0x5F62,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf4.bin,50,177224d42ff8259d10468190dd3a31e6574dc93b,ACTTBL_E(1).SN1,0x5F94,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf5.bin,50,5ef6c7a21809933a4ed081e8205a2bb0d5db8d34,ACTTBL_E(1).SN1,0x5FC6,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/Easy/objpos/platforms/sbz1pf6.bin,56,e5660788ed581f3559a13db5406fec58e246a66c,ACTTBL_E(1).SN1,0x5FF8,platform subtable segment from pointer table; exact AS match
+Enhancements/Sonic Jam/_source_sn1/AC.SN1,207312,a8472232a8848217054ee1194410aec3ac9f1ab1,AC.SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/_source_sn1/ACTTBL(1).SN1,25434,cbaab5b5ddba8b804142a46a4dae4a7d94392301,ACTTBL(1).SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/_source_sn1/ACTTBL_E(1).SN1,24978,5b91c41bf5a5c2675f4c55f844a95b745f4652c9,ACTTBL_E(1).SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/_source_sn1/ACTTBL_N(1).SN1,25014,8d7d7f9f56b22ed9328ebee1a55969083552fa7f,ACTTBL_N(1).SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/_source_sn1/DATA.SN1,285011,a1364fe3445f553aba429f2b017c61a926ffaaa7,DATA.SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/_source_sn1/TBL.SN1,34320,3dd770b4184fc8498aa6442bb68beb80d4f692b6,TBL.SN1,0x0,original uploaded source file
+Enhancements/Sonic Jam/README.md,1009,80dae44a016f0afb22cf669fbe50f6f35d768dbf,generated,,package notes

@@ -28,6 +28,8 @@ BugFixVictoryDebug:			equ 1*Enhanced
 BugFixDrownInDebug:			equ 1*Enhanced
 FeatureAirAnimation:			equ 1*Enhanced
 
+FeatureSonicJam				equ 1*Enhanced	; Use the Sonic Jam Assets, 1 for Original, 2 for Normal, 3 for Easy
+
 ; Causes Error on Demo 3 and with Object Edge Detection
 FeatureSonicCDExtendedCamera:		equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 
