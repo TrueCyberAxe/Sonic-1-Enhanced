@@ -383,29 +383,60 @@ locret_65B0:
 ; ===========================================================================
 
 MoveScreenHoriz:
-		move.w	(v_player+obX).w,d0
-		sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
-	if FixBugs
-		; Fix horizontal wrap bug
-		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
-		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-		blt.s	SH_BehindMid	; if yes, branch
-		subi.w	#16,d0		; is distance more than 160px?
-		bge.s	SH_AheadOfMid	; if yes, branch
+	move.w	(v_player+obX).w,d0
+	sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
+
+	if FeatureSonicCDExtendedCamera
+		sub.w (v_camera_pan).w,d0       ; Horizontal camera pan value
+		beq.s SH_ProperlyFramed
 	else
 		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-		bcs.s	SH_BehindMid	; if yes, branch
-		subi.w	#16,d0		; is distance more than 160px?
-		bcc.s	SH_AheadOfMid	; if yes, branch
 	endif
+
+	if (FixCameraFollowBug)|(FixBugs)|(FeatureSonicCDExtendedCamera)
+		; Fix horizontal wrap bug
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+		blt.s	SH_BehindMid	; if yes, branch
+	else
+		bcs.s	SH_BehindMid	; if yes, branch
+	endif
+
+	if FeatureSonicCDExtendedCamera
+		bra.s SH_AheadOfMid		; branch
+	endif ; if FeatureSonicCDExtendedCamera
+
+	if FeatureSonicCDExtendedCamera=0
+		subi.w	#16,d0			; is distance more than 160px?
+
+	if (FixCameraFollowBug)|(FixBugs)
+		; Fix horizontal wrap bug
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+
+		bge.s	SH_AheadOfMid	; if yes, branch
+	else
+    ; bcc.s	SH_AheadOfMid <-- should it be this?
+		bra.s	SH_AheadOfMid	; extended camera: move toward target
+	endif ; if (FixCameraFollowBug)|(FixBugs)
+
+	endif ; if FeatureSonicCDExtendedCamera=0
+
+SH_ProperlyFramed:
 		clr.w	(v_scrshiftx).w
 		rts
 ; ===========================================================================
 
 SH_AheadOfMid:
+	if FeatureSonicCDExtendedCamera=0
 		cmpi.w	#16,d0		; is Sonic within 16px of middle area?
+
+	if (FixCameraFollowBug)|(FixBugs)
 		blo.s	SH_Ahead16	; if yes, branch
+	else
+		blt.s	SH_Ahead16    ; if yes, branch
+	endif
+
 		move.w	#16,d0		; set to 16 if greater
+	endif
 
 SH_Ahead16:
 		add.w	(v_screenposx).w,d0
@@ -423,14 +454,15 @@ SH_SetScreen:
 ; ===========================================================================
 
 SH_BehindMid:
-	if FixBugs
+	if ((FixCameraFollowBug)|(FixBugs))&(FeatureSonicCDExtendedCamera=0)
 		; Fix the camera follow bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 		cmpi.w	#-16,d0		; is Sonic within -16px of middle area?
 		bgt.s	SH_Behind16	; if yes, branch
 		move.w	#-16,d0		; set to -16 if lower
-SH_Behind16:
 	endif
+
+SH_Behind16:
 		add.w	(v_screenposx).w,d0
 		cmp.w	(v_limitleft2).w,d0
 		bgt.s	SH_SetScreen

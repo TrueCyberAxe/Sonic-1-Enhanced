@@ -110,8 +110,7 @@ loc_19202:
 		tst.b	obBossFlash(a0)
 		bne.s	loc_1923A
 		move.b	#$20,obBossFlash(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l	; play boss damage sound
+		sfx	#sfx_HitBoss,snd_jsr	; play boss damage sound
 
 loc_1923A:
 		lea	(v_palette+$22).w,a1
@@ -433,8 +432,7 @@ loc_194DA:
 
 loc_194E0:
 		clr.w	obVelY(a0)
-		move.w	#bgm_SYZ,d0
-		jsr	(QueueSound1).l		; play SYZ music
+		music	#bgm_SYZ,snd_jsr		; play SYZ music
 
 loc_194EE:
 		bra.w	loc_191F2
@@ -460,7 +458,7 @@ loc_19512:
 ; ===========================================================================
 
 BossSpringYard_ShipDelete:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)	; Bug 6
 		; Avoid returning to BossSpringYard_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

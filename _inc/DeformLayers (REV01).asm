@@ -185,7 +185,7 @@ Deform_LZ:
 		move.w	(v_waterpos1).w,d4
 		move.w	(v_screenposy).w,d5
 	; write normal scroll before meeting water position
-	.normalLoop:		
+	.normalLoop:
 		cmp.w	d4,d5	; is current y >= water y?
 		bge.s	.underwaterLoop	; if yes, branch
 		move.l	d0,(a1)+
@@ -258,7 +258,7 @@ Deform_MZ:
 	; calculate y-position of background
 		move.w	#$200,d0	; start with 512px, ignoring 2 chunks
 		move.w	(v_screenposy).w,d1
-		subi.w	#$1C8,d1	; 0% scrolling when y <= 56px 
+		subi.w	#$1C8,d1	; 0% scrolling when y <= 56px
 		bcs.s	.noYscroll
 		move.w	d1,d2
 		add.w	d1,d1
@@ -293,7 +293,7 @@ Deform_MZ:
 		move.w	d2,d3
 		asr.w	#1,d3
 		move.w	#4,d1
-	.cloudLoop:		
+	.cloudLoop:
 		move.w	d3,(a1)+
 		swap	d3
 		add.l	d0,d3
@@ -303,21 +303,21 @@ Deform_MZ:
 		move.w	(v_bg3screenposx).w,d0
 		neg.w	d0
 		move.w	#1,d1
-	.mountainLoop:		
+	.mountainLoop:
 		move.w	d0,(a1)+
 		dbf	d1,.mountainLoop
 
 		move.w	(v_bg2screenposx).w,d0
 		neg.w	d0
 		move.w	#8,d1
-	.bushLoop:		
+	.bushLoop:
 		move.w	d0,(a1)+
 		dbf	d1,.bushLoop
 
 		move.w	(v_bgscreenposx).w,d0
 		neg.w	d0
 		move.w	#$F,d1
-	.interiorLoop:		
+	.interiorLoop:
 		move.w	d0,(a1)+
 		dbf	d1,.interiorLoop
 
@@ -363,7 +363,7 @@ Deform_SLZ:
 		moveq	#0,d3
 		move.w	d2,d3
 		move.w	#$1B,d1
-	.starLoop:		
+	.starLoop:
 		move.w	d3,(a1)+
 		swap	d3
 		add.l	d0,d3
@@ -415,7 +415,7 @@ Bg_Scroll_X:
 		jmp	.pixelJump(pc,d2.w)		; skip pixels for first row
 	.blockLoop:
 		move.w	(a2)+,d0
-	.pixelJump:		
+	.pixelJump:
 		move.l	d0,(a1)+
 		move.l	d0,(a1)+
 		move.l	d0,(a1)+
@@ -467,7 +467,7 @@ Deform_SYZ:
 		move.w	d2,d3
 		asr.w	#1,d3
 		move.w	#7,d1
-	.cloudLoop:		
+	.cloudLoop:
 		move.w	d3,(a1)+
 		swap	d3
 		add.l	d0,d3
@@ -477,14 +477,14 @@ Deform_SYZ:
 		move.w	d2,d0
 		asr.w	#3,d0
 		move.w	#4,d1
-	.mountainLoop:		
+	.mountainLoop:
 		move.w	d0,(a1)+
 		dbf	d1,.mountainLoop
 
 		move.w	d2,d0
 		asr.w	#2,d0
 		move.w	#5,d1
-	.buildingLoop:		
+	.buildingLoop:
 		move.w	d0,(a1)+
 		dbf	d1,.buildingLoop
 
@@ -502,7 +502,7 @@ Deform_SYZ:
 		move.w	d2,d3
 		asr.w	#1,d3
 		move.w	#$D,d1
-	.bushLoop:		
+	.bushLoop:
 		move.w	d3,(a1)+
 		swap	d3
 		add.l	d0,d3
@@ -580,7 +580,7 @@ Deform_SBZ:
 		moveq	#0,d3
 		move.w	d2,d3
 		move.w	#3,d1
-	.cloudLoop:		
+	.cloudLoop:
 		move.w	d3,(a1)+
 		swap	d3
 		add.l	d0,d3
@@ -618,7 +618,7 @@ Deform_SBZ:
 Deform_SBZ2:;loc_68A2:
 	; plain background deformation
 		move.w	(v_scrshiftx).w,d4
-		ext.l	d4		
+		ext.l	d4
 		asl.l	#6,d4
 		move.w	(v_scrshifty).w,d5
 		ext.l	d5
@@ -633,7 +633,7 @@ Deform_SBZ2:;loc_68A2:
 		swap	d0
 		move.w	(v_bgscreenposx).w,d0
 		neg.w	d0
-	.loop:		
+	.loop:
 		move.l	d0,(a1)+
 		dbf	d1,.loop
 		rts
@@ -671,19 +671,39 @@ ScrollHoriz:
 MoveScreenHoriz:
 		move.w	(v_player+obX).w,d0
 		sub.w	(v_screenposx).w,d0 ; Sonic's distance from left edge of screen
-	if FixBugs
+
+	if FeatureSonicCDExtendedCamera
+		sub.w (v_camera_pan).w,d0       ; Horizontal camera pan value
+		beq.s SH_ProperlyFramed
+	else
 		; Fix horizontal wrap bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-		blt.s	SH_BehindMid	; if yes, branch
-		subi.w	#16,d0		; is distance more than 160px?
-		bge.s	SH_AheadOfMid	; if yes, branch
-	else
-		subi.w	#(320/2)-16,d0	; is distance less than 144px?
-		bcs.s	SH_BehindMid	; if yes, branch
-		subi.w	#16,d0		; is distance more than 160px?
-		bcc.s	SH_AheadOfMid	; if yes, branch
 	endif
+
+	if (FixCameraFollowBug)|(FixBugs)|(FeatureSonicCDExtendedCamera)
+		; Fix horizontal wrap bug
+		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+		blt.s	SH_BehindMid	; if yes, branch
+	else
+		bcs.s	SH_BehindMid	; if yes, branch
+	endif
+
+	if FeatureSonicCDExtendedCamera
+		bra.s SH_AheadOfMid    					; branch
+	endif ; if FeatureSonicCDExtendedCamera=0
+
+	if FeatureSonicCDExtendedCamera=0
+		subi.w	#16,d0							; is distance more than 160px?
+
+		if (FixCameraFollowBug)|(FixBugs)
+			bge.s	SH_AheadOfMid				; if yes, branch
+		else
+			bcc.s	SH_AheadOfMid				; if yes, branch
+		endif ; if(FixCameraFollowBug)|(FixBugs)
+	endif ; if FeatureSonicCDExtendedCamera=0
+
+SH_ProperlyFramed:
 		clr.w	(v_scrshiftx).w
 		rts
 ; ===========================================================================
@@ -709,7 +729,7 @@ SH_SetScreen:
 ; ===========================================================================
 
 SH_BehindMid:
-	if FixBugs
+	if (FixCameraFollowBug)|(FeatureSonicCDExtendedCamera)|(FixBugs)
 		; Fix the camera follow bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
 		cmpi.w	#-16,d0		; is Sonic within -16px of middle area?

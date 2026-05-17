@@ -14,7 +14,7 @@ Over_Index:	dc.w Over_ChkPLC-Over_Index
 ; ===========================================================================
 
 Over_ChkPLC:	; Routine 0
-		tst.l	(v_plc_buffer).w ; are the pattern load cues empty?
+		tst.l	(v_plc_queue_base).w ; are the pattern load cues empty?
 		beq.s	Over_Main	; if yes, branch
 		rts
 ; ===========================================================================
@@ -48,6 +48,11 @@ Over_UpdatePos:
 Over_SetWait:
 		move.w	#720,obTimeFrame(a0) ; set time delay to 12 seconds
 		addq.b	#2,obRoutine(a0)
+
+	if BugFixGameOverFlicker
+		bra.w   DisplaySprite ; KoH additional line to prevent blinking.
+	endif
+
 	if FixBugs=0
 		; this causes the text to briefly flicker when conjoining
 		rts

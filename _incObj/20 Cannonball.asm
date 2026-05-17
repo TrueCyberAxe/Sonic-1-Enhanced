@@ -78,7 +78,7 @@ Cbal_Animate:
 		bchg	#0,obFrame(a0)	; change frame
 
 Cbal_Display:
-	if FixBugs=0
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 4
 		; Moved to prevent a display-and-delete bug.
 		bsr.w	DisplaySprite
 	endif
@@ -86,7 +86,7 @@ Cbal_Display:
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0	; has object fallen off the level?
 		blo.w	DeleteObject	; if yes, branch
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 4
 		bra.w	DisplaySprite
 	else
 		rts

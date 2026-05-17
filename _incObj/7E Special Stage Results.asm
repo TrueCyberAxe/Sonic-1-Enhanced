@@ -24,7 +24,7 @@ ssr_mainX = objoff_30		; position for card to display on
 ; ===========================================================================
 
 SSR_ChkPLC:	; Routine 0
-		tst.l	(v_plc_buffer).w ; are the pattern load cues empty?
+		tst.l	v_plc_queue_base.w ; are the pattern load cues empty?
 		beq.s	SSR_Main	; if yes, branch
 		rts
 ; ===========================================================================
@@ -113,13 +113,11 @@ SSR_RingBonus:	; Routine 6
 		move.b	(v_vblank_byte).w,d0
 		andi.b	#3,d0
 		bne.s	locret_C8EA
-		move.w	#sfx_Switch,d0
-		jmp	(QueueSound2).l	; play "blip" sound
+		sfx	#sfx_Switch,snd_jmp	; play "blip" sound
 ; ===========================================================================
 
 loc_C8C4:
-		move.w	#sfx_Cash,d0
-		jsr	(QueueSound2).l	; play "ker-ching" sound
+		sfx	#sfx_Cash,snd_jsr	; play "ker-ching" sound
 		addq.b	#2,obRoutine(a0)
 		move.w	#180,obTimeFrame(a0) ; set time delay to 3 seconds
 		cmpi.w	#50,(v_rings).w	; do you have at least 50 rings?
@@ -139,8 +137,7 @@ SSR_Exit:	; Routine $A, $12
 SSR_Continue:	; Routine $E
 		move.b	#4,(v_ssrescontinue+obFrame).w
 		move.b	#$14,(v_ssrescontinue+obRoutine).w
-		move.w	#sfx_Continue,d0
-		jsr	(QueueSound2).l	; play continues jingle
+		sfx	#sfx_Continue,snd_jsr	; play continues jingle
 		addq.b	#2,obRoutine(a0)
 		move.w	#360,obTimeFrame(a0) ; set time delay to 6 seconds
 		bra.w	DisplaySprite

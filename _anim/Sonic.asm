@@ -90,7 +90,14 @@ fr_Float6:	equ $54
 fr_Injury:	equ $55
 fr_GetAir:	equ $56
 fr_Slide:	equ $57 ; formerly mamed fr_WaterSlide (was too long...)
-
+	if FeatureSpindash>1
+fr_Spindash1:	equ $58
+fr_Spindash2:	equ $59
+fr_Spindash3:	equ $5A
+fr_Spindash4:	equ $5B
+fr_Spindash5:	equ $5C
+fr_Spindash6:	equ $5D
+	endif ; if FeatureSpindash>1
 
 ; ---------------------------------------------------------------------------
 ; Animation script - Sonic
@@ -137,6 +144,15 @@ id_Null:	sonani	SonAni_Null	; $1C
 id_Float3:	sonani	SonAni_Float3	; $1D
 id_Float4:	sonani	SonAni_Float4	; $1E
 
+	if FeatureSpindash>1
+id_Spindash:	sonani	SonAni_SpinDash	; $1F
+	else
+id_Spindash:	equ	id_Roll2
+	endif
+
+id_PeeloutCharge:	equ id_Run
+id_Dash:			equ id_Run
+
 ; ---------------------------------------------------------------------------
 ; --- Special animations (walk/run/roll/push) ---
 ; Sonic handles animations with a start value of $80 or greater separately.
@@ -152,7 +168,7 @@ SonAni_Walk:	dc.b $FF
 
 SonAni_Run:	dc.b $FF
 		dc.b fr_Run11,  fr_Run12,  fr_Run13,  fr_Run14,  afEnd,     afEnd
-		dc.b afEnd 
+		dc.b afEnd
 		even
 
 SonAni_Roll:	dc.b $FE
@@ -295,7 +311,7 @@ SonAni_Hurt:	dc.b 3
 		even
 
 SonAni_Slide:	dc.b 7
-		dc.b fr_Injury, fr_Slide
+		dc.b fr_Injury, fr_WaterSlide
 		dc.b afEnd
 		even
 
@@ -313,3 +329,15 @@ SonAni_Float4:	dc.b 3
 		dc.b fr_Float1
 		dc.b afChange, id_Walk
 		even
+
+	if FeatureSpindash>1
+SonAni_SpinDash:
+		dc.b 0
+		dc.b fr_Spindash1, fr_Spindash2
+		dc.b fr_Spindash1, fr_Spindash3
+		dc.b fr_Spindash1, fr_Spindash4
+		dc.b fr_Spindash1, fr_Spindash5
+		dc.b fr_Spindash1, fr_Spindash6
+		dc.b afEnd
+		even
+	endif

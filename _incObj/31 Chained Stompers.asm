@@ -25,7 +25,7 @@ CStom_Var:	dc.b 2,	0, 0		; routine number, y-position, frame number
 		dc.b 6,	$F0, 2
 
 CStom_Lengths:	; chain lengths based on subtype
-		dc.b $70, 0		
+		dc.b $70, 0
 		dc.b $A0, 0
 		dc.b $50, 0
 		dc.b $78, 0
@@ -134,7 +134,7 @@ CStom_Block:	; Routine 2
 		movea.l	a2,a0
 
 CStom_Display:
-	if FixBugs=0
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
 		bsr.w	DisplaySprite
 	endif
 		bra.w	CStom_ChkDel
@@ -160,13 +160,13 @@ CStom_Spikes:	; Routine 4
 
 ; CStom_Display2:
 CStom_Ceiling:	; Routine 6
-	if FixBugs=0
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
 		bsr.w	DisplaySprite
 	endif
 
 CStom_ChkDel:
 		out_of_range.w	DeleteObject
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1 / 2 / 6 Fix
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bra.w	DisplaySprite
@@ -210,8 +210,7 @@ loc_B872:
 		bne.s	loc_B892
 		tst.b	obRender(a0)
 		bpl.s	loc_B892
-		move.w	#sfx_ChainRise,d0
-		jsr	(QueueSound2).l	; play rising chain sound
+		sfx	#sfx_ChainRise,snd_jsr	; play rising chain sound
 
 loc_B892:
 		subi.w	#$80,objoff_32(a0)
@@ -236,8 +235,7 @@ loc_B8A8:
 		move.w	#0,obVelY(a0)	; stop object falling
 		tst.b	obRender(a0)
 		bpl.s	CStom_Restart
-		move.w	#sfx_ChainStomp,d0
-		jsr	(QueueSound2).l	; play stomping sound
+		sfx	#sfx_ChainStomp,snd_jsr	; play stomping sound
 
 CStom_Restart:
 		moveq	#0,d0
@@ -262,8 +260,7 @@ loc_B902:
 		bne.s	loc_B91C
 		tst.b	obRender(a0)
 		bpl.s	loc_B91C
-		move.w	#sfx_ChainRise,d0
-		jsr	(QueueSound2).l	; play rising chain sound
+		sfx	#sfx_ChainRise,snd_jsr	; play rising chain sound
 
 loc_B91C:
 		subi.w	#$80,objoff_32(a0)
@@ -289,8 +286,7 @@ loc_B938:
 		move.w	#$3C,objoff_38(a0)
 		tst.b	obRender(a0)
 		bpl.s	loc_B97C
-		move.w	#sfx_ChainStomp,d0
-		jsr	(QueueSound2).l	; play stomping sound
+		sfx	#sfx_ChainStomp,snd_jsr	; play stomping sound
 
 loc_B97C:
 		bra.w	CStom_Restart

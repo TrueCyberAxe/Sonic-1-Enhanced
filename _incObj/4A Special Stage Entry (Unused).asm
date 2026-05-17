@@ -27,7 +27,7 @@ Van_Main:	; Routine 0
 		move.b	#1,obPriority(a0)
 		move.b	#$38,obActWid(a0)
 		move.w	#ArtTile_Warp,obGfx(a0)
-		move.w	#120,van_time(a0) ; set time for Sonic's disappearance to 2 seconds
+		move.w	#120,van_time(a0) 						; set time for Sonic's disappearance to 2 seconds
 
 Van_RmvSonic:	; Routine 2
 		move.w	(v_player+obX).w,obX(a0)
@@ -39,18 +39,17 @@ Van_RmvSonic:	; Routine 2
 		bne.s	.display
 		tst.b	(v_player).w
 		beq.s	.display
-		move.b	#0,(v_player).w	; remove Sonic
-		move.w	#sfx_SSGoal,d0
-		jsr	(QueueSound2).l	; play Special Stage "GOAL" sound
+		move.b	#0,(v_player).w								; remove Sonic
+		sfx	#sfx_SSGoal,snd_jsr	; play Special Stage "GOAL" sound
 
 .display:
 		jmp	(DisplaySprite).l
 ; ===========================================================================
 
 Van_LoadSonic:	; Routine 4
-		subq.w	#1,van_time(a0)	; subtract 1 from time
+		subq.w	#1,van_time(a0)								; subtract 1 from time
 		bne.s	.wait		; if time remains, branch
-		move.b	#id_SonicPlayer,(v_player).w ; load Sonic object
+		move.b	#id_SonicPlayer,(v_player).w 	; load Sonic object
 		jmp	(DeleteObject).l
 
 .wait:

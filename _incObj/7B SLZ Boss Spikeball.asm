@@ -9,12 +9,18 @@ BossSpikeball:
 		jsr	BossSpikeball_Index(pc,d0.w)
 		move.w	obBossX(a0),d0
 		andi.w	#$FF80,d0
-		move.w	(v_screenposx).w,d1
+	if TweakS2OffscreenDelete
+		; Use the object manager's cached rounded camera X like Sonic 2.
+		sub.w	(v_opl_screen).w,d0
+		addi.w	#$80,d0 ; approx distance between object and screen
+	else
+		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#$80,d1
 		andi.w	#$FF80,d1
-		sub.w	d1,d0
+		sub.w	d1,d0 ; approx distance between object and screen
+	endif
 		bmi.w	BossStarLight_Delete
-		cmpi.w	#$280,d0
+		cmpi.w	#$280,d0		; 128+320+192
 		bhi.w	BossStarLight_Delete
 		jmp	(DisplaySprite).l
 ; ===========================================================================
@@ -303,8 +309,7 @@ loc_18FDC:
 		jsr	(Sonic_ChkRoll).l
 		movea.l	(sp)+,a0
 		move.b	#2,obRoutine(a2)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play "spring" sound
+		sfx	#sfx_Spring,snd_jsr	; play "spring" sound
 
 loc_19008:
 		clr.w	obVelX(a0)
@@ -388,7 +393,7 @@ BossSpikeball_MoveFrag:	; Routine $A
 		move.b	d0,obFrame(a0)
 
 		tst.b	obRender(a0)
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Avoid returning to BossSpikeball to prevent a
 		; display-and-delete bug.
 		bmi.s	.return
@@ -396,7 +401,7 @@ BossSpikeball_MoveFrag:	; Routine $A
 		bra.w	BossStarLight_Delete
 	else
 		bpl.w	BossStarLight_Delete
-	endif
+	endif ; if (BugFixRenderBeforeInit)|(FixBugs)
 
 .return:
 		rts

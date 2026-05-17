@@ -23,7 +23,7 @@ got_finalX = objoff_32		; position for card to finish on
 ; ===========================================================================
 
 Got_ChkPLC:	; Routine 0
-		tst.l	(v_plc_buffer).w ; are the pattern load cues empty?
+		tst.l	v_plc_queue_base.w ; are the pattern load cues empty?
 		beq.s	Got_Main	; if yes, branch
 		rts
 ; ===========================================================================
@@ -117,8 +117,7 @@ Got_RingBonus:
 Got_ChkBonus:
 		tst.w	d0		; is there any bonus?
 		bne.s	Got_AddBonus	; if yes, branch
-		move.w	#sfx_Cash,d0
-		jsr	(QueueSound2).l	; play "ker-ching" sound
+		sfx	#sfx_Cash,snd_jsr	; play "ker-ching" sound
 		addq.b	#2,obRoutine(a0)
 		cmpi.w	#id_SBZ_act2,(v_zone).w	; is level SBZ2?
 		bne.s	Got_SetDelay		; if not, branch
@@ -136,8 +135,7 @@ Got_AddBonus:
 		move.b	(v_vblank_byte).w,d0
 		andi.b	#3,d0
 		bne.s	locret_C692
-		move.w	#sfx_Switch,d0
-		jmp	(QueueSound2).l	; play "blip" sound
+		sfx	#sfx_Switch,snd_jmp	; play "blip" sound
 ; ===========================================================================
 
 Got_NextLevel:	; Routine $A
@@ -204,9 +202,9 @@ Got_SBZ2:
 		cmpi.b	#4,obFrame(a0)
 		bne.w	DeleteObject
 		addq.b	#2,obRoutine(a0)
-		clr.b	(f_lockctrl).w	; unlock controls
-		move.w	#bgm_FZ,d0
-		jmp	(QueueSound1).l	; play FZ music
+		clr.b	(f_lockctrl).w				; unlock controls
+		music	#bgm_FZ,snd_jmp				; play FZ music
+
 ; ===========================================================================
 
 ; loc_C766:
@@ -214,6 +212,9 @@ Got_Boundary:	; Routine $10
 		addq.w	#2,(v_limitright2).w
 		cmpi.w	#$2100,(v_limitright2).w
 		beq.w	DeleteObject
+	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+		clr.b  (f_victory).w 													; Unset victory animation flag
+	endif
 		rts
 ; ===========================================================================
 		;    x-start, x-main, y-main,

@@ -139,8 +139,7 @@ loc_189FE:
 		tst.b	obBossFlash(a0)
 		bne.s	loc_18A28
 		move.b	#$20,obBossFlash(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l	; play boss damage sound
+		sfx	#sfx_HitBoss,snd_jsr	; play boss damage sound
 
 loc_18A28:
 		lea	(v_palette+$22).w,a1
@@ -325,8 +324,7 @@ loc_18BAE:
 
 loc_18BB4:
 		clr.w	obVelY(a0)
-		move.w	#bgm_SLZ,d0
-		jsr	(QueueSound1).l		; play SLZ music
+		music	#bgm_SLZ,snd_jsr		; play SLZ music
 
 loc_18BC2:
 		bra.w	loc_189EE
@@ -344,7 +342,7 @@ BSLZ_Escape:
 
 loc_18BE0:
 		tst.b	obRender(a0)
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
 		bpl.s	BossStarLight_PopAndDelete
 	else
 		bpl.w	BossStarLight_Delete

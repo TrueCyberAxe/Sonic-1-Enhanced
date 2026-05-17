@@ -23,6 +23,9 @@ Sonic_Index:	dc.w Sonic_Main-Sonic_Index			; 0 - object init
 		dc.w Sonic_Hurt-Sonic_Index			; 4 - while being knocked back from damage
 		dc.w Sonic_Death-Sonic_Index			; 6 - while dying and falling off screen
 		dc.w Sonic_ResetLevel-Sonic_Index		; 8 - after having died and waiting for the level to restart
+	if BugFixScatteredRingsTimer
+		dc.w Sonic_Drowned-Sonic_Index
+	endif ; if BugFixScatteredRingsTimer
 ; ===========================================================================
 
 ; Obj01_Main:
@@ -42,17 +45,44 @@ Sonic_Main:	; Routine 0
 
 ; Obj01_Control:
 Sonic_Control:	; Routine 2
+	if AdvancedDebugger
+		move.b	(v_jpadpress1).w,d0			; get pressed buttons
+		andi.b	#btnA|btnStart,d0			; are A and Start pressed?
+		cmpi.b	#btnA|btnStart,d0
+		bne.s	Sonic_DebugSkip
+		RaiseError "Intentional crash test:%<endl>Level ID = %<.w $FFFFFE10>%<endl>Frame = %<.w $FFFFFE04>", SampleLevelDebugger
+Sonic_DebugSkip:
+	endif ; if AdvancedDebugger
+
+	if BugFixVictoryDebug
+		tst.b	(f_victory).w												; is victory flag set?
+		bne.w	Sonic_Control_Nodebug													; if yes, branch
+	endif ; if BugFixVictoryDebug
+
+	if Debug=0
 		tst.w	(f_debugmode).w				; is debug cheat enabled?
-		beq.s	.nodebug				; if not, branch
+		beq.s	Sonic_Control_Nodebug			; if not, branch
+	endif ; if Debug=0
+
+	if FeatureSonicCDExtendedCamera
+		bsr.s Sonic_PanCamera
+	endif ; if FeatureSonicCDExtendedCamera
+
 		btst	#bitB,(v_jpadpress1).w			; is button B pressed?
-		beq.s	.nodebug				; if not, branch
+		beq.s	Sonic_Control_Nodebug			; if not, branch
 		move.w	#1,(v_debuguse).w			; enter debug mode on the next frame (change Sonic into a ring/item)
 		clr.b	(f_lockctrl).w				; unlock controls
-		rts						; return
+		rts
+
+	if FeatureSonicCDExtendedCamera
+		include "Enhancements/_incObj/Sonic_PanCamera.asm"
+	endif ; if FeatureSonicCDExtendedCamera
+
+	; return
 ; ===========================================================================
 
 ; loc_12C58:
-.nodebug:
+Sonic_Control_Nodebug:
 		tst.b	(f_lockctrl).w				; are controls locked?
 		bne.s	.ignorecontrols				; if yes, branch
 		move.w	(v_jpadhold1).w,(v_jpadhold2).w		; enable joypad control
@@ -166,7 +196,7 @@ Sonic_Display:
 .music:
 		lea	(MusicList2).l,a1			; load music list for post-invincibility
 		move.b	(a1,d0.w),d0				; get entry for current zone
-		jsr	(QueueSound1).l				; resume normal level music
+		play_queued_music snd_jsr			; resume normal level music
 
 ; Obj01_RmvInvin:
 .removeinvincible:
@@ -184,8 +214,8 @@ Sonic_Display:
 		move.w	#$C,(v_sonspeedacc).w			; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w			; restore Sonic's deceleration
 		move.b	#0,(v_shoes).w				; cancel speed shoes
-		move.w	#bgm_Slowdown,d0			; resume music...
-		jmp	(QueueSound1).l				; ...at normal speed
+		music	#bgm_Slowdown,snd_jmp			; resume music at normal speed
+
 ; ===========================================================================
 
 ; Obj01_ExitChk:
@@ -247,8 +277,12 @@ Sonic_Water:
 		asr.w	obVelY(a0)				; (can only do one bit shift at a time on RAM)
 		beq.s	.return					; if Sonic's new Y-speed is 0, don't load splash object
 		move.b	#id_Splash,(v_splash).w			; load splash object
-		move.w	#sfx_Splash,d0				; set splash sound
-		jmp	(QueueSound2).l				; play it
+
+	if FeatureSpindash=1
+		move.w	#$100,(v_objspace+object_size*7+obAnim).w ; set the spin dash dust animation to splash
+	endif
+
+		sfx	#sfx_Splash,snd_jmp			; set splash sound and play it
 ; ===========================================================================
 
 ; Obj01_OutWater:
@@ -261,6 +295,11 @@ Sonic_Water:
 		move.w	#$C,(v_sonspeedacc).w			; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w			; restore Sonic's deceleration
 		asl.w	obVelY(a0)				; double Y-speed while exiting water
+
+	if TweakFixHurtWaterPhystics
+		tst.w	obVelY(a0)				; test Sonic's vertical velocity
+	endif ; if TweakFixHurtWaterPhystics
+
 		beq.w	.return					; if Sonic's new Y-speed is 0, don't load splash object
 		move.b	#id_Splash,(v_splash).w			; load splash object
 		cmpi.w	#-$1000,obVelY(a0)			; is Sonic's new upwards speed too fast for collision detection to handle? (red springs probably cause this)
@@ -269,8 +308,8 @@ Sonic_Water:
 
 ; loc_12E0E:
 .belowmaxspeed:
-		move.w	#sfx_Splash,d0				; set splash sound
-		jmp	(QueueSound2).l				; play it
+		sfx	#sfx_Splash,snd_jmp			; set splash sound and play it
+
 ; End of function Sonic_Water
 
 
@@ -281,6 +320,12 @@ Sonic_Water:
 
 ; Obj01_MdNormal:
 Sonic_MdNormal:	; While Sonic is on the ground and not rolling
+	if FeatureSpindash
+		bsr.w	Sonic_SpinDash
+	endif ; if FeatureSpindash
+	if FeatureSuperPeelout
+		bsr.w	Sonic_Peelout
+	endif ; if FeatureSuperPeelout
 		bsr.w	Sonic_Jump				; check if we need to jump
 		bsr.w	Sonic_SlopeResistWalk			; handle resistance from running up slopes
 		bsr.w	Sonic_Move				; handle Sonic's left/right movement
@@ -293,7 +338,12 @@ Sonic_MdNormal:	; While Sonic is on the ground and not rolling
 ; ===========================================================================
 
 ; Obj01_MdJump:
-Sonic_MdJump:	; While Sonic is in the air but not rolling
+Sonic_MdJump:
+	if FeatureSpindash
+		; Clear the duck flag while airborne so the spindash crouch state cannot leak into see-saws.
+		clr.b	fr_Duck(a0)
+	endif ; if FeatureSpindash
+		; While Sonic is in the air but not rolling
 		bsr.w	Sonic_JumpHeight			; handle Sonic's jump height based on whether the jump button is still held
 		bsr.w	Sonic_JumpDirection			; handle midair direction adjustments while jumping
 		bsr.w	Sonic_LevelBound			; make sure Sonic stays within level bounds and handle bottomless pits
@@ -306,6 +356,9 @@ Sonic_MdJump:	; While Sonic is in the air but not rolling
 .notunderwater:
 		bsr.w	Sonic_JumpAngle				; steadily return Sonic's angle while jumping to 0
 		bsr.w	Sonic_Floor				; handle collision with level while airborne
+	if FeatureAirRoll
+		bsr.w	Sonic_AirRoll
+	endif ; if FeatureAirRoll
 		rts						; return
 ; ===========================================================================
 
@@ -323,6 +376,10 @@ Sonic_MdRoll:	; While Sonic is on the ground and rolling
 
 ; Obj01_MdJump2:
 Sonic_MdJump2:	; While Sonic is in the air and rolling (usually, but not limited to, jumping)
+	if FeatureSpindash
+		; Clear the duck flag while airborne so the spindash crouch state cannot leak into see-saws.
+		clr.b	fr_Duck(a0)
+	endif ; if FeatureSpindash
 		bsr.w	Sonic_JumpHeight			; handle Sonic's jump height based on whether the jump button is still held
 		bsr.w	Sonic_JumpDirection			; handle midair direction adjustments while jumping
 		bsr.w	Sonic_LevelBound			; make sure Sonic stays within level bounds and handle bottomless pits
@@ -335,6 +392,9 @@ Sonic_MdJump2:	; While Sonic is in the air and rolling (usually, but not limited
 .notunderwater:
 		bsr.w	Sonic_JumpAngle				; steadily return Sonic's angle while jumping to 0
 		bsr.w	Sonic_Floor				; handle collision with level while airborne
+	if FeatureAirRoll
+		bsr.w	Sonic_AirRoll
+	endif ; if FeatureAirRoll
 		rts						; return
 ; End of Sonic_Modes
 
@@ -432,11 +492,24 @@ Sonic_LookUp:
 		btst	#bitUp,(v_jpadhold2).w			; is up being held?
 		beq.s	Sonic_Duck				; if not, check for ducking instead
 		move.b	#id_LookUp,obAnim(a0)			; use "looking up" animation
+
+	if FeatureSpindash
+		addq.b	#1,(v_screendelay_v).w			; increment vertical screen movement delay timer
+		cmp.b	#$78,(v_screendelay_v).w		; has the delay timer reached its maximum value?
+
+		if TweakS2LevelArtLoader
+			bcs.s	Sonic_ResetScr_Alt		; branch to alternate screen reset routine
+		else
+			bcs.s	Sonic_ResetScr			; branch to regular screen reset routine
+		endif ; if TweakS2LevelArtLoader
+
+		move.b	#$78,(v_screendelay_v).w		; clamp delay timer to maximum value
+	endif ; if FeatureSpindash
+
 		cmpi.w	#$C8,(v_lookshift).w			; has camera already fully moved up?
 		beq.s	Sonic_CheckDpadLetGo			; if yes, don't move it up further
 		addq.w	#2,(v_lookshift).w			; move camera up further
 		bra.s	Sonic_CheckDpadLetGo			; skip over
-; ===========================================================================
 
 ; Sonic_LookDown:
 Sonic_Duck:
@@ -451,6 +524,11 @@ Sonic_Duck:
 
 ; Obj01_ResetScr:
 Sonic_ResetScr:
+	if TweakS2LevelArtLoader
+		move.b	#$00,(v_screendelay_v).w		; clear the vertical screen delay timer
+
+Sonic_ResetScr_Alt:
+	endif ; if TweakS2LevelArtLoader
 		cmpi.w	#$60,(v_lookshift).w			; is screen in its default position?
 		beq.s	Sonic_CheckDpadLetGo			; if yes, branch
 		bcc.s	.resetdown				; does camera need to go back down? if yes, branch
@@ -595,6 +673,13 @@ Sonic_MoveLeft:
 		neg.w	d1					; negate it for left-side check
 		cmp.w	d1,d0					; is new speed above max speed?
 		bgt.s	.nocap					; if not, branch
+
+	if TweakRemoveSpeedCap
+		add.w	d5,d0					; +++ remove this frame's acceleration change
+		cmp.w	d1,d0					; +++ compare speed with top speed
+		ble.s	.nocap					; +++ if speed was already greater than the maximum, branch
+	endif ; if TweakRemoveSpeedCap
+
 		move.w	d1,d0					; cap Sonic's ground speed
 
 ; loc_130A6:
@@ -622,8 +707,12 @@ Sonic_MoveLeft:
 		blt.s	.nostopping				; if not, don't play skidding animation/sound
 		move.b	#id_Stop,obAnim(a0)			; use "stopping" animation
 		bclr	#0,obStatus(a0)				; clear X-flip flag (Sonic is now facing right)
-		move.w	#sfx_Skid,d0				; set skidding sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Skid,snd_jsr,snd_load_w,QueueSound2	; set skidding sound and play it
+
+	if FeatureSpindash>1
+		move.b	#$06,(v_objspace+object_size*7+obRoutine).w ; set the spin dash dust routine to skid dust
+		move.b	#$15,(v_objspace+object_size*7+obFrame).w ; set skid dust animation/frame duration
+	endif
 
 ; locret_130E8:
 .nostopping:
@@ -648,6 +737,13 @@ Sonic_MoveRight:
 		add.w	d5,d0					; add acceleration to current ground speed
 		cmp.w	d6,d0					; is new speed above max speed?
 		blt.s	.nocap					; if not, branch
+
+	if TweakRemoveSpeedCap
+		add.w	d5,d0					; +++ remove this frame's acceleration change
+		cmp.w	d1,d0					; +++ compare speed with top speed
+		ble.s	.nocap					; +++ if speed was already greater than the maximum, branch
+	endif
+
 		move.w	d6,d0					; cap Sonic's ground speed
 
 ; loc_1310C:
@@ -676,8 +772,12 @@ Sonic_MoveRight:
 
 		move.b	#id_Stop,obAnim(a0)			; use "stopping" animation
 		bset	#0,obStatus(a0)				; set X-flip flag (Sonic is now facing left)
-		move.w	#sfx_Skid,d0				; set skidding sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Skid,snd_jsr,snd_load_w,QueueSound2	; set skidding sound and play it
+
+	if FeatureSpindash>1
+		move.b	#$06,(v_objspace+object_size*7+obRoutine).w ; change spin dash dust animation routine to skid dust
+		move.b	#$15,(v_objspace+object_size*7+obFrame).w ; set skid dust animation/frame duration
+	endif
 
 ; locret_1314E:
 .nostopping:
@@ -753,6 +853,16 @@ Sonic_RollSlowdownDone:
 
 ; loc_131CC:
 Sonic_AngledRollSpeed:
+	if FeatureSpindash
+		cmp.w	#$60,(v_lookshift).w			; has the camera look-shift reached the target position?
+		beq.s	.cont2					; if so, skip adjustment
+		bcc.s	.cont1					; if above target, begin reducing shift value
+		addq.w	#4,(v_lookshift).w			; increase look-shift toward target position
+.cont1:
+		subq.w	#2,(v_lookshift).w			; gradually reduce look-shift each frame
+.cont2:
+	endif ; if FeatureSpindash
+
 		move.b	obAngle(a0),d0				; get Sonic's current angle in relation to the floor
 		jsr	(CalcSine).l				; get sine and cosine values for the angle
 		muls.w	obInertia(a0),d0			; multiply angle sine by ground speed
@@ -866,6 +976,13 @@ Sonic_JumpDirection:
 		neg.w	d1					; negate it for leftward movement check
 		cmp.w	d1,d0					; is new speed exceeding maximum?
 		bgt.s	.notleft				; if not, branch
+
+	if TweakRemoveSpeedCap
+		add.w	d5,d0					; +++ remove this frame's acceleration change
+		cmp.w	d1,d0					; +++ compare speed with top speed
+		ble.s	.notleft				; +++ if speed was already greater than the maximum, branch
+	endif
+
 		move.w	d1,d0					; cap leftward X-speed to maximum
 
 ; loc_13278:
@@ -876,9 +993,17 @@ Sonic_JumpDirection:
 		add.w	d5,d0					; increase rightward movement speed
 		cmp.w	d6,d0					; is new speed exceeding maximum?
 		blt.s	Sonic_JumpMove				; if not, branch
+
+	if TweakRemoveSpeedCap
+		sub.w	d5,d0					; +++ remove this frame's acceleration change
+		cmp.w	d6,d0					; +++ compare speed with top speed
+		bge.s	Obj01_JumpMove				; +++ if speed was already greater than the maximum, branch
+	endif
+
 		move.w	d6,d0					; cap rightward X-speed to maximum
 
 ; Obj01_JumpMove:
+Obj01_JumpMove:
 Sonic_JumpMove:
 		move.w	d0,obVelX(a0)				; update Sonic's horizontal speed
 ; ---------------------------------------------------------------------------
@@ -930,6 +1055,13 @@ Sonic_AirDrag:
 		rts						; return
 ; End of function Sonic_JumpDirection
 
+	if FeatureSpindash
+		include "Enhancements/_incObj/Sonic Spindash.asm"
+	endif
+
+	if FeatureSuperPeelout
+		include "Enhancements/_incObj/Sonic SuperPeelout.asm"
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -939,7 +1071,7 @@ Sonic_AirDrag:
 ; this routine isn't known, though it possibly was for troubleshooting
 ; collision errors in which Sonic would somehow clip through ceilings.
 ; ---------------------------------------------------------------------------
-
+	if TweakRemoveReduntantCode=0
 Sonic_SquashUnused:
 		move.b	obAngle(a0),d0				; get Sonic's current angle
 		addi.b	#$20,d0					; rotate it by 45 degrees
@@ -953,6 +1085,7 @@ Sonic_SquashUnused:
 		move.w	#0,obVelX(a0)				; clear Sonic's horizontal speed
 		move.w	#0,obVelY(a0)				; clear Sonic#s vertical speed
 		move.b	#id_Warp3,obAnim(a0)			; use "warping" animation
+	endif
 
 ; locret_13302:
 .return:
@@ -994,7 +1127,7 @@ Sonic_LevelBound:
 ; loc_13336:
 .chkbottom:
 		move.w	(v_limitbtm2).w,d0			; load current target bottom level boundary
-	if FixBugs
+	if (BugFixTooFastToLive)|(FixBugs)
 		; The original code does not consider that the camera boundary
 		; may be in the middle of lowering itself, which is why going
 		; down the S-tunnel in GHZ act 1 fast enough can kill Sonic.
@@ -1004,6 +1137,7 @@ Sonic_LevelBound:
 		move.w	d1,d0					; use target level boundary while it's moving down to prevent unfair deaths
 .skipboundaryoverride:
 	endif
+
 		addi.w	#224,d0					; add screen beight
 		cmp.w	obY(a0),d0				; has Sonic touched the bottom boundary?
 		blt.s	.bottom					; if yes, branch
@@ -1012,16 +1146,32 @@ Sonic_LevelBound:
 
 ; Boundary_Bottom:
 .bottom:
-	if FixBugs
-		; See below...
+	if FeatureSpindash
+		; Match the spindash path to the moving lower boundary while the screen scrolls down.
+		move.w	(v_limitbtm1).w,d0
+		move.w	(v_limitbtm2).w,d1
+		cmp.w	d0,d1				; screen still scrolling down?
+		blt.s	.dontkill			; if so, don't kill Sonic
+	endif ; if FeatureSpindash
+
+	if BugFixFallOffFinalZone
+		cmpi.w	#id_FZ,(v_zone).w		; is level FZ?
+		beq.s	Sonic_LevelBound_Next
+	endif ; if BugFixFallOffFinalZone
+
 		cmpi.w	#id_SBZ_act2,(v_zone).w			; is level SBZ2?
-		bne.s	JumpTo_KillSonic			; if not, kill Sonic
+
+	if FixBugs
+		bne.s	JumpTo_KillSonic
+	else
+		bne.w	KillSonic				; if not, kill Sonic
+	endif
+
 		cmpi.w	#$2000,(v_player+obX).w			; is Sonic far enough into the level?
+
+	if FixBugs
 		blo.s	JumpTo_KillSonic			; if not, kill Sonic
 	else
-		cmpi.w	#id_SBZ_act2,(v_zone).w			; is level SBZ2?
-		bne.w	KillSonic				; if not, kill Sonic
-		cmpi.w	#$2000,(v_player+obX).w			; is Sonic far enough into the level?
 		blo.w	KillSonic				; if not, kill Sonic
 	endif
 
@@ -1029,6 +1179,7 @@ Sonic_LevelBound:
 		clr.b	(v_lastlamp).w				; clear lamppost counter
 		move.w	#1,(f_restart).w			; restart the level
 		move.w	#id_LZ_act4,(v_zone).w			; set level to SBZ3 (LZ4)
+.dontkill:
 		rts						; return
 ; ===========================================================================
 
@@ -1039,6 +1190,7 @@ Sonic_LevelBound:
 		move.w	#0,obVelX(a0)				; clear X-velocity
 		move.w	#0,obInertia(a0)			; clear ground speed
 		bra.s	.chkbottom				; check for bottom boundary collision as well
+
 ; ===========================================================================
 
 	if FixBugs
@@ -1049,6 +1201,11 @@ JumpTo_KillSonic:
 	endif
 ; End of function Sonic_LevelBound
 
+	if BugFixFallOffFinalZone
+Sonic_LevelBound_Next:
+		move.b	#id_Ending,(v_gamemode).w	; go to the ending instead of killing Sonic in FZ
+		rts
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -1064,6 +1221,21 @@ Sonic_Roll:
 		neg.w	d0					; otherwise, make it positive
 ; loc_13392:
 .ispositive:
+	if TweakSlowDucking
+		btst	#bitDn,(v_jpadhold2).w			; is down being held?
+		beq.s	.noroll					; if not, branch
+		move.b	(v_jpadhold2).w,d0			; get held buttons
+		andi.b	#btnL+btnR,d0				; is left/right being held?
+		bne.s	.noroll					; if yes, branch
+		move.w	obInertia(a0),d0			; get Sonic's current ground speed
+		bpl.s	.cont					; if ground speed is positive, continue
+		neg.w	d0					; otherwise, make it positive
+
+.cont:
+		cmpi.w	#$100,d0				; is Sonic moving at $100 speed or faster?
+		bhi.s	Sonic_ChkRoll				; if yes, branch
+		move.b	#id_Duck,obAnim(a0)			; use "ducking" animation
+	else
 		cmpi.w	#$80,d0					; is Sonic moving at $80 speed or faster?
 		blo.s	.noroll					; if not, branch
 		move.b	(v_jpadhold2).w,d0			; get held buttons
@@ -1071,6 +1243,7 @@ Sonic_Roll:
 		bne.s	.noroll					; if yes, prevent rolling (some kind of fat-fingering convenience feature?)
 		btst	#bitDn,(v_jpadhold2).w			; is down being held?
 		bne.s	Sonic_ChkRoll				; if yes, branch
+	endif ; if TweakSlowDucking
 
 ; Obj01_NoRoll:
 .noroll:
@@ -1091,8 +1264,7 @@ Sonic_ChkRoll:
 		move.b	#sonic_roll_width,obWidth(a0)		; set Sonic's hitbox width to rolling size
 		move.b	#id_Roll,obAnim(a0)			; use "rolling" animation
 		addq.w	#sonic_height-sonic_roll_height,obY(a0)	; adjust Y-position to align Sonic to the floor
-		move.w	#sfx_Roll,d0				; set rolling sound
-		jsr	(QueueSound2).l				; play it
+		sfx	#sfx_Roll,snd_jsr,snd_load_w,QueueSound2	; set rolling sound and play it
 
 		tst.w	obInertia(a0)				; is current speed zero?
 		bne.s	.ismoving				; if not, branch
@@ -1112,14 +1284,14 @@ Sonic_ChkRoll:
 Sonic_Jump:
 		move.b	(v_jpadpress2).w,d0			; get pressed buttons
 		andi.b	#btnABC,d0				; is A, B or C pressed?
-		beq.w	.return					; if not, branch
+		beq.w	Sonic_Jump_Return				; if not, branch
 
 		moveq	#0,d0					; clear d0
 		move.b	obAngle(a0),d0				; get Sonic's current angle
 		addi.b	#$80,d0					; rotate 180 degrees for ceiling collision check
 		bsr.w	Sonic_CalcHeadroom			; calculate pixels above Sonic's head
 		cmpi.w	#6,d1					; are there less than 6px between Sonic and the ceiling?
-		blt.w	.return					; if yes, prevent jumping
+		blt.w	Sonic_Jump_Return				; if yes, prevent jumping
 
 		move.w	#$680,d2				; set initial jump force
 		btst	#6,obStatus(a0)				; is Sonic underwater?
@@ -1142,17 +1314,25 @@ Sonic_Jump:
 		addq.l	#4,sp					; run in-air subroutines when we return
 		move.b	#1,jumping(a0)				; set jump flag
 		clr.b	sticktoconvex(a0)			; detach Sonic from the gears in SBZ
-		move.w	#sfx_Jump,d0				; set jump sound
-		jsr	(QueueSound2).l				; play jumping sound
-	if FixBugs=0
+		sfx	#sfx_Jump,snd_jsr,snd_load_w,QueueSound2	; set jump sound and play it
+
+	if (FeatureBetaVictoryAnimation)|(FixBugs=0)
 		; This sets Sonic's hitbox to standing size when roll-jumping.
 		; A leftover from the victory animation in prototypes.
 		move.b	#sonic_height,obHeight(a0)		; set height to standing size
 		move.b	#sonic_width,obWidth(a0)		; set width to standing size
 	endif
 
+	if FeatureBetaVictoryAnimation
+		tst.b	(f_victory).w				; has the victory animation flag been set?
+		bne.s	Sonic_Jump_VictoryJump		; if yes, branch
+	endif ; if FeatureBetaVictoryAnimation
+
+
 		btst	#2,obStatus(a0)				; is Sonic already in a ball state?
-		bne.s	.rolljump				; if so, branch
+		bne.s	Sonic_Jump_RollJump			; if so, branch
+
+Jump_Regular:
 		move.b	#sonic_roll_height,obHeight(a0)		; set height to rolling size
 		move.b	#sonic_roll_width,obWidth(a0)		; set width to rolling size
 		move.b	#id_Roll,obAnim(a0)			; use "jumping" animation
@@ -1160,16 +1340,26 @@ Sonic_Jump:
 		addq.w	#sonic_height-sonic_roll_height,obY(a0)	; adjust Y-position to align Sonic to the floor
 
 ; locret_1348E:
-.return:
+Sonic_Jump_Return:
 		rts						; return
+
+; ===========================================================================
+
+.victoryjump:
+Sonic_Jump_VictoryJump:
+	if FeatureBetaVictoryAnimation
+		move.b	#id_Leap2,obAnim(a0)			; play the victory animation
+		rts
+	endif ; if FeatureBetaVictoryAnimation
+
 ; ===========================================================================
 
 ; loc_13490:
 .rolljump:
+Sonic_Jump_RollJump:
 		bset	#4,obStatus(a0)				; set Roll-Jump flag
 		rts						; return
 ; End of function Sonic_Jump
-
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -1177,6 +1367,11 @@ Sonic_Jump:
 ; ---------------------------------------------------------------------------
 
 Sonic_JumpHeight:
+	if FeatureBetaVictoryAnimation
+		tst.b	(f_victory).w				; has the victory animation flag been set?
+		bne.s	AirVictory				; if yes, branch
+	endif
+
 		tst.b	jumping(a0)				; is Sonic airborne specifically from a jump?
 		beq.s	.capyvel				; if not, just cap Y speed normally
 		move.w	#-$400,d1				; set max jump height
@@ -1216,9 +1411,39 @@ Sonic_JumpHeight:
 		move.w	#$FC0,obVelY(a0)			; force Sonic to stay below maximum screen scroll speed
 .return3:
 	endif
+
+	if FeatureAirRoll
+Sonic_AirRoll:
+		move.b	(v_jpadpress2).w,d0			; get buttons pressed this frame
+		andi.b	#btnABC,d0				; has A/B/C been pressed?
+		bne.w	AirRoll_Checks				; if so, branch
+		rts
+
+AirRoll_Checks:
+	if FeatureAirRoll=1
+		cmpi.b	#id_Spring,obAnim(a0)			; is spring jump active?
+		beq.s	locret_134D2				; if so, branch
+	endif
+
+		cmpi.b	#id_Roll,obAnim(a0)			; is the rolling animation active?
+		bne.s	AirRoll_Set				; if not, branch
+
+		btst	#1,obStatus(a0)				; is Sonic in the air?
+		bne.s	AirRoll_Set				; if so, branch
+		rts
+
+AirRoll_Set:
+		move.b	#id_Roll,obAnim(a0)			; set Sonic's animation to the rolling animation
+	endif ; if FeatureAirRoll
+
 		rts						; return
 ; End of function Sonic_JumpHeight
 
+AirVictory:
+	if FeatureBetaVictoryAnimation
+		move.b	#id_Leap2,obAnim(a0)
+		rts
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -1791,10 +2016,11 @@ Sonic_Hurt:	; Routine 4
 		btst	#6,obStatus(a0)				; is Sonic underwater?
 		beq.s	.notunderwater				; if not, branch
 		subi.w	#$20,obVelY(a0)				; reduce gravity to be only $10 while underwater
+
 ; loc_1380C:
 .notunderwater:
 		bsr.w	Sonic_HurtStop				; check if Sonic has landed again after taking damage and revert to normal state
-	if FixBugs
+	if (TweakFixHurtWaterPhystics)|(FixBugs)
 		; Fix water not being acknowledged during a hurt state
 		bsr.w	Sonic_Water				; handle Sonic while in water (LZ only)
 	endif
@@ -1825,7 +2051,7 @@ Sonic_HurtStop:
 	endif
 		addi.w	#224,d0					; add screen height
 		cmp.w	obY(a0),d0				; has Sonic touched the bottom level boundary?
-	if FixBugs
+	if (BugFixHurtDeathBoundary)|(FixBugs)
 		blt.w	JumpTo_KillSonic			; if yes, kill Sonic (signed check to not die while leaving the top screen)
 	else
 		; This would cause Sonic to die from the upper/top boundary of the level, while in hurt state.
@@ -1874,17 +2100,20 @@ Sonic_Death:	; Routine 6
 
 ; GameOver: <-- old misnomer (this routine ALSO handles game overs, but not just)
 Sonic_HandleDeath:
-	if FixBugs
+	if (BugFixDeathBoundary)|(FixBugs)
 		; Fix the death boundary bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
 		move.w	(v_screenposy).w,d0			; get current Y screen position
-		addi.w	#$100,d0				; go $100 pixels lower
-		cmp.w	obY(a0),d0				; has Sonic's death animation gone below the screen?
-		bge.w	.return					; if not, branch
 	else
 		move.w	(v_limitbtm2).w,d0			; get current bottom boundary position
+	endif
+
 		addi.w	#$100,d0				; go $100 pixels lower
 		cmp.w	obY(a0),d0				; has Sonic's death animation gone below the screen?
+
+	if (BugFixDeathBoundary)|(FixBugs)
+		bge.w	.return					; if not, branch
+	else
 		bhs.w	.return					; if not, branch
 	endif
 
@@ -1905,8 +2134,7 @@ Sonic_HandleDeath:
 
 ; loc_138C2:
 .gameOverBgmAndPatterns:
-		move.w	#bgm_GameOver,d0			; set GAME OVER music
-		jsr	(QueueSound1).l				; play it
+		music	#bgm_GameOver,snd_jsr			; set GAME OVER music and play it
 		moveq	#plcid_GameOver,d0			; set game over patterns
 		jmp	(AddPLC).l				; load them
 ; ===========================================================================
@@ -2041,6 +2269,9 @@ Sonic_Loops:
 		rts						; return
 ; End of function Sonic_Loops
 
+	if BugFixScatteredRingsTimer
+		include "Enhancements/_incObj/Sonic Drowns.asm"
+	endif
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -2056,7 +2287,7 @@ Sonic_Animate:
 		move.b	d0,obPrevAni(a0)			; remember new animation
 		move.b	#0,obAniFrame(a0)			; restart animation from beginning
 		move.b	#0,obTimeFrame(a0)			; reset animation frame duration
-	if FixBugs
+	if (BugFixWalkJump=2)|(FixBugs)
 		; This fixes the occasional "pushing air" bug
 		bclr	#5,obStatus(a0)				; clear pushing flag
 	endif
@@ -2275,16 +2506,47 @@ Sonic_LoadGfx:
 		lea	(SonicDynPLC).l,a2			; load PLC script
 		add.w	d0,d0					; double current frame for word-based indexing
 		adda.w	(a2,d0.w),a2				; find relevant DPLC definition for new frame
+
+	if FeatureEnhancedPLCQueue
+		moveq	#0,d5
+		move.b	(a2)+,d5				; read "number of entries" value
+		subq.b	#1,d5
+	else
 		moveq	#0,d1					; clear d1
 		move.b	(a2)+,d1				; read "number of entries" value
 		subq.b	#1,d1					; subtract by 1 for first iteration
+	endif ; if FeatureEnhancedPLCQueue
+
 		bmi.s	.nochange				; if this was an empty entry, nothing to do, branch
 
+	if FeatureEnhancedPLCQueue
+		move.w	#$F000,d4				; set starting VRAM destination for Sonic graphics
+		move.l	#Art_Sonic,d6				; load base address of Sonic's uncompressed art
+	else
 		lea	(v_sgfx_buffer).w,a3			; load Sonic's graphics transfer buffer
 		move.b	#1,(f_sonframechg).w			; set flag for VBlank to update Sonic graphics via DMA
+	endif ; if FeatureEnhancedPLCQueue
 
 ; SPLC_ReadEntry:
 .readentry:
+	if FeatureEnhancedPLCQueue
+		moveq	#0,d1					; clear d1
+		move.b	(a2)+,d1				; read first byte of DPLC entry
+		lsl.w	#8,d1					; shift into upper byte
+		move.b	(a2)+,d1				; read second byte of DPLC entry
+		move.w	d1,d3					; copy DPLC entry to d3
+		lsr.w	#8,d3					; move tile count nybble into lower byte
+		andi.w	#$F0,d3					; isolate upper nybble (tile count)
+		addi.w	#$10,d3					; add 1 tile ($10 == 1 tile in bytes)
+		andi.w	#$FFF,d1				; isolate source tile index/offset
+		lsl.l	#5,d1					; multiply by $20 (tile_size)
+		add.l	d6,d1					; add base art address
+		move.w	d4,d2					; copy current VRAM destination to d2
+		add.w	d3,d4					; advance VRAM destination by transfer size
+		add.w	d3,d4					; double because VRAM addresses are word-based
+		jsr	(QueueDMATransfer).l			; queue DMA transfer for this DPLC entry
+		dbf	d5,.readentry				; repeat for number of entries
+	else
 		moveq	#0,d2					; clear d2
 		move.b	(a2)+,d2				; read next byte of DPLC entry
 		move.w	d2,d0					; copy to d0
@@ -2302,6 +2564,7 @@ Sonic_LoadGfx:
 		lea	tile_size(a3),a3			; go to next tile
 		dbf	d0,.loadtile				; repeat for number of tiles
 		dbf	d1,.readentry				; repeat for number of entries
+	endif ; if FeatureEnhancedPLCQueue
 
 ; locret_13C96:
 .nochange:

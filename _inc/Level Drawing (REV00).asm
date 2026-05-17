@@ -386,6 +386,7 @@ DrawFlipXY:
 ; incrementing its palette lines by 1. This may have been
 ; a debug function to discolour mirrored tiles, to test
 ; if they're loading properly.
+	if TweakRemoveReduntantCode=0
 		rts
 		move.l	d0,(a5)
 		move.w	#$2000,d5
@@ -404,6 +405,7 @@ DrawFlipXY:
 		add.w	d5,d4
 		move.w	d4,(a6)
 		rts
+	endif ; if TweakRemoveReduntantCode=0
 ; ===========================================================================
 
 ; Gets address of block at a certain coordinate

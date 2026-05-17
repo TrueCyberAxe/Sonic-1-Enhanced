@@ -120,7 +120,7 @@ Drown_AirLeft:	; Routine $C
 		bpl.s	Drown_AirLeft_Delete
 		jmp	(DisplaySprite).l
 
-Drown_AirLeft_Delete:	
+Drown_AirLeft_Delete:
 		jmp	(DeleteObject).l
 ; ===========================================================================
 
@@ -179,33 +179,56 @@ Drown_WobbleData:
 ; ===========================================================================
 
 Drown_Countdown:; Routine $A
+	if FeatureRestoreMonitorScubaGear
+		; Scuba gear bypasses the normal air countdown while goggles are active.
+		tst.b	(f_goggles).w					; do we have goggles?
+		bne.w	.nocountdown					; if yes, branch
+	endif
+
+	if BugFixDrownInDebug
+		; Debug mode should not keep draining the player's air timer.
+		tst.w	(v_debuguse).w					; are we in debug mode?
+		bne.w	.nocountdown					; if yes, branch
+	endif
+
 		tst.w	objoff_2C(a0)
 		bne.w	.loc_13F86
 		cmpi.b	#6,(v_player+obRoutine).w
 		bhs.w	.nocountdown
-		btst	#6,(v_player+obStatus).w ; is Sonic underwater?
-		beq.w	.nocountdown	; if not, branch
+		btst	#6,(v_player+obStatus).w			; is Sonic underwater?
+		beq.w	.nocountdown					; if not, branch
 
-		subq.w	#1,drown_time(a0)	; decrement timer
-		bpl.w	.nochange	; branch if time remains
+	if FeatureAirAnimation
+		cmpi.b	#id_Roll,obAnim(a0)				; is the rolling animation active?
+		beq.s	.airanimskip					; if so, branch
+
+		move.b	#id_Surf,obAnim(a0)				; use Sonic's drowning animation
+.airanimskip:
+	endif
+
+		subq.w	#1,drown_time(a0)				; decrement timer
+		bpl.w	.nochange					; branch if time remains
 		move.w	#59,drown_time(a0)
 		move.w	#1,objoff_36(a0)
 		jsr	(RandomNumber).l
 		andi.w	#1,d0
 		move.b	d0,objoff_34(a0)
-		move.w	(v_air).w,d0	; check air remaining
+		move.w	(v_air).w,d0					; check air remaining
 		cmpi.w	#25,d0
-		beq.s	.warnsound	; play sound if air is 25
+		beq.s	.warnsound					; play sound if air is 25
 		cmpi.w	#20,d0
 		beq.s	.warnsound
 		cmpi.w	#15,d0
 		beq.s	.warnsound
 		cmpi.w	#12,d0
-		bhi.s	.reduceair	; if air is above 12, branch
+		bhi.s	.reduceair					; if air is above 12, branch
 
-		bne.s	.skipmusic	; if air is less than 12, branch
-		move.w	#bgm_Drowning,d0
-		jsr	(QueueSound1).l	; play countdown music
+	if FeatureAirAnimation
+		move.b	#id_Surf,obAnim(a0)				; use Sonic's drowning animation
+	endif
+
+		bne.s	.skipmusic					; if air is less than 12, branch
+		music	#bgm_Drowning,snd_jsr				; play countdown music
 
 .skipmusic:
 		subq.b	#1,objoff_32(a0)
@@ -216,8 +239,7 @@ Drown_Countdown:; Routine $A
 ; ===========================================================================
 
 .warnsound:
-		move.w	#sfx_Warning,d0
-		jsr	(QueueSound2).l	; play "ding-ding" warning sound
+		sfx	#sfx_Warning,snd_jsr	; play "ding-ding" warning sound
 
 .reduceair:
 		subq.w	#1,(v_air).w	; subtract 1 from air remaining
@@ -226,8 +248,7 @@ Drown_Countdown:; Routine $A
 		; Sonic drowns here
 		bsr.w	ResumeMusic
 		move.b	#$81,(f_playerctrl).w ; lock controls and disable object interaction
-		move.w	#sfx_Drown,d0
-		jsr	(QueueSound2).l	; play drowning sound
+		sfx	#sfx_Drown,snd_jsr	; play drowning sound
 		move.b	#$A,objoff_34(a0)
 		move.w	#1,objoff_36(a0)
 		move.w	#$78,objoff_2C(a0)
@@ -243,7 +264,7 @@ Drown_Countdown:; Routine $A
 		move.b	#1,(f_nobgscroll).w
 	if FixBugs
 		; Correct Drowning Bugs
-		move.b	#2,obRoutine(a0)	; make sure Sonic is in his default state (Sonic_Control)
+		move.b	#$02,obRoutine(a0)	; make sure Sonic is in his default state (Sonic_Control)
 		clr.b	(f_timecount).w		; also stop the timer immediately to avoid double deaths from Time Overs
 	endif
 		movea.l	(sp)+,a0
@@ -252,11 +273,18 @@ Drown_Countdown:; Routine $A
 
 .loc_13F86:
 		subq.w	#1,objoff_2C(a0)
+
+	if BugFixDrowningTimer
+		; Keep Sonic from moving during the countdown delay before the drowning state starts.
+		bne.s	.nochange
+	else
 		bne.s	.loc_13F94
+	endif ; if BugFixDrowningTimer
+
 		move.b	#6,(v_player+obRoutine).w
 		rts
 ; ===========================================================================
-
+	if BugFixDrowningTimer=0 ; @TODO Double check this is correct
 .loc_13F94:
 		move.l	a0,-(sp)
 		lea	(v_player).w,a0
@@ -264,6 +292,7 @@ Drown_Countdown:; Routine $A
 		addi.w	#$10,obVelY(a0)
 		movea.l	(sp)+,a0
 		bra.s	.nochange
+	endif
 ; ===========================================================================
 
 .gotomakenum:

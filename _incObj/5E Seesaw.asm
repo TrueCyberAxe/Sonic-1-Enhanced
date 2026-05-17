@@ -5,7 +5,7 @@
 see_origX = objoff_30		; original x-axis position
 see_origY = objoff_34		; original y-axis position
 see_speed = objoff_38		; speed of collision
-see_frame = objoff_3A		; 
+see_frame = objoff_3A		;
 see_parent = objoff_3C		; RAM address of parent object
 
 Seesaw:
@@ -15,12 +15,18 @@ Seesaw:
 		jsr	See_Index(pc,d1.w)
 		move.w	see_origX(a0),d0
 		andi.w	#$FF80,d0
-		move.w	(v_screenposx).w,d1
+	if TweakS2OffscreenDelete
+		; Use the object manager's cached rounded camera X like Sonic 2.
+		sub.w	(v_opl_screen).w,d0
+		addi.w	#$80,d0 										; approx distance between object and screen
+	else
+		move.w	(v_screenposx).w,d1 		; get screen position
 		subi.w	#$80,d1
 		andi.w	#$FF80,d1
-		sub.w	d1,d0
+		sub.w	d1,d0 										; approx distance between object and screen
+	endif
 		bmi.w	DeleteObject
-		cmpi.w	#$280,d0
+		cmpi.w	#$280,d0 		; 128+320+192
 		bhi.w	DeleteObject
 		bra.w	DisplaySprite
 ; ===========================================================================
@@ -254,8 +260,7 @@ See_Spring:
 		clr.b	jumping(a2)
 		move.b	#id_Spring,obAnim(a2) ; change Sonic's animation to "spring" ($10)
 		move.b	#2,obRoutine(a2)
-		move.w	#sfx_Spring,d0
-		jsr	(QueueSound2).l	; play spring sound
+		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
 loc_1192C:
 		clr.w	obVelX(a0)

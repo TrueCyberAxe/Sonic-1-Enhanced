@@ -62,6 +62,9 @@ SonicSS_Modes:	dc.w SonicSS_OnWall-SonicSS_Modes
 
 ; Obj09_OnWall:
 SonicSS_OnWall:
+	if TweakBetterBonusStageControls>1
+		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
+	endif
 		bsr.w	SonicSS_Jump
 		bsr.w	SonicSS_Move
 		bsr.w	SonicSS_Fall
@@ -81,7 +84,11 @@ SonicSS_Display:
 		jsr	(SpeedToPos).l
 		bsr.w	SS_FixCamera
 		move.w	(v_ssangle).w,d0
+	if FeatureDisableSSRotation=0
 		add.w	(v_ssrotate).w,d0
+	else
+		; Keep Sonic visually aligned when the stage rotation is being suppressed.
+	endif
 		move.w	d0,(v_ssangle).w
 		jsr	(Sonic_Animate).l
 		rts
@@ -172,7 +179,7 @@ loc_1BB14:
 loc_1BB1A:
 		subi.w	#$40,d0
 		bcc.s	loc_1BB22
-		nop	
+		nop
 
 loc_1BB22:
 		move.w	d0,obInertia(a0)
@@ -198,7 +205,7 @@ loc_1BB42:
 loc_1BB48:
 		addi.w	#$40,d0
 		bcc.s	loc_1BB50
-		nop	
+		nop
 
 loc_1BB50:
 		move.w	d0,obInertia(a0)
@@ -225,8 +232,10 @@ SonicSS_Jump:
 		asr.l	#8,d0
 		move.w	d0,obVelY(a0)
 		bset	#1,obStatus(a0)
-		move.w	#sfx_Jump,d0
-		jsr	(QueueSound2).l	; play jumping sound
+	if TweakBetterBonusStageControls>1
+		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
+	endif
+		sfx	#sfx_Jump,snd_jsr	; set jump sound and play it
 
 ; Obj09_NoJump:
 SonicSS_NoJump:
@@ -241,19 +250,63 @@ SonicSS_NoJump:
 ; ---------------------------------------------------------------------------
 
 nullsub_2:
+Obj09_JumpHeight:
+	if TweakBetterBonusStageControls>1
+		; Project velocity onto the rotated jump direction before applying the release cap.
+		move.b	(v_jpadhold2).w,d0						; read held controller buttons
+		andi.b	#btnABC,d0							; isolate jump buttons
+		bne.s	Obj09_JumpHeight_Return					; if jump is still held, branch to return
+		btst	#7,obStatus(a0)							; has Sonic initiated a jump?
+		beq.s	Obj09_JumpHeight_Return					; if not, branch to return
+		move.b	(v_ssangle).w,d0						; get special stage rotation angle
+		andi.b	#$FC,d0								; align angle to sine table entry
+		neg.b	d0								; invert angle direction
+		subi.b	#$40,d0								; rotate angle by 90 degrees
+		jsr	(CalcSine).l							; calculate sine/cosine values for jump direction
+		move.w	obVelY(a0),d2							; get current Y velocity
+		muls.w	d2,d0								; project Y velocity onto jump direction sine
+		asr.l	#8,d0								; scale projected Y component
+		move.w	obVelX(a0),d2							; get current X velocity
+		muls.w	d2,d1								; project X velocity onto jump direction cosine
+		asr.l	#8,d1								; scale projected X component
+		add.w	d0,d1								; combine projected X/Y velocity into jump speed
+		cmpi.w	#$400,d1							; has jump speed exceeded the release threshold?
+		ble.s	Obj09_JumpHeight_Return					; if not, branch to return
+		move.b	(v_ssangle).w,d0						; get special stage rotation angle again
+		andi.b	#$FC,d0								; align angle to sine table entry
+		neg.b	d0								; invert angle direction
+		subi.b	#$40,d0								; rotate angle by 90 degrees
+		jsr	(CalcSine).l							; recalculate sine/cosine for capped jump speed
+		muls.w	#$400,d1							; apply jump-release speed to cosine component
+		asr.l	#8,d1								; scale new X velocity
+		move.w	d1,obVelX(a0)							; set capped X velocity
+		muls.w	#$400,d0							; apply jump-release speed to sine component
+		asr.l	#8,d0								; scale new Y velocity
+		move.w	d0,obVelY(a0)							; set capped Y velocity
+		bclr	#7,obStatus(a0)							; clear "Sonic has jumped" flag so cap only applies once
+	elseif TweakBetterBonusStageControls
+		move.w	#-$400,d1							; set maximum jump speed
+		cmp.w	obVelY(a0),d1							; is Sonic already below the cap?
+		ble.s	Obj09_JumpHeight_Return						; if yes, branch
+		move.b	(v_jpadhold2).w,d0						; get held buttons
+		andi.b	#btnABC,d0							; is A, B, or C being held?
+		bne.s	Obj09_JumpHeight_Return						; if yes, branch
+		move.w	d1,obVelY(a0)							; cap vertical speed if not holding ABC
+	else
 		rts
 
 		; dead code
 		move.w	#-$400,d1		; set maximum jump speed
 		cmp.w	obVelY(a0),d1		; is Sonic already below the cap?
-		ble.s	.return			; if yes, branch
+		ble.s	Obj09_JumpHeight_Return	; if yes, branch
 		move.b	(v_jpadhold2).w,d0	; get held buttons
 		andi.b	#btnABC,d0		; is A, B, or C being held?
-		bne.s	.return			; if yes, branch
+		bne.s	Obj09_JumpHeight_Return	; if yes, branch
 		move.w	d1,obVelY(a0)		; cap vertical speed if not holding ABC
+	endif ; if TweakBetterBonusStageControls>1
 
 ; locret_1BBB4:
-.return:
+Obj09_JumpHeight_Return:
 		rts
 ; End of function nullsub_2
 
@@ -469,13 +522,12 @@ SonicSS_ChkCont:
 ; Obj09_GetCont:
 SonicSS_GetCont:
 		jsr	(CollectRing).l
-		cmpi.w	#50,(v_rings).w	; check if you have 50 rings
+		cmpi.w	#50,(v_rings).w			; check if you have 50 rings
 		blo.s	SonicSS_NoCont
 		bset	#0,(v_lifecount).w
 		bne.s	SonicSS_NoCont
-		addq.b	#1,(v_continues).w ; add 1 to number of continues
-		move.w	#sfx_Continue,d0
-		jsr	(QueueSound1).l	; play extra continue sound
+		addq.b	#1,(v_continues).w		; add 1 to number of continues
+		sfx	#sfx_Continue,snd_jsr,snd_load_w,QueueSound1	; play continue sound
 
 ; Obj09_NoCont:
 SonicSS_NoCont:
@@ -494,10 +546,9 @@ SonicSS_Chk1Up:
 
 ; Obj09_Get1Up:
 SonicSS_Get1Up:
-		addq.b	#1,(v_lives).w	; add 1 to number of lives
-		addq.b	#1,(f_lifecount).w ; update the lives counter
-		move.w	#bgm_ExtraLife,d0
-		jsr	(QueueSound1).l	; play extra life music
+		addq.b	#1,(v_lives).w				; add 1 to number of lives
+		addq.b	#1,(f_lifecount).w			; update the lives counter
+		music	#bgm_ExtraLife,snd_jsr			; play extra life music
 		moveq	#0,d4
 		rts
 ; ===========================================================================
@@ -526,8 +577,7 @@ SonicSS_GetEmer:
 
 ; Obj09_NoEmer:
 SonicSS_NoEmer:
-		move.w	#bgm_Emerald,d0
-		jsr	(QueueSound2).l ; play emerald music
+		music	#bgm_Emerald,snd_jsr,snd_load_w,QueueSound2	; play emerald music
 		moveq	#0,d4
 		rts
 ; ===========================================================================
@@ -626,6 +676,9 @@ SonicSS_ChkBumper:
 		asr.l	#8,d0
 		move.w	d0,obVelY(a0)
 		bset	#1,obStatus(a0)
+	if TweakBetterBonusStageControls>1
+		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
+	endif
 		bsr.w	SS_RemoveCollectedItem
 		bne.s	SonicSS_BumpSnd
 		move.b	#2,(a2)
@@ -635,8 +688,7 @@ SonicSS_ChkBumper:
 
 ; Obj09_BumpSnd:
 SonicSS_BumpSnd:
-		move.w	#sfx_Bumper,d0
-		jmp	(QueueSound2).l	; play bumper sound
+		sfx	#sfx_Bumper,snd_jmp			; play bumper sound
 ; ===========================================================================
 
 ; Obj09_GOAL:
@@ -644,8 +696,7 @@ SonicSS_GOAL:
 		cmpi.b	#$27,d0		; is the item a "GOAL"?
 		bne.s	SonicSS_UPblock
 		addq.b	#2,obRoutine(a0) ; run routine "SonicSS_ExitStage"
-		move.w	#sfx_SSGoal,d0
-		jsr	(QueueSound2).l	; play "GOAL" sound
+		sfx	#sfx_SSGoal,snd_jsr	; play "GOAL" sound
 		rts
 ; ===========================================================================
 
@@ -665,8 +716,8 @@ SonicSS_UPblock:
 
 ; Obj09_UPsnd:
 SonicSS_UPsnd:
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play up/down sound
+		sfx	#sfx_SSItem,snd_jmp	; play up/down sound
+
 ; ===========================================================================
 
 ; Obj09_DOWNblock:
@@ -685,8 +736,7 @@ SonicSS_DOWNblock:
 
 ; Obj09_DOWNsnd:
 SonicSS_DOWNsnd:
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play up/down sound
+		sfx	#sfx_SSItem,snd_jmp	; play up/down sound
 ; ===========================================================================
 
 ; Obj09_Rblock:
@@ -706,8 +756,7 @@ SonicSS_Rblock:
 ; Obj09_RevStage:
 SonicSS_RevStage:
 		neg.w	(v_ssrotate).w	; reverse stage rotation
-		move.w	#sfx_SSItem,d0
-		jmp	(QueueSound2).l	; play sound
+		sfx	#sfx_SSItem,snd_jmp	; play sound
 ; ===========================================================================
 
 ; Obj09_ChkGlass:
@@ -741,8 +790,7 @@ SonicSS_GlassUpdate:
 
 ; Obj09_GlassSnd:
 SonicSS_GlassSnd:
-		move.w	#sfx_SSGlass,d0
-		jmp	(QueueSound2).l	; play glass block sound
+		sfx	#sfx_SSGlass,snd_jmp	; play glass block sound
 ; ===========================================================================
 
 ; Obj09_NoGlass:

@@ -59,7 +59,11 @@ BBall_Move:	; Routine 2
 ; ===========================================================================
 
 .type01:
+	if TweakMathOptimizations
+		moveq	#$60,d1
+	else
 		move.w	#$60,d1
+	endif ; if TweakMathOptimizations
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
@@ -75,13 +79,21 @@ BBall_Move:	; Routine 2
 ; ===========================================================================
 
 .type02:
-		move.w	#$60,d1
+	if TweakRemoveReduntantCode=0
+		if TweakMathOptimizations
+			moveq	#$60,d1 															; <- WTF??? Why is this here? It's not even used
+		else
+			move.w	#$60,d1 															; <- WTF??? Why is this here? It's not even used
+		endif ; if TweakMathOptimizations
+	endif
 		moveq	#0,d0
 		move.b	(v_oscillate+$E).w,d0
 		btst	#0,obStatus(a0)
 		beq.s	.noflip2
 		neg.w	d0
-		addi.w	#$80,d0
+	if TweakRemoveReduntantCode=0
+		addi.w	#$80,d0																; add $80 to osc value <-HEY why is this not $60?
+	endif
 
 .noflip2:
 		move.w	bball_origY(a0),d1

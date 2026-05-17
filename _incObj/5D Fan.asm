@@ -94,7 +94,7 @@ Fan_Delay:	; Routine 2
 		move.b	d0,obFrame(a0)
 
 .chkdel:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.w	DeleteObject

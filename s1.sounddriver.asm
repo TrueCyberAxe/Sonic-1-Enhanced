@@ -80,17 +80,20 @@ SpeedUpIndex:
 		dc.b 8		; SBZ
 		dc.b $FF	; Invincibility
 		dc.b 5		; Extra Life
-		;dc.b ?		; Special Stage
-		;dc.b ?		; Title Screen
-		;dc.b ?		; Ending
-		;dc.b ?		; Boss
-		;dc.b ?		; FZ
-		;dc.b ?		; Sonic Got Through
-		;dc.b ?		; Game Over
-		;dc.b ?		; Continue Screen
-		;dc.b ?		; Credits
-		;dc.b ?		; Drowning
-		;dc.b ?		; Get Emerald
+	if BugFixSoundDriverBugs
+		; @TODO find the correct spedup tempos
+		; dc.b ?		; Special Stage
+		; dc.b ?		; Title Screen
+		; dc.b ?		; Ending
+		; dc.b ?		; Boss
+		; dc.b ?		; FZ
+		; dc.b ?		; Sonic Got Through
+		; dc.b ?		; Game Over
+		; dc.b ?		; Continue Screen
+		; dc.b ?		; Credits
+		; dc.b ?		; Drowning
+		; dc.b ?		; Get Emerald
+	endif ; if BugFixSoundDriverBugs
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -146,9 +149,9 @@ SoundPriorities:
 ; sub_71B4C:
 UpdateMusic:
 		stopZ80
-		nop	
-		nop	
-		nop	
+		nop
+		nop
+		nop
 ; loc_71B5A:
 .updateloop:
 		btst	#0,(z80_bus_request).l		; Is the z80 busy?
@@ -157,11 +160,11 @@ UpdateMusic:
 		btst	#7,(z80_ram+zDAC_Status).l	; Is DAC accepting new samples?
 		beq.s	.driverinput			; Branch if yes
 		startZ80
-		nop	
-		nop	
-		nop	
-		nop	
-		nop	
+		nop
+		nop
+		nop
+		nop
+		nop
 		bra.s	UpdateMusic
 ; ===========================================================================
 
@@ -254,7 +257,7 @@ UpdateMusic:
 ; loc_71C22:
 .sfxpsgnext:
 		dbf	d7,.sfxpsgloop
-		
+
 		move.b	#$40,SMPS_RAM.f_voice_selector(a6)	; Now at special SFX tracks
 		adda.w	#SMPS_Track.len,a5
 		tst.b	SMPS_Track.PlaybackControl(a5)		; Is track playing?
@@ -466,7 +469,7 @@ NoteTimeoutUpdate:
 		tst.b	SMPS_Track.VoiceControl(a5)		; Is this a PSG track?
 		bmi.w	.psgnoteoff				; If yes, branch
 		jsr	FMNoteOff(pc)
-		addq.w	#4,sp					; Do not return to caller
+		addq.w	#4,sp				; Do not return to caller
 		rts
 ; ===========================================================================
 ; loc_71DBE:
@@ -679,34 +682,41 @@ PlaySoundID:
 		beq.w	StopAllSound
 		bpl.s	.locret				; If >= 0, return (not a valid sound, bgm or command)
 		move.b	#$80,SMPS_RAM.v_sound_id(a6)	; reset music flag
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		cmpi.b	#bgm__Last,d7		; Is this music ($81-$93)?
 	else
 		; DANGER! Music ends at $93, yet this checks until $9F; attempting to
 		; play sounds $94-$9F will cause a crash!
 		; See LevSel_NoCheat for more.
-		cmpi.b	#bgm__Last+$C,d7	; Is this music ($81-$9F)?
+		cmpi.b	#bgm__Last+$C,d7				; Is this music ($81-$9F)?
 	endif
-		bls.w	Sound_PlayBGM		; Branch if yes
-		cmpi.b	#sfx__First,d7		; Is this after music but before sfx? (redundant check)
+		bls.w	Sound_PlayBGM							; Branch if yes
+		cmpi.b	#sfx__First,d7					; Is this after music but before sfx? (redundant check)
 		blo.w	.locret			; Return if yes
-		cmpi.b	#sfx__Last,d7		; Is this sfx ($A0-$CF)?
-		bls.w	Sound_PlaySFX		; Branch if yes
-		cmpi.b	#spec__First,d7		; Is this after sfx but before special sfx? (redundant check)
+		cmpi.b	#sfx__Last,d7						; Is this sfx ($A0-$CF)?
+		bls.w	Sound_PlaySFX							; Branch if yes
+		cmpi.b	#spec__First,d7					; Is this after sfx but before special sfx? (redundant check)
 		blo.w	.locret			; Return if yes
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(ExtendedSoundEffects)|(FixBugs)
 		cmpi.b	#spec__Last,d7		; Is this special sfx ($D0-$D0)?
 		bls.w	Sound_PlaySpecial	; Branch if yes
+
+	if (BugFixSoundDriverBugs)|(ExtendedSoundEffects)
+		cmpi.b	#spec__Last,d7					; Is this special sfx ($D1-$DF)?
+		bls.w	Sound_PlaySFX2
+	endif
+
 		cmpi.b	#flg__First,d7		; Is this after special sfx but before $E0?
 		blo.w	.locret			; Return if yes
 	else
 		; DANGER! Special SFXes end at $D0, yet this checks until $DF; attempting to
 		; play sounds $D1-$DF will cause a crash!
-		cmpi.b	#spec__Last+$10,d7	; Is this special sfx ($D0-$DF)?
-		blo.w	Sound_PlaySpecial	; Branch if yes
+		cmpi.b	#spec__Last+$10,d7			; Is this special sfx ($D0-$DF)?
+		blo.w	Sound_PlaySpecial					; Branch if yes
 	endif
-		cmpi.b	#flg__Last,d7		; Is this $E0-$E4?
-		bls.s	Sound_E0toE4		; Branch if yes
+		cmpi.b	#flg__Last,d7						; Is this $E0-$E4?
+		bls.s	Sound_E0toE4							;	Branch if yes
+
 ; locret_71F8C:
 .locret:
 		rts
@@ -730,7 +740,28 @@ ptr_flgend
 ; Play "Say-gaa" PCM sound
 ; ---------------------------------------------------------------------------
 ; Sound_E1: PlaySega:
+
 PlaySegaSound:
+	if FeatureSkipSEGALogo
+		lea	(SegaPCM).l,a2									; Load the SEGA PCM sample into a2. It's important that we use a2 since a0 and a1 are going to be used up ahead when reading the joypad ports
+		move.l	#SegaPCM.size,d3				; Load the size of the SEGA PCM sample into d3
+		move.b	#$2A,(ym2612_a0).l					; $A04000 = $2A -> Write to DAC channel
+PlayPCM_Loop:
+		move.b	(a2)+,(ym2612_d0).l		; Write the PCM data (contained in a2) to $A04001 (YM2612 register D0)
+		move.w	#$14,d0							; Write the pitch ($14 in this case) to d0
+		dbf	d0,*										; Decrement d0; jump to itself if not 0. (for pitch control, avoids playing the sample too fast)
+		sub.l	#1,d3									; Subtract 1 from the PCM sample size
+		beq.s	return_PlayPCM				; If d3 = 0, we finished playing the PCM sample, so stop playing, leave this loop, and unfreeze the 68K
+		lea	(v_jpadhold1).w,a0			; address where JoyPad states are written
+		lea	($A10003).l,a1					; address where JoyPad states are read from
+		jsr	(Joypad_Read).w					; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
+		btst	#7,(v_jpadhold1).w		; Check for Start button
+		bne.s	return_PlayPCM				; If start is pressed, stop playing, leave this loop, and unfreeze the 68K
+		bra.s	PlayPCM_Loop					; Otherwise, continue playing PCM sample
+return_PlayPCM:
+		addq.w	#4,sp
+		rts
+	else
 		move.b	#$88,(z80_ram+zDAC_Sample).l	; Queue Sega PCM
 		startZ80
 		move.w	#$11,d1
@@ -739,13 +770,14 @@ PlaySegaSound:
 		move.w	#-1,d0
 ; loc_71FC4:
 .busyloop:
-		nop	
+		nop
 		dbf	d0,.busyloop
 
 		dbf	d1,.busyloop_outer
 
 		addq.w	#4,sp	; Tamper return value so we don't return to caller
 		rts
+	endif ; if FeatureSkipSEGALogo
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Play music track $81-$9F
@@ -828,12 +860,23 @@ Sound_PlayBGM:
 	else
 		moveq	#0,d7
 		move.b	2(a3),d7		; load number of FM+DAC tracks
+
+	if BugFixSongFadeRestoration
+		move.b	4(a3),d4		; load tempo dividing timing
+		moveq	#TrackSz,d6
+		move.b	#1,d5			; Note duration for first "note"
+	endif ; if BugFixSongFadeRestoration
+
 		beq.w	.bgm_fmdone		; branch if zero
 		subq.b	#1,d7
 		move.b	#$C0,d1			; Default AMS+FMS+Panning
+
+	if BugFixSongFadeRestoration=0
 		move.b	4(a3),d4		; load tempo dividing timing
 		moveq	#SMPS_Track.len,d6
 		move.b	#1,d5			; Note duration for first "note"
+	endif
+
 	endif
 		lea	SMPS_RAM.v_music_fmdac_tracks(a6),a1
 		lea	FMDACInitBytes(pc),a2
@@ -970,57 +1013,103 @@ PSGInitBytes:	dc.b $80, $A0, $C0	; Specifically, these configure writes to the P
 ; ---------------------------------------------------------------------------
 ; Play normal sound effect
 ; ---------------------------------------------------------------------------
+	if ExtendedSoundEffects
+Sound_PlaySFX2:
+		tst.b	SMPS_RAM.f_1up_playing(a6)			; Is 1-up playing?
+		bne.w	Sound_ClearSndPrio					; Exit is it is
+		tst.b	SMPS_RAM.v_fadeout_counter(a6)		; Is music being faded out?
+		bne.w	Sound_ClearSndPrio					; Exit if it is
+		tst.b	SMPS_RAM.f_fadein_flag(a6)			; Is music being faded in?
+		bne.w	Sound_ClearSndPrio					; Exit if it is
+
+	if FeatureSpindash>1
+		clr.b	(f_sfx_spinrev).w
+		cmp.b	#$D1,d7										; is this the Spin Dash sound?
+		bne.s	@cont3										; if not, branch
+
+		move.w	d0,-(sp)
+		move.b	(v_sfx_frequency).w,d0	; store extra frequency
+		tst.b	(v_sfx_spinrev).w					; is the Spin Dash timer active?
+		bne.s	@cont1										; if it is, branch
+		move.b	#-1,d0									; otherwise, reset frequency (becomes 0 on next line)
+
+	@cont1:
+		addq.b	#1,d0
+		cmp.b	#$C,d0										; has the limit been reached?
+		bcc.s	@cont2										; if it has, branch
+		move.b	d0,(v_sfx_frequency).w				; otherwise, set new frequency
+
+	@cont2:
+		move.b	#1,(f_sfx_spinrev).w		; set flag
+		move.b	#60,(v_sfx_spinrev).w		; set timer
+		move.w	(sp)+,d0
+
+	@cont3:
+	endif ; if FeatureSpindash>1
+
+		movea.l	(Go_SoundIndex).l,a0
+		sub.b	#$A1,d7
+		bra	SoundEffects_Common
+	endif ; if ExtendedSoundEffects
+
 ; Sound_A0toCF:
 Sound_PlaySFX:
 		tst.b	SMPS_RAM.f_1up_playing(a6)	; Is 1-up playing?
-		bne.w	.clear_sndprio			; Exit is it is
+		bne.w	Sound_ClearSndPrio		; Exit is it is
 		tst.b	SMPS_RAM.v_fadeout_counter(a6)	; Is music being faded out?
-		bne.w	.clear_sndprio			; Exit if it is
+		bne.w	Sound_ClearSndPrio		; Exit if it is
 		tst.b	SMPS_RAM.f_fadein_flag(a6)	; Is music being faded in?
-		bne.w	.clear_sndprio			; Exit if it is
-		cmpi.b	#sfx_Ring,d7			; is ring sound effect played?
+		bne.w	Sound_ClearSndPrio		; Exit if it is
+
+	if FeatureSpindash>1
+		clr.b	(f_sfx_spinrev).w
+	endif ; if FeatureSpindash>1
+
+		cmpi.b	#sfx_Ring,d7						; is ring sound	effect played?
 		bne.s	.sfx_notRing			; if not, branch
 		tst.b	SMPS_RAM.v_ring_speaker(a6)	; Is the ring sound playing on right speaker?
 		bne.s	.gotringspeaker			; Branch if not
-		move.b	#sfx_RingLeft,d7		; play ring sound in left speaker
+		move.b	#sfx_RingLeft,d7				; play ring sound in left speaker
 ; loc_721EE:
 .gotringspeaker:
 		bchg	#0,SMPS_RAM.v_ring_speaker(a6)	; change speaker
 ; Sound_notB5:
 .sfx_notRing:
-		cmpi.b	#sfx_Push,d7				; is "pushing" sound played?
+		cmpi.b	#sfx_Push,d7						; is "pushing" sound played?
 		bne.s	.sfx_notPush				; if not, branch
 		tst.b	SMPS_RAM.f_push_playing(a6)		; Is pushing sound already playing?
-		bne.w	.locret					; Return if not
+		bne.w	Sound_PlaySFX_Return	; Return if not
 		move.b	#$80,SMPS_RAM.f_push_playing(a6)	; Mark it as playing
 ; Sound_notA7:
 .sfx_notPush:
 		movea.l	(Go_SoundIndex).l,a0
-		subi.b	#sfx__First,d7		; Make it 0-based
-		lsl.w	#2,d7			; Convert sfx ID into index
-		movea.l	(a0,d7.w),a3		; SFX data pointer
+		subi.b	#sfx__First,d7					; Make it 0-based
+
+SoundEffects_Common:
+		lsl.w	#2,d7											; Convert sfx ID into index
+		movea.l	(a0,d7.w),a3						; SFX data pointer
 		movea.l	a3,a1
 		moveq	#0,d1
-		move.w	(a1)+,d1		; Voice pointer
-		add.l	a3,d1			; Relative pointer
-		move.b	(a1)+,d5		; Dividing timing
-	if FixBugs
+		move.w	(a1)+,d1								; Voice pointer
+		add.l	a3,d1											; Relative pointer
+		move.b	(a1)+,d5								; Dividing timing
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		moveq	#0,d7
 	else
 		; DANGER! there is a missing 'moveq	#0,d7' here, without which SFXes whose
 		; index entry is above $3F will cause a crash.
 		; This bug is fixed in Ristar's driver.
 	endif
-		move.b	(a1)+,d7	; Number of tracks (FM + PSG)
+		move.b	(a1)+,d7								; Number of tracks (FM + PSG)
 		subq.b	#1,d7
 		moveq	#SMPS_Track.len,d6
 ; loc_72228:
 .sfx_loadloop:
 		moveq	#0,d3
-		move.b	1(a1),d3	; Channel assignment bits
+		move.b	1(a1),d3								; Channel assignment bits
 		move.b	d3,d4
 		bmi.s	.sfxinitpsg	; Branch if PSG
-		subq.w	#2,d3		; SFX can only have FM3, FM4 or FM5
+		subq.w	#2,d3										; SFX can only have FM3, FM4 or FM5
 		lsl.w	#2,d3
 		lea	SFX_BGMChannelRAM(pc),a5
 		movea.l	(a5,d3.w),a5
@@ -1042,7 +1131,13 @@ Sound_PlaySFX:
 		move.b	d0,(psg_input).l
 ; loc_7226E:
 .sfxoverridedone:
+	if FeatureSpindash<2
 		movea.l	SFX_SFXChannelRAM(pc,d3.w),a5
+	else
+		lea	SFX_SFXChannelRAM(pc),a5
+		movea.l	(a5,d3.w),a5
+	endif ; if FeatureSpindash<2
+
 		movea.l	a5,a2
 		moveq	#(SMPS_Track.len/4)-1,d0	; $30 bytes
 ; loc_72276:
@@ -1050,7 +1145,20 @@ Sound_PlaySFX:
 		clr.l	(a2)+
 		dbf	d0,.clearsfxtrackram
 
+	if FeatureSpindash<2
 		move.w	(a1)+,SMPS_Track.PlaybackControl(a5)	; Initial playback control bits
+	else
+		move.w	(a1)+,8(a5)
+		tst.b	(f_sfx_spinrev).w	; is the Spin Dash sound playing?
+		beq.s	.cont		; if not, branch
+		move.w	d0,-(sp)
+		move.b	(v_sfx_frequency).w,d0
+		add.b	d0,8(a5)
+		move.w	(sp)+,d0
+
+.cont:
+	endif ; if FeatureSpindash<2
+
 		move.b	d5,SMPS_Track.TempoDivider(a5)		; Initial voice control bits
 		moveq	#0,d0
 		move.w	(a1)+,d0				; Track data pointer
@@ -1073,14 +1181,14 @@ Sound_PlaySFX:
 ; loc_722B8:
 .doneoverride:
 		tst.b	SMPS_RAM.v_sfx_psg3_track.PlaybackControl(a6)		; Is SFX being played?
-		bpl.s	.locret							; Branch if not
+		bpl.s	Sound_PlaySFX_Return				; Branch if not
 		bset	#2,SMPS_RAM.v_spcsfx_psg3_track.PlaybackControl(a6)	; Set 'SFX is overriding' bit
 ; locret_722C4:
-.locret:
+Sound_PlaySFX_Return:
 		rts
 ; ===========================================================================
 ; loc_722C6:
-.clear_sndprio:
+Sound_ClearSndPrio:
 		_clr.b	SMPS_RAM.v_sndprio(a6)	; Clear priority
 		rts
 ; ===========================================================================
@@ -1120,21 +1228,23 @@ Sound_PlaySpecial:
 		tst.b	SMPS_RAM.f_fadein_flag(a6)	; Is music being faded in?
 		bne.w	.locret				; Exit if it is
 		movea.l	(Go_SpecSoundIndex).l,a0
-		subi.b	#spec__First,d7			; Make it 0-based
+		subi.b	#spec__First,d7							; Make it 0-based
 		lsl.w	#2,d7
 		movea.l	(a0,d7.w),a3
 		movea.l	a3,a1
 		moveq	#0,d0
-		move.w	(a1)+,d0				; Voice pointer
-		add.l	a3,d0					; Relative pointer
+		move.w	(a1)+,d0										; Voice pointer
+		add.l	a3,d0													; Relative pointer
 		move.l	d0,SMPS_RAM.v_special_voice_ptr(a6)	; Store voice pointer
-		move.b	(a1)+,d5				; Dividing timing
-	if FixBugs
+		move.b	(a1)+,d5										; Dividing timing
+
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		moveq	#0,d7
 	else
 		; DANGER! there is a missing 'moveq	#0,d7' here, without which special SFXes whose
 		; index entry is above $3F will cause a crash. This instance was not fixed in Ristar's driver.
 	endif
+
 		move.b	(a1)+,d7	; Number of tracks (FM + PSG)
 		subq.b	#1,d7
 		moveq	#SMPS_Track.len,d6
@@ -1239,7 +1349,7 @@ StopSFX:
 		bne.s	.getfmpointer					; Branch if not
 		tst.b	SMPS_RAM.v_spcsfx_fm4_track.PlaybackControl(a6)	; Is special SFX playing?
 		bpl.s	.getfmpointer					; Branch if not
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		movea.l	a5,a3
 	else
 		; DANGER! there is a missing 'movea.l	a5,a3' here, without which the
@@ -1468,7 +1578,7 @@ StopAllSound:
 		moveq	#0,d1		; FM3/FM6 normal mode, disable timers
 		jsr	WriteFMI(pc)
 		movea.l	a6,a0
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		move.w	#(SMPS_RAM.v_1up_ram_copy/4)-1,d0	; Clear $400 bytes: all variables and track data
 	else
 		; DANGER! This should be clearing all variables and track data, but misses the last $10 bytes of v_spcsfx_psg3_Track.
@@ -1516,7 +1626,7 @@ InitMusicPlayback:
 		; DANGER! Only v_soundqueue0 and v_soundqueue1 are restored, once again breaking v_soundqueue2
 	endif
 		move.b	#$80,SMPS_RAM.v_sound_id(a6)	; set music to $80 (silence)
-	if FixBugs
+	if BugFixSoundDriverBugs|(FixBugs)
 		lea	SMPS_RAM.v_music_dac_track.VoiceControl(a6),a1
 		lea	FMDACInitBytes(pc),a2
 		moveq	#SMPS_MUSIC_FM_DAC_TRACK_COUNT-1,d1	; 7 DAC/FM tracks
@@ -1544,7 +1654,7 @@ InitMusicPlayback:
 		jsr	FMSilenceAll(pc)
 		bra.w	PSGSilenceAll
 	endif
-	
+
 ; End of function InitMusicPlayback
 ; ===========================================================================
 
@@ -1652,7 +1762,7 @@ DoFadeIn:
 		bclr	#2,SMPS_RAM.v_music_dac_track.PlaybackControl(a6)	; Clear 'SFX overriding' bit
 		clr.b	SMPS_RAM.f_fadein_flag(a6)				; Stop fadein
 
-	if FixBugs
+	if (BugFixSongFadeRestoration)|(FixBugs)
 		; Fix the DAC fade-in bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 		tst.b	SMPS_RAM.v_music_dac_track.PlaybackControl(a6)		; is the DAC channel running?
@@ -1731,9 +1841,9 @@ WriteFMI:
 		btst	#7,d2		; Is FM busy?
 		bne.s	WriteFMI	; Loop if so
 		move.b	d0,(ym2612_a0).l
-		nop	
-		nop	
-		nop	
+		nop
+		nop
+		nop
 ; loc_72746:
 .waitloop:
 		move.b	(ym2612_a0).l,d2
@@ -1758,9 +1868,9 @@ WriteFMII:
 		btst	#7,d2		; Is FM busy?
 		bne.s	WriteFMII	; Loop if so
 		move.b	d0,(ym2612_a1).l
-		nop	
-		nop	
-		nop	
+		nop
+		nop
+		nop
 ; loc_7277C:
 .waitloop:
 		move.b	(ym2612_a0).l,d2
@@ -1975,7 +2085,7 @@ PSGCheckNoteTimeout:
 		tst.b	SMPS_Track.NoteTimeoutMaster(a5)	; Is note timeout on?
 		beq.s	PSGSendVolume				; Branch if not
 		tst.b	SMPS_Track.NoteTimeout(a5)		; Has note timeout expired?
-		bne.s	PSGSendVolume				; Branch if not
+		bne.s	PSGSendVolume			; Branch if not
 		rts
 ; End of function SetPSGVolume
 
@@ -1995,7 +2105,7 @@ SendPSGNoteOff:
 		move.b	SMPS_Track.VoiceControl(a5),d0	; PSG channel to change
 		ori.b	#$1F,d0				; Maximum volume attenuation
 		move.b	d0,(psg_input).l
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		; This is the same fix that S&K's driver uses:
 		cmpi.b	#$DF,d0				; Are stopping PSG3?
 		bne.s	locret_729B4
@@ -2166,7 +2276,7 @@ cfFadeInToPrevious:
 		move.l	(a1)+,(a0)+
 		dbf	d0,.restoreramloop
 
-	if FixBugs
+	if (BugFixSongFadeRestoration)|(FixBugs)
 		; Fix the FM 6 restoration bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 		move.b	#$2B,d0		; Register: DAC mode (bit 7 = enable)
@@ -2209,7 +2319,7 @@ cfFadeInToPrevious:
 .nextpsg:
 		adda.w	#SMPS_Track.len,a5
 		dbf	d7,.psgloop
-		
+
 		movea.l	a3,a5
 		move.b	#$80,SMPS_RAM.f_fadein_flag(a6)		; Trigger fade-in
 		move.b	#$28,SMPS_RAM.v_fadein_counter(a6)	; Fade-in delay
@@ -2301,7 +2411,7 @@ cfStopSpecialFM4:
 		movea.l	a3,a5
 ; loc_72C22:
 .locexit:
-		addq.w	#8,sp	; Tamper with return value so we don't return to caller
+		addq.w	#8,sp		; Tamper with return value so we don't return to caller
 		rts
 ; ===========================================================================
 ; loc_72C26:
@@ -2360,8 +2470,8 @@ SetVoice:
 .sendtl:
 		jsr	WriteFMIorII(pc)
 		dbf	d5,.sendtlloop
-		
-		move.b	#$B4,d0				; Register for AMS/FMS/Panning
+
+		move.b	#$B4,d0			; Register for AMS/FMS/Panning
 		move.b	SMPS_Track.AMSFMSPan(a5),d1	; Value to send
 		jsr	WriteFMIorII(pc)		; (It would be better if this were a jmp)
 
@@ -2383,7 +2493,7 @@ SendVoiceTL:
 		movea.l	SMPS_RAM.v_voice_ptr(a6),a1		; Voice pointer
 		tst.b	SMPS_RAM.f_voice_selector(a6)
 		beq.s	.gotvoiceptr
-	if FixBugs
+	if (BugFixSoundDriverBugs)|(FixBugs)
 		movea.l	SMPS_Track.VoicePtr(a5),a1
 	else
 		; DANGER! This uploads the wrong voice! It should have been a5 instead of a6!
@@ -2554,7 +2664,7 @@ cfStopTrack:
 		move.b	SMPS_Track.PSGNoise(a0),(psg_input).l	; Set noise tone
 ; loc_72E02:
 .locexit:
-		addq.w	#8,sp	; Tamper with return value so we don't go back to caller
+		addq.w	#8,sp		; Tamper with return value so we don't go back to caller
 		rts
 ; ===========================================================================
 ; loc_72E06:
@@ -2598,8 +2708,8 @@ cfRepeatAtPos:
 ; loc_72E48:
 .loopexists:
 		subq.b	#1,SMPS_Track.LoopCounters(a5,d0.w)	; Decrease loop's repeat count
-		bne.s	cfJumpTo				; If nonzero, branch to target
-		addq.w	#2,a4					; Skip target address
+		bne.s	cfJumpTo			; If nonzero, branch to target
+		addq.w	#2,a4				; Skip target address
 		rts
 ; ===========================================================================
 ; loc_72E52:
@@ -2734,6 +2844,9 @@ ptr_sndend
 ; ---------------------------------------------------------------------------
 SpecSoundIndex:
 ptr_sndD0:	dc.l SoundD0
+	if FeatureSpindash>1
+ptr_sndD1:	dc.l SoundD1
+	endif ; if FeatureSpindash>1
 ptr_specend
 
 ; ---------------------------------------------------------------------------
@@ -2841,6 +2954,10 @@ SoundCF:	include "sound/sfx/SndCF - Signpost.asm"
 ; ---------------------------------------------------------------------------
 SoundD0:	include "sound/sfx/SndD0 - Waterfall.asm"
 		even
+	if FeatureSpindash>1
+SoundD1:	incbin	"Enhancements/sound/sfx/SndD1 - Spindash.asm"
+		even
+	endif ; if FeatureSpindash>1
 
 ; ---------------------------------------------------------------------------
 ; 'Sega' chant PCM sample
@@ -2859,4 +2976,3 @@ SegaPCM:	include "sound/dac/pcm/generated/sega.inc"
 		if SegaPCM.size>Size_of_SegaPCM
 			fatal "Size_of_SegaPCM = $\{Size_of_SegaPCM}, but you have a $\{SegaPCM.size} byte Sega sound."
 		endif
-

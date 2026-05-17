@@ -265,10 +265,16 @@ out_of_range:	macro exit,pos
 		move.w	obX(a0),d0	; get object position
 	endif
 		andi.w	#$FF80,d0	; round down to nearest $80
+	if TweakS2OffscreenDelete
+		; Use the object manager's cached rounded camera X like Sonic 2.
+		sub.w	(v_opl_screen).w,d0
+		addi.w	#128,d0		; approx distance between object and screen
+	else
 		move.w	(v_screenposx).w,d1 ; get screen position
 		subi.w	#128,d1
 		andi.w	#$FF80,d1
 		sub.w	d1,d0		; approx distance between object and screen
+	endif ; if TweakS2OffscreenDelete
 		cmpi.w	#128+320+192,d0
 		bhi.ATTRIBUTE	exit
 		endm
@@ -355,3 +361,125 @@ __LABEL__:	label	 *
 		binclude path
 __LABEL___end:	label	 *
 		endm
+
+; ---------------------------------------------------------------------------
+; Play a sound effect or music
+;
+; track:
+;	#bgm_Boss, #sfx_Ring, d0, etc.
+;
+; routine:
+;	QueueSound1 or QueueSound2
+;
+; queue:
+;	sndq_music or sndq_sfx
+;
+; load:
+;	snd_load_none	= d0 already contains sound ID
+;	snd_load_b	= move.b track,d0
+;	snd_load_w	= move.w track,d0
+;
+; dispatch:
+;	snd_bsr		= bsr.w routine
+;	snd_bra		= bra.w routine
+;	snd_jsr		= jsr (routine).l
+;	snd_jmp		= jmp (routine).l
+; ---------------------------------------------------------------------------
+
+_sound:	macro sndtrack,sndroutine,sndqueue,sndload,snddispatch
+	if OptimiseSound=1
+
+		move.b	sndtrack,(v_snddriver_ram+sndqueue).l
+
+		if (snddispatch=snd_bra)|(snddispatch=snd_jmp)
+			rts
+		endif
+
+	else
+
+		if sndload=snd_load_b
+			move.b	sndtrack,d0
+		endif
+		if sndload=snd_load_w
+			move.w	sndtrack,d0
+		endif
+
+		if snddispatch=snd_bsr
+			bsr.w	sndroutine
+		endif
+		if snddispatch=snd_bra
+			bra.w	sndroutine
+		endif
+		if snddispatch=snd_jsr
+			jsr	(sndroutine).l
+		endif
+		if snddispatch=snd_jmp
+			jmp	(sndroutine).l
+		endif
+
+	endif
+	endm
+
+queue_music:	macro sndtrack,sndload
+	if strlen("sndload")=0
+		move.w	sndtrack,d0
+	elseif sndload=snd_load_b
+		move.b	sndtrack,d0
+	elseif sndload=snd_load_w
+		move.w	sndtrack,d0
+	endif
+	endm
+
+queue_sfx:	macro sndtrack,sndload
+	if strlen("sndload")=0
+		move.w	sndtrack,d0
+	elseif sndload=snd_load_b
+		move.b	sndtrack,d0
+	elseif sndload=snd_load_w
+		move.w	sndtrack,d0
+	endif
+	endm
+
+play_queued_music:	macro snddispatch,sndroutine
+	if strlen("snddispatch")=0
+		_sound	d0,QueueSound1,sndq_music,snd_load_none,snd_jsr
+	elseif strlen("sndroutine")=0
+		_sound	d0,QueueSound1,sndq_music,snd_load_none,snddispatch
+	else
+		_sound	d0,sndroutine,sndq_music,snd_load_none,snddispatch
+	endif
+	endm
+
+play_queued_sfx:	macro snddispatch,sndroutine
+	if strlen("snddispatch")=0
+		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,snd_jsr
+	elseif strlen("sndroutine")=0
+		_sound	d0,QueueSound2,sndq_sfx,snd_load_none,snddispatch
+	else
+		_sound	d0,sndroutine,sndq_sfx,snd_load_none,snddispatch
+	endif
+	endm
+
+music:	macro sndtrack,snddispatch,sndload,sndroutine
+	if strlen("snddispatch")=0
+		_sound	sndtrack,QueueSound1,sndq_music,snd_load_w,snd_bsr
+	elseif strlen("sndload")=0
+		_sound	sndtrack,QueueSound1,sndq_music,snd_load_w,snddispatch
+	elseif strlen("sndroutine")=0
+		_sound	sndtrack,QueueSound1,sndq_music,sndload,snddispatch
+	else
+		_sound	sndtrack,sndroutine,sndq_music,sndload,snddispatch
+	endif
+	endm
+
+sfx:	macro sndtrack,snddispatch,sndload,sndroutine
+	if strlen("snddispatch")=0
+		_sound	sndtrack,QueueSound2,sndq_sfx,snd_load_w,snd_bsr
+	elseif strlen("sndload")=0
+		_sound	sndtrack,QueueSound2,sndq_sfx,snd_load_w,snddispatch
+	elseif strlen("sndroutine")=0
+		_sound	sndtrack,QueueSound2,sndq_sfx,sndload,snddispatch
+	else
+		_sound	sndtrack,sndroutine,sndq_sfx,sndload,snddispatch
+	endif
+	endm

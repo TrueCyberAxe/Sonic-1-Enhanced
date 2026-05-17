@@ -7,7 +7,7 @@
 ; aren't even loaded into VRAM (it would be "Nem_UnkExplode", but loading
 ; it overwrites part of the Crabmeat graphics at "ArtTile_Missile_Disolve").
 ; ---------------------------------------------------------------------------
-
+; @TODO Fix Badniks to use this
 ; MissileDissolve: <--- old misnomer
 UnusedExplosion:
 		moveq	#0,d0
@@ -29,8 +29,7 @@ UnkExpl_Main:	; Routine 0
 		move.b	#$C,obActWid(a0)
 		move.b	#9,obTimeFrame(a0)
 		move.b	#0,obFrame(a0)
-		move.w	#sfx_A5,d0		; (this sfx is also unused)
-		jsr	(QueueSound2).l		; play sound
+		sfx	#sfx_A5,snd_jsr	; play sound (this sfx is also unused)
 
 UnkExpl_Animate:	; Routine 2
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from frame duration
@@ -78,8 +77,7 @@ ExItem_Main:	; Routine 2
 		move.b	#$C,obActWid(a0)
 		move.b	#7,obTimeFrame(a0) ; set frame duration to 7 frames
 		move.b	#0,obFrame(a0)
-		move.w	#sfx_BreakItem,d0
-		jsr	(QueueSound2).l	; play breaking enemy sound
+		sfx	#sfx_BreakItem,snd_jsr	; play breaking enemy sound
 
 ExItem_Animate:	; Routine 4 (2 for Explosion)
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from frame duration
@@ -118,5 +116,4 @@ Expl_Main:	; Routine 0
 		move.b	#$C,obActWid(a0)
 		move.b	#7,obTimeFrame(a0)
 		move.b	#0,obFrame(a0)
-		move.w	#sfx_Bomb,d0
-		jmp	(QueueSound2).l	; play exploding bomb sound
+		sfx	#sfx_Bomb,snd_jmp	; play exploding bomb sound

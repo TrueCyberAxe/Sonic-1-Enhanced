@@ -177,8 +177,8 @@ NemBCT_Loop:
 		move.b	(a0)+,d0	; read next byte
 		cmpi.b	#$80,d0	; sign bit being set signifies a new palette index
 		bhs.s	NemBCT_ChkEnd	; a bmi could have been used instead of a compare and bcc
-		
 		move.b	d0,d1
+
 		andi.w	#$F,d7	; get palette index
 		andi.w	#$70,d1	; get repeat count for palette index
 		or.w	d1,d7	; combine the two

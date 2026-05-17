@@ -408,8 +408,7 @@ SS_AniEmeraldSparks:
 		clr.l	(a0)
 		clr.l	4(a0)
 		move.b	#4,(v_player+obRoutine).w
-		move.w	#sfx_SSGoal,d0
-		jsr	(QueueSound2).l	; play special stage GOAL sound
+		sfx	#sfx_SSGoal,snd_jsr	; play special stage GOAL sound
 
 locret_1B60C:
 		rts

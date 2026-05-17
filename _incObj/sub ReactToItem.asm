@@ -3,15 +3,18 @@
 ; ---------------------------------------------------------------------------
 
 ReactToItem:
-		nop	
-		move.w	obX(a0),d2	; load Sonic's x-axis position
-		move.w	obY(a0),d3	; load Sonic's y-axis position
+	if TweakCodeOptimizations=0
+		nop
+	endif ; if TweakCodeOptimizations=0
+
+		move.w	obX(a0),d2									; load Sonic's x-axis position
+		move.w	obY(a0),d3									; load Sonic's y-axis position
 		subq.w	#sonic_react_width,d2
 		moveq	#0,d5
-		move.b	obHeight(a0),d5	; load Sonic's height
+		move.b	obHeight(a0),d5							; load Sonic's height
 		subq.b	#3,d5
 		sub.w	d5,d3
-		cmpi.b	#fr_Duck,obFrame(a0) ; is Sonic ducking?
+		cmpi.b	#fr_Duck,obFrame(a0) 				; is Sonic ducking?
 		bne.s	.notducking	; if not, branch
 		addi.w	#((sonic_height-3)-sonic_duck_height)*2,d3
 		moveq	#sonic_duck_height,d5
@@ -25,7 +28,7 @@ ReactToItem:
 .loop:
 		tst.b	obRender(a1)
 		bpl.s	.next
-		move.b	obColType(a1),d0 ; load collision type
+		move.b	obColType(a1),d0 						; load collision type
 		bne.s	.proximity	; if nonzero, branch
 
 .next:
@@ -113,13 +116,13 @@ ReactToItem:
 
 .withiny:
 .chktype:
-		move.b	obColType(a1),d1 ; load collision type
-		andi.b	#$C0,d1		; is obColType $40 or higher?
-		beq.w	React_Enemy	; if not, branch
-		cmpi.b	#$C0,d1		; is obColType $C0 or higher?
-		beq.w	React_Special	; if yes, branch
-		tst.b	d1		; is obColType $80-$BF?
-		bmi.w	React_ChkHurt	; if yes, branch
+		move.b	obColType(a1),d1 						; load collision type
+		andi.b	#$C0,d1											; is obColType $40 or higher?
+		beq.w	React_Enemy										; if not, branch
+		cmpi.b	#$C0,d1											; is obColType $C0 or higher?
+		beq.w	React_Special									; if yes, branch
+		tst.b	d1														; is obColType $80-$BF?
+		bmi.w	React_ChkHurt									; if yes, branch
 
 ; obColType is $40-$7F (powerups)
 
@@ -139,7 +142,7 @@ ReactToItem:
 ; ===========================================================================
 
 React_Monitor:
-		tst.w	obVelY(a0)	; is Sonic moving upwards?
+		tst.w	obVelY(a0)										; is Sonic moving upwards?
 		bpl.s	.movingdown	; if not, branch
 	if FixBugs
 		; Fix bumping monitors from below that are already on the ground
@@ -152,7 +155,7 @@ React_Monitor:
 		blo.s	.donothing
 
 .monitorbumped:
-		neg.w	obVelY(a0)	; reverse Sonic's vertical speed
+		neg.w	obVelY(a0)										; reverse Sonic's vertical speed
 		move.w	#-$180,obVelY(a1)
 		tst.b	ob2ndRout(a1)
 		bne.s	.donothing
@@ -161,26 +164,32 @@ React_Monitor:
 ; ===========================================================================
 
 .movingdown:
-		cmpi.b	#id_Roll,obAnim(a0) ; is Sonic rolling/jumping?
+		cmpi.b	#id_Roll,obAnim(a0) 				; is Sonic rolling/jumping?
 		bne.s	.donothing
-		neg.w	obVelY(a0)	; reverse Sonic's y-motion
-		addq.b	#2,obRoutine(a1) ; advance the monitor's routine counter
+		neg.w	obVelY(a0)										; reverse Sonic's y-motion
+		addq.b	#2,obRoutine(a1) 						; advance the monitor's routine counter
 
 .donothing:
 		rts
 ; ===========================================================================
 
 React_Enemy:
-		tst.b	(v_invinc).w	; is Sonic invincible?
+		tst.b	(v_invinc).w									; is Sonic invincible?
 		bne.s	.donthurtsonic	; if yes, branch
-		cmpi.b	#id_Roll,obAnim(a0) ; is Sonic rolling/jumping?
-		bne.w	React_ChkHurt	; if not, branch
+
+	if FeatureSpindash
+		tst.b	f_spindash(a0)								; is Sonic Spindashing?
+		bne.s	.donthurtsonic								; if yes, branch
+	endif
+
+		cmpi.b	#id_Roll,obAnim(a0) 				; is Sonic rolling/jumping?
+		bne.w	React_ChkHurt									; if not, branch
 
 .donthurtsonic:
 		tst.b	obColProp(a1)
 		beq.s	.breakenemy
 
-		neg.w	obVelX(a0)	; repel Sonic
+		neg.w	obVelX(a0)										; repel Sonic
 		neg.w	obVelY(a0)
 		asr.w	obVelX(a0)
 		asr.w	obVelY(a0)
@@ -197,17 +206,17 @@ React_Enemy:
 		bset	#7,obStatus(a1)
 		moveq	#0,d0
 		move.w	(v_itembonus).w,d0
-		addq.w	#2,(v_itembonus).w ; add 2 to item bonus counter
+		addq.w	#2,(v_itembonus).w 					; add 2 to item bonus counter
 		cmpi.w	#6,d0
 		blo.s	.bonusokay
-		moveq	#6,d0		; max bonus is lvl6
+		moveq	#6,d0													; max bonus is lvl6
 
 .bonusokay:
 		move.w	d0,objoff_3E(a1)
 		move.w	.points(pc,d0.w),d0
-		cmpi.w	#$20,(v_itembonus).w ; have 16 enemies been destroyed?
+		cmpi.w	#$20,(v_itembonus).w 				; have 16 enemies been destroyed?
 		blo.s	.lessthan16	; if not, branch
-		move.w	#1000,d0	; fix bonus to 10000
+		move.w	#1000,d0										; fix bonus to 10000
 		move.w	#$A,objoff_3E(a1)
 
 .lessthan16:
@@ -239,7 +248,7 @@ React_Caterkiller:
 		bset	#7,obStatus(a1)
 
 React_ChkHurt:
-		tst.b	(v_invinc).w	; is Sonic invincible?
+		tst.b	(v_invinc).w									; is Sonic invincible?
 		beq.s	.notinvincible	; if not, branch
 
 .isflashing:
@@ -248,7 +257,9 @@ React_ChkHurt:
 ; ===========================================================================
 
 .notinvincible:
-		nop	
+	if TweakCodeOptimizations=0
+		nop
+	endif ; if TweakCodeOptimizations=0
 		tst.w	flashtime(a0)		; is Sonic flashing?
 		bne.s	.isflashing	; if yes, branch
 		movea.l	a1,a2
@@ -259,9 +270,18 @@ React_ChkHurt:
 ; ---------------------------------------------------------------------------
 
 HurtSonic:
-		tst.b	(v_shield).w	; does Sonic have a shield?
+		tst.b	(v_shield).w									; does Sonic have a shield?
 		bne.s	.hasshield	; if yes, branch
-		tst.w	(v_rings).w	; does Sonic have any rings?
+
+	if FeatureRestoreMonitorScubaGear
+		tst.b	(f_goggles).w									; does Sonic have a Goggle Flag?
+		beq.s	.ringcheck										; if not, branch
+		move.b	#0,(f_goggles).w						; remove goggles
+
+.ringcheck:
+	endif
+
+		tst.w	(v_rings).w										; does Sonic have any rings?
 		beq.w	.norings	; if not, branch
 
 		jsr	(FindFreeObj).l
@@ -271,25 +291,28 @@ HurtSonic:
 		move.w	obY(a0),obY(a1)
 
 .hasshield:
-		move.b	#0,(v_shield).w	; remove shield
+		move.b	#0,(v_shield).w							; remove shield
 		move.b	#4,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
 		bset	#1,obStatus(a0)
-		move.w	#-$400,obVelY(a0) ; make Sonic bounce away from the object
+		move.w	#-$400,obVelY(a0) 					; make Sonic bounce away from the object
 		move.w	#-$200,obVelX(a0)
-		btst	#6,obStatus(a0)	; is Sonic underwater?
+		btst	#6,obStatus(a0)								; is Sonic underwater?
 		beq.s	.isdry		; if not, branch
 
-		move.w	#-$200,obVelY(a0) ; slower bounce
+		move.w	#-$200,obVelY(a0) 					; slower bounce
 		move.w	#-$100,obVelX(a0)
 
 .isdry:
 		move.w	obX(a0),d0
 		cmp.w	obX(a2),d0
 		blo.s	.isleft		; if Sonic is left of the object, branch
-		neg.w	obVelX(a0)	; if Sonic is right of the object, reverse
+		neg.w	obVelX(a0)										; if Sonic is right of the object, reverse
 
 .isleft:
+	if FeatureSpindash
+		move.b #0,f_spindash(a0) 					; clear Spin Dash flag
+	endif
 		move.w	#0,obInertia(a0)
 		move.b	#id_Hurt,obAnim(a0)
 		move.w	#120,flashtime(a0)	; set temp invincible time to 2 seconds
@@ -311,13 +334,13 @@ HurtSonic:
 	endif
 
 .sound:
-		jsr	(QueueSound2).l
+		play_queued_sfx
 		moveq	#-1,d0
 		rts
 ; ===========================================================================
 
 .norings:
-		tst.w	(f_debugmode).w	; is debug mode cheat on?
+		tst.w	(f_debugmode).w								; is debug mode	cheat on?
 		bne.w	.hasshield	; if yes, branch
 		; continue straight to KillSonic
 
@@ -327,7 +350,11 @@ HurtSonic:
 
 KillSonic:
 		tst.w	(v_debuguse).w	; is debug mode active?
-		bne.s	.dontdie	; if yes, branch
+	if FeatureContextualDeath
+		bne.w	.dontdie	; if yes, branch
+	else
+		bne.s	.dontdie	; if yes, branch													; if yes, branch
+	endif ; if FeatureContextualDeath=0
 		move.b	#0,(v_invinc).w	; remove invincibility
 		move.b	#6,obRoutine(a0)
 		bsr.w	Sonic_ResetOnFloor
@@ -344,29 +371,69 @@ KillSonic:
 		move.w	obY(a0),objoff_38(a0)
 	endif
 
+	if FeatureContextualDeath
+		cmpi.b	#id_Electro,obID(a2)										; was damage caused by a Fire Object?
+		beq.s	.electricdeath											; if yes, branch
+
+		cmpi.b	#id_LavaGeyser,obID(a2)								; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_LavaWall,obID(a2)									; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_LavaTag,obID(a2)										; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_LavaBall,obID(a2)									; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_Flamethrower,obID(a2)									; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_Explosion,obID(a2)									; was damage caused by a Fire Object?
+		beq.s	.flamingdeath												; if yes, branch
+
+		cmpi.b	#id_Bomb,obID(a2)									; was damage caused by a Fire Object?
+		beq.s	.flamingdeath
+
+		cmpi.b	#id_BossFire,obID(a2)									; was damage caused by a Fire Object?
+		bne.s	.normaldeath												; if not, branch
+
+.flamingdeath:
+		move.b	#id_Burnt,obAnim(a0)
+		bra.s 	.deathcommon
+
+.electricdeath:
+		move.b	#id_Shrink,obAnim(a0)
+		bra.s 	.deathcommon
+	endif ; if FeatureContextualDeath
+
+.normaldeath:
 		move.b	#id_Death,obAnim(a0)
+
+.deathcommon:
 		bset	#7,obGfx(a0)
 
 	if FixBugs
 		; Stop timer as soon as death is triggered to prevent double deaths from time overs
 		clr.b	(f_timecount).w	; stop time counter
-		
+
 		; Fix harpoon object's death sound
 		move.w	#sfx_HitSpikes,d0 ; play spikes death sound
 		cmpi.b	#id_Spikes,obID(a2)	; check if you were killed by spikes
 		beq.s	.sound
 		cmpi.b	#id_Harpoon,obID(a2)	; check if you were killed by a harpoon
 		beq.s	.sound
-		move.w	#sfx_Death,d0	; play normal death sound
+		move.w	#sfx_Death,d0							; play normal death sound
 	else
 		move.w	#sfx_Death,d0	; play normal death sound
 		cmpi.b	#id_Spikes,obID(a2)	; check if you were killed by spikes
 		bne.s	.sound
-		move.w	#sfx_HitSpikes,d0 ; play spikes death sound
+		move.w	#sfx_HitSpikes,d0 				; play spikes death sound
 	endif
 
 .sound:
-		jsr	(QueueSound2).l
+		play_queued_sfx
 
 .dontdie:
 		moveq	#-1,d0
@@ -374,16 +441,46 @@ KillSonic:
 ; End of function KillSonic
 ; ===========================================================================
 
+	if FeatureContextualDeath
+KillSonicByCrushing:
+		move.b	#0,(v_invinc).w				; remove invincibility
+		move.b	#0,(v_shield).w				; remove shield
+		move.b	#6,obRoutine(a0)
+
+		bsr.w	Sonic_ResetOnFloor
+		bset	#1,obStatus(a0)
+
+		move.w	#-$140,obVelY(a0)			; distance of death vertical movement
+		move.w	#0,obVelX(a0)				; stop horizontal movement
+		move.w	#0,obInertia(a0)			; stop existing inertia
+
+	if FixBugs
+		clr.b	(f_timecount).w
+	else
+		move.w	obY(a0),objoff_38(a0)		; ???
+	endif
+
+		move.b	#id_Shrink,obAnim(a0)
+		bset	#7,obGfx(a0)
+
+		move.w	#sfx_Death,d0				; play normal death sound
+
+		play_queued_sfx
+
+		moveq	#-1,d0
+		rts
+	endif ; FeatureContextualDeath
+
 React_Special:
 		move.b	obColType(a1),d1
 		andi.b	#$3F,d1
-		cmpi.b	#$B,d1		; is collision type $CB ?
+		cmpi.b	#$B,d1										; is collision type $CB	?
 		beq.s	.caterkiller	; if yes, branch
-		cmpi.b	#$C,d1		; is collision type $CC ?
+		cmpi.b	#$C,d1										; is collision type $CC	?
 		beq.s	.yadrin		; if yes, branch
-		cmpi.b	#$17,d1		; is collision type $D7 ?
+		cmpi.b	#$17,d1										; is collision type $D7	?
 		beq.s	.D7orE1		; if yes, branch
-		cmpi.b	#$21,d1		; is collision type $E1 ?
+		cmpi.b	#$21,d1										; is collision type $E1	?
 		beq.s	.D7orE1		; if yes, branch
 		rts
 ; ===========================================================================

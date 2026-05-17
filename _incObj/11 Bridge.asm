@@ -299,12 +299,13 @@ Bri_Data_Align:	; Values used to align logs to the left & right of the one being
 
 Bri_ChkDel:
 		out_of_range.w	.deletebridge
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bra.w	DisplaySprite
 	else
 		rts
 	endif
+
 ; ===========================================================================
 
 .deletebridge:

@@ -109,8 +109,8 @@ Spik_Upright:
 	endif
 
 Spik_Hurt:
-		tst.b	(v_invinc).w	; is Sonic invincible?
-		bne.s	Spik_Display	; if yes, branch
+		tst.b	(v_invinc).w			; is Sonic invincible?
+		bne.s	Spik_Display			; if yes, branch
 	if FixBugs
 		; (Proper) Spike Bug Fix
 		; https://info.sonicretro.org/SCHG_How-to:Change_Spike_behavior_in_Sonic_1
@@ -132,11 +132,11 @@ Spik_Hurt:
 		; --- REVXB ("Revision 2") Spike Bug Fix ---
 		; REVXB is a mod of REV01 created for Sonic Mega Collection (2002), and
 		; the only change made is this dirty spike bug fix. The above code was
-		; relocated to unused vector entries at the start of the ROM (see "loc_E0"). 
+		; relocated to unused vector entries at the start of the ROM (see "loc_E0").
 		; Consider enabling "FixBugs" for a clean solution (see above).
-		tst.w	flashtime(a0)	; Is Sonic flashing after being hurt?
-		bne.s	loc_CF20	; If so, skip getting hurt
-		jmp	(loc_E0).l	; This is a copy of the above code that was pushed aside for this
+		tst.w	flashtime(a0)			; Is Sonic flashing after being hurt?
+		bne.s	loc_CF20					; If so, skip getting hurt
+		jmp	(loc_E0).l					; This is a copy of the above code that was pushed aside for this
 loc_D5A2:
 	endif
 
@@ -148,7 +148,7 @@ loc_CF20:
 		movea.l	(sp)+,a0
 
 Spik_Display:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.w	DeleteObject,spik_origX(a0)
@@ -201,8 +201,7 @@ Spik_Wait:
 		bne.s	locret_CFE6
 		tst.b	obRender(a0)
 		bpl.s	locret_CFE6
-		move.w	#sfx_SpikesMove,d0
-		jsr	(QueueSound2).l	; play "spikes moving" sound
+		sfx	#sfx_SpikesMove,snd_jsr	; play "spikes moving" sound
 		bra.s	locret_CFE6
 ; ===========================================================================
 

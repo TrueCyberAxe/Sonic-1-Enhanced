@@ -25,8 +25,7 @@ GFire_Main:	; Routine 0
 		move.b	#1,obPriority(a0)
 		move.b	#$8B,obColType(a0)
 		move.b	#8,obActWid(a0)
-		move.w	#sfx_Burning,d0
-		jsr	(QueueSound2).l	 ; play burning sound
+		sfx	#sfx_Burning,snd_jsr	; play burning sound
 		tst.b	obSubtype(a0)
 		beq.s	GFire_Spread
 		addq.b	#2,obRoutine(a0)

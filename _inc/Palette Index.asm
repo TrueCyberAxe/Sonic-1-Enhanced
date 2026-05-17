@@ -48,7 +48,11 @@ palid_Ending:		makePalEntry	Pal_Ending, 		v_palette_line_1
 
 Pal_SegaBG:		bincludeEndMarker	"palette/Sega Background.bin"
 Pal_Title:		bincludeEndMarker	"palette/Title Screen.bin"
+	if AsciiMenu=0
 Pal_LevelSel:		bincludeEndMarker	"palette/Level Select.bin"
+	else
+Pal_LevelSel:		bincludeEndMarker	"Enhancements/palette/Level Select - S2 Font.bin"
+	endif ; if ExtendedMenu=0
 Pal_Sonic:		bincludeEndMarker	"palette/Sonic.bin"
 Pal_GHZ:		bincludeEndMarker	"palette/Green Hill Zone.bin"
 Pal_LZ:			bincludeEndMarker	"palette/Labyrinth Zone.bin"

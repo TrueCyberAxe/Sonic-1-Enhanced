@@ -37,7 +37,7 @@ SolidObject:
 
 .stand:
 		move.w	d4,d2
-	if FixBugs
+	if (TweakFasterRingScatter)|(FixBugs)
 		jsr	(MvSonicOnPtfm).l
 	else
 		; Goes out of range just from enabling FixBugs
@@ -71,7 +71,7 @@ SolidObject71:
 
 .stand:
 		move.w	d4,d2
-	if FixBugs
+	if (FeatureRestoreMonitorSuper)|(TweakFasterRingScatter)|(FixBugs)
 		jsr	(MvSonicOnPtfm).l
 	else
 		; Goes out of range just from enabling FixBugs
@@ -217,7 +217,17 @@ Solid_SideAir:
 Solid_Ignore:
 		btst	#5,obStatus(a0)	; is Sonic pushing?
 		beq.s	Solid_Debug	; if not, branch
-	if FixBugs=0
+
+	if BugFixWalkJump=1
+		cmpi.b	#id_Roll,obAnim(a1)		; is Sonic in his jumping/rolling animation?
+		beq.s	Solid_NotPushing		; if so, branch
+		cmpi.b	#id_Drown,obAnim(a1)	; is Sonic in his drowning animation?
+		beq.s	Solid_NotPushing		; if so, branch
+		cmpi.b	#id_Hurt,obAnim(a1)		; is Sonic in his hurt animation?
+		beq.s	Solid_NotPushing		; if so, branch
+	endif
+
+	if (BugFixWalkJump<2)&(FixBugs=0)
 		; This causes the infamous "walk-jump bug"
 		move.w	#id_Run,obAnim(a1) ; use running animation
 	endif
@@ -240,13 +250,13 @@ Solid_TopBottom:
 ; ===========================================================================
 
 Solid_Below:
-		tst.w	obVelY(a1)	; is Sonic moving vertically?
-		beq.s	Solid_Squash	; if not, branch
-		bpl.s	Solid_TopBtmAir	; if moving downwards, branch
-		tst.w	d3		; is Sonic above the object?
-		bpl.s	Solid_TopBtmAir	; if yes, branch
-		sub.w	d3,obY(a1)	; correct Sonic's position
-		move.w	#0,obVelY(a1)	; stop Sonic moving
+		tst.w	obVelY(a1)												; is Sonic moving vertically?
+		beq.s	Solid_Squash											; if not, branch
+		bpl.s	Solid_TopBtmAir										; if moving downwards, branch
+		tst.w	d3																; is Sonic above the object?
+		bpl.s	Solid_TopBtmAir										; if yes, branch
+		sub.w	d3,obY(a1)												; correct Sonic's position
+		move.w	#0,obVelY(a1)										; stop Sonic moving
 
 Solid_TopBtmAir:
 		moveq	#-1,d4
@@ -254,11 +264,17 @@ Solid_TopBtmAir:
 ; ===========================================================================
 
 Solid_Squash:
-		btst	#1,obStatus(a1)	; is Sonic in the air?
-		bne.s	Solid_TopBtmAir	; if yes, branch
+		btst	#1,obStatus(a1)										; is Sonic in the air?
+		bne.s	Solid_TopBtmAir										; if yes, branch
 		move.l	a0,-(sp)
 		movea.l	a1,a0
-		jsr	(KillSonic).l	; kill Sonic
+
+	if FeatureContextualDeath
+		jsr	(KillSonicByCrushing).l								; kill Sonic
+	else
+		jsr	(KillSonic).l												; kill Sonic
+	endif ; if FeatureContextualDeath
+
 		movea.l	(sp)+,a0
 		moveq	#-1,d4
 		rts

@@ -4,7 +4,7 @@
 
 MoveSonicInDemo:
 		tst.w	(f_demo).w	; is demo mode on?
-		bne.s	MDemo_On	; if yes, branch
+		bne.s	MDemo_On		; if yes, branch
 		rts
 ; ===========================================================================
 
@@ -31,30 +31,47 @@ DemoRecorder:
 ; ===========================================================================
 
 MDemo_On:
+	if EnhancedDebug
+		btst	#bitA,(v_jpadhold1).w 						; check if A is pressed
+		beq.s	.checkC										; if not, branch
+
+		bra	.quit
+
+.checkC:
+		btst	#bitC,(v_jpadhold1).w 						; check if C is pressed
+		beq.s	.skip										; if not, branch
+
+		bra	.quit
+
+.skip:
+	endif ; if EnhancedDebug
+
 		tst.b	(v_jpadhold1).w	; is start button held?
 		bpl.s	.dontquit	; if not, branch
-		tst.w	(f_demo).w	; is this an ending sequence demo?
+
+.quit:
+		tst.w	(f_demo).w												; is this an ending sequence demo?
 		bmi.s	.dontquit	; if yes, branch
-		move.b	#id_Title,(v_gamemode).w ; go to title screen
+		move.b	#id_Title,(v_gamemode).w				; go to title screen
 
 .dontquit:
 		lea	(DemoDataPtr).l,a1
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
-		cmpi.b	#id_Special,(v_gamemode).w ; is this a special stage?
+		cmpi.b	#id_Special,(v_gamemode).w 			; is this a special stage?
 		bne.s	.notspecial	; if not, branch
-		moveq	#6,d0		; use demo #6
+		moveq	#6,d0															; use demo #6
 
 .notspecial:
 		lsl.w	#2,d0
-		movea.l	(a1,d0.w),a1	; fetch address for demo data
-		tst.w	(f_demo).w	; is this an ending sequence demo?
+		movea.l	(a1,d0.w),a1										; fetch address for demo data
+		tst.w	(f_demo).w												; is this an ending sequence demo?
 		bpl.s	.notcredits	; if not, branch
 		lea	(DemoEndDataPtr).l,a1
 		move.w	(v_creditsnum).w,d0
 		subq.w	#1,d0
 		lsl.w	#2,d0
-		movea.l	(a1,d0.w),a1	; fetch address for credits demo
+		movea.l	(a1,d0.w),a1										; fetch address for credits demo
 
 .notcredits:
 		move.w	(v_btnpushtime1).w,d0
@@ -63,7 +80,7 @@ MDemo_On:
 		lea	(v_jpadhold1).w,a0
 		move.b	d0,d1
 
-	if FixBugs
+	if (BugFixDemoPlayback)|(FixBugs)
 		; Fix demo playback
 		; https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
 		move.b	v_jpadhold2-v_jpadhold1(a0),d2

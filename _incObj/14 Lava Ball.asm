@@ -55,8 +55,7 @@ LBall_Main:	; Routine 0
 		move.w	#0,obVelY(a0)	; delete vertical speed
 
 .sound:
-		move.w	#sfx_Fireball,d0
-		jsr	(QueueSound2).l	; play lava ball sound
+		sfx	#sfx_Fireball,snd_jsr ; play lava ball sound
 
 LBall_Action:	; Routine 2
 		moveq	#0,d0
@@ -69,7 +68,12 @@ LBall_Action:	; Routine 2
 		bsr.w	AnimateSprite
 
 LBall_ChkDel:
+	if BugFixRenderBeforeInit ; Bug 6
+		out_of_range	LBall_Delete
+	else
 		out_of_range.w	DeleteObject
+	endif ; if BugFixRenderBeforeInit
+
 	if FixBugs
 		bra.w	DisplaySprite
 	else
@@ -167,4 +171,7 @@ LBall_Type08:
 ; ===========================================================================
 
 LBall_Delete:
+	if BugFixRenderBeforeInit ; Bug 6
+		addq.l  #4,sp
+	endif ; if BugFixRenderBeforeInit
 		bra.w	DeleteObject

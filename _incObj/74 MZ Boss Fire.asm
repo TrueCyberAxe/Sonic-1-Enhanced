@@ -39,8 +39,7 @@ BossFire_Main:	; Routine 0
 
 loc_1870A:
 		move.b	#$1E,objoff_29(a0)
-		move.w	#sfx_Fireball,d0
-		jsr	(QueueSound2).l	; play lava sound
+		sfx	#sfx_Fireball,snd_jsr	; play lava sound
 
 BossFire_Action:	; Routine 2
 		moveq	#0,d0
@@ -61,6 +60,9 @@ BossFire_Action:	; Routine 2
 ; ===========================================================================
 
 BossFire_Delete:
+	if BugFixRenderBeforeInit ; Bug 6 Fix
+		addq.l  #4,sp
+	endif
 		jmp	(DeleteObject).l
 ; ===========================================================================
 BossFire_Index2:dc.w BossFire_Drop-BossFire_Index2
@@ -191,7 +193,7 @@ locret_1887E:
 ; ===========================================================================
 
 BossFire_Delete2:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6 Fix
 		; Do not return to BossFire_Action, to avoid double-delete
 		; and display-and-delete bugs.
 		addq.l	#4,sp
@@ -221,4 +223,7 @@ BossFire_Animate:
 
 ; BossFire_Delete3:
 BossFire_TempFireDel:	; Routine 6
+	if BugFixRenderBeforeInit	; Bug 6 Fix
+		addq.l  #4,sp
+	endif
 		jmp	(DeleteObject).l

@@ -112,14 +112,14 @@ locret_843A:
 
 CFlo_TimeZero:
 		bsr.w	ObjectFall
-	if FixBugs=0
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
 	endif
 		tst.b	obRender(a0)
 		bpl.s	CFlo_Delete
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) 		; Bug 3
 		bra.w	DisplaySprite
 	else
 		rts
@@ -202,8 +202,7 @@ loc_84EE:
 
 loc_84F2:
 		bsr.w	DisplaySprite
-		move.w	#sfx_Collapse,d0
-		jmp	(QueueSound2).l	; play collapsing sound
+		sfx	#sfx_Collapse,snd_jmp	; play collapsing sound
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Disintegration data for collapsing ledges (MZ, SLZ, SBZ)

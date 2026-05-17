@@ -250,6 +250,11 @@ Elev_MakeMulti:	; Routine 6
 		move.b	#$E,obSubtype(a1)
 
 .chkdel:
+	if BugFixRenderBeforeInit=0
 		addq.l	#4,sp
+	endif
 		out_of_range.w	DeleteObject
+	if BugFixRenderBeforeInit
+		addq.l	#4,sp
+	endif
 		rts

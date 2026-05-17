@@ -361,7 +361,11 @@ loc_16C64:
 		jsr	(DeleteChild).l ; Don't mind this misnomer.
 	endif
 
+;loc_16C7C:
 .delete:
+	if (BugFixCaterkillerDeath)|(FeatureSpindash)
+		clr.b	obColType(a1)	; immediately remove all touch response values when destroying the head to avoid taking damage
+	endif
 		; Mark self for deletion.
 		move.b	#$A,obRoutine(a0)
 

@@ -41,8 +41,7 @@ Bonus_Main:	; Routine 0
 		move.b	#$10,obActWid(a0)
 		move.b	obSubtype(a0),obFrame(a0)
 		move.w	#119,bonus_timelen(a0) ; set display time to 2 seconds
-		move.w	#sfx_Bonus,d0
-		jsr	(QueueSound2).l	; play bonus sound
+		sfx	#sfx_Bonus,snd_jsr	; play bonus sound
 		moveq	#0,d0
 		move.b	obSubtype(a0),d0
 		add.w	d0,d0
@@ -60,7 +59,7 @@ Bonus_Main:	; Routine 0
 .points:	dc.w 0			; Bonus points array
 		dc.w 1000
 		dc.w 100
-	if FixBugs
+	if (BugFixHiddenPoints)|(FixBugs)
 		; Fix the Hidden Points bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 		dc.w 10
@@ -75,5 +74,5 @@ Bonus_Display:	; Routine 2
 		out_of_range.s	Bonus_Display_Delete
 		jmp	(DisplaySprite).l
 
-Bonus_Display_Delete:	
+Bonus_Display_Delete:
 		jmp	(DeleteObject).l

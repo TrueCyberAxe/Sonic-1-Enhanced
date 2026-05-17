@@ -98,8 +98,7 @@ Bas_Action:	; Routine 2
 		move.b	(v_vblank_byte).w,d0
 		andi.b	#$F,d0
 		bne.s	.nosound
-		move.w	#sfx_Basaran,d0
-		jsr	(QueueSound2).l	; play flapping sound every 16th frame
+		sfx	#sfx_Basaran,snd_jsr	; play flapping sound every 16th frame
 
 .nosound:
 		bsr.w	SpeedToPos
@@ -162,16 +161,18 @@ Bas_Action:	; Routine 2
 		rts
 ; ===========================================================================
 ; unused crap
-		bsr.w	SpeedToPos
-	if FixBugs=0
+	if TweakRemoveReduntantCode=0
+			bsr.w	SpeedToPos
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
-		bsr.w	DisplaySprite
+			bsr.w	DisplaySprite
 	endif
-		tst.b	obRender(a0)
-		bpl.w	DeleteObject
-	if FixBugs
+			tst.b	obRender(a0)
+			bpl.w	DeleteObject
+	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 3
 		bra.w	DisplaySprite
 	else
-		rts
+			rts
 	endif
+	endif ; if TweakRemoveReduntantCode=0

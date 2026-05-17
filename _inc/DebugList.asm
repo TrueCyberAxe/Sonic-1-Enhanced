@@ -20,6 +20,10 @@ dbug:	macro map,object,subtype,frame,vram
 .GHZ:
 		dc.w (.GHZend-.GHZ-2)/8
 
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
+
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
 		dbug	Map_Monitor,	id_Monitor,	0,	0,	ArtTile_Monitor
@@ -34,13 +38,19 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Newt,	id_Newtron,	0,	0,	ArtTile_Newtron|Tile_Pal2
 		dbug	Map_Edge,	id_EdgeWalls,	0,	0,	ArtTile_GHZ_Edge_Wall|Tile_Pal3
 		dbug	Map_GBall,	id_Obj19,	0,	0,	ArtTile_GHZ_Giant_Ball|Tile_Pal3
+	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
 		dbug	Map_GRing,	id_GiantRing,	0,	0,	ArtTile_Giant_Ring|Tile_Pal2
 		dbug	Map_Bonus,	id_HiddenBonus,	1,	1,	ArtTile_Hidden_Points|Tile_Prio
+	endif ; if EnhancedDebug=0
 .GHZend:
 
 .LZ:
 		dc.w (.LZend-.LZ-2)/8
+
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -77,6 +87,10 @@ dbug:	macro map,object,subtype,frame,vram
 .MZ:
 		dc.w (.MZend-.MZ-2)/8
 
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
+
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
 		dbug	Map_Monitor,	id_Monitor,	0,	0,	ArtTile_Monitor
@@ -100,11 +114,17 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_LTag,	id_LavaTag,	0,	0,	ArtTile_Monitor|Tile_Prio
 		dbug	Map_Bas,	id_Basaran,	0,	0,	ArtTile_Basaran
 		dbug	Map_Cat,	id_Caterkiller,	0,	0,	ArtTile_MZ_SYZ_Caterkiller|Tile_Pal2
+	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
+	endif ; if EnhancedDebug=0
 .MZend:
 
 .SLZ:
 		dc.w (.SLZend-.SLZ-2)/8
+
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -121,11 +141,17 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Scen,	id_Scenery,	0,	0,	ArtTile_SLZ_Fireball_Launcher|Tile_Pal3
 		dbug	Map_Bomb,	id_Bomb,	0,	0,	ArtTile_Bomb
 		dbug	Map_Orb,	id_Orbinaut,	0,	0,	ArtTile_SLZ_Orbinaut|Tile_Pal2
+	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
+	endif ; if EnhancedDebug=0
 .SLZend:
 
 .SYZ:
 		dc.w (.SYZend-.SYZ-2)/8
+
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -142,11 +168,17 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_FBlock,	id_FloatingBlock, 0,	0,	ArtTile_Level|Tile_Pal3
 		dbug	Map_But,	id_Button,	0,	0,	ArtTile_Button+4
 		dbug	Map_Cat,	id_Caterkiller,	0,	0,	ArtTile_MZ_SYZ_Caterkiller|Tile_Pal2
+	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
+	endif ; if EnhancedDebug=0
 .SYZend:
 
 .SBZ:
 		dc.w (.SBZend-.SBZ-2)/8
+
+	if EnhancedDebug
+		include "Enhancements/_inc/DebugListEnhancedStart.asm"
+	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
 		dbug 	Map_Ring,	id_Rings,	0,	0,	ArtTile_Ring|Tile_Pal2
@@ -177,7 +209,9 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Gird,	id_Girder,	0,	0,	ArtTile_SBZ_Girder|Tile_Pal3
 		dbug	Map_Invis,	id_Invisibarrier, $11,	0,	ArtTile_Monitor|Tile_Prio
 		dbug	Map_Hog,	id_BallHog,	4,	0,	ArtTile_Ball_Hog|Tile_Pal2
+	if EnhancedDebug=0
 		dbug	Map_Lamp,	id_Lamppost,	1,	0,	ArtTile_Lamppost
+	endif ; if EnhancedDebug=0
 .SBZend:
 
 .Ending:
@@ -205,7 +239,9 @@ dbug:	macro map,object,subtype,frame,vram
 		dbug	Map_Animal2,	id_Animals,	$13,	0,	ArtTile_Ending_Chicken
 		dbug	Map_Animal3,	id_Animals,	$14,	0,	ArtTile_Ending_Squirrel
 	else
-		dbug 	Map_Ring,	id_Rings,	0,	8,	ArtTile_Ring|Tile_Pal2
+		if EnhancedDebug=0
+			dbug 	Map_Ring,	id_Rings,	0,	8,	ArtTile_Ring|Tile_Pal2
+		endif ; EnhancedDebug=0
 	endif
 .Endingend:
 

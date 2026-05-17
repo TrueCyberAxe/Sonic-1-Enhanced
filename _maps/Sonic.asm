@@ -615,4 +615,19 @@ MS_WaterSlide:	spriteHeader
 	spritePiece	$C, -8, 1, 3, $10, 0, 0, 0, 0
 MS_WaterSlide_End
 
+	if FeatureSpindash>1
+MS_Spindash1:	dc.b 1			; spin dash 1
+		dc.b $F8, $F, 0, 0, $F4
+MS_Spindash2:	dc.b 1			; spin dash 2
+		dc.b $F8, $F, 0, 0, $F4
+MS_Spindash3:	dc.b 1			; spin dash 3
+		dc.b $F8, $F, 0, 0, $F4
+MS_Spindash4:	dc.b 1			; spin dash 4
+		dc.b $F8, $F, 0, 0, $F4
+MS_Spindash5:	dc.b 1			; spin dash 5
+		dc.b $F8, $F, 0, 0, $F4
+MS_Spindash6:	dc.b 1			; spin dash 6
+		dc.b $F8, $F, 0, 0, $F4
+	endif
+
 	even

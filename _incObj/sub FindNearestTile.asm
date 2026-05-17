@@ -10,15 +10,19 @@
 ;	     (refers to a 16x16 tile number)
 ; ---------------------------------------------------------------------------
 
+	if TweakUncompressedChunkMapping
+Floor_ChkTile_LocateBlock:
+	else
 FindNearestTile:
-		move.w	d2,d0		; get y-pos. of bottom edge of object
+		move.w	d2,d0					; get y-pos. of bottom edge of object
 		lsr.w	#1,d0
 		andi.w	#$380,d0
-		move.w	d3,d1		; get x-pos. of object
+		move.w	d3,d1					; get x-pos. of object
 		lsr.w	#8,d1
 		andi.w	#$7F,d1
-		add.w	d1,d0		; combine
-		moveq	#$FFFFFFFF,d1	; = -1 (prefill to prepare creating a RAM address)
+		add.w	d1,d0					; combine
+		moveq	#$FFFFFFFF,d1				; = -1 (prefill to prepare creating a RAM address)
+	endif ; if TweakUncompressedChunkMapping
 		lea	(v_lvllayout_fg).w,a1
 		move.b	(a1,d0.w),d1	; get 256x256 tile number
 		beq.s	.blanktile	; branch if 0 (blank chunk)
@@ -35,7 +39,12 @@ FindNearestTile:
 		andi.w	#$1E,d0
 		add.w	d0,d1
 
-    if FixBugs
+	if FixBugs
+		if TweakUncompressedChunkMapping
+	.blanktile:
+			movea.l	d1,a1
+			rts
+		else
 		movea.l	d1,a1
 		rts
 
@@ -54,11 +63,12 @@ FindNearestTile:
 
 	.chunk0:
 		dc.w 0
-    else
+		endif ; if TweakUncompressedChunkMapping
+	else
 	.blanktile:
 		movea.l	d1,a1
 		rts
-    endif
+	endif ; if FixBugs
 
 ; ===========================================================================
 
@@ -82,6 +92,50 @@ FindNearestTile:
 		lsr.w	#3,d0
 		andi.w	#$1E,d0
 		add.w	d0,d1
-		movea.l	d1,a1
+	if TweakUncompressedChunkMapping ; @TODO Double check this is correct
+
+; ===========================================================================
+
+.blanktile:
+		lea	($FFFFFF00).w,a1	; override a1
+		addq.w	#4,sp					; pop a stack frame to avoid adding the address of the chunk mappings to a1
 		rts
 ; End of function FindNearestTile
+
+
+; ---------------------------------------------------------------------------
+; Subroutine to	find which tile	the object is standing on
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+
+FindNearestTile: ; XREF: FindFloor; et al
+		move.w	d2,d0							; get y-pos. of bottom edge of object
+		lsr.w	#1,d0
+		andi.w	#$380,d0
+		move.w	d3,d1							; get x-pos. of object
+		lsr.w	#8,d1
+		andi.w	#$7F,d1
+		add.w	d1,d0								; combine
+
+		tst.b	(v_zone).w					; are we in Green Hill Zone?
+		beq.s	.ghz								; if yes, branch
+		cmpi.b	#6,(v_zone).w 		; are we in the ending sequence?
+		beq.s	.ghz								; if yes, branch
+
+		moveq	#-1,d1
+		bsr.w	Floor_ChkTile_LocateBlock
+		movea.l	d1,a1
+		rts
+; ---------------------------------------------------------------------------
+
+.ghz:
+		moveq	#0,d1
+		bsr.w	Floor_ChkTile_LocateBlock
+		add.l	#Blk256_GHZ,d1
+	endif ; if TweakUncompressedChunkMapping
+
+		movea.l	d1,a1
+		rts
+
+; End of function Floor_ChkTile

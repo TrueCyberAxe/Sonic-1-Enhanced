@@ -162,8 +162,7 @@ loc_19EC6:
 		move.w	#0,objoff_30(a1)
 		move.w	#1,objoff_32(a0)
 		clr.b	objoff_35(a0)
-		move.w	#sfx_Rumbling,d0
-		jsr	(QueueSound2).l	; play rumbling sound
+		sfx	#sfx_Rumbling,snd_jsr	; play rumbling sound
 
 loc_19F10:
 		tst.w	objoff_32(a0)
@@ -209,8 +208,7 @@ loc_19F6A:
 	endif
 		subq.b	#1,obBossHits(a0)
 		move.b	#$64,objoff_35(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l	; play boss damage sound
+		sfx	#sfx_HitBoss,snd_jsr	; play boss damage sound
 
 loc_19F88:
 		subq.b	#1,objoff_35(a0)
@@ -292,8 +290,7 @@ locret_1A01E:
 ; ===========================================================================
 
 loc_1A020:
-		move.w	#sfx_Electric,d0
-		jmp	(QueueSound2).l	; play electricity sound
+		sfx	#sfx_Electric,snd_jmp	; play electricity sound
 ; ===========================================================================
 
 ; loc_1A02A:
@@ -449,8 +446,7 @@ BossFinal_Eggman_Escape:
 		tst.b	obColType(a0)
 		bne.s	loc_1A216
 		move.w	#$1E,objoff_30(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l	; play boss damage sound
+		sfx	#sfx_HitBoss,snd_jsr	; play boss damage sound
 
 loc_1A1FC:
 		subq.w	#1,objoff_30(a0)
@@ -485,7 +481,7 @@ loc_1A248:
 		tst.b	obRender(a0)
 		bmi.s	loc_1A260
 		move.b	#id_Ending,(v_gamemode).w
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)
 		; Avoid returning to BossFinal_Eggman to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

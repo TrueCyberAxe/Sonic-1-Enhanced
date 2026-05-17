@@ -39,8 +39,8 @@ AddPoints:
 		bmi.s	.return ; branch if Mega Drive is Japanese
 		addq.b	#1,(v_lives).w ; give extra life
 		addq.b	#1,(f_lifecount).w
-		move.w	#bgm_ExtraLife,d0
-		jmp	(QueueSound1).l
+		music	#bgm_ExtraLife,snd_jmp		; play SLZ music
+
 	endif
 
 .return:

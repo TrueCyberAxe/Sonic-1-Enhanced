@@ -6,7 +6,7 @@ Points:
 		moveq	#0,d0
 		move.b	obRoutine(a0),d0
 		move.w	Poi_Index(pc,d0.w),d1
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		jmp	Poi_Index(pc,d1.w)
@@ -33,7 +33,7 @@ Poi_Slower:	; Routine 2
 		bpl.w	DeleteObject	; if not, delete
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)	; reduce object speed
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)
 		bra.w	DisplaySprite
 	else
 		rts

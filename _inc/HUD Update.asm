@@ -3,7 +3,12 @@
 ; ---------------------------------------------------------------------------
 
 HUD_Update:
-		tst.w	(f_debugmode).w	; is debug mode on?
+	if EnhancedDebug
+		tst.w	(v_debuguse).w				; is debug mode	on?
+	else
+		tst.w	(f_debugmode).w				; is debug mode	on?
+	endif
+
 		bne.w	HudDebug	; if yes, branch
 		tst.b	(f_scorecount).w ; does the score need updating?
 		beq.s	.chkrings	; if not, branch

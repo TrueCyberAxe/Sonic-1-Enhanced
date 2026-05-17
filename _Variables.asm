@@ -27,7 +27,22 @@ v_16x16:		ds.b	$1800		; 16x16 tile mappings
 
 v_sgfx_buffer:		ds.b	tile_size*23	; buffered Sonic graphics ($17 cells)
 v_sgfx_buffer_end:
+
+	if Enhanced
+
+; For Reference https://info.sonicretro.org/SCHG:Sonic_the_Hedgehog_(16-bit)/RAM_Editing
+; DMA Queue frees up this ram $FFFFC900 to $FFFFCAFF.
+
+f_sfx_spinrev:		ds.b	1		; spin dash rev SFX flag		$FFFFC900
+v_sfx_spinrev:		ds.b	1		; spin dash rev SFX counter/value	$FFFFC901
+v_sfx_frequency:	ds.b	1		; spin dash rev SFX frequency		$FFFFC902
+v_screendelay_v:	ds.b	1		; vertical screen delay timer		$FFFFC903
+v_screendelay:		ds.b	1		; screen delay timer			$FFFFC904
+			ds.b	$1B		; unused
+	else
 			ds.b	$20		; unused
+	endif
+
 v_tracksonic:		ds.b	$100		; position tracking data for Sonic
 v_hscrolltablebuffer:	ds.b	$380		; scrolling table data
 v_hscrolltablebuffer_end:
@@ -109,6 +124,7 @@ v_snddriver_ram:	SMPS_RAM		; sound driver state
 			ds.b	$40		; unused
 
 v_gamemode:		ds.b	1		; game mode (00=Sega; 04=Title; 08=Demo; 0C=Level; 10=SS; 14=Cont; 18=End; 1C=Credit; +8C=PreLevel)
+v_levelselect_buffer:		equ	v_gamemode-$40	; level select RAM buffer
 			ds.b	1		; unused
 v_jpadhold2:		ds.b	1		; joypad input - held, duplicate
 v_jpadpress2:		ds.b	1		; joypad input - pressed, duplicate
@@ -143,7 +159,13 @@ v_random:		ds.l	1		; pseudo random number buffer
 f_pause:		ds.w	1		; flag set to pause the game
 			ds.b	4		; unused
 v_vdp_buffer2:		ds.w	1		; VDP instruction buffer
+
+	if Enhanced
+v_startscore:		ds.w	1		; score as of checkpoint
+	else
 			ds.b	2		; unused
+	endif
+
 f_hblank_pal:		ds.w	1		; flag set to change palette during HBlank (0000 = no; 0001 = change) (previously called f_hbla_pal)
 v_waterpos1:		ds.w	1		; water height, actual
 v_waterpos2:		ds.w	1		; water height, ignoring sway
@@ -169,6 +191,23 @@ v_plc_patternsleft:	ds.w	1
 v_plc_framepatternsleft:ds.w	1
 			ds.b	4		; unused
 v_plc_buffer_end:
+
+; ===========================================================================
+; PLC Queue Enhancement
+; ===========================================================================
+	if TweakNoWaitPLCLevelTiles
+v_plc_queue_base:	equ	v_pal_buffer		; beginning of RAM allocated for PLC
+	else
+v_plc_queue_base:	equ	v_plc_buffer		; beginning of RAM allocated for PLC
+	endif
+
+v_plc_queue_end:	equ	v_plc_ptrnemcode	; end of PLC queue / start of decompression state
+
+; Calculate maximum PLC queue entries
+v_plc_queue_slot_count:	equ	(v_plc_queue_end-4-v_plc_buffer_dest)/plc_slot_size
+v_plc_queue_loop_count:	equ	v_plc_queue_slot_count-1
+
+; ===========================================================================
 
 v_levelvariables:				; variables that are reset between levels
 v_screenposx:		ds.l	1		; screen position x
@@ -242,7 +281,13 @@ v_palss_num:		ds.w	1		; palette cycling in Special Stage - reference number
 v_palss_time:		ds.w	1		; palette cycling in Special Stage - time until next change
 v_palss_index:		ds.w	1		; palette cycling in Special Stage - index into palette cycle 2 (unused?)
 v_ssbganim:		ds.w	1		; Special Stage background animation
+
+	if Enhanced
+v_camera_pan:		ds.w	1		; extended camera pan offset
+	else
 			ds.b	2		; unused
+	endif
+
 v_obj31ypos:		ds.w	1		; y-position of object 31 (MZ stomper)
 			ds.b	1		; unused
 v_bossstatus:		ds.b	1		; status of boss and prison capsule (01 = boss defeated; 02 = prison opened)
@@ -452,7 +497,14 @@ f_debugcheat:		ds.b	1		; debug mode cheat flag
 f_creditscheat:		ds.b	1		; hidden credits & press start cheat flag
 v_title_dcount:		ds.w	1		; number of times the d-pad is pressed on title screen
 v_title_ccount:		ds.w	1		; number of times C is pressed on title screen
+
+	if Enhanced
+f_victory:		ds.b	1		; victory condition flag
+f_levelreload:		ds.b	1		; reload level flag
+	else
 			ds.b	2		; unused
+	endif
+
 v_unused2:		ds.w	1		; unused
 v_unused3:		ds.b	1		; unused
 v_unused4:		ds.b	1		; unused
@@ -494,3 +546,9 @@ v_errortype:	ds.b	1	; error type
 	dephase
 
 	!org 0
+
+; Character object RAM offset variables
+v_charging:		equ	$29	; charge timer/value
+f_goggles:		equ	$39	; goggles flag
+f_spindash:		equ	$3A	; spin dash flag
+f_superpeelout:		equ	$3B	; super peel-out flag

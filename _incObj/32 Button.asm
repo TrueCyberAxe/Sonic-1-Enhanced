@@ -62,8 +62,7 @@ loc_BDBE:
 loc_BDC8:
 		tst.b	(a3)
 		bne.s	loc_BDD6
-		move.w	#sfx_Switch,d0
-		jsr	(QueueSound2).l	; play switch sound
+		sfx	#sfx_Switch,snd_jsr	; play switch sound
 
 loc_BDD6:
 		bset	d3,(a3)
@@ -78,7 +77,7 @@ loc_BDDE:
 		bchg	#1,obFrame(a0)
 
 But_Display:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.s	But_Delete

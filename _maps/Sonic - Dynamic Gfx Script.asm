@@ -91,6 +91,15 @@ SonicDynPLC_internal:	mappingsTable
 	mappingsTableEntry.w	SonPLC_GetAir
 	mappingsTableEntry.w	SonPLC_WaterSlide
 
+	if FeatureSpindash>1
+	mappingsTableEntry.w	SonPLC_SpinDash1	; $58
+	mappingsTableEntry.w	SonPLC_SpinDash2	; $59
+	mappingsTableEntry.w	SonPLC_SpinDash3	; $5A
+	mappingsTableEntry.w	SonPLC_SpinDash4	; $5B
+	mappingsTableEntry.w	SonPLC_SpinDash5	; $5C
+	mappingsTableEntry.w	SonPLC_SpinDash6	; $5D
+	endif ; if FeatureSpindash>1
+
 SonPLC_Null:	dplcHeader
 SonPLC_Null_End
 
@@ -601,5 +610,31 @@ SonPLC_WaterSlide:	dplcHeader
 	dplcEntry	$10, $4F6
 	dplcEntry	3, $506
 SonPLC_WaterSlide_End
+
+	if FeatureSpindash>1
+SonPLC_SpinDash1:	dplcHeader
+	dplcEntry	$10, $510
+SonPLC_SpinDash1_End
+
+SonPLC_SpinDash2:	dplcHeader
+	dplcEntry	$10, $520
+SonPLC_SpinDash2_End
+
+SonPLC_SpinDash3:	dplcHeader
+	dplcEntry	$10, $530
+SonPLC_SpinDash3_End
+
+SonPLC_SpinDash4:	dplcHeader
+	dplcEntry	$10, $540
+SonPLC_SpinDash4_End
+
+SonPLC_SpinDash5:	dplcHeader
+	dplcEntry	$10, $550
+SonPLC_SpinDash5_End
+
+SonPLC_SpinDash6:	dplcHeader
+	dplcEntry	$10, $560
+SonPLC_SpinDash6_End
+	endif ; if FeatureSpindash>1
 
 	even

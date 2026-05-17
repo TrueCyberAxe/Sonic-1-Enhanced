@@ -43,9 +43,17 @@ Brick_Action:	; Routine 2
 
 .chkdel:
 	if Revision=0
-		bsr.w	DisplaySprite
-		out_of_range.w	DeleteObject
-		rts
+			if BugFixRenderBeforeInit=0 ; Bug 1
+				bsr.w	DisplaySprite
+			endif
+
+			out_of_range.w	DeleteObject
+
+			if BugFixRenderBeforeInit ; Bug 1
+				bra.w	DisplaySprite
+			else
+				rts
+			endif
 	else
 		out_of_range.w	DeleteObject
 		bra.w	DisplaySprite

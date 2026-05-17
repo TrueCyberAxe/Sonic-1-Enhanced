@@ -35,7 +35,7 @@ sonicAniFrame = objoff_32		; Sonic's current animation number
 		move.w	#$11,d3
 		move.w	obX(a0),d4
 		bsr.w	SolidObject
-		btst	#3,obStatus(a0)	; has Sonic landed on the block?
+		btst	#3,obStatus(a0)									; has Sonic landed on the block?
 		bne.s	.smash		; if yes, branch
 
 .notspinning:
@@ -43,22 +43,22 @@ sonicAniFrame = objoff_32		; Sonic's current animation number
 ; ===========================================================================
 
 .smash:
-		cmpi.b	#id_Roll,sonicAniFrame(a0) ; is Sonic rolling/jumping?
+		cmpi.b	#id_Roll,sonicAniFrame(a0) 		; is Sonic rolling/jumping?
 		bne.s	.notspinning	; if not, branch
 		move.w	.count(a0),(v_itembonus).w
 		bset	#2,obStatus(a1)
 		move.b	#sonic_roll_height,obHeight(a1)
 		move.b	#sonic_roll_width,obWidth(a1)
-		move.b	#id_Roll,obAnim(a1) ; make Sonic roll
-		move.w	#-$300,obVelY(a1) ; rebound Sonic
+		move.b	#id_Roll,obAnim(a1) 					; make Sonic roll
+		move.w	#-$300,obVelY(a1) 						; rebound Sonic
 		bset	#1,obStatus(a1)
 		bclr	#3,obStatus(a1)
 		move.b	#2,obRoutine(a1)
 		bclr	#3,obStatus(a0)
 		clr.b	obSolid(a0)
 		move.b	#1,obFrame(a0)
-		lea	(Smab_Speeds).l,a4 ; load broken fragment speed data
-		moveq	#3,d1		; set number of fragments to 4
+		lea	(Smab_Speeds).l,a4 								; load broken fragment speed data
+		moveq	#3,d1														; set number of	fragments to 4
 		move.w	#$38,d2
 		bsr.w	SmashObject
 		bsr.w	FindFreeObj
@@ -67,17 +67,17 @@ sonicAniFrame = objoff_32		; Sonic's current animation number
 		move.w	obX(a0),obX(a1)
 		move.w	obY(a0),obY(a1)
 		move.w	(v_itembonus).w,d2
-		addq.w	#2,(v_itembonus).w ; increment bonus counter
-		cmpi.w	#6,d2		; have fewer than 3 blocks broken?
+		addq.w	#2,(v_itembonus).w 						; increment bonus counter
+		cmpi.w	#6,d2													; have fewer than 3 blocks broken?
 		blo.s	.bonus		; if yes, branch
-		moveq	#6,d2		; set cap for points
+		moveq	#6,d2														; set cap for points
 
 .bonus:
 		moveq	#0,d0
 		move.w	Smab_Scores(pc,d2.w),d0
-		cmpi.w	#$20,(v_itembonus).w ; have 16 blocks been smashed?
+		cmpi.w	#$20,(v_itembonus).w 					; have 16 blocks been smashed?
 		blo.s	.givepoints	; if not, branch
-		move.w	#1000,d0	; give higher points for 16th block
+		move.w	#1000,d0											; give higher points for 16th block
 		moveq	#10,d2
 
 .givepoints:
@@ -86,7 +86,7 @@ sonicAniFrame = objoff_32		; Sonic's current animation number
 		move.b	d2,obFrame(a1)
 
 Smab_Points:	; Routine 4
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 6
 		; Avoid returning to SmashBlock to prevent display-and-delete
 		; and double-delete bugs.
 		addq.l	#4,sp
@@ -94,20 +94,20 @@ Smab_Points:	; Routine 4
 
 		bsr.w	SpeedToPos
 		addi.w	#$38,obVelY(a0)
-	if FixBugs=0
+	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
 	endif
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 3
 		bra.w	DisplaySprite
 	else
 		rts
 	endif
 ; ===========================================================================
-Smab_Speeds:	dc.w -$200, -$200	; x-speed, y-speed
+Smab_Speeds:	dc.w -$200, -$200						; x-speed, y-speed
 		dc.w -$100, -$100
 		dc.w $200, -$200
 		dc.w $100, -$100

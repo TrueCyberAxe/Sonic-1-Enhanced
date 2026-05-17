@@ -156,7 +156,7 @@ MBlock_Type03:
 ; ===========================================================================
 
 MBlock_03_End:
-		clr.b	obSubtype(a0)	; change to type 00 (non-moving type)
+		clr.b	obSubtype(a0)	; change to type 00 (non-moving	type)
 		rts
 ; ===========================================================================
 

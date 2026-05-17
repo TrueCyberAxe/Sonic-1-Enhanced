@@ -99,7 +99,7 @@ loc_16380:
 		lea	(v_obj63).w,a2
 		bset	#0,(a2,d0.w)
 		beq.s	loc_1639A
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Avoid returning to SpinConvey to prevent display-and-delete
 		; and double-delete bugs.
 		addq.l	#4,sp

@@ -105,8 +105,7 @@ loc_1833E:
 		tst.b	obBossFlash(a0)
 		bne.s	loc_18374
 		move.b	#$28,obBossFlash(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l	; play boss damage sound
+		sfx	#sfx_HitBoss,snd_jsr	; play boss damage sound
 
 loc_18374:
 		lea	(v_palette+$22).w,a1
@@ -312,8 +311,7 @@ loc_18566:
 
 loc_1856C:
 		clr.w	obVelY(a0)
-		move.w	#bgm_MZ,d0
-		jsr	(QueueSound1).l		; play MZ music
+		music	#bgm_MZ,snd_jsr			; play MZ music
 
 loc_1857A:
 		bsr.w	BossMove
@@ -340,7 +338,7 @@ loc_185A2:
 ; ===========================================================================
 
 BossMarble_ShipDel:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)
 		; Avoid returning to BossMarble_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

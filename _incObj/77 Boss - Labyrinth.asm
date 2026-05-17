@@ -103,8 +103,7 @@ loc_17F48:
 		tst.b	obBossFlash(a0)
 		bne.s	loc_17F70
 		move.b	#$20,obBossFlash(a0)
-		move.w	#sfx_HitBoss,d0
-		jsr	(QueueSound2).l
+		sfx	#sfx_HitBoss,snd_jsr
 
 loc_17F70:
 		lea	(v_palette+$22).w,a1
@@ -282,8 +281,7 @@ BLZ_ShipWait:
 		move.b	#$32,objoff_3C(a0)
 
 loc_18112:
-		move.w	#bgm_LZ,d0
-		jsr	(QueueSound1).l		; play LZ music
+		music	#bgm_LZ,snd_jsr			; play LZ music
 	if Revision<>0
 		clr.b	(f_lockscreen).w
 	endif
@@ -329,7 +327,7 @@ loc_18166:
 ; ===========================================================================
 
 BossLabyrinth_ShipDel:
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs)	; Bug 6
 		; Avoid returning to BossLabyrinth_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

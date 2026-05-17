@@ -71,7 +71,7 @@ Pri_BodyMain:	; Routine 2
 		bset	#1,(v_player+obStatus).w
 
 .open:
-		move.b	#2,obFrame(a0)	; use frame number 2 (destroyed prison)
+		move.b	#2,obFrame(a0)	; use frame number 2 (destroyed	prison)
 		rts
 ; ===========================================================================
 
@@ -205,7 +205,7 @@ Pri_EndAct:	; Routine $E
 
 		jsr	(GotThroughAct).l
 
-	if FixBugs
+	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Avoid returning to Prison to prevent display-and-delete
 		; and double-delete bugs.
 		addq.l	#4,sp

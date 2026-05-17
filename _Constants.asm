@@ -16,6 +16,7 @@ PSG_Sample_Rate: equ Z80_Clock/16
 vdp_data_port:		equ $C00000
 vdp_control_port:	equ $C00004
 vdp_counter:		equ $C00008
+
 psg_input:		equ $C00011
 debug_reg:		equ $C0001C
 
@@ -25,12 +26,17 @@ z80_dac3_pitch:		equ $A000EA
 z80_dac_status:		equ $A01FFD
 z80_dac_sample:		equ $A01FFF
 z80_ram_end:		equ $A02000	; end of non-reserved Z80 RAM
+z80_version:		equ $A10001
+z80_port_1_data:	equ $A10002
+z80_port_1_control:	equ $A10008
+z80_port_2_control:	equ $A1000A
+z80_expansion_control:	equ $A1000C
+z80_bus_request:	equ $A11100
+z80_reset:		equ $A11200
 ym2612_a0:		equ $A04000
 ym2612_d0:		equ $A04001
 ym2612_a1:		equ $A04002
 ym2612_d1:		equ $A04003
-z80_bus_request:	equ $A11100
-z80_reset:		equ $A11200
 
 ; I/O addresses
 console_version:	equ $A10001
@@ -49,9 +55,42 @@ expansion_control:	equ $A1000D
 sram_port:		equ $A130F1
 security_addr:		equ $A14000
 
+; Sound driver constants
+TrackPlaybackControl:	equ 0		; All tracks
+TrackVoiceControl:	equ 1		; All tracks
+TrackTempoDivider:	equ 2		; All tracks
+TrackDataPointer:	equ 4		; All tracks (4 bytes)
+TrackTranspose:		equ 8		; FM/PSG only (sometimes written to as a word, to include TrackVolume)
+TrackVolume:		equ 9		; FM/PSG only
+TrackAMSFMSPan:		equ $A		; FM/DAC only
+TrackVoiceIndex:	equ $B		; FM/PSG only
+TrackVolEnvIndex:	equ $C		; PSG only
+TrackStackPointer:	equ $D		; All tracks
+TrackDurationTimeout:	equ $E		; All tracks
+TrackSavedDuration:	equ $F		; All tracks
+TrackSavedDAC:		equ $10		; DAC only
+TrackFreq:		equ $10		; FM/PSG only (2 bytes)
+TrackNoteTimeout:	equ $12		; FM/PSG only
+TrackNoteTimeoutMaster:equ $13		; FM/PSG only
+TrackModulationPtr:	equ $14		; FM/PSG only (4 bytes)
+TrackModulationWait:	equ $18		; FM/PSG only
+TrackModulationSpeed:	equ $19		; FM/PSG only
+TrackModulationDelta:	equ $1A		; FM/PSG only
+TrackModulationSteps:	equ $1B		; FM/PSG only
+TrackModulationVal:	equ $1C		; FM/PSG only (2 bytes)
+TrackDetune:		equ $1E		; FM/PSG only
+TrackPSGNoise:		equ $1F		; PSG only
+TrackFeedbackAlgo:	equ $1F		; FM only
+TrackVoicePtr:		equ $20		; FM SFX only (4 bytes)
+TrackLoopCounters:	equ $24		; All tracks (multiple bytes)
+TrackGoSubStack:	equ TrackSz	; All tracks (multiple bytes. This constant won't get to be used because of an optimisation that just uses zTrackSz)
+
+TrackSz:	equ $30
+
 ; VRAM data
 vram_fg:	equ $C000	; foreground namespace
 vram_bg:	equ $E000	; background namespace
+vram_sonic:	equ $F000	; Sonic graphics
 vram_sprites:	equ $F800	; sprite table
 vram_hscroll:	equ $FC00	; horizontal scroll table
 
@@ -159,6 +198,7 @@ obFrame:	equ $1A	; current frame displayed
 obAniFrame:	equ $1B	; current frame in animation script
 obAnim:		equ $1C	; current animation
 obPrevAni:	equ $1D	; previous animation
+obNextAni:	equ $1D	; next animation
 obTimeFrame:	equ $1E	; time to next frame
 obDelayAni:	equ $1F	; time to delay animation
 obColType:	equ $20	; collision response type
@@ -218,6 +258,32 @@ objoff_3D:	equ $3D
 objoff_3E:	equ $3E
 objoff_3F:	equ $3F
 
+; Object variables (Sonic 2 disassembly nomenclature)
+render_flags:	equ 1	; bitfield for x/y flip, display mode
+art_tile:	equ 2	; palette line & VRAM setting (2 bytes)
+mappings:	equ 4	; mappings address (4 bytes)
+x_pos:		equ 8	; x-axis position (2-4 bytes)
+y_pos:		equ $C	; y-axis position (2-4 bytes)
+x_vel:		equ $10	; x-axis velocity (2 bytes)
+y_vel:		equ $12	; y-axis velocity (2 bytes)
+y_radius:	equ $16	; height/2
+x_radius:	equ $17	; width/2
+priority:	equ $18	; sprite stack priority -- 0 is front
+width_pixels:	equ $19	; action width
+mapping_frame:	equ $1A	; current frame displayed
+anim_frame:	equ $1B	; current frame in animation script
+anim:		equ $1C	; current animation
+next_anim:	equ $1D	; next animation
+anim_frame_duration: equ $1E ; time to next frame
+collision_flags: equ $20 ; collision response type
+collision_property: equ $21 ; collision extra property
+status:		equ $22	; orientation or mode
+respawn_index:	equ $23	; respawn list index number
+routine:	equ $24	; routine number
+routine_secondary: equ $25 ; secondary routine number
+angle:		equ $26	; angle
+subtype:	equ $28	; object subtype
+
 ; Object variables used by bosses
 obBossHits:	equ obColProp ; number of remaining hit points for boss, defaults to 8
 obBossX:	equ objoff_30 ; base X boss position (2 bytes)
@@ -240,7 +306,104 @@ aniXFlip:	equ $20 ; horizontally mirrors the current frame
 aniYFlip:	equ $40 ; vertically mirrors the current frame
 
 ; Background music
+	if FeatureUseSonic2SoundDriver
+		; Keep the game-facing Sonic 1 IDs stable while the Sonic 2 driver remaps them internally.
 bgm__First:	equ $81
+bgm_GHZ:	equ bgm__First+$00
+bgm_LZ:		equ bgm__First+$01
+bgm_MZ:		equ bgm__First+$02
+bgm_SLZ:	equ bgm__First+$03
+bgm_SYZ:	equ bgm__First+$04
+bgm_SBZ:	equ bgm__First+$05
+bgm_Invincible:	equ bgm__First+$06
+bgm_ExtraLife:	equ bgm__First+$07
+bgm_SS:		equ bgm__First+$08
+bgm_Title:	equ bgm__First+$09
+bgm_Ending:	equ bgm__First+$0A
+bgm_Boss:	equ bgm__First+$0B
+bgm_FZ:		equ bgm__First+$0C
+bgm_GotThrough:	equ bgm__First+$0D
+bgm_GameOver:	equ bgm__First+$0E
+bgm_Continue:	equ bgm__First+$0F
+bgm_Credits:	equ bgm__First+$10
+bgm_Drowning:	equ bgm__First+$11
+bgm_Emerald:	equ bgm__First+$12
+bgm__Last:	equ bgm_Emerald
+
+; Sound effects
+sfx__First:	equ $A0
+sfx_Jump:	equ sfx__First+$00
+sfx_Lamppost:	equ sfx__First+$01
+sfx_A2:		equ sfx__First+$02
+sfx_Death:	equ sfx__First+$03
+sfx_Skid:	equ sfx__First+$04
+sfx_A5:		equ sfx__First+$05
+sfx_HitSpikes:	equ sfx__First+$06
+sfx_Push:	equ sfx__First+$07
+sfx_SSGoal:	equ sfx__First+$08
+sfx_SSItem:	equ sfx__First+$09
+sfx_Splash:	equ sfx__First+$0A
+sfx_AB:		equ sfx__First+$0B
+sfx_HitBoss:	equ sfx__First+$0C
+sfx_Bubble:	equ sfx__First+$0D
+sfx_Fireball:	equ sfx__First+$0E
+sfx_Shield:	equ sfx__First+$0F
+sfx_Saw:	equ sfx__First+$10
+sfx_Electric:	equ sfx__First+$11
+sfx_Drown:	equ sfx__First+$12
+sfx_Flamethrower:equ sfx__First+$13
+sfx_Bumper:	equ sfx__First+$14
+sfx_Ring:	equ sfx__First+$15
+sfx_SpikesMove:	equ sfx__First+$16
+sfx_Rumbling:	equ sfx__First+$17
+sfx_B8:		equ sfx__First+$18
+sfx_Collapse:	equ sfx__First+$19
+sfx_SSGlass:	equ sfx__First+$1A
+sfx_Door:	equ sfx__First+$1B
+sfx_Teleport:	equ sfx__First+$1C
+sfx_ChainStomp:	equ sfx__First+$1D
+sfx_Roll:	equ sfx__First+$1E
+sfx_Continue:	equ sfx__First+$1F
+sfx_Basaran:	equ sfx__First+$20
+sfx_BreakItem:	equ sfx__First+$21
+sfx_Warning:	equ sfx__First+$22
+sfx_GiantRing:	equ sfx__First+$23
+sfx_Bomb:	equ sfx__First+$24
+sfx_Cash:	equ sfx__First+$25
+sfx_RingLoss:	equ sfx__First+$26
+sfx_ChainRise:	equ sfx__First+$27
+sfx_Burning:	equ sfx__First+$28
+sfx_Bonus:	equ sfx__First+$29
+sfx_EnterSS:	equ sfx__First+$2A
+sfx_WallSmash:	equ sfx__First+$2B
+sfx_Spring:	equ sfx__First+$2C
+sfx_Switch:	equ sfx__First+$2D
+sfx_RingLeft:	equ sfx__First+$2E
+sfx_Signpost:	equ sfx__First+$2F
+
+; Special sound effects
+spec__First:	equ $D0
+sfx_Waterfall:	equ spec__First+$00
+	if FeatureSpindash>1
+spec__Last:	equ spec__First+$01
+	else
+spec__Last:	equ sfx_Waterfall
+	endif ; if FeatureSpindash>1
+sfx__Last:	equ spec__Last
+
+flg__First:	equ $78
+sfx_Stop:	equ flg__First+$00
+bgm_Fade:	equ flg__First+$01
+sfx_Sega:	equ flg__First+$02
+bgm_Speedup:	equ flg__First+$03
+bgm_Slowdown:	equ flg__First+$04
+bgm_Stop:	equ flg__First+$05
+flg__Last:	equ bgm_Stop
+
+	else
+
+bgm__First:	equ $81
+
 bgm_GHZ:	equ ((ptr_mus81-MusicIndex)/4)+bgm__First
 bgm_LZ:		equ ((ptr_mus82-MusicIndex)/4)+bgm__First
 bgm_MZ:		equ ((ptr_mus83-MusicIndex)/4)+bgm__First
@@ -326,6 +489,7 @@ bgm_Speedup:	equ ((ptr_flgE2-Sound_ExIndex)/4)+flg__First
 bgm_Slowdown:	equ ((ptr_flgE3-Sound_ExIndex)/4)+flg__First
 bgm_Stop:	equ ((ptr_flgE4-Sound_ExIndex)/4)+flg__First
 flg__Last:	equ ((ptr_flgend-Sound_ExIndex-4)/4)+flg__First
+	endif ; if FeatureUseSonic2SoundDriver
 
 ; Boss locations
 ; The main values are based on where the camera boundaries mainly lie
@@ -492,6 +656,7 @@ ArtTile_Points:			equ $797
 ArtTile_Lamppost:		equ $7A0
 ArtTile_Ring:			equ $7B2
 ArtTile_Lives_Counter:		equ $7D4
+ArtTile_SpindashDust:     	equ ($D800/$20) ; $6C0
 
 ; Eggman
 ArtTile_Eggman:			equ $400
@@ -580,3 +745,41 @@ ArtTile_Credits_Font:		equ $5A0
 
 ; Error Handler
 ArtTile_Error_Handler_Font:	equ $7C0
+
+	if FeatureSpindash>1
+	    if FeatureUseSonic2SoundDriver
+sfx_Spindash:			equ spec__First+$01
+	    else
+sfx_Spindash:			equ ((ptr_sndD1-SpecSoundIndex)/4)+spec__First
+	    endif ; if FeatureUseSonic2SoundDriver
+	elseif FeatureSpindash=1
+sfx_Spindash:			equ sfx_Roll		; $BE
+	endif ; if FeatureSpindash>1
+
+bitHorizontal:			equ 0
+bitVertical:			equ 1
+bitSpinSmoke:			equ 2
+bitStandingOn:			equ 3
+bitPushing:			equ 5
+bitObjectFlag:			equ 7
+
+obSmoke:			equ $FFFFD11C
+
+max_ring_scatter:		equ $20 				; 32
+max_demo:			equ 4
+
+bit_in_air:			equ 1
+bit_pushing:			equ 5
+
+; Sound macro constants
+snd_load_none:			equ 0		; d0 already contains sound ID
+snd_load_b:			equ 1		; move.b track,d0
+snd_load_w:			equ 2		; move.w track,d0
+
+snd_bsr:			equ 0		; bsr.w routine
+snd_bra:			equ 1		; bra.w routine
+snd_jsr:			equ 2		; jsr (routine).l
+snd_jmp:			equ 3		; jmp (routine).l
+
+snd_queue1:			equ 1		; QueueSound1
+snd_queue2:			equ 2		; QueueSound2
