@@ -82,7 +82,7 @@ loc_AF8E:
 		bsr.w	SolidObject2F
 
 LGrass_Display:
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif
@@ -232,7 +232,7 @@ LGrass_ChkDel:
 ; loc_B0C6:
 LGrass_ChkGone:
 		out_of_range.w	DeleteObject,lgrass_origX(a0)
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 2
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bra.w	DisplaySprite
 	else

@@ -201,7 +201,7 @@ OPL_MovedRight:
 	.no_respawn:
 		bsr.w	OPL_SpawnObj			; check respawn flag and spawn object
 		beq.s	.loop_find_right		; loop until object is found outside window
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		tst.b	4(a0)				; was this object a remember state?
@@ -261,7 +261,7 @@ OPL_NoMove:
 OPL_SpawnObj:
 		tst.b	4(a0)				; is remember respawn flag set?
 		bpl.s	OPL_MakeItem			; if not, branch
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		btst	#7,2(a2,d2.w)			; is remember bit already set? (test only)
@@ -288,7 +288,7 @@ OPL_MakeItem:
 		move.b	d1,obStatus(a1)
 		move.b	(a0)+,d0			; get object id
 		bpl.s	.no_respawn_bit			; branch if remember respawn bit is not set
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		bset	#7,2(a2,d2.w)			; set as removed

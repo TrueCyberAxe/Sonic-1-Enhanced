@@ -134,7 +134,7 @@ CStom_Block:	; Routine 2
 		movea.l	a2,a0
 
 CStom_Display:
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
 		bsr.w	DisplaySprite
 	endif
 		bra.w	CStom_ChkDel
@@ -160,13 +160,13 @@ CStom_Spikes:	; Routine 4
 
 ; CStom_Display2:
 CStom_Ceiling:	; Routine 6
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 2 / 6 Fix
 		bsr.w	DisplaySprite
 	endif
 
 CStom_ChkDel:
 		out_of_range.w	DeleteObject
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1 / 2 / 6 Fix
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 1 / 2 / 6 Fix
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bra.w	DisplaySprite

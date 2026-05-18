@@ -458,7 +458,7 @@ loc_19512:
 ; ===========================================================================
 
 BossSpringYard_ShipDelete:
-	if (BugFixRenderBeforeInit)|(FixBugs)	; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs)	; Bug 6
 		; Avoid returning to BossSpringYard_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

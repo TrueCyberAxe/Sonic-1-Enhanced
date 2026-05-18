@@ -14,11 +14,11 @@ Debug_Index:
 ; ===========================================================================
 
 Debug_Main:	; Routine 0
-	if BugFixDebugMomentum
+	if FixBugDebugMomentum
 		clr.w   (v_objspace+$14).w ; Clear Inertia
 		clr.w   (v_objspace+$12).w ; Clear X/Y Speed
 		clr.w   (v_objspace+$10).w ; Clear X/Y Speed
-	endif ; if BugFixDebugMomentum
+	endif ; if FixBugDebugMomentum
 		addq.b	#2,(v_debuguse).w
 		move.w	(v_limittop2).w,(v_limittopdb).w ; buffer level x-boundary
 		move.w	(v_limitbtm1).w,(v_limitbtmdb).w ; buffer level y-boundary

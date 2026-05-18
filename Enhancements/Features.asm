@@ -24,14 +24,14 @@ EnhancedDebugMenu: 			equ 0*Enhanced
 ErrorHandlerExternalScrollConsole	equ 1*AdvancedDebugger
 ErrorHandlerExternalVSync		equ 1*AdvancedDebugger
 
-BugFixVictoryDebug:			equ 1*Enhanced
-BugFixDrownInDebug:			equ 1*Enhanced
+FixBugVictoryDebug:			equ 1*Enhanced
+FixBugDrownInDebug:			equ 1*Enhanced
 FeatureAirAnimation:			equ 1*Enhanced
 
-FeatureSonicJam				equ 1*Enhanced	; Use the Sonic Jam Assets, 1 for Original, 2 for Normal, 3 for Easy
+FeatureSonicJam				equ 3*Enhanced	; Use the Sonic Jam Assets, 1 for Original, 2 for Normal, 3 for Easy
 
 ; Causes Error on Demo 3 and with Object Edge Detection
-FeatureSonicCDExtendedCamera:		equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
+FeatureCDExtendedCamera:		equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 
 ; Causes Crash when Entering Water
 FeatureSpindash:			equ 1*Enhanced	; 0 = Off, 1 = Sonic CD, 2 = Sonic 2											Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and  https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
@@ -61,50 +61,52 @@ TweakBetterFadeEffects:			equ 0*Enhanced	; 															Based on https://info.
 TweakFastLoadInit:			equ 1*Enhanced	; Disable Some Initialization to load SEGA Logo Faster
 TweakSegaLogoWhiteFade:			equ 2*Enhanced	; 1 = Initial Fade to White but Black to White every time Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-960404, 2 = Better Fade From Demos by Cyber Axe and Based on https://info.sonicretro.org/SCHG_How-to:Improve_the_fade_in%5Cfade_out_progression_routines_in_Sonic_1 - Also Based on http://sonicresearch.org/community/index.php?threads/fixed-improving-the-fade-to-white-routines.5885/
 
-BugFixDebugMomentum:			equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
-BugFixDemoPlayback:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
-BugFixHiddenPoints:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
+FixBugDebugMomentum:			equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
+FixBugDemoPlayback:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
+FixBugHiddenPoints:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 FixBugEnemyDeathRoll:			equ 1*Enhanced	; Keep rolling and roll-jumping attacks from falling through to the hurt path
-FixBugInvinsibleMusic:			equ 1*Enhanced	; Clear stale invincibility and speed shoes music state
-BugFixTitleScreenPressStart:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
+FixBugInvincibleMusic:			equ 1*Enhanced	; Clear stale invincibility and speed shoes music state
+FixBugTitleScreenPressStart:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 
 ; Unfinished
-BugFixSpringDownSpring:			equ 1*Enhanced	; If rolling when you hit spring, stay rolling unless up spring
+FixBugSpringDownSpring:			equ 1*Enhanced	; If rolling when you hit spring, stay rolling unless up spring
 
 ; ============================================================
-BugFixTooFastToLive:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
-BugFixInvincibilityDelayDeath:		equ 1*Enhanced	; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
-BugFixCameraFollow:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
-BugFixSpringFaceWrongDirection:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
-BugFixWalkJump:				equ 1*Enhanced	; Set to 1 for fix, Set to 2 for cleaner fix										Based on Mode 1: https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1, Mode 2: https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
+FixBugTooFastToLive:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-748796
+FixBugInvincibilityDelayDeath:		equ 1*Enhanced	; Fixes being able to be killed after breaking an invincibility monitor before the sparkles appear
+FixBugCameraFollow:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_camera_follow_bug
+FixBugSpringFaceWrongDirection:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-729566
+FixBugWalkJump:				equ 1*Enhanced	; Set to 1 for fix, Set to 2 for cleaner fix										Based on Mode 1: https://info.sonicretro.org/SCHG_How-to:Fix_the_Walk-Jump_Bug_in_Sonic_1, Mode 2: https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-741799
 
 ; Bug Fixes Not Inluded in Other Revisions
 
-BugFixPLCShifting:			equ 1*Enhanced	; Pattern Load Cue													Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
-BugFixPLCRaceCondition: 		equ 1*Enhanced	; Pattern Load Cue													Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
+FixBugPLCShifting:			equ 1*Enhanced	; Pattern Load Cue													Based on https://forums.sonicretro.org/index.php?threads/how-to-fix-pattern-load-cues-queue-shifting-bug.28339/
+FixBugPLCRaceCondition: 		equ 1*Enhanced	; Pattern Load Cue													Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 
-BugFixDeleteScatteredRings:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
-BugFixScatteredRingsTimer:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
-BugFixDrowningTimer:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
-BugFixDeathBoundary:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
-BugFixHurtDeathBoundary:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
-BugFixSongFadeRestoration:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
-BugFixBlinkingHUD:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
-BugFixLevelSelectCorruption:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
-BugFixRememberSprite:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
-BugFixSoundDriverBugs:			equ 1*Enhanced	; Uncommenting of code in Sound_ChkValue
-BugFixCaterkillerDeath:			equ 1*Enhanced	; Fixes bug that occurs when rolling into a Caterkiller too fast							Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
-BugFixGameOverFlicker:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
-BugFixFallOffFinalZone:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
-BugFixRollerGlitch:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
-; BugFixHorizontalSpikePole:	  	equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
-BugFixRenderBeforeInit:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
-BugFixFZDebugCreditTransition:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
-BugFixDrownLockTitleScreen:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
+FixBugDeleteScatteredRings:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Accidental_Deletion_of_Scattered_Rings
+FixBugScatteredRingsTimer:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Ring_Timers
+FixBugDrowningTimer:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Correct_Drowning_Bugs_in_Sonic_1
+FixBugDeathBoundary:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
+FixBugHurtDeathBoundary:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
+FixBugSongFadeRestoration:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
+FixBugBlinkingHUD:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
+FixBugLevelSelectCorruption:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
+FixBugRememberSprite:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
+FixBugSoundDriver:			equ 1*Enhanced	; Uncommenting of code in Sound_ChkValue
+FixBugCaterkillerDeath:			equ 1*Enhanced	; Fixes bug that occurs when rolling into a Caterkiller too fast							Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4
+FixBugGameOverFlicker:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-713108
+FixBugFallOffFinalZone:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-752258
+FixBugRollerGlitch:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-819718
+; FixBugHorizontalSpikePole:	  	equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-826729
+FixBugRenderBeforeInit:			equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-827645
+FixBugFZDebugCreditTransition:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838455
+FixBugDrownLockTitleScreen:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-3#post-962010
 
+FixBugInvincibleMusic:			equ 1*Enhanced	; Fixes Bug with Invincible Music not being removed (Noticeable with S Monitor)
+FixBugEnemyDeathRoll:			equ 1*Enhanced  ; Fix Enemy Damage when in a Rolling State
 
 ; @todo port from sonic 2 code
-BugFixMonitorBugs:			equ 0*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
+FixBugMonitors:				equ 0*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 
 ; @TODO Fix Bug when going too fast at ghz 1 slope checkpoint causing death
 ; @TODO Reset Camera location when entering DEBUG MODE
@@ -227,4 +229,4 @@ FeatureUseSonic2SoundDriver:		equ 0*Enhanced	; 													Based on https://for
 ; Non Default Features some people may want to use
 FeatureRetainRingsBetweenActs:		equ 0*Enhanced	; 													Based on https://info.sonicretro.org/SCHG_How-to:Retain_Rings_Between_Acts_in_Sonic_1
 FeatureDisableSSRotation:		equ 0*Enhanced	; 													Based on http://sonicresearch.org/community/index.php?threads/sonic-1-non-rotating-special-stages.6074/
-;BugFixPauseOnSSResults:		equ 1*Enhanced
+FixBugPauseOnSSResults:			equ 1*Enhanced

@@ -205,7 +205,7 @@ Pri_EndAct:	; Routine $E
 
 		jsr	(GotThroughAct).l
 
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Avoid returning to Prison to prevent display-and-delete
 		; and double-delete bugs.
 		addq.l	#4,sp

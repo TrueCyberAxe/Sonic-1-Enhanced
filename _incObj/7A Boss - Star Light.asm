@@ -342,7 +342,7 @@ BSLZ_Escape:
 
 loc_18BE0:
 		tst.b	obRender(a0)
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		bpl.s	BossStarLight_PopAndDelete
 	else
 		bpl.w	BossStarLight_Delete

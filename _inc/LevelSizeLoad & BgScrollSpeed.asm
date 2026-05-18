@@ -34,9 +34,9 @@ LevelSizeLoad:
 		move.w	#$1010,(v_fg_xblock).w ; and v_fg_yblock
 		move.w	(a0)+,d0
 		move.w	d0,(v_lookshift).w
-	if FeatureSonicCDExtendedCamera
+	if FeatureCDExtendedCamera
 		move.w    #160,(v_camera_pan).w    ; reset the horizontal camera pan value to 160 pixels
-	endif ; if FeatureSonicCDExtendedCamera
+	endif ; if FeatureCDExtendedCamera
 		bra.w	LevSz_ChkLamp
 
 ; ===========================================================================

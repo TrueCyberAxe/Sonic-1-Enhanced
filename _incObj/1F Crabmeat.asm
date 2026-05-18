@@ -199,7 +199,7 @@ Crab_BallMove:	; Routine 8
 		lea	(Ani_Crab).l,a1
 		bsr.w	AnimateSprite
 		bsr.w	ObjectFall
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 4
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 4
 		; Another bug where an object is queued for display and then
 		; deleted, causing a null-pointer dereference.
 		bsr.w	DisplaySprite
@@ -207,7 +207,7 @@ Crab_BallMove:	; Routine 8
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0	; has object moved below the level boundary?
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		blo.s	Crab_Delete
 		bra.w	DisplaySprite
 	else

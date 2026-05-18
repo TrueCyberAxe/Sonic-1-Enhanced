@@ -51,7 +51,7 @@ Pow_Checks:
 Pow_Delete:	; Routine 4
 		subq.w	#1,obTimeFrame(a0)
 
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		; Avoid returning to PowerUp to prevent display-and-delete
 		; and double-delete bugs.
 		bpl.s	.return

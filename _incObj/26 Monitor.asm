@@ -57,14 +57,14 @@ Mon_Solid:														; Routine 2
 ; ===========================================================================
 
 .ontop:
-	if BugFixMonitorBugs 							; Super Transformation Bug when Pushing
+	if FixBugMonitors 							; Super Transformation Bug when Pushing
 		addq.b  #pushing_bit_delta,d6
 		btst    d6,status(a0)    					; is Sonic pushing this object?
 		beq.s   .skip
 		bclr    #is_pushing,status(a1)				; clear 'pushing' bit
 		bclr    d6,status(a0)    					; clear object's 'pushing' bit
 .skip:
-	endif ; if BugFixMonitorBugs
+	endif ; if FixBugMonitors
 		move.w	#$10,d3
 		move.w	obX(a0),d2
 		bsr.w	MvSonicOnPtfm
@@ -83,7 +83,7 @@ Mon_Solid:														; Routine 2
 ; ===========================================================================
 
 .normal:	; 2nd Routine 0
-	if BugFixMonitorBugs 			; Fix Errors on uphill slopes
+	if FixBugMonitors 			; Fix Errors on uphill slopes
 		btst  #1,obStatus(a0)		; is Sonic standing on object?
 		beq.s loc_A25C
 	endif
@@ -140,14 +140,14 @@ loc_A25C:
 		btst	#5,obStatus(a0)	; is Sonic pushing?
 		beq.s	Mon_Animate	; if not, branch
 
-	if BugFixWalkJump=1
+	if FixBugWalkJump=1
 		cmpi.b	#id_Roll,obAnim(a1)				; is Sonic in his jumping/rolling animation?
 		beq.s	loc_A26A						; if so, branch
 		cmpi.b	#id_Drown,obAnim(a1)			; is Sonic in his drowning animation?
 		beq.s	loc_A26A						; if so, branch
 	endif
 
-	if (FixBugs=0)&(BugFixWalkJump<2)
+	if (FixBugs=0)&(FixBugWalkJump<2)
 		; This causes the infamous "walk-jump bug"
 		move.w	#id_Run,obAnim(a1) ; clear obAnim and set obNextAni to 1
 	endif
@@ -161,7 +161,7 @@ Mon_Animate:	; Routine 6
 		bsr.w	AnimateSprite
 
 Mon_Display:	; Routine 8
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.w	DeleteObject
@@ -173,7 +173,7 @@ Mon_Display:	; Routine 8
 	endif
 ; ===========================================================================
 
-	if BugFixMonitorBugs 							; Spindash Roll to Walk when Spindashing Next to Monitor
+	if FixBugMonitors 							; Spindash Roll to Walk when Spindashing Next to Monitor
 Mon_CheckRelease:
 		btst d6,obStatus(a0)    					; if we're standing on the object
 		beq.s .skip1
@@ -187,17 +187,17 @@ Mon_CheckRelease:
 		bclr #is_pushing,obStatus(a1)     ; clear 'pushing' bit
 .skip2:
 		rts
-	endif ; if BugFixMonitorBugs
+	endif ; if FixBugMonitors
 
 Mon_BreakOpen:	; Routine 4
-	if BugFixMonitorBugs 							; Spindash Roll to Walk when Spindashing Next to Monitor
+	if FixBugMonitors 							; Spindash Roll to Walk when Spindashing Next to Monitor
 		moveq #p1_standing_bit,d6
 		lea (MainCharacter).w,a1
 		bsr.s Mon_CheckRelease    				; Release player 1 -  d6 = p1 standing bit, a1 = player 1 address
 		moveq #p2_standing_bit,d6
 		lea (Sidekick).w,a1
 		bsr.s Mon_CheckRelease    				; Release player 2 - d6 = p2 standing bit, a1 = player 2 address
-	endif ; if BugFixMonitorBugs
+	endif ; if FixBugMonitors
 		addq.b	#2,obRoutine(a0)
 		move.b	#0,obColType(a0)
 		bsr.w	FindFreeObj

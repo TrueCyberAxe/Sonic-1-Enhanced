@@ -63,7 +63,7 @@ Msl_Animate:	; Routine 2
 Msl_ChkCancel:
 		movea.l	msl_parent(a0),a1
 		_cmpi.b	#id_ExplosionItem,obID(a1) ; has Buzz Bomber been destroyed?
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		; This adds a return value so that we know if the object has
 		; been freed.
 		bne.s	.return
@@ -91,7 +91,7 @@ Msl_FromBuzz:	; Routine 4
 		move.b	#1,obAnim(a0)
 		bsr.w	SpeedToPos
 
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 4
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 4
 		; Object should not call DisplaySprite and DeleteObject on
 		; the same frame, or else cause a null-pointer dereference.
 		lea	(Ani_Missile).l,a1
@@ -104,7 +104,7 @@ Msl_FromBuzz:	; Routine 4
 		cmp.w	obY(a0),d0	; has object moved below the level boundary?
 		blo.s	Msl_Delete	; if yes, branch
 
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 4
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 4
 		lea	(Ani_Missile).l,a1
 		bsr.w	AnimateSprite
 		bra.w	DisplaySprite

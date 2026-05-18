@@ -10,7 +10,7 @@ Signpost:
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
 
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
 		bsr.w	DisplaySprite
 	endif
 
@@ -18,7 +18,7 @@ Signpost:
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range	DeleteObject
 
-	if (BugFixRenderBeforeInit)|(FixBugs)			; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs)			; Bug 1
 		bra.w	DisplaySprite
 	else
 		rts
@@ -64,7 +64,7 @@ Sign_Spin:	; Routine 4
 		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
 	endif
 
-	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 		move.b  #1,(f_victory).w 											; Set victory animation flag
 
 		tst.w	(v_debuguse).w													; is debug mode	on?
@@ -124,14 +124,14 @@ Sign_SparkPos:	dc.b -$18,-$10										; x-position, y-position
 ; ===========================================================================
 
 Sign_SonicRun:	; Routine 6
-	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 		clr.b  (f_lockscreen).w 											; Unset Prevent Sonic Leaving the Screen
-	endif ; if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	endif ; if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 
-	if BugFixVictoryDebug=0
+	if FixBugVictoryDebug=0
 		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	locret_ECEE		; if yes, branch													; if yes, branch
-	endif ; if BugFixVictoryDebug=0
+	endif ; if FixBugVictoryDebug=0
 
 	if FixBugs
 		; This function's checks are a mess, creating an edgecase where it's

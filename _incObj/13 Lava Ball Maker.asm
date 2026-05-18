@@ -7,7 +7,7 @@ LavaMaker:
 		move.b	obRoutine(a0),d0
 		move.w	LavaM_Index(pc,d0.w),d1
 		jsr	LavaM_Index(pc,d1.w)
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		; See LavaBall.
 		out_of_range.w	DeleteObject
 		rts

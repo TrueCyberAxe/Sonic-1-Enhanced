@@ -96,14 +96,14 @@ locret_8308:
 
 Ledge_TimeZero:
 		bsr.w	ObjectFall
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0)
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0)
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
 	endif
 		tst.b	obRender(a0)
 		bpl.s	Ledge_Delete
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		bra.w	DisplaySprite
 	else
 		rts

@@ -49,7 +49,7 @@ Over_SetWait:
 		move.w	#720,obTimeFrame(a0) ; set time delay to 12 seconds
 		addq.b	#2,obRoutine(a0)
 
-	if BugFixGameOverFlicker
+	if FixBugGameOverFlicker
 		bra.w   DisplaySprite ; KoH additional line to prevent blinking.
 	endif
 

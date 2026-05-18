@@ -62,7 +62,7 @@ SBall_Main:	; Routine 0
 		bcs.s	.fail
 
 .makechain:
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 5
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 5
 		; If an object is allocated before the parent object, then
 		; when the child is deleted, it will have already been queued
 		; for display, which is a display-and-delete bug.

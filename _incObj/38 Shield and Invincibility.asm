@@ -148,7 +148,7 @@ Shi_Start_Delete:
 	endif ; if Enhanced
 		jmp	(DeleteObject).l
 
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 ; ---------------------------------------------------------------------------
 ; Subroutine to restore level music when invincibility stars disappear after
 ; something other than Sonic_Display cleared the invincibility flag.
@@ -179,4 +179,4 @@ Shi_RestoreMusic:
 
 .return:
 		rts
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic

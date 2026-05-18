@@ -218,7 +218,7 @@ Solid_Ignore:
 		btst	#5,obStatus(a0)	; is Sonic pushing?
 		beq.s	Solid_Debug	; if not, branch
 
-	if BugFixWalkJump=1
+	if FixBugWalkJump=1
 		cmpi.b	#id_Roll,obAnim(a1)		; is Sonic in his jumping/rolling animation?
 		beq.s	Solid_NotPushing		; if so, branch
 		cmpi.b	#id_Drown,obAnim(a1)	; is Sonic in his drowning animation?
@@ -227,7 +227,7 @@ Solid_Ignore:
 		beq.s	Solid_NotPushing		; if so, branch
 	endif
 
-	if (BugFixWalkJump<2)&(FixBugs=0)
+	if (FixBugWalkJump<2)&(FixBugs=0)
 		; This causes the infamous "walk-jump bug"
 		move.w	#id_Run,obAnim(a1) ; use running animation
 	endif

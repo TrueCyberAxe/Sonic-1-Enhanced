@@ -77,7 +77,7 @@ loc_BDDE:
 		bchg	#1,obFrame(a0)
 
 But_Display:
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.s	But_Delete

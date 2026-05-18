@@ -185,7 +185,7 @@ Drown_Countdown:; Routine $A
 		bne.w	.nocountdown					; if yes, branch
 	endif
 
-	if BugFixDrownInDebug
+	if FixBugDrownInDebug
 		; Debug mode should not keep draining the player's air timer.
 		tst.w	(v_debuguse).w					; are we in debug mode?
 		bne.w	.nocountdown					; if yes, branch
@@ -274,17 +274,17 @@ Drown_Countdown:; Routine $A
 .loc_13F86:
 		subq.w	#1,objoff_2C(a0)
 
-	if BugFixDrowningTimer
+	if FixBugDrowningTimer
 		; Keep Sonic from moving during the countdown delay before the drowning state starts.
 		bne.s	.nochange
 	else
 		bne.s	.loc_13F94
-	endif ; if BugFixDrowningTimer
+	endif ; if FixBugDrowningTimer
 
 		move.b	#6,(v_player+obRoutine).w
 		rts
 ; ===========================================================================
-	if BugFixDrowningTimer=0 ; @TODO Double check this is correct
+	if FixBugDrowningTimer=0 ; @TODO Double check this is correct
 .loc_13F94:
 		move.l	a0,-(sp)
 		lea	(v_player).w,a0

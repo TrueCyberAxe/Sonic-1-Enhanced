@@ -1498,7 +1498,7 @@ RunPLC:
 .skipXor:
 		andi.w	#$7FFF,d2			; clear XOR flag
 
-	if (BugFixPLCRaceCondition=0)&(FixBugs=0)
+	if (FixBugPLCRaceCondition=0)&(FixBugs=0)
 		; Relocated to bugfix below
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
 	endif
@@ -1515,7 +1515,7 @@ RunPLC:
 		move.l	d0,(v_plc_previousrow).w	; clear previous XOR dump
 		move.l	d5,(v_plc_dataword).w		; store lookup field
 		move.l	d6,(v_plc_shiftvalue).w		; store bit shift counter
-	if (BugFixPLCRaceCondition)|(FixBugs)
+	if (FixBugPLCRaceCondition)|(FixBugs)
 		; Fix a race condition with Pattern Load Cues
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
@@ -1599,29 +1599,29 @@ ProcessPLC_Return:
 ; loc_16DC:
 ProcessPLC_ShiftCue:
 		lea	(v_plc_queue_base).w,a0		; load PLC process list
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		lea	6(a0),a1
 		moveq	#$E,d0					; do $F cues
 	else
 		moveq	#(v_plc_buffer_only_end-v_plc_buffer-plc_slot_size)/4-1,d0 ; set size of list
-	endif ; if BugFixPLCShifting
+	endif ; if FixBugPLCShifting
 
 ; loc_16E2:
 .loop:
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		move.l	(a1)+,(a0)+
 		move.w	(a1)+,(a0)+
 	else
 		move.l	plc_slot_size(a0),(a0)+		; shift contents of PLC buffer up 6 bytes
-	endif ; if BugFixPLCShifting
+	endif ; if FixBugPLCShifting
 
 		dbf	d0,.loop			; repeat til done
 
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		moveq   #0,d0
 		move.l  d0,(a0)+    ; clear the last cue to avoid overcopying it
 		move.w  d0,(a0)+    ;
-	endif ; if BugFixPLCShifting
+	endif ; if FixBugPLCShifting
 
 	if FixBugs
 		; The above code does not properly 'pop' the 16th PLC entry.
@@ -2168,9 +2168,9 @@ Tit_LoadText:
 		move.w	#id_GHZ_act1,(v_zone).w	; set level to GHZ1 (000)
 		move.w	#0,(v_pcyc_time).w		; disable palette cycling
 
-	if BugFixDrownLockTitleScreen
+	if FixBugDrownLockTitleScreen
 		move.b	#0,(f_nobgscroll).w 									; clear scroll lock
-	endif ; if BugFixDrownLockTitleScreen
+	endif ; if FixBugDrownLockTitleScreen
 
 		bsr.w	LevelSizeLoad			; load level size (will use GHZ1's sizes)
 		bsr.w	DeformLayers			; initialize background deformation before fade-in (redundant here)
@@ -2234,7 +2234,7 @@ Tit_LoadText:
 		move.b	#0,(f_debugmode).w		; disable debug mode (cheat remains active though)
 		move.w	#376,(v_generictimer).w		; run title screen for 376 frames (6 seconds plus some change)
 
-	if (BugFixTitleScreenPressStart)|(FixBugs)
+	if (FixBugTitleScreenPressStart)|(FixBugs)
 		; Fix the Press Start Button text
 		; https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 		clearRAM v_sonicteam,v_sonicteam+object_size ; delete RAM used by "SONIC TEAM PRESENTS" object (fully)
@@ -2396,7 +2396,7 @@ GM_Level_Select:
 Tit_LoadLevelSelect:
 GotoLevelSelect:
 Tit_EnterLevelSelect:
-	if (BugFixLevelSelectCorruption)|(FixBugs)
+	if (FixBugLevelSelectCorruption)|(FixBugs)
 		; Fix the level selects graphics bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
 		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
@@ -2434,11 +2434,11 @@ Tit_EnterLevelSelect:
 ; ---------------------------------------------------------------------------
 
 LevelSelect:
-	if BugFixLevelSelectCorruption
+	if FixBugLevelSelectCorruption
 		move.b	#(id_VBlank_Title-2),(v_vblank_routine).w
 	else
 		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
-	endif ; if BugFixLevelSelectCorruption
+	endif ; if FixBugLevelSelectCorruption
 		bsr.w	WaitForVBlank			; wait for VBlank to finish
 		bsr.w	LevSelControls			; update selected line if necessary
 		bsr.w	RunPLC				; run any potential PLC
@@ -4237,7 +4237,7 @@ End_LoadData:
 		bsr.w	PalLoad_Fade			; ...to fade-in buffer
 		music	#bgm_Ending			; load ending sequence music and play it
 
-	if (BugFixFZDebugCreditTransition)|(FixBugs)
+	if (FixBugFZDebugCreditTransition)|(FixBugs)
 		; Fix being able to enable debug mode without having entered the cheat code for it
 		tst.b	(f_debugcheat).w		; has debug cheat been entered?
 		beq.s	End_LoadSonic			; if not, branch

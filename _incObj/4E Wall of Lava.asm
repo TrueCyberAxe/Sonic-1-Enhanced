@@ -98,7 +98,7 @@ LWall_Solid:	; Routine 2
 		bsr.w	SpeedToPos
 
 .rangechk:
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 1 / 6 Fix
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 1 / 6 Fix
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
@@ -108,7 +108,7 @@ LWall_Solid:	; Routine 2
 		out_of_range.s	.chkgone
 
 .moving:
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1 / 6 Fix
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 1 / 6 Fix
 		bra.w	DisplaySprite
 	else
 		rts

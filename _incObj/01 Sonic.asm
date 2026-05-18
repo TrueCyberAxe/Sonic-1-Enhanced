@@ -23,9 +23,9 @@ Sonic_Index:	dc.w Sonic_Main-Sonic_Index			; 0 - object init
 		dc.w Sonic_Hurt-Sonic_Index			; 4 - while being knocked back from damage
 		dc.w Sonic_Death-Sonic_Index			; 6 - while dying and falling off screen
 		dc.w Sonic_ResetLevel-Sonic_Index		; 8 - after having died and waiting for the level to restart
-	if BugFixScatteredRingsTimer
+	if FixBugScatteredRingsTimer
 		dc.w Sonic_Drowned-Sonic_Index
-	endif ; if BugFixScatteredRingsTimer
+	endif ; if FixBugScatteredRingsTimer
 ; ===========================================================================
 
 ; Obj01_Main:
@@ -54,19 +54,19 @@ Sonic_Control:	; Routine 2
 Sonic_DebugSkip:
 	endif ; if AdvancedDebugger
 
-	if BugFixVictoryDebug
+	if FixBugVictoryDebug
 		tst.b	(f_victory).w				; is victory flag set?
 		bne.w	Sonic_Control_Nodebug			; if yes, branch
-	endif ; if BugFixVictoryDebug
+	endif ; if FixBugVictoryDebug
 
 	if Debug=0
 		tst.w	(f_debugmode).w				; is debug cheat enabled?
 		beq.s	Sonic_Control_Nodebug			; if not, branch
 	endif ; if Debug=0
 
-	if FeatureSonicCDExtendedCamera
+	if FeatureCDExtendedCamera
 		bsr.s Sonic_PanCamera
-	endif ; if FeatureSonicCDExtendedCamera
+	endif ; if FeatureCDExtendedCamera
 
 		btst	#bitB,(v_jpadpress1).w			; is button B pressed?
 		beq.s	Sonic_Control_Nodebug			; if not, branch
@@ -74,9 +74,9 @@ Sonic_DebugSkip:
 		clr.b	(f_lockctrl).w				; unlock controls
 		rts
 
-	if FeatureSonicCDExtendedCamera
+	if FeatureCDExtendedCamera
 		include "Enhancements/_incObj/Sonic_PanCamera.asm"
-	endif ; if FeatureSonicCDExtendedCamera
+	endif ; if FeatureCDExtendedCamera
 
 	; return
 ; ===========================================================================
@@ -178,17 +178,17 @@ Sonic_Display:
 		tst.b	(v_invinc).w				; does Sonic have invincibility?
 		beq.s	.chkshoes				; if not, branch
 		tst.w	invtime(a0)				; check time remaining for invinciblity
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 		beq.s	.restoremusic				; if no time remains, restore normal state
 	else
 		beq.s	.chkshoes				; if no time remains, branch
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 		subq.w	#1,invtime(a0)				; subtract 1 from time
 		bne.s	.chkshoes				; if time remains, branch
 
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 .restoremusic:
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 		tst.b	(f_lockscreen).w			; is a boss fight active?
 		bne.s	.removeinvincible			; if yes, don't change music
 		cmpi.w	#12,(v_air).w				; is drowning countdown active?
@@ -205,31 +205,31 @@ Sonic_Display:
 		lea	(MusicList2).l,a1			; load music list for post-invincibility
 		move.b	(a1,d0.w),d0				; get entry for current zone
 		play_queued_music snd_jsr			; resume normal level music
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 		tst.b	(v_shoes).w				; are speed shoes still active?
 		beq.s	.removeinvincible			; if not, branch
 		tst.w	shoetime(a0)				; is there speed shoes time remaining?
 		beq.s	.removeinvincible			; if not, let the shoes expiry path restore tempo
 		music	#bgm_Speedup,snd_jsr			; keep speed shoes tempo after invincibility ends
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 
 ; Obj01_RmvInvin:
 .removeinvincible:
 		move.b	#0,(v_invinc).w				; cancel invincibility
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 		clr.w	invtime(a0)				; clear any stale invincibility timer state
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 
 ; Obj01_ChkShoes:
 .chkshoes:
 		tst.b	(v_shoes).w				; does Sonic have speed shoes?
 		beq.s	.return					; if not, branch
 		tst.w	shoetime(a0)				; check time remaining
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 		beq.s	.removeshoes				; if there is none, restore normal speed
 	else
 		beq.s	.return					; if there is none, branch
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 		subq.w	#1,shoetime(a0)				; subtract 1 from time
 		bne.s	.return					; if time remains, branch
 .removeshoes:
@@ -237,9 +237,9 @@ Sonic_Display:
 		move.w	#$C,(v_sonspeedacc).w			; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w			; restore Sonic's deceleration
 		move.b	#0,(v_shoes).w				; cancel speed shoes
-	if FixBugInvinsibleMusic
+	if FixBugInvincibleMusic
 		clr.w	shoetime(a0)				; clear any stale speed shoes timer state
-	endif ; if FixBugInvinsibleMusic
+	endif ; if FixBugInvincibleMusic
 		music	#bgm_Slowdown,snd_jmp			; resume music at normal speed
 
 ; ===========================================================================
@@ -1158,7 +1158,7 @@ Sonic_LevelBound:
 ; loc_13336:
 .chkbottom:
 		move.w	(v_limitbtm2).w,d0			; load current target bottom level boundary
-	if (BugFixTooFastToLive)|(FixBugs)
+	if (FixBugTooFastToLive)|(FixBugs)
 		; The original code does not consider that the camera boundary
 		; may be in the middle of lowering itself, which is why going
 		; down the S-tunnel in GHZ act 1 fast enough can kill Sonic.
@@ -1185,10 +1185,10 @@ Sonic_LevelBound:
 		blt.s	.dontkill			; if so, don't kill Sonic
 	endif ; if FeatureSpindash
 
-	if BugFixFallOffFinalZone
+	if FixBugFallOffFinalZone
 		cmpi.w	#id_FZ,(v_zone).w		; is level FZ?
 		beq.s	Sonic_LevelBound_Next
-	endif ; if BugFixFallOffFinalZone
+	endif ; if FixBugFallOffFinalZone
 
 		cmpi.w	#id_SBZ_act2,(v_zone).w			; is level SBZ2?
 
@@ -1232,7 +1232,7 @@ JumpTo_KillSonic:
 	endif
 ; End of function Sonic_LevelBound
 
-	if BugFixFallOffFinalZone
+	if FixBugFallOffFinalZone
 Sonic_LevelBound_Next:
 		move.b	#id_Ending,(v_gamemode).w	; go to the ending instead of killing Sonic in FZ
 		rts
@@ -2084,7 +2084,7 @@ Sonic_HurtStop:
 	endif
 		addi.w	#224,d0					; add screen height
 		cmp.w	obY(a0),d0				; has Sonic touched the bottom level boundary?
-	if (BugFixHurtDeathBoundary)|(FixBugs)
+	if (FixBugHurtDeathBoundary)|(FixBugs)
 		blt.w	JumpTo_KillSonic			; if yes, kill Sonic (signed check to not die while leaving the top screen)
 	else
 		; This would cause Sonic to die from the upper/top boundary of the level, while in hurt state.
@@ -2133,7 +2133,7 @@ Sonic_Death:	; Routine 6
 
 ; GameOver: <-- old misnomer (this routine ALSO handles game overs, but not just)
 Sonic_HandleDeath:
-	if (BugFixDeathBoundary)|(FixBugs)
+	if (FixBugDeathBoundary)|(FixBugs)
 		; Fix the death boundary bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_death_boundary_bug
 		move.w	(v_screenposy).w,d0			; get current Y screen position
@@ -2144,7 +2144,7 @@ Sonic_HandleDeath:
 		addi.w	#$100,d0				; go $100 pixels lower
 		cmp.w	obY(a0),d0				; has Sonic's death animation gone below the screen?
 
-	if (BugFixDeathBoundary)|(FixBugs)
+	if (FixBugDeathBoundary)|(FixBugs)
 		bge.w	.return					; if not, branch
 	else
 		bhs.w	.return					; if not, branch
@@ -2302,7 +2302,7 @@ Sonic_Loops:
 		rts						; return
 ; End of function Sonic_Loops
 
-	if BugFixScatteredRingsTimer
+	if FixBugScatteredRingsTimer
 		include "Enhancements/_incObj/Sonic Drowns.asm"
 	endif
 
@@ -2320,7 +2320,7 @@ Sonic_Animate:
 		move.b	d0,obPrevAni(a0)			; remember new animation
 		move.b	#0,obAniFrame(a0)			; restart animation from beginning
 		move.b	#0,obTimeFrame(a0)			; reset animation frame duration
-	if (BugFixWalkJump=2)|(FixBugs)
+	if (FixBugWalkJump=2)|(FixBugs)
 		; This fixes the occasional "pushing air" bug
 		bclr	#5,obStatus(a0)				; clear pushing flag
 	endif

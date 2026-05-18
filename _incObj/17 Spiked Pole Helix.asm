@@ -85,7 +85,7 @@ Hel_NotCentre:
 
 Hel_Action:	; Routine 2, 4
 		bsr.w	Hel_RotateSpikes
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 2
 		; This has been moved to prevent a display-after-free bug.
 		bsr.w	DisplaySprite
 	endif
@@ -109,7 +109,7 @@ locret_7DA6:
 
 Hel_ChkDel:
 		out_of_range.w	Hel_DelAll
-	if BugFixRenderBeforeInit ; Bug 2
+	if FixBugRenderBeforeInit ; Bug 2
 		bra.w	DisplaySprite
 	else
 		rts

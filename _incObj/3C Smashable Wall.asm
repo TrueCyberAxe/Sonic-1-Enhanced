@@ -67,7 +67,7 @@ Smash_Solid:	; Routine 2
 		bsr.s	SmashObject
 
 Smash_FragMove:	; Routine 4
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Fragments already queue themselves for display, so they should
 		; not return to SmashWall and get queued again through RememberState
 		addq.l	#4,sp
@@ -75,15 +75,15 @@ Smash_FragMove:	; Routine 4
 
 		bsr.w	SpeedToPos
 		addi.w	#$70,obVelY(a0)	; make fragment fall faster
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0) ; Bug 3
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0) ; Bug 3
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
-	endif ; if (BugFixRenderBeforeInit=0)&(FixBugs=0)
+	endif ; if (FixBugRenderBeforeInit=0)&(FixBugs=0)
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 3
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 3
 		bra.w	DisplaySprite
 	else
 		rts
-	endif ; if (BugFixRenderBeforeInit)|(FixBugs)
+	endif ; if (FixBugRenderBeforeInit)|(FixBugs)
