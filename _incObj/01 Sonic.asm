@@ -50,13 +50,13 @@ Sonic_Control:	; Routine 2
 		andi.b	#btnA|btnStart,d0			; are A and Start pressed?
 		cmpi.b	#btnA|btnStart,d0
 		bne.s	Sonic_DebugSkip
-		RaiseError "Intentional crash test:%<endl>Level ID = %<.w $FFFFFE10>%<endl>Frame = %<.w $FFFFFE04>", SampleLevelDebugger
+		RaiseError "Intentional crash test:%<endl>Level ID = %<.w $FFFFFE10>%<endl>Frame = %<.w $FFFFFE04>",SampleLevelDebugger
 Sonic_DebugSkip:
 	endif ; if AdvancedDebugger
 
 	if BugFixVictoryDebug
-		tst.b	(f_victory).w												; is victory flag set?
-		bne.w	Sonic_Control_Nodebug													; if yes, branch
+		tst.b	(f_victory).w				; is victory flag set?
+		bne.w	Sonic_Control_Nodebug			; if yes, branch
 	endif ; if BugFixVictoryDebug
 
 	if Debug=0
@@ -178,9 +178,17 @@ Sonic_Display:
 		tst.b	(v_invinc).w				; does Sonic have invincibility?
 		beq.s	.chkshoes				; if not, branch
 		tst.w	invtime(a0)				; check time remaining for invinciblity
+	if FixBugInvinsibleMusic
+		beq.s	.restoremusic				; if no time remains, restore normal state
+	else
 		beq.s	.chkshoes				; if no time remains, branch
+	endif ; if FixBugInvinsibleMusic
 		subq.w	#1,invtime(a0)				; subtract 1 from time
 		bne.s	.chkshoes				; if time remains, branch
+
+	if FixBugInvinsibleMusic
+.restoremusic:
+	endif ; if FixBugInvinsibleMusic
 		tst.b	(f_lockscreen).w			; is a boss fight active?
 		bne.s	.removeinvincible			; if yes, don't change music
 		cmpi.w	#12,(v_air).w				; is drowning countdown active?
@@ -197,23 +205,41 @@ Sonic_Display:
 		lea	(MusicList2).l,a1			; load music list for post-invincibility
 		move.b	(a1,d0.w),d0				; get entry for current zone
 		play_queued_music snd_jsr			; resume normal level music
+	if FixBugInvinsibleMusic
+		tst.b	(v_shoes).w				; are speed shoes still active?
+		beq.s	.removeinvincible			; if not, branch
+		tst.w	shoetime(a0)				; is there speed shoes time remaining?
+		beq.s	.removeinvincible			; if not, let the shoes expiry path restore tempo
+		music	#bgm_Speedup,snd_jsr			; keep speed shoes tempo after invincibility ends
+	endif ; if FixBugInvinsibleMusic
 
 ; Obj01_RmvInvin:
 .removeinvincible:
 		move.b	#0,(v_invinc).w				; cancel invincibility
+	if FixBugInvinsibleMusic
+		clr.w	invtime(a0)				; clear any stale invincibility timer state
+	endif ; if FixBugInvinsibleMusic
 
 ; Obj01_ChkShoes:
 .chkshoes:
 		tst.b	(v_shoes).w				; does Sonic have speed shoes?
 		beq.s	.return					; if not, branch
 		tst.w	shoetime(a0)				; check time remaining
+	if FixBugInvinsibleMusic
+		beq.s	.removeshoes				; if there is none, restore normal speed
+	else
 		beq.s	.return					; if there is none, branch
+	endif ; if FixBugInvinsibleMusic
 		subq.w	#1,shoetime(a0)				; subtract 1 from time
 		bne.s	.return					; if time remains, branch
+.removeshoes:
 		move.w	#$600,(v_sonspeedmax).w			; restore Sonic's max speed
 		move.w	#$C,(v_sonspeedacc).w			; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w			; restore Sonic's deceleration
 		move.b	#0,(v_shoes).w				; cancel speed shoes
+	if FixBugInvinsibleMusic
+		clr.w	shoetime(a0)				; clear any stale speed shoes timer state
+	endif ; if FixBugInvinsibleMusic
 		music	#bgm_Slowdown,snd_jmp			; resume music at normal speed
 
 ; ===========================================================================
@@ -320,12 +346,17 @@ Sonic_Water:
 
 ; Obj01_MdNormal:
 Sonic_MdNormal:	; While Sonic is on the ground and not rolling
+	if ((FeatureSpindash)|(FeatureSuperPeelout))&FeatureUnlockMovesAfterCompletion
+		bsr.w	CheckSRAMGameComplete
+		beq.s	.skipunlockedmoves
+	endif ; if ((FeatureSpindash)|(FeatureSuperPeelout))&FeatureUnlockMovesAfterCompletion
 	if FeatureSpindash
 		bsr.w	Sonic_SpinDash
 	endif ; if FeatureSpindash
 	if FeatureSuperPeelout
 		bsr.w	Sonic_Peelout
 	endif ; if FeatureSuperPeelout
+.skipunlockedmoves:
 		bsr.w	Sonic_Jump				; check if we need to jump
 		bsr.w	Sonic_SlopeResistWalk			; handle resistance from running up slopes
 		bsr.w	Sonic_Move				; handle Sonic's left/right movement
@@ -1422,7 +1453,7 @@ Sonic_AirRoll:
 AirRoll_Checks:
 	if FeatureAirRoll=1
 		cmpi.b	#id_Spring,obAnim(a0)			; is spring jump active?
-		beq.s	locret_134D2				; if so, branch
+		beq.s	Sonic_AirRoll_Return			; if so, branch ; locret_134D2
 	endif
 
 		cmpi.b	#id_Roll,obAnim(a0)			; is the rolling animation active?
@@ -1436,6 +1467,8 @@ AirRoll_Set:
 		move.b	#id_Roll,obAnim(a0)			; set Sonic's animation to the rolling animation
 	endif ; if FeatureAirRoll
 
+; locret_134D2
+Sonic_AirRoll_Return:
 		rts						; return
 ; End of function Sonic_JumpHeight
 
@@ -2571,3 +2604,33 @@ Sonic_LoadGfx:
 		rts						; return
 ; End of function Sonic_LoadGfx
 ; ===========================================================================
+
+	if FeatureUnlockMovesAfterCompletion
+; ---------------------------------------------------------------------------
+; Check if the SRAM completion flag has been written.
+; ---------------------------------------------------------------------------
+
+CheckSRAMGameComplete:
+	if EnableSRAM=1
+		gotoSRAM
+		cmpi.b	#"S",(sram_save_sig1).l		; has SRAM been initialized?
+		bne.s	.locked				; if not, branch
+		cmpi.b	#"1",(sram_save_sig2).l		; is this this game's save data?
+		bne.s	.locked				; if not, branch
+		move.b	(sram_unlock_flags).l,d0	; get unlocked feature flags
+		andi.b	#maskSRAMGameComplete,d0	; has the game been completed?
+		bra.s	.return				; restore ROM mapping and return
+
+.locked:
+		moveq	#0,d0				; no unlocks
+
+.return:
+		gotoROM
+		tst.b	d0				; set condition codes for callers
+	else
+		moveq	#0,d0				; no SRAM means no saved completion flag
+	endif ; if EnableSRAM=1
+		rts
+; End of function CheckSRAMGameComplete
+; ===========================================================================
+	endif ; if FeatureUnlockMovesAfterCompletion

@@ -174,22 +174,29 @@ React_Monitor:
 ; ===========================================================================
 
 React_Enemy:
-		tst.b	(v_invinc).w									; is Sonic invincible?
-		bne.s	.donthurtsonic	; if yes, branch
+		tst.b	(v_invinc).w					; is Sonic invincible?
+		bne.s	.donthurtsonic					; if yes, branch
 
 	if FeatureSpindash
-		tst.b	f_spindash(a0)								; is Sonic Spindashing?
-		bne.s	.donthurtsonic								; if yes, branch
+		tst.b	f_spindash(a0)					; is Sonic Spindashing?
+		bne.s	.donthurtsonic					; if yes, branch
 	endif
 
+	if FixBugEnemyDeathRoll
+		btst	#2,obStatus(a0)					; is Sonic in a ball state?
+		bne.s	.donthurtsonic					; if yes, branch
+		btst	#4,obStatus(a0)					; is Sonic roll-jumping?
+		bne.s	.donthurtsonic					; if yes, branch
+	endif ; if FixBugEnemyDeathRoll
+
 		cmpi.b	#id_Roll,obAnim(a0) 				; is Sonic rolling/jumping?
-		bne.w	React_ChkHurt									; if not, branch
+		bne.w	React_ChkHurt					; if not, branch
 
 .donthurtsonic:
 		tst.b	obColProp(a1)
 		beq.s	.breakenemy
 
-		neg.w	obVelX(a0)										; repel Sonic
+		neg.w	obVelX(a0)					; repel Sonic
 		neg.w	obVelY(a0)
 		asr.w	obVelX(a0)
 		asr.w	obVelY(a0)
@@ -274,9 +281,9 @@ HurtSonic:
 		bne.s	.hasshield	; if yes, branch
 
 	if FeatureRestoreMonitorScubaGear
-		tst.b	(f_goggles).w									; does Sonic have a Goggle Flag?
-		beq.s	.ringcheck										; if not, branch
-		move.b	#0,(f_goggles).w						; remove goggles
+		tst.b	(v_goggles).w									; does Sonic have a Goggle Flag?
+		beq.s	.ringcheck									; if not, branch
+		move.b	#0,(v_goggles).w								; remove goggles
 
 .ringcheck:
 	endif

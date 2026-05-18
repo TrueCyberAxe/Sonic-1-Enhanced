@@ -72,6 +72,7 @@ v_gameovertext1:equ	v_objspace+object_size*2	; object variable space for the "GA
 v_gameovertext2:equ	v_objspace+object_size*3	; object variable space for the "OVER" in "GAME OVER"/"TIME OVER" text ($40 bytes)
 
 v_shieldobj:	equ	v_objspace+object_size*6	; object variable space for the shield ($40 bytes)
+v_gogglesobj:	equ	v_objspace+object_size*7	; object variable space for the goggles overlay ($40 bytes)
 v_starsobj1:	equ	v_objspace+object_size*8	; object variable space for the invincibility stars #1 ($40 bytes)
 v_starsobj2:	equ	v_objspace+object_size*9	; object variable space for the invincibility stars #2 ($40 bytes)
 v_starsobj3:	equ	v_objspace+object_size*10	; object variable space for the invincibility stars #3 ($40 bytes)
@@ -411,6 +412,7 @@ v_score:		ds.l	1		; score
 v_shield:		ds.b	1		; shield status (00 = no; 01 = yes)
 v_invinc:		ds.b	1		; invinciblity status (00 = no; 01 = yes)
 v_shoes:		ds.b	1		; speed shoes status (00 = no; 01 = yes)
+v_goggles:
 v_unused1:		ds.b	1		; an unused fourth player status (Goggles?)
 
 v_lastlamp:		ds.b	2		; number of the last lamppost you hit

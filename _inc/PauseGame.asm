@@ -30,7 +30,16 @@ Pause_StopGame:
 		tst.b (v_debuguse).w 														; Is debug mode active?
 		beq.s .skip																		; if not, branch
 
-		bra.w GotoLevelSelect
+		clr.w	(v_debuguse).w														; leave debug mode before opening level select
+		clr.w	(f_pause).w															; clear pause state before changing mode
+	if ExtendedMenu
+		move.b	#1,(v_levelselect_buffer).w								; enter the level list, not the options menu
+	endif ; if ExtendedMenu
+		bset	#bitDebugLevelSelect,(f_debugmode).w						; remember level select was opened from debug
+		move.w	#0,(v_jpadhold2).w										; clear Sonic's stale input
+		move.w	#0,(v_jpadhold1).w										; clear controller stale input
+		move.b	#id_LevelSelect,(v_gamemode).w							; enter level select through the game mode loop
+		rts
 .skip:
 	endif ; if EnhancedDebug
 

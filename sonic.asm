@@ -201,8 +201,13 @@ RomEndLoc:	dc.l EndOfRom-1		; End address of ROM
 	else
 		dc.l $20202020
 	endif
+	if EnableSRAM=1
+		dc.l sram_save_sig1	; SRAM start ($200001)
+		dc.l sram_unlock_flags	; SRAM end ($200005)
+	else
 		dc.l $20202020		; SRAM start ($200001)
 		dc.l $20202020		; SRAM end ($20xxxx)
+	endif
 	if FeatureUpdateHeader
 		dc.b "GITHUB DISSASEMBLY WITH ENHANCEMENT OPTIONS         " ; Notes (unused, anything can be put in this space, but it has to be 52 bytes.)
 	else
@@ -2404,6 +2409,18 @@ Tit_EnterLevelSelect:
 		move.l	d0,(v_scrposy_vdp).w		; clear VSRAM (d0 is still 0)
 		disable_ints				; disable interrupts
 
+	if EnhancedDebug
+		bsr.w	ClearScreen					; wipe old level planes and sprites for debug entry
+		moveq	#0,d0						; restore clear value after ClearScreen
+		lea	(vdp_data_port).l,a6				; prepare VDP data write
+		locVRAM	ArtTile_Level_Select_Font*tile_size,4(a6)	; load level select font for debug entry
+		lea	(Art_Text).l,a5					; load font source
+		move.w	#(Art_Text_end-Art_Text)/2-1,d1			; load all font tiles
+.LevSelLoadFont:
+		move.w	(a5)+,(a6)					; write one word of font art
+		dbf	d1,.LevSelLoadFont				; loop until font is loaded
+	endif ; if EnhancedDebug
+
 		lea	(vdp_data_port).l,a6		; prepare VDP data write
 		locVRAM	vram_bg				; write to background nametable
 		move.w	#plane_size_64x32/4-1,d1	; write full screen
@@ -2435,6 +2452,20 @@ LevelSelect:
 	endif ; if TweakNavigationLevelSelect
 
 		beq.s	LevelSelect			; if not, loop level select
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.s	.notdebugcancel			; if not, branch
+		btst	#bitC,(v_jpadpress1).w		; was C pressed?
+		beq.s	.notdebugcancel			; if not, branch
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag
+		clr.w	(v_debuguse).w			; exit debug mode
+		clr.w	(f_pause).w			; clear pause state
+		move.w	#0,(v_jpadhold2).w		; clear Sonic's stale input
+		move.w	#0,(v_jpadhold1).w		; clear controller stale input
+		move.b	#id_Level,(v_gamemode).w	; return to the current level
+		rts
+.notdebugcancel:
+	endif ; if EnhancedDebug
 
 LevSel_SelectionMade:
 		move.w	(v_levselitem).w,d0		; get currently selected line
@@ -2527,6 +2558,9 @@ LevSel_Credits:
 ; ===========================================================================
 
 LevSel_Level_SS:
+	if EnhancedDebug
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag after selecting a level
+	endif ; if EnhancedDebug
 	if TweakConsistLevelSelClear
 		move.w  (v_zone).w,d0
 	endif ; if TweakConsistLevelSelClear
@@ -3462,7 +3496,7 @@ Level_SkipClr:
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
-		move.b	d0,(v_unused1).w		; clear unused flag (goggles?)
+		move.b	d0,(v_goggles).w		; clear goggles flag
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -4233,7 +4267,7 @@ End_LoadSonic:
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
-		move.b	d0,(v_unused1).w		; clear unused flag (goggles?)
+		move.b	d0,(v_goggles).w		; clear goggles flag
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -4242,7 +4276,7 @@ End_LoadSonic:
 		move.b	#1,(f_ringcount).w		; update rings counter
 		move.b	#0,(f_timecount).w		; stop time counter for the ending sequence
 	if FeatureRestoreMonitorScubaGear
-		move.b	#0,(f_goggles).w 					; move 0 to the goggle check
+		move.b	#0,(v_goggles).w 					; move 0 to the goggle check
 	endif ; if FeatureRestoreMonitorScubaGear
 		move.w	#1800,(v_generictimer).w	; set generic timer to 30 seconds (unused in ending sequence)
 		move.b	#id_VBlank_Ending,(v_vblank_routine).w ; set VBlank routine to $18
@@ -4278,6 +4312,13 @@ End_MainLoop:
 		beq.s	End_ChkEmerald			; if yes, branch
 
 		move.b	#id_Credits,(v_gamemode).w	; change game mode to credits
+	if EnableSRAM=1
+		gotoSRAM
+		move.b	#"S",(sram_save_sig1).l		; mark SRAM as initialized
+		move.b	#"1",(sram_save_sig2).l		; mark this game's save data
+		ori.b	#maskSRAMGameComplete,(sram_unlock_flags).l ; remember the game has been completed
+		gotoROM
+	endif ; if EnableSRAM=1
 		music	#bgm_Credits,snd_bsr,snd_load_b,QueueSound2	; play it
 		move.w	#0,(v_creditsnum).w		; set credits page number to 0 ("Sonic Team Staff")
 		rts					; return to MainGameLoop
@@ -5657,10 +5698,17 @@ SS_6:		binclude	"sslayout/6 (REV00).eni"
 	else
 		; SS 5 and 6 had broken objects outside the accessible layout;
 		; REV01 removes those - remaining layouts stay unchanged.
+	  if FeatureSonicJam
+SS_5:		binclude	"Enhancements/Sonic Jam/Common/sslayout/5 (REV01).eni"
+		even
+SS_6:		binclude	"Enhancements/Sonic Jam/Common/sslayout/6 (REV01).eni"
+		even
+	  else
 SS_5:		binclude	"sslayout/5 (REV01).eni"
 		even
 SS_6:		binclude	"sslayout/6 (REV01).eni"
 		even
+	  endif ; if FeatureSonicJam
 	endif
 
 ; ---------------------------------------------------------------------------
@@ -5687,41 +5735,41 @@ Art_SbzSmoke:	binclude	"artunc/SBZ Background Smoke.unc"
 ; ---------------------------------------------------------------------------
 Level_Index:
 		; GHZ
-		dc.w Level_GHZ1-Level_Index, Level_GHZbg-Level_Index, Level_GHZ1Unk-Level_Index
-		dc.w Level_GHZ2-Level_Index, Level_GHZbg-Level_Index, Level_GHZ2Unk-Level_Index
-		dc.w Level_GHZ3-Level_Index, Level_GHZbg-Level_Index, Level_GHZ3Unk-Level_Index
-		dc.w Level_GHZ4Unk-Level_Index, Level_GHZ4Unk-Level_Index, Level_GHZ4Unk-Level_Index
+		dc.w Level_GHZ1-Level_Index,Level_GHZbg-Level_Index,Level_GHZ1Unk-Level_Index
+		dc.w Level_GHZ2-Level_Index,Level_GHZbg-Level_Index,Level_GHZ2Unk-Level_Index
+		dc.w Level_GHZ3-Level_Index,Level_GHZbg-Level_Index,Level_GHZ3Unk-Level_Index
+		dc.w Level_GHZ4Unk-Level_Index,Level_GHZ4Unk-Level_Index,Level_GHZ4Unk-Level_Index
 		; LZ
-		dc.w Level_LZ1-Level_Index, Level_LZbg-Level_Index, Level_LZ1Unk-Level_Index
-		dc.w Level_LZ2-Level_Index, Level_LZbg-Level_Index, Level_LZ2Unk-Level_Index
-		dc.w Level_LZ3-Level_Index, Level_LZbg-Level_Index, Level_LZ3Unk-Level_Index
-		dc.w Level_SBZ3-Level_Index, Level_LZbg-Level_Index, Level_SBZ3Unk-Level_Index
+		dc.w Level_LZ1-Level_Index,Level_LZbg-Level_Index,Level_LZ1Unk-Level_Index
+		dc.w Level_LZ2-Level_Index,Level_LZbg-Level_Index,Level_LZ2Unk-Level_Index
+		dc.w Level_LZ3-Level_Index,Level_LZbg-Level_Index,Level_LZ3Unk-Level_Index
+		dc.w Level_SBZ3-Level_Index,Level_LZbg-Level_Index,Level_SBZ3Unk-Level_Index
 		; MZ
-		dc.w Level_MZ1-Level_Index, Level_MZ1bg-Level_Index, Level_MZ1-Level_Index
-		dc.w Level_MZ2-Level_Index, Level_MZ2bg-Level_Index, Level_MZ2Unk-Level_Index
-		dc.w Level_MZ3-Level_Index, Level_MZ3bg-Level_Index, Level_MZ3Unk-Level_Index
-		dc.w Level_MZ4Unk-Level_Index, Level_MZ4Unk-Level_Index, Level_MZ4Unk-Level_Index
+		dc.w Level_MZ1-Level_Index,Level_MZ1bg-Level_Index,Level_MZ1-Level_Index
+		dc.w Level_MZ2-Level_Index,Level_MZ2bg-Level_Index,Level_MZ2Unk-Level_Index
+		dc.w Level_MZ3-Level_Index,Level_MZ3bg-Level_Index,Level_MZ3Unk-Level_Index
+		dc.w Level_MZ4Unk-Level_Index,Level_MZ4Unk-Level_Index,Level_MZ4Unk-Level_Index
 		; SLZ
-		dc.w Level_SLZ1-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ2-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ3-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ1Unk-Level_Index, Level_SLZ1Unk-Level_Index, Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ1-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ2-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ3-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ1Unk-Level_Index,Level_SLZ1Unk-Level_Index,Level_SLZ1Unk-Level_Index
 		; SYZ
-		dc.w Level_SYZ1-Level_Index, Level_SYZbg-Level_Index, Level_SYZ1Unk-Level_Index
-		dc.w Level_SYZ2-Level_Index, Level_SYZbg-Level_Index, Level_SYZ2Unk-Level_Index
-		dc.w Level_SYZ3-Level_Index, Level_SYZbg-Level_Index, Level_SYZ3Unk-Level_Index
-		dc.w Level_SYZ4Unk-Level_Index, Level_SYZ4Unk-Level_Index, Level_SYZ4Unk-Level_Index
+		dc.w Level_SYZ1-Level_Index,Level_SYZbg-Level_Index,Level_SYZ1Unk-Level_Index
+		dc.w Level_SYZ2-Level_Index,Level_SYZbg-Level_Index,Level_SYZ2Unk-Level_Index
+		dc.w Level_SYZ3-Level_Index,Level_SYZbg-Level_Index,Level_SYZ3Unk-Level_Index
+		dc.w Level_SYZ4Unk-Level_Index,Level_SYZ4Unk-Level_Index,Level_SYZ4Unk-Level_Index
 		; SBZ
-		dc.w Level_SBZ1-Level_Index, Level_SBZ1bg-Level_Index, Level_SBZ1bg-Level_Index
-		dc.w Level_SBZ2-Level_Index, Level_SBZ2bg-Level_Index, Level_SBZ2bg-Level_Index
-		dc.w Level_SBZ2-Level_Index, Level_SBZ2bg-Level_Index, Level_SBZ2Unk-Level_Index
-		dc.w Level_SBZ4Unk-Level_Index, Level_SBZ4Unk-Level_Index, Level_SBZ4Unk-Level_Index
+		dc.w Level_SBZ1-Level_Index,Level_SBZ1bg-Level_Index,Level_SBZ1bg-Level_Index
+		dc.w Level_SBZ2-Level_Index,Level_SBZ2bg-Level_Index,Level_SBZ2bg-Level_Index
+		dc.w Level_SBZ2-Level_Index,Level_SBZ2bg-Level_Index,Level_SBZ2Unk-Level_Index
+		dc.w Level_SBZ4Unk-Level_Index,Level_SBZ4Unk-Level_Index,Level_SBZ4Unk-Level_Index
 		zonewarning Level_Index,24
 		; Ending
-		dc.w Level_End-Level_Index, Level_GHZbg-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_End-Level_Index, Level_GHZbg-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_EndUnk-Level_Index, Level_EndUnk-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_EndUnk-Level_Index, Level_EndUnk-Level_Index, Level_EndUnk-Level_Index
+		dc.w Level_End-Level_Index,Level_GHZbg-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_End-Level_Index,Level_GHZbg-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_EndUnk-Level_Index,Level_EndUnk-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_EndUnk-Level_Index,Level_EndUnk-Level_Index,Level_EndUnk-Level_Index
 
 Level_GHZ1:	binclude	"levels/ghz1.bin"
 		even
@@ -5833,61 +5881,79 @@ Art_Dust:	binclude	"Enhancements/artunc/spindust.unc"
 ; ---------------------------------------------------------------------------
 ObjPos_Index:
 		; GHZ
-		dc.w ObjPos_GHZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; LZ
-		dc.w ObjPos_LZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_LZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_LZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; MZ
-		dc.w ObjPos_MZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SLZ
-		dc.w ObjPos_SLZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SYZ
-		dc.w ObjPos_SYZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SBZ
-		dc.w ObjPos_SBZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_FZ-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_FZ-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		zonewarning ObjPos_Index,$10
 		; Ending
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; --- Put extra object data here. ---
 ObjPosLZPlatform_Index:
-		dc.w ObjPos_LZ1pf1-ObjPos_Index, ObjPos_LZ1pf2-ObjPos_Index
-		dc.w ObjPos_LZ2pf1-ObjPos_Index, ObjPos_LZ2pf2-ObjPos_Index
-		dc.w ObjPos_LZ3pf1-ObjPos_Index, ObjPos_LZ3pf2-ObjPos_Index
-		dc.w ObjPos_LZ1pf1-ObjPos_Index, ObjPos_LZ1pf2-ObjPos_Index
+		dc.w ObjPos_LZ1pf1-ObjPos_Index,ObjPos_LZ1pf2-ObjPos_Index
+		dc.w ObjPos_LZ2pf1-ObjPos_Index,ObjPos_LZ2pf2-ObjPos_Index
+		dc.w ObjPos_LZ3pf1-ObjPos_Index,ObjPos_LZ3pf2-ObjPos_Index
+		dc.w ObjPos_LZ1pf1-ObjPos_Index,ObjPos_LZ1pf2-ObjPos_Index
 ObjPosSBZPlatform_Index:
-		dc.w ObjPos_SBZ1pf1-ObjPos_Index, ObjPos_SBZ1pf2-ObjPos_Index
-		dc.w ObjPos_SBZ1pf3-ObjPos_Index, ObjPos_SBZ1pf4-ObjPos_Index
-		dc.w ObjPos_SBZ1pf5-ObjPos_Index, ObjPos_SBZ1pf6-ObjPos_Index
-		dc.w ObjPos_SBZ1pf1-ObjPos_Index, ObjPos_SBZ1pf2-ObjPos_Index
-		dc.b $FF, $FF, 0, 0, 0,	0
+		dc.w ObjPos_SBZ1pf1-ObjPos_Index,ObjPos_SBZ1pf2-ObjPos_Index
+		dc.w ObjPos_SBZ1pf3-ObjPos_Index,ObjPos_SBZ1pf4-ObjPos_Index
+		dc.w ObjPos_SBZ1pf5-ObjPos_Index,ObjPos_SBZ1pf6-ObjPos_Index
+		dc.w ObjPos_SBZ1pf1-ObjPos_Index,ObjPos_SBZ1pf2-ObjPos_Index
+		dc.b $FF,$FF,0,0,0,0
 
-ObjPos_GHZ1:	binclude	"objpos/ghz1.bin"
+ObjPos_GHZ1:
+	if (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/ghz1.bin"
+	else
+		binclude	"objpos/ghz1.bin"
+	endif
 		even
-ObjPos_GHZ2:	binclude	"objpos/ghz2.bin"
+ObjPos_GHZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/ghz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/ghz2.bin"
+	else
+		binclude	"objpos/ghz2.bin"
+	endif
 		even
 ObjPos_GHZ3:
 	if Revision=0
 		binclude	"objpos/ghz3 (REV00).bin"
+		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/ghz3 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/ghz3 (REV01).bin"
 		even
 	else
 		binclude	"objpos/ghz3 (REV01).bin"
@@ -5898,21 +5964,40 @@ ObjPos_LZ1:
 	if Revision=0
 		binclude	"objpos/lz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/lz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/lz1 (REV01).bin"
 		even
 	endif
-ObjPos_LZ2:	binclude	"objpos/lz2.bin"
+ObjPos_LZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/lz2.bin"
+	else
+		binclude	"objpos/lz2.bin"
+	endif
 		even
 ObjPos_LZ3:
 	if Revision=0
 		binclude	"objpos/lz3 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/lz3 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/lz3 (REV01).bin"
+		even
 	else
 		binclude	"objpos/lz3 (REV01).bin"
 		even
 	endif
-ObjPos_SBZ3:	binclude	"objpos/sbz3.bin"
+ObjPos_SBZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/sbz3.bin"
+	else
+		binclude	"objpos/sbz3.bin"
+	endif
 		even
 
 ObjPos_LZ1pf1:	binclude	"objpos/platforms/lz1pf1.bin"
@@ -5932,28 +6017,82 @@ ObjPos_MZ1:
 	if Revision=0
 		binclude	"objpos/mz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/mz1 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/mz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/mz1 (REV01).bin"
 		even
 	endif
-ObjPos_MZ2:	binclude	"objpos/mz2.bin"
+ObjPos_MZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/mz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/mz2.bin"
+	else
+		binclude	"objpos/mz2.bin"
+	endif
 		even
-ObjPos_MZ3:	binclude	"objpos/mz3.bin"
+ObjPos_MZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/mz3.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/mz3.bin"
+	else
+		binclude	"objpos/mz3.bin"
+	endif
 		even
 
-ObjPos_SLZ1:	binclude	"objpos/slz1.bin"
+ObjPos_SLZ1:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/slz1.bin"
+	else
+		binclude	"objpos/slz1.bin"
+	endif
 		even
-ObjPos_SLZ2:	binclude	"objpos/slz2.bin"
+ObjPos_SLZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/slz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/slz2.bin"
+	else
+		binclude	"objpos/slz2.bin"
+	endif
 		even
-ObjPos_SLZ3:	binclude	"objpos/slz3.bin"
+ObjPos_SLZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/slz3.bin"
+	else
+		binclude	"objpos/slz3.bin"
+	endif
 		even
-ObjPos_SYZ1:	binclude	"objpos/syz1.bin"
+ObjPos_SYZ1:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/syz1.bin"
+	else
+		binclude	"objpos/syz1.bin"
+	endif
 		even
-ObjPos_SYZ2:	binclude	"objpos/syz2.bin"
+ObjPos_SYZ2:
+	if (FeatureSonicJam=1)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Original/objpos/syz2.bin"
+	elseif (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/syz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/syz2.bin"
+	else
+		binclude	"objpos/syz2.bin"
+	endif
 		even
 ObjPos_SYZ3:
 	if Revision=0
 		binclude	"objpos/syz3 (REV00).bin"
+		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/syz3 (REV01).bin"
 		even
 	else
 		binclude	"objpos/syz3 (REV01).bin"
@@ -5964,13 +6103,31 @@ ObjPos_SBZ1:
 	if Revision=0
 		binclude	"objpos/sbz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/sbz1 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/sbz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/sbz1 (REV01).bin"
 		even
 	endif
-ObjPos_SBZ2:	binclude	"objpos/sbz2.bin"
+ObjPos_SBZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/sbz2.bin"
+	else
+		binclude	"objpos/sbz2.bin"
+	endif
 		even
-ObjPos_FZ:	binclude	"objpos/fz.bin"
+ObjPos_FZ:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/fz.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/fz.bin"
+	else
+		binclude	"objpos/fz.bin"
+	endif
 		even
 
 ObjPos_SBZ1pf1:	binclude	"objpos/platforms/sbz1pf1.bin"
@@ -5986,7 +6143,16 @@ ObjPos_SBZ1pf5:	binclude	"objpos/platforms/sbz1pf5.bin"
 ObjPos_SBZ1pf6:	binclude	"objpos/platforms/sbz1pf6.bin"
 		even
 
-ObjPos_End:	binclude	"objpos/ending.bin"
+ObjPos_End:
+	if (FeatureSonicJam=1)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Original/objpos/ending.bin"
+	elseif (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Normal/objpos/ending.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Easy/objpos/ending.bin"
+	else
+		binclude	"objpos/ending.bin"
+	endif
 		even
 
 ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0

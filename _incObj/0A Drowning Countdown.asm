@@ -181,7 +181,7 @@ Drown_WobbleData:
 Drown_Countdown:; Routine $A
 	if FeatureRestoreMonitorScubaGear
 		; Scuba gear bypasses the normal air countdown while goggles are active.
-		tst.b	(f_goggles).w					; do we have goggles?
+		tst.b	(v_goggles).w					; do we have goggles?
 		bne.w	.nocountdown					; if yes, branch
 	endif
 

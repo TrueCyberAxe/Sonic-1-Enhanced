@@ -162,27 +162,27 @@ id_Dash:			equ id_Run
 ; animations without resetting the animation positon.
 
 SonAni_Walk:	dc.b $FF
-		dc.b fr_Walk13, fr_Walk14, fr_Walk15, fr_Walk16, fr_Walk11, fr_Walk12
+		dc.b fr_Walk13,fr_Walk14,fr_Walk15,fr_Walk16,fr_Walk11,fr_Walk12
 		dc.b afEnd
 		even
 
 SonAni_Run:	dc.b $FF
-		dc.b fr_Run11,  fr_Run12,  fr_Run13,  fr_Run14,  afEnd,     afEnd
+		dc.b fr_Run11,fr_Run12,fr_Run13,fr_Run14,afEnd,afEnd
 		dc.b afEnd
 		even
 
 SonAni_Roll:	dc.b $FE
-		dc.b fr_Roll1,  fr_Roll2,  fr_Roll3,  fr_Roll4,  fr_Roll5,  afEnd
+		dc.b fr_Roll1,fr_Roll2,fr_Roll3,fr_Roll4,fr_Roll5,afEnd
 		dc.b afEnd
 		even
 
 SonAni_Roll2:	dc.b $FE
-		dc.b fr_Roll1,  fr_Roll2,  fr_Roll5,  fr_Roll3,  fr_Roll4,  fr_Roll5
+		dc.b fr_Roll1,fr_Roll2,fr_Roll5,fr_Roll3,fr_Roll4,fr_Roll5
 		dc.b afEnd
 		even
 
 SonAni_Push:	dc.b $FD
-		dc.b fr_Push1,  fr_Push2,  fr_Push3,  fr_Push4,  afEnd,     afEnd
+		dc.b fr_Push1,fr_Push2,fr_Push3,fr_Push4,afEnd,afEnd
 		dc.b afEnd
 		even
 

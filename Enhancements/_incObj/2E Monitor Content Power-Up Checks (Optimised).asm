@@ -120,7 +120,11 @@ Pow_ChkGoggles:
 	if FeatureRestoreMonitorScubaGear
 		cmpi.b	#8,d0					; does monitor contain Goggles?
 		bne.s	Pow_ChkEnd				; if not, branch to Pow_ChkEnd
-		move.b	#1,(f_goggles).w			; mark goggles as active
+		move.b	#1,(v_goggles).w			; mark goggles as active
+		lea	(v_gogglesobj).w,a1			; load the fixed goggles overlay object
+		clr.b	obRoutine(a1)				; initialize it from the start
+		_move.b	#id_ShieldItem,obID(a1)		; load shield object handler
+		move.b	#5,obAnim(a1)				; use goggles overlay mode
 	endif
   
 ; ===========================================================================

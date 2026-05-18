@@ -54,6 +54,12 @@ expansion_control:	equ $A1000D
 ; Misc addresses
 sram_port:		equ $A130F1
 security_addr:		equ $A14000
+sram_save_sig1:		equ $200001
+sram_save_sig2:		equ $200003
+sram_unlock_flags:	equ $200005
+
+bitSRAMGameComplete:	equ 0
+maskSRAMGameComplete:	equ 1<<bitSRAMGameComplete
 
 ; Sound driver constants
 TrackPlaybackControl:	equ 0		; All tracks
@@ -645,6 +651,7 @@ ArtTile_Spring_Vertical:	equ $533
 ArtTile_Shield:			equ $541
 ArtTile_Invincibility:		equ $55C
 ArtTile_Game_Over:		equ $55E
+ArtTile_Goggles:		equ $660
 ArtTile_Title_Card:		equ $580
 ArtTile_Animal_1:		equ $580
 ArtTile_Animal_2:		equ $592
@@ -762,6 +769,8 @@ bitSpinSmoke:			equ 2
 bitStandingOn:			equ 3
 bitPushing:			equ 5
 bitObjectFlag:			equ 7
+bitDebugLevelSelect:		equ 7
+maskDebugLevelSelect:		equ 1<<bitDebugLevelSelect
 
 obSmoke:			equ $FFFFD11C
 

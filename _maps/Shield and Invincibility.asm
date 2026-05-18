@@ -10,6 +10,9 @@ Map_Shield_internal:	mappingsTable
 	mappingsTableEntry.w	.stars2
 	mappingsTableEntry.w	.stars3
 	mappingsTableEntry.w	.stars4
+    if FeatureRestoreMonitorScubaGear
+	mappingsTableEntry.w	.goggles
+    endif ; if FeatureRestoreMonitorScubaGear
 
 .shield1:	spriteHeader
 	spritePiece	-$18, -$18, 3, 3, 0, 0, 0, 0, 0
@@ -60,5 +63,11 @@ Map_Shield_internal:	mappingsTable
 	spritePiece	-$18, 0, 3, 3, $12, 0, 1, 0, 0
 	spritePiece	0, 0, 3, 3, $1B, 0, 1, 0, 0
 .stars4_End
+
+	if FeatureRestoreMonitorScubaGear
+.goggles:	spriteHeader
+	spritePiece	-8, -$14, 2, 2, 0, 0, 0, 0, 0
+.goggles_End
+	endif ; if FeatureRestoreMonitorScubaGear
 
 	even

@@ -88,6 +88,9 @@ PLC_Main2:	plcheader
 		plcm	Nem_Monitors,	ArtTile_Monitor			; monitors
 		plcm	Nem_Shield,	ArtTile_Shield			; shield
 		plcm	Nem_Stars,	ArtTile_Invincibility		; invincibility stars
+	if FeatureRestoreMonitorScubaGear
+		plcm	Nem_Goggle,	ArtTile_Goggles			; goggles
+	endif ; if FeatureRestoreMonitorScubaGear
 PLC_Main2_end:
 
 ; ---------------------------------------------------------------------------

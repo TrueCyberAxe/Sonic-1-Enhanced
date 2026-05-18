@@ -35,6 +35,7 @@ FeatureSonicCDExtendedCamera:		equ 1*Enhanced	; 															Based on http://s
 
 ; Causes Crash when Entering Water
 FeatureSpindash:			equ 1*Enhanced	; 0 = Off, 1 = Sonic CD, 2 = Sonic 2											Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and  https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
+FeatureUnlockMovesAfterCompletion:	equ 1*Enhanced	; Unlock Spin Dash and Super Peel-Out after the game has been completed
 
 ; Feature
 FeatureCentreTitleScreen:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
@@ -63,6 +64,8 @@ TweakSegaLogoWhiteFade:			equ 2*Enhanced	; 1 = Initial Fade to White but Black t
 BugFixDebugMomentum:			equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-sonic-1s-debug-mode.5664/#post-84570
 BugFixDemoPlayback:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_demo_playback
 BugFixHiddenPoints:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
+FixBugEnemyDeathRoll:			equ 1*Enhanced	; Keep rolling and roll-jumping attacks from falling through to the hurt path
+FixBugInvinsibleMusic:			equ 1*Enhanced	; Clear stale invincibility and speed shoes music state
 BugFixTitleScreenPressStart:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 
 ; Unfinished

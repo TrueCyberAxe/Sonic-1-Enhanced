@@ -414,8 +414,7 @@ MoveScreenHoriz:
 
 		bge.s	SH_AheadOfMid	; if yes, branch
 	else
-    ; bcc.s	SH_AheadOfMid <-- should it be this?
-		bra.s	SH_AheadOfMid	; extended camera: move toward target
+		bcc.s	SH_AheadOfMid	; if yes, branch
 	endif ; if (FixCameraFollowBug)|(FixBugs)
 
 	endif ; if FeatureSonicCDExtendedCamera=0
@@ -432,7 +431,7 @@ SH_AheadOfMid:
 	if (FixCameraFollowBug)|(FixBugs)
 		blo.s	SH_Ahead16	; if yes, branch
 	else
-		blt.s	SH_Ahead16    ; if yes, branch
+		blo.s	SH_Ahead16	; if yes, branch
 	endif
 
 		move.w	#16,d0		; set to 16 if greater

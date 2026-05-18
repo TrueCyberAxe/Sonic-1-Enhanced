@@ -15,6 +15,8 @@ Sonic_SpinDash:
 		andi.b	#btnABC,d0			; pressing A/B/C ?
 		beq.w	.end				; if not, return
 
+		bclr	#bitPushing,obStatus(a0)	; clear stale pushing state before charging
+
 	if FeatureSpindash>1
 		move.w	#$1F00,obAnim(a0)		; changed from #$900
 	else
@@ -52,6 +54,7 @@ Sonic_SpinDash:
 ; loc2_1AC8E
 Sonic_UpdateSpindash:
 		move.b #id_Spindash,obAnim(a0)			; set Spin Dash anim (9 in s2)
+		bclr	#bitPushing,obStatus(a0)		; prevent object pushes while charging
 
 		move.b	(v_jpadhold2).w,d0			; read controller
 		btst	#bitDn,d0				; check down button
@@ -66,6 +69,8 @@ Sonic_UpdateSpindash:
 		; add the difference between Sonic's rolling and standing heights
 		addq.w	#sonic_height-sonic_roll_height,obY(a0) ; keep Sonic grounded after radius change
 		move.b	#$00,f_spindash(a0)			; clear Spin Dash flag
+		bset	#2,obStatus(a0)				; enter rolling mode after releasing
+		bclr	#bitPushing,obStatus(a0)		; release without stale pushing state
 		moveq	#0,d0
 
 		; Sonic 2 Style Extra Charging
