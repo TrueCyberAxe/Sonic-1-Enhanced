@@ -1,0 +1,9 @@
+[submodule "Enhancements/Sonic CD"]
+	path = Enhancements/Sonic CD
+	url = https://github.com/sonicretro/scddisasm.git
+[submodule "Enhancements/Sonic 2"]
+	path = Enhancements/Sonic 2
+	url = https://github.com/sonicretro/s2disasm.git
+[submodule "Enhancements/Sonic 3"]
+	path = Enhancements/Sonic 3
+	url = https://github.com/sonicretro/skdisasm.git
