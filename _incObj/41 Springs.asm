@@ -7,7 +7,7 @@ Springs:
 		move.b	obRoutine(a0),d0
 		move.w	Spring_Index(pc,d0.w),d1
 		jsr	Spring_Index(pc,d1.w)
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range.w	DeleteObject
@@ -133,7 +133,7 @@ Spring_Flipped:
 		move.w	#15,locktime(a1)
 		move.w	obVelX(a1),obInertia(a1)
 
-	if BugFixSpringFaceWrongDirection
+	if FixBugSpringFaceWrongDirection
 		tst.w	obVelX(a1)				; is Sonic moving left?
 		bmi.s	.faceleft				; if yes, branch
 		bclr	#0,obStatus(a1)				; face Sonic right
@@ -143,7 +143,7 @@ Spring_Flipped:
 .facecont:
 	else
 		bchg	#0,obStatus(a1)
-	endif ; if BugFixSpringFaceWrongDirection
+	endif ; if FixBugSpringFaceWrongDirection
 
 		btst	#2,obStatus(a1)
 		bne.s	loc_DC56
@@ -201,9 +201,9 @@ Spring_BounceDwn:
 		clr.b	obSolid(a0)
 		sfx	#sfx_Spring,snd_jsr	; play spring sound
 
-	if BugFixSpringDownSpring=0
-		move.b	#id_roll,obAnim(a1)
-	endif ; if BugFixSpringDownSpring=0
+	if FixBugSpringDownSpring
+		move.b	#id_Roll,obAnim(a1)
+	endif ; if FixBugSpringDownSpring
 
 Spring_AniDwn: ; Routine $10
 	lea	(Ani_Spring).l,a1

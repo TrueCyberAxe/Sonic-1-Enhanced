@@ -23,6 +23,13 @@ OPL_Main:
 		move.w	(v_zone).w,d0			; get zone/act numbers
 		lsl.b	#6,d0
 		lsr.w	#4,d0				; combine zone/act into single number, times 4
+	if FeatureSonicJamModes
+		jsr	(SonicJam_GetObjPosPtrs).l
+		move.l	a0,(v_opl_data).w
+		move.l	a0,(v_opl_data+4).w
+		move.l	a1,(v_opl_data+8).w
+		move.l	a1,(v_opl_data+$C).w
+	else
 		lea	(ObjPos_Index).l,a0
 		movea.l	a0,a1				; copy index pointer to a1
 		adda.w	(a0,d0.w),a0			; jump to objpos list for specified zone/act
@@ -31,6 +38,7 @@ OPL_Main:
 		adda.w	2(a1,d0.w),a1			; jump to secondary objpos list (this is always blank)
 		move.l	a1,(v_opl_data+8).w		; copy objpos list address
 		move.l	a1,(v_opl_data+$C).w
+	endif ; FeatureSonicJamModes
 		lea	(v_objstate).w,a2
 		move.w	#$101,(a2)+			; start respawn counter at 1
 	if FixBugs
@@ -201,7 +209,7 @@ OPL_MovedRight:
 	.no_respawn:
 		bsr.w	OPL_SpawnObj			; check respawn flag and spawn object
 		beq.s	.loop_find_right		; loop until object is found outside window
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		tst.b	4(a0)				; was this object a remember state?
@@ -261,7 +269,7 @@ OPL_NoMove:
 OPL_SpawnObj:
 		tst.b	4(a0)				; is remember respawn flag set?
 		bpl.s	OPL_MakeItem			; if not, branch
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		btst	#7,2(a2,d2.w)			; is remember bit already set? (test only)
@@ -288,7 +296,7 @@ OPL_MakeItem:
 		move.b	d1,obStatus(a1)
 		move.b	(a0)+,d0			; get object id
 		bpl.s	.no_respawn_bit			; branch if remember respawn bit is not set
-	if (BugFixRememberSprite)|(FixBugs)
+	if (FixBugRememberSprite)|(FixBugs)
 		; Fix a remember sprite related bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 		bset	#7,2(a2,d2.w)			; set as removed

@@ -6,5 +6,5 @@ REM // Requires ".bin" files to be associated with an emulator.
 call build.bat
 
 if exist s1built.bin (
-    start "" s1built.bin
+    "C:/Users/Ronnie Smith/Desktop/Fusion364/Fusion.exe" s1built.bin
 )

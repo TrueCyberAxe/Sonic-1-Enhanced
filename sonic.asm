@@ -51,6 +51,8 @@ ZoneCount = 6
 ;	| Used for the zonewarning macro. Do not change, unless more zones get added.
 ;	| Discrete zones are: GHZ, LZ, MZ, SLZ, SYZ, and SBZ
 
+	include	"Enhancements/sonic_enhanced.asm"
+
 ; ===========================================================================
 ; Assembler-specific macros and assembler settings
 	include "MacroSetup.asm"
@@ -200,8 +202,13 @@ RomEndLoc:	dc.l EndOfRom-1		; End address of ROM
 	else
 		dc.l $20202020
 	endif
+	if EnableSRAM=1
+		dc.l sram_save_sig1	; SRAM start ($200001)
+		dc.l sram_unlock_flags	; SRAM end ($200005)
+	else
 		dc.l $20202020		; SRAM start ($200001)
 		dc.l $20202020		; SRAM end ($20xxxx)
+	endif
 	if FeatureUpdateHeader
 		dc.b "GITHUB DISSASEMBLY WITH ENHANCEMENT OPTIONS         " ; Notes (unused, anything can be put in this space, but it has to be 52 bytes.)
 	else
@@ -1169,10 +1176,17 @@ JoypadInit:
 ReadJoypads:
 		lea	(v_jpadhold1).w,a0		; address where joypad states are written
 		lea	(port_1_data).l,a1		; first joypad port
+	if Enhanced
+		bsr.w	Joypad_Read3ButtonFor6Button	; read standard inputs in six-button cycle order
+		bsr.w	Joypad_Read6Button		; detect and read six-button inputs for player 1
+		rts
+	else
 		bsr.s	.read				; do the first joypad
+	endif ; if Enhanced
 		addq.w	#2,a1				; do the second joypad (port_2_data)
 
 .read:
+Joypad_Read:
 		move.b	#0,(a1)				; read A and Start input (TH poll low)
 		nop					; wait a bit
 		nop					; ''
@@ -1198,6 +1212,94 @@ ReadJoypads:
 		move.b	d1,(a0)+			; write PRESSED buttons
 		rts					; return to VBlank routine
 ; End of function ReadJoypads
+
+	if Enhanced
+; ---------------------------------------------------------------------------
+; Subroutine to read three-button inputs in the cycle order needed before
+; reading the six-button extension: TH high, then TH low.
+; ---------------------------------------------------------------------------
+
+Joypad_Read3ButtonFor6Button:
+		move.b	#$40,(a1)			; read D-Pad, B, and C input (TH poll high)
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	(a1),d0				; write D-Pad, B, and C input states to d0
+		andi.b	#%00111111,d0			; clear all other inputs from the poll
+
+		move.b	#0,(a1)				; read A and Start input (TH poll low)
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	(a1),d1				; write A and Start input states to d1
+		lsl.b	#2,d1				; move A and Start to topmost bits
+		andi.b	#%11000000,d1			; clear all other inputs from the poll
+		or.b	d1,d0				; merge both poll results into d0
+		not.b	d0				; flip bits so that 0=released and 1=pressed
+
+		move.b	(a0),d1				; get buttons pressed the previous frame
+		eor.b	d0,d1				; XOR with buttons pressed this frame
+
+		move.b	d0,(a0)+			; write HELD buttons
+		and.b	d0,d1				; find buttons pressed this frame
+		move.b	d1,(a0)+			; write PRESSED buttons
+		rts					; return to VBlank routine
+; End of function Joypad_Read3ButtonFor6Button
+
+; ---------------------------------------------------------------------------
+; Subroutine to detect/read a six-button controller on port 1.
+; Extended buttons are stored as Z/Y/X/Mode in bits 0-3.
+; ---------------------------------------------------------------------------
+
+Joypad_Read6Button:
+		move.b	#$40,(a1)			; third TH poll high
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	#0,(a1)				; fourth TH poll low
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	#$40,(a1)			; fifth TH poll high
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	#0,(a1)				; sixth TH poll low, read six-button signature
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	(a1),d0				; low nybble is 0 on six-button pads
+		andi.b	#$F,d0
+		bne.s	.not6button
+
+		move.b	#$40,(a1)			; read Z/Y/X/Mode input
+		nop					; wait a bit
+		nop					; ''
+		nop					; ''
+		nop					; ''
+		move.b	(a1),d0
+		not.b	d0				; flip bits so that 0=released and 1=pressed
+		andi.b	#btnZ|btnY|btnX|btnMode,d0
+		move.b	(v_jpadhold1ext).w,d1		; get buttons pressed the previous frame
+		eor.b	d0,d1				; XOR with buttons pressed this frame
+		move.b	d0,(v_jpadhold1ext).w		; write HELD buttons
+		and.b	d0,d1				; find buttons pressed this frame
+		move.b	d1,(v_jpadpress1ext).w		; write PRESSED buttons
+		move.b	#1,(f_6button).w			; remember that port 1 has a six-button pad
+		rts
+
+.not6button:
+		move.b	#$40,(a1)			; leave TH high
+		clr.b	(v_jpadhold1ext).w		; clear stale six-button held inputs
+		clr.b	(v_jpadpress1ext).w		; clear stale six-button pressed inputs
+		rts
+	endif ; if Enhanced
 
 
 ; ===========================================================================
@@ -1484,7 +1586,7 @@ RunPLC:
 .skipXor:
 		andi.w	#$7FFF,d2			; clear XOR flag
 
-	if (BugFixPLCRaceCondition=0)&(FixBugs=0)
+	if (FixBugPLCRaceCondition=0)&(FixBugs=0)
 		; Relocated to bugfix below
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
 	endif
@@ -1501,7 +1603,7 @@ RunPLC:
 		move.l	d0,(v_plc_previousrow).w	; clear previous XOR dump
 		move.l	d5,(v_plc_dataword).w		; store lookup field
 		move.l	d6,(v_plc_shiftvalue).w		; store bit shift counter
-	if (BugFixPLCRaceCondition)|(FixBugs)
+	if (FixBugPLCRaceCondition)|(FixBugs)
 		; Fix a race condition with Pattern Load Cues
 		; https://info.sonicretro.org/SCHG_How-to:Fix_a_race_condition_with_Pattern_Load_Cues
 		move.w	d2,(v_plc_patternsleft).w	; save section counter
@@ -1585,29 +1687,29 @@ ProcessPLC_Return:
 ; loc_16DC:
 ProcessPLC_ShiftCue:
 		lea	(v_plc_queue_base).w,a0		; load PLC process list
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		lea	6(a0),a1
 		moveq	#$E,d0					; do $F cues
 	else
-		moveq	#(v_plc_queue_end-v_plc_buffer-v_plc_buffer_dest)/4-1,d0 ; set size of list
-	endif ; if BugFixPLCShifting
+		moveq	#(v_plc_buffer_only_end-v_plc_buffer-plc_slot_size)/4-1,d0 ; set size of list
+	endif ; if FixBugPLCShifting
 
 ; loc_16E2:
 .loop:
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		move.l	(a1)+,(a0)+
 		move.w	(a1)+,(a0)+
 	else
 		move.l	plc_slot_size(a0),(a0)+		; shift contents of PLC buffer up 6 bytes
-	endif ; if BugFixPLCShifting
+	endif ; if FixBugPLCShifting
 
 		dbf	d0,.loop			; repeat til done
 
-	if BugFixPLCShifting
+	if FixBugPLCShifting
 		moveq   #0,d0
 		move.l  d0,(a0)+    ; clear the last cue to avoid overcopying it
 		move.w  d0,(a0)+    ;
-	endif ; if BugFixPLCShifting
+	endif ; if FixBugPLCShifting
 
 	if FixBugs
 		; The above code does not properly 'pop' the 16th PLC entry.
@@ -2080,9 +2182,13 @@ GM_Title:	; fading out from previous game mode
 ;		music	bgm_Stop,0,1,1 													; stop music
 ;	endif ; if FeatureUseSonic2SoundDriver=0
 		music	#bgm_Stop,snd_bsr,snd_load_b,QueueSound2		; stop music
-		bsr.w	ClearPLC			; stop any potential in-progress PLC
-		bsr.w	PaletteFadeOut		; fade-out previous game mode
+		bsr.w	ClearPLC						; stop any potential in-progress PLC
+		bsr.w	PaletteFadeOut						; fade-out previous game mode
 ; ---------------------------------------------------------------------------
+
+	if FeatureSonicJamModes
+		jsr	(SonicJam_ResetModeOnTitle).l
+	endif ; FeatureSonicJamModes
 
 		; screen setup and loading "SONIC TEAM PRESENTS" (STP) patterns
 		disable_ints				; disable ints while accessing the VDP
@@ -2154,9 +2260,9 @@ Tit_LoadText:
 		move.w	#id_GHZ_act1,(v_zone).w	; set level to GHZ1 (000)
 		move.w	#0,(v_pcyc_time).w		; disable palette cycling
 
-	if BugFixDrownLockTitleScreen
+	if FixBugDrownLockTitleScreen
 		move.b	#0,(f_nobgscroll).w 									; clear scroll lock
-	endif ; if BugFixDrownLockTitleScreen
+	endif ; if FixBugDrownLockTitleScreen
 
 		bsr.w	LevelSizeLoad			; load level size (will use GHZ1's sizes)
 		bsr.w	DeformLayers			; initialize background deformation before fade-in (redundant here)
@@ -2201,7 +2307,7 @@ Tit_LoadText:
 
 		locVRAM	ArtTile_Level*tile_size		; set target VRAM location for level patterns
 
-		lea	(GHZ_1st).l,a0 			; load first half of GHZ patterns
+		lea	(Nem_GHZ_1st).l,a0 		; load first half of GHZ patterns
 
 	if (TweakTitleCompress)&(TweakLevelCompressionMode>1)
 		;if TweakLevelCompressionMode=2 					; @NOTE needs proper implementation
@@ -2220,7 +2326,7 @@ Tit_LoadText:
 		move.b	#0,(f_debugmode).w		; disable debug mode (cheat remains active though)
 		move.w	#376,(v_generictimer).w		; run title screen for 376 frames (6 seconds plus some change)
 
-	if (BugFixTitleScreenPressStart)|(FixBugs)
+	if (FixBugTitleScreenPressStart)|(FixBugs)
 		; Fix the Press Start Button text
 		; https://info.sonicretro.org/SCHG_How-to:Display_the_Press_Start_Button_text
 		clearRAM v_sonicteam,v_sonicteam+object_size ; delete RAM used by "SONIC TEAM PRESENTS" object (fully)
@@ -2275,24 +2381,34 @@ Tit_MainLoop:
 		bsr.w	PalCycle_Title			; run title screen palette cycle
 		bsr.w	RunPLC				; run any potential PLC
 
-	if EnhancedDebug
+	if FeatureSonicJamModes
+		tst.b	(f_6button).w			; is a six-button controller connected?
+		beq.s	.nojamdemo			; if not, keep A/B/C for Jam mode selection
+		move.b	(v_jpadpress1ext).w,d0		; get pressed six-button inputs
+		andi.b	#btnX|btnY|btnZ,d0		; did X/Y/Z get pressed?
+		bne.w	GotoDemo			; if yes, start a demo
+.nojamdemo:
+	elseif EnhancedDebug
 		move.b v_jpadpress1,d0        								; get pressed buttons...
 		andi.b #btnA,d0																; is A button pressed?
 		bne.w	GotoDemo																; if yes, branch
-	endif ; if EnhancedDebug
+	endif ; if FeatureSonicJamModes
 
 	if (Debug+EnhancedDebug+FeatureLevelSelectOnC)
+		move.b v_jpadpress1,d0				; get pressed buttons...
 		andi.b #btnStart,d0				; is Start button pressed?
 		bne.w	PlayLevel				; if so, branch
 
-		move.b v_jpadpress1,d0				; get pressed buttons...
-		andi.b #btnC,d0					; is button C pressed?
+		if FeatureSonicJamModes=0
+			move.b v_jpadpress1,d0			; get pressed buttons...
+			andi.b #btnC,d0				; is button C pressed?
 
-		if ExtendedMenu=0
-			bne.w	Tit_LoadLevelSelect		; if so, branch
-		else
-			bne.w	Tit_LoadLevelSelect		; if so, branch
-		endif ; if ExtendedMenu=0
+			if ExtendedMenu=0
+				bne.w	Tit_LoadLevelSelect	; if so, branch
+			else
+				bne.w	Tit_LoadLevelSelect	; if so, branch
+			endif ; if ExtendedMenu=0
+		endif ; if FeatureSonicJamModes=0
 	endif ; if FeatureLevelSelectOnC
 
 		move.w	(v_player+obX).w,d0		; get current title screen position (big Sonic object)
@@ -2366,11 +2482,23 @@ Tit_CountC:
 
 ; loc_3230:
 Tit_ChkStartOrDemo:
+	if FeatureSonicJamModes
+		; Check Start/A/B/C before the demo timer. Otherwise pressing A/B/C on
+		; the final title frame can fall through to GotoDemo before the mode is seen.
+		jsr	(SonicJam_TitleModeSelect).l
+		tst.b	d0
+		bmi.w	Tit_ChkLevSel			; Start = vanilla path, including level-select behaviour
+		bgt.w	PlayLevel			; A/B/C = selected Jam mode, start game
+
+		tst.w	(v_generictimer).w		; has title screen timer expired?
+		beq.w	GotoDemo			; if yes, launch Demo mode
+		bra.w	Tit_MainLoop			; no Start/A/B/C
+	else
 		tst.w	(v_generictimer).w		; has title screen timer expired?
 		beq.w	GotoDemo			; if yes, launch Demo mode
 		andi.b	#btnStart,(v_jpadpress1).w	; check if Start is pressed
 		beq.w	Tit_MainLoop			; if not, continue looping title screen
-
+	endif ; FeatureSonicJamModes
 Tit_ChkLevSel:
 		tst.b	(f_levselcheat).w		; check if level select code is on
 		beq.w	PlayLevel			; if not, begin game by playing normal level
@@ -2378,19 +2506,47 @@ Tit_ChkLevSel:
 		beq.w	PlayLevel			; if not, begin game by playing normal level
 ; ---------------------------------------------------------------------------
 
+GM_Level_Select:
+Tit_LoadLevelSelect:
+GotoLevelSelect:
 Tit_EnterLevelSelect:
-	if (BugFixLevelSelectCorruption)|(FixBugs)
+	if (FixBugLevelSelectCorruption)|(FixBugs)
 		; Fix the level selects graphics bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
 		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
 		bsr.w	WaitForVBlank			; run VBlank one extra frame to prevent graphical glitches
 	endif
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.s	.loadactivepal			; if not, branch
+		bsr.w	ClearPLC			; stop any level PLC before overwriting VRAM with menu art
+		clr.w	(v_plc_patternsleft).w		; clear any in-progress PLC transfer
+		bsr.w	PaletteFadeOut			; fade out the level before drawing the menu
+		moveq	#palid_LevelSel,d0		; load level select palette...
+		bsr.w	PalLoad_Fade			; ...to fade-in buffer
+		bra.s	.levelselectpalready
+
+.loadactivepal:
+	endif ; if EnhancedDebug
 		moveq	#palid_LevelSel,d0		; load level select palette...
 		bsr.w	PalLoad				; ...directly to active palette
+.levelselectpalready:
 
 		clearRAM v_hscrolltablebuffer		; clear H-Scroll buffer
 		move.l	d0,(v_scrposy_vdp).w		; clear VSRAM (d0 is still 0)
 		disable_ints				; disable interrupts
+
+	if EnhancedDebug
+		bsr.w	ClearScreen					; wipe old level planes and sprites for debug entry
+		moveq	#0,d0						; restore clear value after ClearScreen
+		lea	(vdp_data_port).l,a6				; prepare VDP data write
+		locVRAM	ArtTile_Level_Select_Font*tile_size,4(a6)	; load level select font for debug entry
+		lea	(Art_Text).l,a5					; load font source
+		move.w	#(Art_Text_end-Art_Text)/2-1,d1			; load all font tiles
+.LevSelLoadFont:
+		move.w	(a5)+,(a6)					; write one word of font art
+		dbf	d1,.LevSelLoadFont				; loop until font is loaded
+	endif ; if EnhancedDebug
 
 		lea	(vdp_data_port).l,a6		; prepare VDP data write
 		locVRAM	vram_bg				; write to background nametable
@@ -2399,22 +2555,57 @@ Tit_EnterLevelSelect:
 		dbf	d1,.LevSelClearBG		; loop until plane is fully cleared
 
 		bsr.w	LevSelTextLoad			; load level select text before entering main loop
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.s	.nofadein			; if not, branch
+		bsr.w	PaletteFadeIn			; fade into the level select menu
+
+.nofadein:
+	endif ; if EnhancedDebug
 
 ; ---------------------------------------------------------------------------
 ; Level Select main loop
 ; ---------------------------------------------------------------------------
 
 LevelSelect:
-	if BugFixLevelSelectCorruption
+	if FixBugLevelSelectCorruption
 		move.b	#(id_VBlank_Title-2),(v_vblank_routine).w
 	else
 		move.b	#id_VBlank_Title,(v_vblank_routine).w ; set VBlank routine to $04
-	endif ; if BugFixLevelSelectCorruption
+	endif ; if FixBugLevelSelectCorruption
 		bsr.w	WaitForVBlank			; wait for VBlank to finish
 		bsr.w	LevSelControls			; update selected line if necessary
 		bsr.w	RunPLC				; run any potential PLC
 		tst.l	(v_plc_queue_base).w		; are any patterns in the PLC still left to be loaded?
 		bne.s	LevelSelect			; if yes, block quitting level select until finished
+
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.s	.notdebuginput			; if not, branch
+	if Enhanced
+		tst.b	(f_debug_6button).w		; is a six-button pad detected?
+		bne.s	.debugsixbuttonback		; if yes, use Mode to exit debug level select
+	endif ; if Enhanced
+		btst	#bitB,(v_jpadpress1).w		; was B pressed?
+		bne.s	LevSel_ExitDebugToLevel		; if yes, exit debug mode and return to the level
+	if Enhanced
+		bra.s	.notdebugmode
+
+.debugsixbuttonback:
+		btst	#bitMode,(v_jpadpress1ext).w	; was Mode pressed?
+		bne.s	LevSel_ExitDebugToLevel		; if yes, exit debug mode and return to the level
+		andi.b	#btnStart,(v_jpadpress1).w	; only Start selects from debug level select
+		bra.s	.gotselectpress
+	endif ; if Enhanced
+	if Enhanced
+.notdebugmode:
+	endif ; if Enhanced
+		btst	#bitC,(v_jpadpress1).w		; was C pressed?
+		bne.s	LevSel_ExitDebugToLevel		; if yes, exit debug mode and return to the level
+		andi.b	#btnStart,(v_jpadpress1).w	; only Start selects from debug level select
+		bra.s	.gotselectpress
+.notdebuginput:
+	endif ; if EnhancedDebug
 
 	if TweakNavigationLevelSelect
 		andi.b	#btnB+btnStart,(v_jpadpress1).w		; is B or Start pressed?
@@ -2422,7 +2613,126 @@ LevelSelect:
 		andi.b	#btnABC+btnStart,(v_jpadpress1).w	; is A, B, C, or Start pressed?
 	endif ; if TweakNavigationLevelSelect
 
+.gotselectpress:
 		beq.s	LevelSelect			; if not, loop level select
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.w	LevSel_NotDebugCancel		; if not, branch
+		bra.w	LevSel_NotDebugCancel		; continue with the selected level
+
+LevSel_ExitDebugToLevel:
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag
+		clr.w	(v_debuguse).w			; exit debug mode
+		clr.w	(f_pause).w			; clear pause state
+		move.w	#0,(v_jpadhold2).w		; clear Sonic's stale input
+		move.w	#0,(v_jpadhold1).w		; clear controller stale input
+		move.b	#id_Level,(v_gamemode).w	; return to the current level
+		bsr.w	PaletteFadeOut			; fade out the debug menu before restoring level art
+		bsr.w	LevSel_RestoreLevelDisplay	; restore level planes, palettes, and common art
+		jsr	(Hud_Base).l			; reload the HUD tiles replaced by level select
+		move.b	#1,(f_scorecount).w		; refresh the score
+		move.b	#1,(f_ringcount).w		; refresh the ring counter
+		move.l	#Map_Sonic,(v_player+obMap).w	; restore Sonic after leaving debug mode
+		move.w	#ArtTile_Sonic,(v_player+obGfx).w ; restore Sonic's art tile
+		clr.b	(v_player+obAnim).w		; reset Sonic's animation
+		clr.w	(v_player+obX+2).w		; clear X subpixel position
+		clr.w	(v_player+obY+2).w		; clear Y subpixel position
+		move.w	(v_limittopdb).w,(v_limittop2).w ; restore vertical scroll limits
+		move.w	(v_limitbtmdb).w,(v_limitbtm1).w ; restore vertical scroll limits
+		move.w	#4-1,d1				; run extra frames so the restored art reaches VRAM
+
+.delay:
+		move.b	#id_VBlank_Levels,(v_vblank_routine).w ; set VBlank routine to $08
+		bsr.w	WaitForVBlank			; wait until VBlank has finished
+		bsr.w	RunPLC				; load restored common art during the fade-out
+		dbf	d1,.delay			; repeat
+.waitplc:
+		tst.l	(v_plc_queue_base).w		; has restored common art finished loading?
+		bne.s	.runplc				; if not, keep waiting
+		tst.w	(v_plc_patternsleft).w		; is the final restored chunk still decompressing?
+		beq.s	.plcdone			; if not, branch
+.runplc:
+		move.b	#id_VBlank_Levels,(v_vblank_routine).w ; set VBlank routine to $08
+		bsr.w	WaitForVBlank			; wait until VBlank has finished
+		bsr.w	RunPLC				; process the next restored art chunk
+		bra.s	.waitplc			; repeat until restored art is ready
+.plcdone:
+		move.w	#$202F,(v_pfade_start).w	; fade in the level palette lines
+		bsr.w	PalFadeIn_Alt			; fade back to the active level
+		jmp	Level_MainLoop			; resume the active level instead of reloading it
+
+LevSel_RestoreLevelDisplay:
+		disable_ints
+		lea	(vdp_control_port).l,a6		; load VDP control port
+		move.w	#$8B03,(a6)			; line scroll mode (per-row horizontally, full-screen vertically)
+		move.w	#$8200+(vram_fg>>10),(a6)	; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6)	; set background nametable address
+		move.w	#$8500+(vram_sprites>>9),(a6)	; set sprite table address
+		move.w	#$9001,(a6)			; 64-cell hscroll size
+		move.w	#$8004,(a6)			; 8-colour mode
+		move.w	#$8720,(a6)			; set background colour (line 3; colour 0)
+		move.w	(v_hblank_hreg).w,(a6)		; restore HBlank register
+		enable_ints
+		moveq	#palid_Sonic,d0			; load Sonic's palette
+		bsr.w	PalLoad
+		cmpi.b	#id_LZ,(v_zone).w		; is level LZ?
+		bne.s	.getlevelpal			; if not, branch
+		moveq	#palid_LZSonWater,d0		; load Sonic's underwater palette
+		cmpi.b	#act4,(v_act).w			; check if on act 4 (for SBZ3/LZ4)
+		bne.s	.waterfade
+		moveq	#palid_SBZ3SonWat,d0		; load SBZ3 Sonic underwater palette
+
+.waterfade:
+		bsr.w	PalLoad_Fade_Water		; restore underwater fade palette
+
+.getlevelpal:
+		moveq	#0,d0
+		move.b	(v_zone).w,d0			; get current zone
+		lsl.w	#4,d0				; multiply by $10 (number of bytes per level header entry)
+		lea	(LevelHeaders).l,a2		; load level headers
+		lea	(a2,d0.w),a2			; get relevant header for current level
+		move.w	14(a2),d0			; get level palette ID
+		andi.w	#$FF,d0				; keep palette byte only
+		cmpi.w	#id_LZ_act4,(v_zone).w		; is level SBZ3 (LZ4)?
+		bne.s	.notSBZ3			; if not, branch
+		moveq	#palid_SBZ3,d0			; use SB3 palette
+
+.notSBZ3:
+		cmpi.w	#id_SBZ_act2,(v_zone).w		; is level SBZ2?
+		beq.s	.isSBZorFZ			; if yes, branch
+		cmpi.w	#id_FZ,(v_zone).w		; is level FZ?
+		bne.s	.normalpal			; if not, branch
+
+.isSBZorFZ:
+		moveq	#palid_SBZ2,d0			; use SBZ2/FZ palette
+
+.normalpal:
+		bsr.w	PalLoad_Fade			; restore level palette for fade-in
+		cmpi.b	#id_LZ,(v_zone).w		; is level LZ/SBZ3?
+		bne.s	.nowaterpal			; if not, branch
+		moveq	#palid_LZWater,d0		; palette $B (LZ underwater)
+		cmpi.b	#act4,(v_act).w			; check if on act 4 (for SBZ3/LZ4)
+		bne.s	.waterpal
+		moveq	#palid_SBZ3Water,d0		; palette $D (SBZ3 underwater)
+
+.waterpal:
+		bsr.w	PalLoad_Water			; restore active underwater palette
+
+.nowaterpal:
+		bsr.w	ClearPLC			; stop menu/level PLCs before direct VRAM transfers
+		clr.w	(v_plc_patternsleft).w		; clear any in-progress PLC transfer
+	if FeatureEnhancedPLCQueue
+		ResetDMAQueue				; discard menu/level DMA entries before restoring the level
+	endif ; if FeatureEnhancedPLCQueue
+		disable_ints
+		bsr.w	DeformLayers			; restore scroll buffers from level positions
+		bsr.w	LoadTilesFromStart		; redraw level planes cleared by level select
+		moveq	#plcid_Main2,d0			; reload common object art overwritten by the menu font
+		bsr.w	NewPLC
+		enable_ints
+		rts
+LevSel_NotDebugCancel:
+	endif ; if EnhancedDebug
 
 LevSel_SelectionMade:
 		move.w	(v_levselitem).w,d0		; get currently selected line
@@ -2434,12 +2744,12 @@ LevSel_SelectionMade:
 
 		cmpi.w	#levsel_sndtest_row,d0		; have you selected item $14 (sound test)?
 	if TweakNavigationLevelSelect
-		beq.s	@checkB				; if so, branch
+		beq.s	.checkB			; if so, branch
 		andi.b	#btnStart,(v_jpadpress1).w	; is Start pressed?
 		beq.s	LevelSelect			; if not, branch
 		bra.s	LevSel_Level_SS			; go to Level/SS subroutine
 
-	@checkB:
+.checkB:
 		andi.b	#btnB,(v_jpadpress1).w		; is B pressed?
 		beq.s	LevelSelect			; if not, branch
 
@@ -2498,7 +2808,11 @@ LevSel_PlaySnd:
 	endif
 
 		play_queued_sfx	snd_bsr			; play selected sound
+	if EnhancedDebug
+		bra.w	LevelSelect			; loop level select
+	else
 		bra.s	LevelSelect			; loop level select
+	endif ; if EnhancedDebug
 ; ===========================================================================
 
 LevSel_Ending:
@@ -2519,10 +2833,18 @@ LevSel_Level_SS:
 		move.w  (v_zone).w,d0
 	endif ; if TweakConsistLevelSelClear
 		add.w	d0,d0				; double selected line for word-based indexing
+	if Enhanced|ExtendedMenu
+		lea	(LevSel_Ptrs).l,a1		; load level pointer table
+		move.w	(a1,d0.w),d0			; find relevant level pointer from table
+	else
 		move.w	LevSel_Ptrs(pc,d0.w),d0		; find relevant level pointer from table
+	endif ; if Enhanced|ExtendedMenu
 		bmi.w	LevelSelect			; if it's an invalid entry, branch back to main loop
 		cmpi.w	#id_SS<<8,d0			; check if selected level Special Stage (0700 is used as dummy value)
 		bne.s	LevSel_Level			; if not, branch
+	if EnhancedDebug
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag after selecting Special Stage
+	endif ; if EnhancedDebug
 		move.b	#id_Special,(v_gamemode).w	; set screen mode to $10 (Special Stage)
 		clr.w	(v_zone).w			; clear level
 		move.b	#3,(v_lives).w			; set lives to 3
@@ -2558,6 +2880,13 @@ LevSel_Level:
 
 		andi.w	#$3FFF,d0			; mask out invalid bits of level number
 		move.w	d0,(v_zone).w		; set new level number (zone and act)
+	if EnhancedDebug
+		btst	#bitDebugLevelSelect,(f_debugmode).w ; was level select opened from debug?
+		beq.s	.notdebuglevel			; if not, branch
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag after selecting a level
+		move.w	#1,(f_restart).w		; force the active level loop to reload the selected level
+.notdebuglevel:
+	endif ; if EnhancedDebug
 
 	if ExtendedMenu
 		bne LevelSelect
@@ -3001,39 +3330,39 @@ LevSel_ChgLine:
 ; Macro to convert input text to the correct level select text,
 ; because ASM68K doesn't support the "charset" feature of AS.
 lstxt	macro textline
-	i:   = 1
-	len: = strlen(\textline)
+i:	= 1
+len:	= strlen(\textline)
 	if len<>24
 		inform 2, "line length must be exactly 24 characters"
 	endif
 
 	while (i<=len)
-		char:	substr i,i,\textline
-		i: = i+1
+char:	substr i,i,\textline
+i:	= i+1
 
-		if     "\char"=' '
-			dc.b	$FF
-		elseif ("\char">='0')&("\char"<='9')
-			dc.b	$00+"\char"-'0'
-		elseif "\char"='$'
-			dc.b	$0A
-		elseif "\char"='-'
-			dc.b	$0B
-		elseif "\char"='='
-			dc.b	$0C
-		elseif "\char"=">"
-			dc.b	$0D
-		;elseif "\char"=">"	; there are two right arrows in the font for some reason
-		;	dc.b	$0E
-		elseif "\char"='Y'	; Y and Z come before A-X
-			dc.b	$0F
-		elseif "\char"='Z'
-			dc.b	$10
-		elseif ("\char">='A')&("\char"<='X')
-			dc.b	$11+"\char"-'A'
-		else
-			inform 2, "illegal char \char"
-		endif
+	if     "\char"=' '
+		dc.b	$FF
+	elseif ("\char">='0')&("\char"<='9')
+		dc.b	$00+"\char"-'0'
+	elseif "\char"='$'
+		dc.b	$0A
+	elseif "\char"='-'
+		dc.b	$0B
+	elseif "\char"='='
+		dc.b	$0C
+	elseif "\char"=">"
+		dc.b	$0D
+	;elseif "\char"=">"	; there are two right arrows in the font for some reason
+	;	dc.b	$0E
+	elseif "\char"='Y'	; Y and Z come before A-X
+		dc.b	$0F
+	elseif "\char"='Z'
+		dc.b	$10
+	elseif ("\char">='A')&("\char"<='X')
+		dc.b	$11+"\char"-'A'
+	else
+		inform 2, "illegal char \char"
+	endif
 	endw
 	endm
 
@@ -3072,7 +3401,6 @@ LevelMenuText:
 			lstxt "                 STAGE 2"
 			lstxt "                 STAGE 3"
 		endif
-
 		lstxt "SCRAP BRAIN ZONE STAGE 1"
 		lstxt "                 STAGE 2"
 		lstxt "                 STAGE 3"
@@ -3136,6 +3464,7 @@ ExtendedMenuText:
 	if (LevSel_PtrsEnd-LevSel_Ptrs)/2<>levsel_line_count
 		inform 2, "LevSel_Ptrs does not match expected line count."
 	endif
+
 	even
 
 ; ===========================================================================
@@ -3268,8 +3597,6 @@ Level_ClrRam:
 	; @TODO figure out where this goes after the clearRAM stuff above was added
 	if TweakNoWaitPLCLevelTiles
 		move.w	#((v_plc_queue_base-$FFFFF628)/4)-1,d1
-	else
-		move.w	#((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 ; length of the PLC queue RAM
 	endif ; if TweakNoWaitPLCLevelTiles
 
 		disable_ints				; disable interrupts
@@ -3335,7 +3662,11 @@ Level_GetBgm:
 	endif ; if TweakFastLevelReload
 
 		tst.w	(f_demo).w			; is this a credits demo?
+	if FeatureRestoreMonitorScubaGear
+		bmi.w	Level_SkipTtlCard		; if yes, don't load title cards or change music
+	else
 		bmi.s	Level_SkipTtlCard		; if yes, don't load title cards or change music
+	endif ; if FeatureRestoreMonitorScubaGear
 
 		moveq	#0,d0				; clear d0
 		move.b	(v_zone).w,d0			; get current Zone ID
@@ -3351,7 +3682,7 @@ Level_BgmNotLZ4:
 Level_PlayBgm:
 		lea	(MusicList).l,a1		; load music playlist
 		move.b	(a1,d0.w),d0			; get music ID for current level
-		play_queued_music			; play music
+		play_queued_music snd_bsr		; play music
 		move.b	#id_TitleCard,(v_titlecard).w	; load title card object
 	if TweakNoWaitPLCLevelTiles
 	  	move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
@@ -3400,8 +3731,6 @@ Level_CheckTtlCard:
 ; ---------------------------------------------------------------------------
 
 		; PLCs have finished, load/initialize remaining data
-
-
 	if FixBugs
 		; Do VBlank for one extra frame to provide enough processing time
 		; for the remaining data initialization below. Without it, it's
@@ -3478,7 +3807,7 @@ Level_SkipClr:
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
-		move.b	d0,(v_unused1).w		; clear unused flag (goggles?)
+		move.b	d0,(v_goggles).w		; clear goggles flag
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -3790,6 +4119,16 @@ Demo_SS:	include	"demodata/Intro - Special Stage.asm"
 ; SpecialStage:
 GM_Special:	; white fade-out from previous game mode
 		sfx	#sfx_EnterSS			; set special stage entry sound and play it
+	if FeatureRestoreMonitorScubaGear
+		clr.b	(v_goggles).w			; don't let level goggles art persist into the Special Stage
+	endif ; if FeatureRestoreMonitorScubaGear
+	if FixBugInvincibleMusic
+		clr.b	(v_shoes).w			; don't carry speed shoes into the Special Stage
+		clr.w	(v_player+shoetime).w		; clear any stale speed shoes timer state
+		if FeatureUseSonic2SoundDriver=0
+			clr.b	(v_snddriver_ram.f_speedup).w ; clear speed shoes tempo before SS music loads
+		endif ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FixBugInvincibleMusic
 		bsr.w	PaletteWhiteOut			; fade-out to white
 ; ---------------------------------------------------------------------------
 
@@ -3802,6 +4141,13 @@ GM_Special:	; white fade-out from previous game mode
 		move.w	#$9011,(a6)			; 128-cell hscroll size
 		disable_display				; disable screen output
 		bsr.w	ClearScreen			; wipe screen
+	if FeatureRestoreMonitorScubaGear
+		bsr.w	ClearPLC			; discard any pending level art before Special Stage art loads
+		clr.w	(v_plc_patternsleft).w		; stop any in-progress goggles/level PLC transfer
+	endif ; if FeatureRestoreMonitorScubaGear
+	if FeatureEnhancedPLCQueue
+		ResetDMAQueue				; discard level DMA entries before the Special Stage VRAM layout
+	endif ; if FeatureEnhancedPLCQueue
 		enable_ints				; enable interrupts
 
 		fillVRAM	0, ArtTile_SS_Plane_1*tile_size+plane_size_64x32, ArtTile_SS_Plane_5*tile_size ; clear nametables
@@ -3867,13 +4213,12 @@ SS_MainLoop:
 		jsr	(SS_ShowLayout).l		; render Special Stage layout
 		bsr.w	SS_BGAnimate			; animate Special Stage background
 
-	; If Better Bonus Stage Controls are Enabled it leaves the timer off as sonic will collect the chaos emerald within a couple of extra seconds
-	if (DebugDisableDemoTime=0)&(TweakBetterBonusStageControls=0)
+	if DebugDisableDemoTime=0
 		tst.w	(f_demo).w			; is demo mode on?
 		beq.s	SS_ChkEnd			; if not, branch
 		tst.w	(v_generictimer).w		; is there time left on the demo?
 		beq.w	SS_ToSegaScreen			; if not, return to Sega screen
-	endif ; if (DebugDisableDemoTime=0)&(TweakBetterBonusStageControls=0)
+	endif ; if DebugDisableDemoTime=0
 
 SS_ChkEnd:
 		cmpi.b	#id_Special,(v_gamemode).w	; is game mode still the Special Stage?
@@ -3979,7 +4324,9 @@ SS_FinLoop_NoBrighten:
 ; ---------------------------------------------------------------------------
 
 SS_NormalExit:	; Special Stage results screen loop
+	if FixBugPauseOnSSResults=0
 		bsr.w	PauseGame			; allow pausing during the results screen
+	endif ; if FixBugPauseOnSSResults=0
 		move.b	#id_VBlank_TitleCards,(v_vblank_routine).w ; set VBlank routine to $0C
 		bsr.w	WaitForVBlank			; wait until VBlank has finished
 		jsr	(ExecuteObjects).l		; execute SSR objects
@@ -4171,8 +4518,6 @@ GM_Ending:
 	; @TODO Figure out where this goes in the new code
 	if TweakNoWaitPLCLevelTiles
 		move.w	#((v_plc_queue_base-$FFFFF628)/4)-1,d1
-	else
-		move.w	#((v_plc_queue_end-4-v_plc_buffer_dest)/4)-1,d1 ; length of the PLC queue RAM
 	endif ; if TweakNoWaitPLCLevelTiles
 
 		disable_ints				; disable interrupts
@@ -4221,7 +4566,7 @@ End_LoadData:
 		bsr.w	PalLoad_Fade			; ...to fade-in buffer
 		music	#bgm_Ending			; load ending sequence music and play it
 
-	if (BugFixFZDebugCreditTransition)|(FixBugs)
+	if (FixBugFZDebugCreditTransition)|(FixBugs)
 		; Fix being able to enable debug mode without having entered the cheat code for it
 		tst.b	(f_debugcheat).w		; has debug cheat been entered?
 		beq.s	End_LoadSonic			; if not, branch
@@ -4251,7 +4596,7 @@ End_LoadSonic:
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
-		move.b	d0,(v_unused1).w		; clear unused flag (goggles?)
+		move.b	d0,(v_goggles).w		; clear goggles flag
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -4260,7 +4605,7 @@ End_LoadSonic:
 		move.b	#1,(f_ringcount).w		; update rings counter
 		move.b	#0,(f_timecount).w		; stop time counter for the ending sequence
 	if FeatureRestoreMonitorScubaGear
-		move.b	#0,(f_goggles).w 					; move 0 to the goggle check
+		move.b	#0,(v_goggles).w 					; move 0 to the goggle check
 	endif ; if FeatureRestoreMonitorScubaGear
 		move.w	#1800,(v_generictimer).w	; set generic timer to 30 seconds (unused in ending sequence)
 		move.b	#id_VBlank_Ending,(v_vblank_routine).w ; set VBlank routine to $18
@@ -4277,7 +4622,9 @@ End_LoadSonic:
 ; ---------------------------------------------------------------------------
 
 End_MainLoop:
+	if FixBugPauseOnSSResults=0
 		bsr.w	PauseGame			; allow pausing during the ending sequence
+	endif ; if FixBugPauseOnSSResults=0
 		move.b	#id_VBlank_Ending,(v_vblank_routine).w ; set VBlank routine to $18
 		bsr.w	WaitForVBlank			; wait until VBlank has finished
 		addq.w	#1,(v_framecount).w		; add 1 to level timer
@@ -4296,6 +4643,13 @@ End_MainLoop:
 		beq.s	End_ChkEmerald			; if yes, branch
 
 		move.b	#id_Credits,(v_gamemode).w	; change game mode to credits
+	if EnableSRAM=1
+		gotoSRAM
+		move.b	#"S",(sram_save_sig1).l		; mark SRAM as initialized
+		move.b	#"1",(sram_save_sig2).l		; mark this game's save data
+		ori.b	#maskSRAMGameComplete,(sram_unlock_flags).l ; remember the game has been completed
+		gotoROM
+	endif ; if EnableSRAM=1
 		music	#bgm_Credits,snd_bsr,snd_load_b,QueueSound2	; play it
 		move.w	#0,(v_creditsnum).w		; set credits page number to 0 ("Sonic Team Staff")
 		rts					; return to MainGameLoop
@@ -4314,7 +4668,9 @@ End_ChkEmerald:
 
 
 End_AllEmlds:	; during the slow white-in
+	if FixBugPauseOnSSResults=0
 		bsr.w	PauseGame			; still allow pausing the game
+	endif ; if FixBugPauseOnSSResults=0
 		move.b	#id_VBlank_Ending,(v_vblank_routine).w ; set VBlank routine to $18
 		bsr.w	WaitForVBlank			; wait until VBlank has finished
 		addq.w	#1,(v_framecount).w		; add 1 to level timer
@@ -4748,7 +5104,8 @@ Map_Missile:	include	"_maps/Buzz Bomber Missile.asm"
 		include	"_incObj/4B Giant Ring.asm"
 		include	"_incObj/7C Ring Flash.asm"
 		include	"_anim/Rings.asm"
-Map_Ring:   if Revision=0
+Map_Ring:
+	    if Revision=0
 		include	"_maps/Rings (REV00).asm"
 	    else
 		; REV01 added an extra blank frame, possibly to mitigate
@@ -5187,9 +5544,18 @@ Nem_UnkFire:	binclude	"artnem/Unused - Fireball.nem" ; unused fireball
 		even
 Nem_Warp:	binclude	"artnem/Unused - SStage Flash.nem" ; entry to special stage flash
 		even
+	if FeatureRestoreMonitorScubaGear
+Nem_Goggle:	binclude	"Enhancements/artnem/Unused - Goggles.nem" ; unused goggles overlay, ring-palette compatible
+	else
 Nem_Goggle:	binclude	"artnem/Unused - Goggles.nem" ; unused goggles
+	endif ; if FeatureRestoreMonitorScubaGear
 		even
 	endif ; if (FeatureEnableUnusedArt)|(Revision=0)
+
+	if FeatureRestoreMonitorScubaGear
+Art_Goggles:	binclude	"Enhancements/artunc/Unused - Goggles.bin" ; unused goggles overlay frames
+		even
+	endif ; if FeatureRestoreMonitorScubaGear
 
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - special stage
@@ -5426,6 +5792,7 @@ Nem_Cater:	binclude	"artnem/Enemy Caterkiller.nem"
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
+Nem_TitleCard:
 	if TweakUncompressedTitleCards
 Gra_TitleCard:	binclude	"Enhancements/artunc/Decompressed/Title Cards.nem"
 	else
@@ -5605,11 +5972,11 @@ Nem_EndEggman:
 		binclude	"artnem/Unused - Eggman Ending.nem"
 		even
 	endif
-	if TweakLevelCompressionMode<3
-Nem_EndFlower:	binclude	"artnem/Ending - Flowers.nem"
-	else
 Gra_EndFlowers:
 Kos_EndFlowers:	binclude	"artkos/Flowers at Ending.kos" ; ending sequence animated flowers
+	even
+	if TweakLevelCompressionMode<3
+Nem_EndFlower:	binclude	"artnem/Ending - Flowers.nem"
 	endif ; if TweakLevelCompressionMode<3
 		even
 Gra_CreditText:
@@ -5673,10 +6040,17 @@ SS_6:		binclude	"sslayout/6 (REV00).eni"
 	else
 		; SS 5 and 6 had broken objects outside the accessible layout;
 		; REV01 removes those - remaining layouts stay unchanged.
+	  if FeatureSonicJam
+SS_5:		binclude	"Enhancements/Sonic Jam/Sonic1/Common/sslayout/5 (REV01).eni"
+		even
+SS_6:		binclude	"Enhancements/Sonic Jam/Sonic1/Common/sslayout/6 (REV01).eni"
+		even
+	  else
 SS_5:		binclude	"sslayout/5 (REV01).eni"
 		even
 SS_6:		binclude	"sslayout/6 (REV01).eni"
 		even
+	  endif ; if FeatureSonicJam
 	endif
 
 ; ---------------------------------------------------------------------------
@@ -5703,41 +6077,41 @@ Art_SbzSmoke:	binclude	"artunc/SBZ Background Smoke.unc"
 ; ---------------------------------------------------------------------------
 Level_Index:
 		; GHZ
-		dc.w Level_GHZ1-Level_Index, Level_GHZbg-Level_Index, Level_GHZ1Unk-Level_Index
-		dc.w Level_GHZ2-Level_Index, Level_GHZbg-Level_Index, Level_GHZ2Unk-Level_Index
-		dc.w Level_GHZ3-Level_Index, Level_GHZbg-Level_Index, Level_GHZ3Unk-Level_Index
-		dc.w Level_GHZ4Unk-Level_Index, Level_GHZ4Unk-Level_Index, Level_GHZ4Unk-Level_Index
+		dc.w Level_GHZ1-Level_Index,Level_GHZbg-Level_Index,Level_GHZ1Unk-Level_Index
+		dc.w Level_GHZ2-Level_Index,Level_GHZbg-Level_Index,Level_GHZ2Unk-Level_Index
+		dc.w Level_GHZ3-Level_Index,Level_GHZbg-Level_Index,Level_GHZ3Unk-Level_Index
+		dc.w Level_GHZ4Unk-Level_Index,Level_GHZ4Unk-Level_Index,Level_GHZ4Unk-Level_Index
 		; LZ
-		dc.w Level_LZ1-Level_Index, Level_LZbg-Level_Index, Level_LZ1Unk-Level_Index
-		dc.w Level_LZ2-Level_Index, Level_LZbg-Level_Index, Level_LZ2Unk-Level_Index
-		dc.w Level_LZ3-Level_Index, Level_LZbg-Level_Index, Level_LZ3Unk-Level_Index
-		dc.w Level_SBZ3-Level_Index, Level_LZbg-Level_Index, Level_SBZ3Unk-Level_Index
+		dc.w Level_LZ1-Level_Index,Level_LZbg-Level_Index,Level_LZ1Unk-Level_Index
+		dc.w Level_LZ2-Level_Index,Level_LZbg-Level_Index,Level_LZ2Unk-Level_Index
+		dc.w Level_LZ3-Level_Index,Level_LZbg-Level_Index,Level_LZ3Unk-Level_Index
+		dc.w Level_SBZ3-Level_Index,Level_LZbg-Level_Index,Level_SBZ3Unk-Level_Index
 		; MZ
-		dc.w Level_MZ1-Level_Index, Level_MZ1bg-Level_Index, Level_MZ1-Level_Index
-		dc.w Level_MZ2-Level_Index, Level_MZ2bg-Level_Index, Level_MZ2Unk-Level_Index
-		dc.w Level_MZ3-Level_Index, Level_MZ3bg-Level_Index, Level_MZ3Unk-Level_Index
-		dc.w Level_MZ4Unk-Level_Index, Level_MZ4Unk-Level_Index, Level_MZ4Unk-Level_Index
+		dc.w Level_MZ1-Level_Index,Level_MZ1bg-Level_Index,Level_MZ1-Level_Index
+		dc.w Level_MZ2-Level_Index,Level_MZ2bg-Level_Index,Level_MZ2Unk-Level_Index
+		dc.w Level_MZ3-Level_Index,Level_MZ3bg-Level_Index,Level_MZ3Unk-Level_Index
+		dc.w Level_MZ4Unk-Level_Index,Level_MZ4Unk-Level_Index,Level_MZ4Unk-Level_Index
 		; SLZ
-		dc.w Level_SLZ1-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ2-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ3-Level_Index, Level_SLZbg-Level_Index, Level_SLZ1Unk-Level_Index
-		dc.w Level_SLZ1Unk-Level_Index, Level_SLZ1Unk-Level_Index, Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ1-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ2-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ3-Level_Index,Level_SLZbg-Level_Index,Level_SLZ1Unk-Level_Index
+		dc.w Level_SLZ1Unk-Level_Index,Level_SLZ1Unk-Level_Index,Level_SLZ1Unk-Level_Index
 		; SYZ
-		dc.w Level_SYZ1-Level_Index, Level_SYZbg-Level_Index, Level_SYZ1Unk-Level_Index
-		dc.w Level_SYZ2-Level_Index, Level_SYZbg-Level_Index, Level_SYZ2Unk-Level_Index
-		dc.w Level_SYZ3-Level_Index, Level_SYZbg-Level_Index, Level_SYZ3Unk-Level_Index
-		dc.w Level_SYZ4Unk-Level_Index, Level_SYZ4Unk-Level_Index, Level_SYZ4Unk-Level_Index
+		dc.w Level_SYZ1-Level_Index,Level_SYZbg-Level_Index,Level_SYZ1Unk-Level_Index
+		dc.w Level_SYZ2-Level_Index,Level_SYZbg-Level_Index,Level_SYZ2Unk-Level_Index
+		dc.w Level_SYZ3-Level_Index,Level_SYZbg-Level_Index,Level_SYZ3Unk-Level_Index
+		dc.w Level_SYZ4Unk-Level_Index,Level_SYZ4Unk-Level_Index,Level_SYZ4Unk-Level_Index
 		; SBZ
-		dc.w Level_SBZ1-Level_Index, Level_SBZ1bg-Level_Index, Level_SBZ1bg-Level_Index
-		dc.w Level_SBZ2-Level_Index, Level_SBZ2bg-Level_Index, Level_SBZ2bg-Level_Index
-		dc.w Level_SBZ2-Level_Index, Level_SBZ2bg-Level_Index, Level_SBZ2Unk-Level_Index
-		dc.w Level_SBZ4Unk-Level_Index, Level_SBZ4Unk-Level_Index, Level_SBZ4Unk-Level_Index
+		dc.w Level_SBZ1-Level_Index,Level_SBZ1bg-Level_Index,Level_SBZ1bg-Level_Index
+		dc.w Level_SBZ2-Level_Index,Level_SBZ2bg-Level_Index,Level_SBZ2bg-Level_Index
+		dc.w Level_SBZ2-Level_Index,Level_SBZ2bg-Level_Index,Level_SBZ2Unk-Level_Index
+		dc.w Level_SBZ4Unk-Level_Index,Level_SBZ4Unk-Level_Index,Level_SBZ4Unk-Level_Index
 		zonewarning Level_Index,24
 		; Ending
-		dc.w Level_End-Level_Index, Level_GHZbg-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_End-Level_Index, Level_GHZbg-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_EndUnk-Level_Index, Level_EndUnk-Level_Index, Level_EndUnk-Level_Index
-		dc.w Level_EndUnk-Level_Index, Level_EndUnk-Level_Index, Level_EndUnk-Level_Index
+		dc.w Level_End-Level_Index,Level_GHZbg-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_End-Level_Index,Level_GHZbg-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_EndUnk-Level_Index,Level_EndUnk-Level_Index,Level_EndUnk-Level_Index
+		dc.w Level_EndUnk-Level_Index,Level_EndUnk-Level_Index,Level_EndUnk-Level_Index
 
 Level_GHZ1:	binclude	"levels/ghz1.bin"
 		even
@@ -5849,61 +6223,79 @@ Art_Dust:	binclude	"Enhancements/artunc/spindust.unc"
 ; ---------------------------------------------------------------------------
 ObjPos_Index:
 		; GHZ
-		dc.w ObjPos_GHZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_GHZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_GHZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; LZ
-		dc.w ObjPos_LZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_LZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_LZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_LZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; MZ
-		dc.w ObjPos_MZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_MZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_MZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SLZ
-		dc.w ObjPos_SLZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SLZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SLZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SYZ
-		dc.w ObjPos_SYZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ3-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SYZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ3-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SYZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; SBZ
-		dc.w ObjPos_SBZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ2-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_FZ-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_SBZ1-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ2-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_FZ-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_SBZ1-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		zonewarning ObjPos_Index,$10
 		; Ending
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
-		dc.w ObjPos_End-ObjPos_Index, ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
+		dc.w ObjPos_End-ObjPos_Index,ObjPos_Null-ObjPos_Index
 		; --- Put extra object data here. ---
 ObjPosLZPlatform_Index:
-		dc.w ObjPos_LZ1pf1-ObjPos_Index, ObjPos_LZ1pf2-ObjPos_Index
-		dc.w ObjPos_LZ2pf1-ObjPos_Index, ObjPos_LZ2pf2-ObjPos_Index
-		dc.w ObjPos_LZ3pf1-ObjPos_Index, ObjPos_LZ3pf2-ObjPos_Index
-		dc.w ObjPos_LZ1pf1-ObjPos_Index, ObjPos_LZ1pf2-ObjPos_Index
+		dc.w ObjPos_LZ1pf1-ObjPos_Index,ObjPos_LZ1pf2-ObjPos_Index
+		dc.w ObjPos_LZ2pf1-ObjPos_Index,ObjPos_LZ2pf2-ObjPos_Index
+		dc.w ObjPos_LZ3pf1-ObjPos_Index,ObjPos_LZ3pf2-ObjPos_Index
+		dc.w ObjPos_LZ1pf1-ObjPos_Index,ObjPos_LZ1pf2-ObjPos_Index
 ObjPosSBZPlatform_Index:
-		dc.w ObjPos_SBZ1pf1-ObjPos_Index, ObjPos_SBZ1pf2-ObjPos_Index
-		dc.w ObjPos_SBZ1pf3-ObjPos_Index, ObjPos_SBZ1pf4-ObjPos_Index
-		dc.w ObjPos_SBZ1pf5-ObjPos_Index, ObjPos_SBZ1pf6-ObjPos_Index
-		dc.w ObjPos_SBZ1pf1-ObjPos_Index, ObjPos_SBZ1pf2-ObjPos_Index
-		dc.b $FF, $FF, 0, 0, 0,	0
+		dc.w ObjPos_SBZ1pf1-ObjPos_Index,ObjPos_SBZ1pf2-ObjPos_Index
+		dc.w ObjPos_SBZ1pf3-ObjPos_Index,ObjPos_SBZ1pf4-ObjPos_Index
+		dc.w ObjPos_SBZ1pf5-ObjPos_Index,ObjPos_SBZ1pf6-ObjPos_Index
+		dc.w ObjPos_SBZ1pf1-ObjPos_Index,ObjPos_SBZ1pf2-ObjPos_Index
+		dc.b $FF,$FF,0,0,0,0
 
-ObjPos_GHZ1:	binclude	"objpos/ghz1.bin"
+ObjPos_GHZ1:
+	if (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/ghz1.bin"
+	else
+		binclude	"objpos/ghz1.bin"
+	endif
 		even
-ObjPos_GHZ2:	binclude	"objpos/ghz2.bin"
+ObjPos_GHZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/ghz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/ghz2.bin"
+	else
+		binclude	"objpos/ghz2.bin"
+	endif
 		even
 ObjPos_GHZ3:
 	if Revision=0
 		binclude	"objpos/ghz3 (REV00).bin"
+		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/ghz3 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/ghz3 (REV01).bin"
 		even
 	else
 		binclude	"objpos/ghz3 (REV01).bin"
@@ -5914,21 +6306,40 @@ ObjPos_LZ1:
 	if Revision=0
 		binclude	"objpos/lz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/lz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/lz1 (REV01).bin"
 		even
 	endif
-ObjPos_LZ2:	binclude	"objpos/lz2.bin"
+ObjPos_LZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/lz2.bin"
+	else
+		binclude	"objpos/lz2.bin"
+	endif
 		even
 ObjPos_LZ3:
 	if Revision=0
 		binclude	"objpos/lz3 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/lz3 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/lz3 (REV01).bin"
+		even
 	else
 		binclude	"objpos/lz3 (REV01).bin"
 		even
 	endif
-ObjPos_SBZ3:	binclude	"objpos/sbz3.bin"
+ObjPos_SBZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/sbz3.bin"
+	else
+		binclude	"objpos/sbz3.bin"
+	endif
 		even
 
 ObjPos_LZ1pf1:	binclude	"objpos/platforms/lz1pf1.bin"
@@ -5948,28 +6359,82 @@ ObjPos_MZ1:
 	if Revision=0
 		binclude	"objpos/mz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/mz1 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/mz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/mz1 (REV01).bin"
 		even
 	endif
-ObjPos_MZ2:	binclude	"objpos/mz2.bin"
+ObjPos_MZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/mz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/mz2.bin"
+	else
+		binclude	"objpos/mz2.bin"
+	endif
 		even
-ObjPos_MZ3:	binclude	"objpos/mz3.bin"
+ObjPos_MZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/mz3.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/mz3.bin"
+	else
+		binclude	"objpos/mz3.bin"
+	endif
 		even
 
-ObjPos_SLZ1:	binclude	"objpos/slz1.bin"
+ObjPos_SLZ1:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/slz1.bin"
+	else
+		binclude	"objpos/slz1.bin"
+	endif
 		even
-ObjPos_SLZ2:	binclude	"objpos/slz2.bin"
+ObjPos_SLZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/slz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/slz2.bin"
+	else
+		binclude	"objpos/slz2.bin"
+	endif
 		even
-ObjPos_SLZ3:	binclude	"objpos/slz3.bin"
+ObjPos_SLZ3:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/slz3.bin"
+	else
+		binclude	"objpos/slz3.bin"
+	endif
 		even
-ObjPos_SYZ1:	binclude	"objpos/syz1.bin"
+ObjPos_SYZ1:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/syz1.bin"
+	else
+		binclude	"objpos/syz1.bin"
+	endif
 		even
-ObjPos_SYZ2:	binclude	"objpos/syz2.bin"
+ObjPos_SYZ2:
+	if (FeatureSonicJam=1)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Original/objpos/syz2.bin"
+	elseif (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/syz2.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/syz2.bin"
+	else
+		binclude	"objpos/syz2.bin"
+	endif
 		even
 ObjPos_SYZ3:
 	if Revision=0
 		binclude	"objpos/syz3 (REV00).bin"
+		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/syz3 (REV01).bin"
 		even
 	else
 		binclude	"objpos/syz3 (REV01).bin"
@@ -5980,13 +6445,31 @@ ObjPos_SBZ1:
 	if Revision=0
 		binclude	"objpos/sbz1 (REV00).bin"
 		even
+	elseif FeatureSonicJam=2
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/sbz1 (REV01).bin"
+		even
+	elseif FeatureSonicJam=3
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/sbz1 (REV01).bin"
+		even
 	else
 		binclude	"objpos/sbz1 (REV01).bin"
 		even
 	endif
-ObjPos_SBZ2:	binclude	"objpos/sbz2.bin"
+ObjPos_SBZ2:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/sbz2.bin"
+	else
+		binclude	"objpos/sbz2.bin"
+	endif
 		even
-ObjPos_FZ:	binclude	"objpos/fz.bin"
+ObjPos_FZ:
+	if (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/fz.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/fz.bin"
+	else
+		binclude	"objpos/fz.bin"
+	endif
 		even
 
 ObjPos_SBZ1pf1:	binclude	"objpos/platforms/sbz1pf1.bin"
@@ -6002,7 +6485,16 @@ ObjPos_SBZ1pf5:	binclude	"objpos/platforms/sbz1pf5.bin"
 ObjPos_SBZ1pf6:	binclude	"objpos/platforms/sbz1pf6.bin"
 		even
 
-ObjPos_End:	binclude	"objpos/ending.bin"
+ObjPos_End:
+	if (FeatureSonicJam=1)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Original/objpos/ending.bin"
+	elseif (FeatureSonicJam=2)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Normal/objpos/ending.bin"
+	elseif (FeatureSonicJam=3)&(Revision<>0)
+		binclude	"Enhancements/Sonic Jam/Sonic1/Easy/objpos/ending.bin"
+	else
+		binclude	"objpos/ending.bin"
+	endif
 		even
 
 ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
@@ -6032,32 +6524,38 @@ SoundDriver:
 	endif
 		even
 
-; ---------------------------------------------------------------------------
-
-; end of 'ROM'
+	if FeatureSonicJamModes
+	    include "Enhancements/Sonic Jam/Sonic1/_inc/SonicJam_ModeSelect.asm"
+	    include "Enhancements/Sonic Jam/Sonic1/_inc/SonicJam_ObjPos_Overrides.asm"
+	    include "Enhancements/Sonic Jam/Sonic1/_inc/SonicJam_SSLayouts_Unique.asm"
+	endif ; FeatureSonicJamModes
 
     if AdvancedDebugger
     ; @NOTE this shouldnt be removed
 SampleLevelDebugger:
-		Console.WriteLine	"Camera (FG): %<.w $FFFFF700>-%<.w $FFFFF704>"
-		Console.WriteLine	"Camera (BG): %<.w $FFFFF708>-%<.w $FFFFF70C>"
-		Console.BreakLine
+		Console.writeline	"Camera (FG): %<.w $FFFFF700>-%<.w $FFFFF704>"
+		Console.writeline	"Camera (BG): %<.w $FFFFF708>-%<.w $FFFFF70C>"
+		Console.breakline
 
-		Console.WriteLine	"%<pal1>Objects IDs in slots:%<pal0>"
-		Console.Write		"%<setw,39>"       ; format slots table nicely ...
+		Console.writeline	"%<pal1>Objects IDs in slots:%<pal0>"
+		Console.write		"%<setw,39>"       ; format slots table nicely ...
 
 		lea	$FFFFD000,a0
 		move.w	#$2000/$40-1,d0
 
-.DisplayObjSlot:
-		Console.Write "%<.b (a0)> "
+SampleLevelDebugger_DisplayObjSlot:
+		Console.write "%<.b (a0)> "
 		lea	$40(a0),a0
-		dbf	d0,.DisplayObjSlot
+		dbf	d0,SampleLevelDebugger_DisplayObjSlot
 
 		rts
 
 		include   "Enhancements/ErrorHandler.asm"
     endif ; if AdvancedDebugger
 EndOfRom:
+
+; ---------------------------------------------------------------------------
+
+; end of 'ROM'
 
 		END

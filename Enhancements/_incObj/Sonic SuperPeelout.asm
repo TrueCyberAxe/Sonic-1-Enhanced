@@ -2,6 +2,9 @@
 ;Subroutine to make Sonic perform a Peelout
 ;---------------------------------------------------------------------------
 
+PeeloutChargeMax:	equ $800
+PeeloutChargeStep:	equ $45		; $800 / 30 frames, rounded up
+
 Sonic_Peelout:
 		btst	#1,f_superpeelout(a0)
 		bne.s	Sonic_DashLaunch
@@ -31,10 +34,18 @@ Sonic_Peelout:
 
 Sonic_DashLaunch:
 		move.b	#id_PeeloutCharge,obAnim(a0)
+		move.w	v_charging(a0),d0
+		lsr.w	#8,d0
+		cmpi.w	#8,d0
+		bls.s	.chargeindexok
+		moveq	#8,d0
+
+.chargeindexok:
+		add.w	d0,d0
 	if FeatureSuperPeelout>1
-		move.w	#$0F00,obInertia(a0)			; Set sonic's speed to Sonic CD Peelout Speed
+		move.w	PeeloutSpeedsSuper(pc,d0.w),obInertia(a0) ; Set Sonic's charged peelout speed
 	else
-		move.w	#$A00,obInertia(a0)			; Set Sonic's speed to Maximum Run Speed
+		move.w	PeeloutSpeeds(pc,d0.w),obInertia(a0) ; Set Sonic's charged peelout speed
 		; move.w	#$760,obInertia(a0)		; Set Sonic's speed to Maximum Run Speed
 	endif
 
@@ -69,10 +80,19 @@ Sonic_DashLaunch:
 		bra.w	Sonic_DashResetScr
 ; ---------------------------------------------------------------------------
 Sonic_DashCharge:						; If still charging the dash...
-		cmpi.b	#obTimeFrame,v_charging(a0)
+		cmpi.w	#PeeloutChargeMax,v_charging(a0)
 		beq.s	Sonic_DashResetScr
-		addi.b	#$01,v_charging(a0)
+		addi.w	#PeeloutChargeStep,v_charging(a0)
+		cmpi.w	#PeeloutChargeMax,v_charging(a0)
+		bcs.s	Sonic_DashResetScr
+		move.w	#PeeloutChargeMax,v_charging(a0)
 		jmp	Sonic_DashResetScr
+
+PeeloutSpeeds:
+		dc.w	$200, $300, $400, $500, $600, $700, $800, $900, $A00
+
+PeeloutSpeedsSuper:
+		dc.w	$300, $480, $600, $780, $900, $A80, $C00, $D80, $F00
 
 Sonic_Dash_Stop_Sound:
 		move.w	#$D3,d0

@@ -10,7 +10,7 @@ Signpost:
 		lea	(Ani_Sign).l,a1
 		bsr.w	AnimateSprite
 
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0)		; Bug 1
 		bsr.w	DisplaySprite
 	endif
 
@@ -18,7 +18,7 @@ Signpost:
 		; the same frame or else cause a null-pointer dereference.
 		out_of_range	DeleteObject
 
-	if (BugFixRenderBeforeInit)|(FixBugs)			; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs)			; Bug 1
 		bra.w	DisplaySprite
 	else
 		rts
@@ -64,7 +64,7 @@ Sign_Spin:	; Routine 4
 		move.b  #1,(f_lockscreen).w 									; Prevent Sonic Leaving the Screen
 	endif
 
-	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 		move.b  #1,(f_victory).w 											; Set victory animation flag
 
 		tst.w	(v_debuguse).w													; is debug mode	on?
@@ -124,14 +124,14 @@ Sign_SparkPos:	dc.b -$18,-$10										; x-position, y-position
 ; ===========================================================================
 
 Sign_SonicRun:	; Routine 6
-	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 		clr.b  (f_lockscreen).w 											; Unset Prevent Sonic Leaving the Screen
-	endif ; if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	endif ; if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 
-	if BugFixVictoryDebug=0
+	if FixBugVictoryDebug=0
 		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	locret_ECEE		; if yes, branch													; if yes, branch
-	endif ; if BugFixVictoryDebug=0
+	endif ; if FixBugVictoryDebug=0
 
 	if FixBugs
 		; This function's checks are a mess, creating an edgecase where it's
@@ -160,6 +160,8 @@ loc_EC70:
 
 	if TweakUncompressedTitleCards
 		bcs.w	locret_ECEE
+	elseif FixBugInvincibleMusic
+		blo.w	locret_ECEE
 	else
 		blo.s	locret_ECEE
 	endif ; if TweakUncompressedTitleCards
@@ -174,9 +176,30 @@ loc_EC86:
 
 GotThroughAct:
 		tst.b	(v_endcard).w
+	if FixBugInvincibleMusic
+		bne.w	locret_ECEE
+	else
 		bne.s	locret_ECEE
+	endif ; if FixBugInvincibleMusic
 		move.w	(v_limitright2).w,(v_limitleft2).w
+	if FeatureRestoreMonitorScubaGear
+		tst.b	(v_goggles).w			; are goggles active?
+		beq.s	.nogogglesrestore		; if not, branch
+		clr.b	(v_goggles).w			; remove goggles at end of act
+.nogogglesrestore:
+	endif ; if FeatureRestoreMonitorScubaGear
 		clr.b	(v_invinc).w	; disable invincibility
+	if FixBugInvincibleMusic
+		clr.w	(v_player+invtime).w		; clear stale invincibility timer state
+		clr.b	(v_shoes).w			; disable speed shoes
+		clr.w	(v_player+shoetime).w		; clear stale speed shoes timer state
+		move.w	#$600,(v_sonspeedmax).w		; restore Sonic's max speed
+		move.w	#$C,(v_sonspeedacc).w		; restore Sonic's acceleration
+		move.w	#$80,(v_sonspeeddec).w		; restore Sonic's deceleration
+		if FeatureUseSonic2SoundDriver=0
+			clr.b	(v_snddriver_ram.f_speedup).w ; clear speed shoes tempo before act-clear music loads
+		endif ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FixBugInvincibleMusic
 		clr.b	(f_timecount).w	; stop time counter
 		move.b	#id_GotThroughCard,(v_endcard).w
 

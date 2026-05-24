@@ -86,7 +86,7 @@ sonicAniFrame = objoff_32		; Sonic's current animation number
 		move.b	d2,obFrame(a1)
 
 Smab_Points:	; Routine 4
-	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs)		; Bug 6
 		; Avoid returning to SmashBlock to prevent display-and-delete
 		; and double-delete bugs.
 		addq.l	#4,sp
@@ -94,14 +94,14 @@ Smab_Points:	; Routine 4
 
 		bsr.w	SpeedToPos
 		addi.w	#$38,obVelY(a0)
-	if (BugFixRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
+	if (FixBugRenderBeforeInit=0)&(FixBugs=0)	; Bug 3
 		; Objects should not call DisplaySprite and DeleteObject on
 		; the same frame or else cause a null-pointer dereference.
 		bsr.w	DisplaySprite
 	endif
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-	if (BugFixRenderBeforeInit)|(FixBugs)		; Bug 3
+	if (FixBugRenderBeforeInit)|(FixBugs)		; Bug 3
 		bra.w	DisplaySprite
 	else
 		rts

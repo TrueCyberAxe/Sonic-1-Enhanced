@@ -34,7 +34,11 @@ v_sfx_spinrev:		ds.b	1		; spin dash rev SFX counter/value	$FFFFC901
 v_sfx_frequency:	ds.b	1		; spin dash rev SFX frequency		$FFFFC902
 v_screendelay_v:	ds.b	1		; vertical screen delay timer		$FFFFC903
 v_screendelay:		ds.b	1		; screen delay timer			$FFFFC904
-			ds.b	$1B		; unused
+v_jpadhold1ext:		ds.b	1		; six-button held inputs		$FFFFC905
+v_jpadpress1ext:	ds.b	1		; six-button pressed inputs		$FFFFC906
+f_6button:		ds.b	1		; six-button controller detected	$FFFFC907
+f_debug_6button:	equ	f_6button	; debug mode uses the same six-button detection flag
+			ds.b	$18		; unused
 	else
 			ds.b	$20		; unused
 	endif
@@ -68,6 +72,7 @@ v_gameovertext1:equ	v_objspace+object_size*2	; object variable space for the "GA
 v_gameovertext2:equ	v_objspace+object_size*3	; object variable space for the "OVER" in "GAME OVER"/"TIME OVER" text ($40 bytes)
 
 v_shieldobj:	equ	v_objspace+object_size*6	; object variable space for the shield ($40 bytes)
+v_gogglesobj:	equ	v_objspace+object_size*7	; object variable space for the goggles ($40 bytes)
 v_starsobj1:	equ	v_objspace+object_size*8	; object variable space for the invincibility stars #1 ($40 bytes)
 v_starsobj2:	equ	v_objspace+object_size*9	; object variable space for the invincibility stars #2 ($40 bytes)
 v_starsobj3:	equ	v_objspace+object_size*10	; object variable space for the invincibility stars #3 ($40 bytes)
@@ -75,6 +80,7 @@ v_starsobj4:	equ	v_objspace+object_size*11	; object variable space for the invin
 
 v_splash:	equ	v_objspace+object_size*12	; object variable space for the water splash ($40 bytes)
 v_sonicbubbles:	equ	v_objspace+object_size*13	; object variable space for the bubbles that come out of Sonic's mouth/drown countdown ($40 bytes)
+v_spindashdust:	equ	v_objspace+object_size*14	; object variable space for spin dash/skid dust ($40 bytes)
 v_watersurface1:equ	v_objspace+object_size*30	; object variable space for the water surface #1 ($40 bytes)
 v_watersurface2:equ	v_objspace+object_size*31	; object variable space for the water surface #1 ($40 bytes)
 
@@ -408,6 +414,7 @@ v_shield:		ds.b	1		; shield status (00 = no; 01 = yes)
 v_invinc:		ds.b	1		; invinciblity status (00 = no; 01 = yes)
 v_shoes:		ds.b	1		; speed shoes status (00 = no; 01 = yes)
 v_unused1:		ds.b	1		; an unused fourth player status (Goggles?)
+v_goggles:		equ	v_unused1	; goggles status (00 = no; 01 = yes)
 
 v_lastlamp:		ds.b	2		; number of the last lamppost you hit
 v_lamp_xpos:		ds.w	1		; x-axis for Sonic to respawn at lamppost
@@ -502,6 +509,7 @@ f_levelreload:		ds.b	1		; reload level flag
 	endif
 
 v_unused2:		ds.w	1		; unused
+v_sonicjam_mode:	equ	v_unused2	; selected Sonic Jam mode for the next level load
 v_unused3:		ds.b	1		; unused
 v_unused4:		ds.b	1		; unused
 v_unused5:		ds.b	1		; unused

@@ -43,6 +43,16 @@ GRing_Animate:	; Routine 2
 GRing_Collect:	; Routine 4
 		subq.b	#2,obRoutine(a0)
 		move.b	#0,obColType(a0)
+	if FixBugClearPowerUpsOnGiantRing
+		clr.b	(v_invinc).w			; remove invincibility immediately
+		clr.w	(v_player+invtime).w		; clear stale invincibility timer state
+		clr.b	(v_shoes).w			; remove speed shoes immediately
+		clr.w	(v_player+shoetime).w		; clear stale speed shoes timer state
+		clr.b	(v_shield).w			; remove shield immediately
+	if FeatureRestoreMonitorScubaGear
+		clr.b	(v_goggles).w			; remove goggles before Sonic vanishes
+	endif ; if FeatureRestoreMonitorScubaGear
+	endif ; if FixBugClearPowerUpsOnGiantRing
 		bsr.w	FindFreeObj
 		bne.w	GRing_PlaySnd
 		_move.b	#id_RingFlash,obID(a1) ; load giant ring flash object

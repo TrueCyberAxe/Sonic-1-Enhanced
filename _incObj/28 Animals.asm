@@ -168,6 +168,9 @@ loc_90C0:
 		move.b	d0,obFrame(a1)
 
 Anml_Display:
+	if FixBugAnimalBounce
+		bsr.w	Anml_CheckSonicBounce
+	endif ; if FixBugAnimalBounce
 		bra.w	DisplaySprite
 ; ===========================================================================
 
@@ -184,7 +187,11 @@ Anml_ChkFloor:
 		bsr.w	ObjectFall
 		tst.w	obVelY(a0)
 		bmi.s	loc_9180
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_9180
 		add.w	d1,obY(a0)
@@ -213,7 +220,11 @@ Anml_Type0:
 		tst.w	obVelY(a0)
 		bmi.s	loc_91AE
 		move.b	#0,obFrame(a0)
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_91AE
 		add.w	d1,obY(a0)
@@ -224,7 +235,11 @@ loc_91AE:
 		bne.s	loc_9224
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
+	if FixBugAnimalBounce
+		bra.w	Anml_Display
+	else
 		bra.w	DisplaySprite
+	endif ; if FixBugAnimalBounce
 ; ===========================================================================
 
 ; loc_91C0:
@@ -233,7 +248,11 @@ Anml_Type1:
 		addi.w	#$18,obVelY(a0)
 		tst.w	obVelY(a0)
 		bmi.s	loc_91FC
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_91FC
 		add.w	d1,obY(a0)
@@ -257,7 +276,11 @@ loc_9212:
 		bne.s	loc_9224
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
+	if FixBugAnimalBounce
+		bra.w	Anml_Display
+	else
 		bra.w	DisplaySprite
+	endif ; if FixBugAnimalBounce
 ; ===========================================================================
 
 loc_9224:
@@ -337,7 +360,11 @@ Anml_End_14:
 		tst.w	obVelY(a0)
 		bmi.s	loc_9310
 		move.b	#0,obFrame(a0)
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_9310
 		not.b	objoff_29(a0)
@@ -376,7 +403,11 @@ Anml_End_0F:
 		tst.w	obVelY(a0)
 		bmi.s	loc_936C
 		move.b	#0,obFrame(a0)
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_936C
 		neg.w	obVelX(a0)
@@ -396,7 +427,11 @@ Anml_End_13:
 		addi.w	#$18,obVelY(a0)
 		tst.w	obVelY(a0)
 		bmi.s	loc_93AA
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	loc_93AA
 		not.b	objoff_29(a0)
@@ -424,7 +459,11 @@ loc_93C4:
 		tst.w	obVelY(a0)
 		bmi.s	locret_93EA
 		move.b	#0,obFrame(a0)
+	if FixBugAnimalBridge
+		bsr.w	Anml_ChkFloorOrBridge
+	else
 		jsr	(ObjFloorDist).l
+	endif ; if FixBugAnimalBridge
 		tst.w	d1
 		bpl.s	locret_93EA
 		add.w	d1,obY(a0)
@@ -451,3 +490,113 @@ sub_9404:
 		subi.w	#$B8,d0
 		rts
 ; End of function sub_9404
+
+	if FixBugAnimalBridge
+; ---------------------------------------------------------------------------
+; Check level floor first, then GHZ bridge logs as object floors for animals.
+; ---------------------------------------------------------------------------
+
+Anml_ChkFloorOrBridge:
+		jsr	(ObjFloorDist).l			; check normal level collision first
+		tst.w	d1				; did the animal hit level floor?
+		bmi.s	.return				; if yes, branch
+		movem.l	d0/d2-d3/a2,-(sp)
+		move.w	obY(a0),d0			; get animal centre Y
+		moveq	#0,d3
+		move.b	obHeight(a0),d3			; get animal half-height
+		add.w	d3,d0				; get animal bottom Y
+		lea	(v_lvlobjspace).w,a2		; check level object slots
+		moveq	#96-1,d2			; number of level object slots
+
+.checkbridge:
+		cmpi.b	#id_Bridge,obID(a2)		; is this a bridge object?
+		bne.s	.next				; if not, branch
+		cmpi.b	#$A,obRoutine(a2)		; is this an individual bridge log?
+		beq.s	.checkx				; if yes, branch
+		cmpi.b	#2,obRoutine(a2)		; is this the leftmost bridge log?
+		beq.s	.checkx				; if yes, branch
+		cmpi.b	#4,obRoutine(a2)		; is this the leftmost bridge log being stood on?
+		bne.s	.next				; if not, branch
+
+.checkx:
+		move.w	obX(a0),d3			; get animal X position
+		sub.w	obX(a2),d3			; compare with log X position
+		addi.w	#8,d3				; shift to unsigned log bounds
+		cmpi.w	#$10,d3				; is animal within the log width?
+		bhs.s	.next				; if not, branch
+		move.w	obY(a2),d3			; get bridge log Y position
+		subi.w	#8,d3				; get bridge log top
+		move.w	d0,d1				; get animal bottom Y
+		sub.w	d3,d1				; compare with bridge top
+		bmi.s	.next				; if animal is above the bridge, branch
+		cmpi.w	#$10,d1				; is animal close enough to land?
+		bhs.s	.next				; if not, branch
+		neg.w	d1				; return negative floor distance
+		bra.s	.done
+
+.next:
+		lea	object_size(a2),a2		; check next object slot
+		dbf	d2,.checkbridge			; repeat for all level objects
+		moveq	#1,d1				; no bridge floor found
+
+.done:
+		movem.l	(sp)+,d0/d2-d3/a2
+
+.return:
+		rts
+	endif ; if FixBugAnimalBridge
+
+	if FixBugAnimalBounce
+; ---------------------------------------------------------------------------
+; Bounce Sonic when he spin-jumps into a freed animal.
+; ---------------------------------------------------------------------------
+
+Anml_CheckSonicBounce:
+		tst.w	(v_debuguse).w				; is debug mode active?
+		bne.s	.return				; if yes, branch
+		lea	(v_player).w,a1			; load Sonic object
+		cmpi.b	#6,obRoutine(a1)			; is Sonic dead or dying?
+		bhs.s	.return				; if yes, branch
+		btst	#1,obStatus(a1)			; is Sonic airborne?
+		beq.s	.return				; if not, branch
+		tst.w	obVelY(a1)			; is Sonic moving down?
+		bmi.s	.return				; if not, branch
+		btst	#2,obStatus(a1)			; is Sonic rolling?
+		bne.s	.checkrange			; if yes, branch
+		btst	#4,obStatus(a1)			; is Sonic roll-jumping?
+		beq.s	.return				; if not, branch
+
+.checkrange:
+		move.w	obY(a1),d0			; get Sonic's Y position
+		moveq	#0,d1
+		move.b	obHeight(a1),d1			; get Sonic's half-height
+		add.w	d1,d0				; get Sonic's bottom Y
+		move.w	obY(a0),d1			; get animal Y position
+		moveq	#0,d2
+		move.b	obHeight(a0),d2			; get animal half-height
+		sub.w	d2,d1				; get animal top Y
+		sub.w	d1,d0				; compare Sonic's bottom to animal top
+		bmi.s	.return				; if Sonic is too high above the animal, branch
+		cmpi.w	#$C,d0				; is Sonic too deep into/under the animal?
+		bhi.s	.return				; if yes, branch
+		move.w	obX(a1),d0			; get Sonic's X position
+		sub.w	obX(a0),d0			; compare with animal
+		bpl.s	.checkx
+		neg.w	d0
+
+.checkx:
+		cmpi.w	#$14,d0				; is Sonic close enough horizontally?
+		bhs.s	.return				; if not, branch
+		move.w	obY(a1),d0			; get Sonic's Y position
+		sub.w	obY(a0),d0			; compare with animal
+		bpl.s	.checky
+		neg.w	d0
+
+.checky:
+		cmpi.w	#$18,d0				; is Sonic close enough vertically?
+		bhs.s	.return				; if not, branch
+		neg.w	obVelY(a1)			; bounce like a monitor
+
+.return:
+		rts
+	endif ; if FixBugAnimalBounce

@@ -15,7 +15,6 @@ ExecuteObjects:
 		cmpi.b	#6,(v_player+obRoutine).w	; is Sonic dying?
 		bhs.s	.sonic_dead			; if yes, branch to alternate logic
 
-; loc_D348:
 .run_object:
 		move.b	(a0),d0				; load object ID from RAM
 		beq.s	.next_object			; if ID is 0, this is an empty object slot, branch
@@ -37,10 +36,10 @@ ExecuteObjects:
 
 ; loc_D362:
 .sonic_dead:
-	if BugFixScatteredRingsTimer
+	if FixBugScatteredRingsTimer
 		cmpi.b  #$A,(v_player+obRoutine).w      ; Has Sonic drowned?
-		beq.s   loc_D348                        ; If so, run objects a little longer
-	endif ; if BugFixScatteredRingsTimer
+		beq.s   .run_object                     ; If so, run objects a little longer
+	endif ; if FixBugScatteredRingsTimer
 		moveq	#(v_lvlobjspace-v_objspace)/object_size-1,d7 ; run first 32 objects normally (reserved objects like Sonic)
 		bsr.s	.run_object			; execute those objects and return here
 

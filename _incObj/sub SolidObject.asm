@@ -181,7 +181,11 @@ loc_FB0E:
 		cmp.w	d1,d5
 		bhi.w	Solid_TopBottom	; if Sonic hits top or bottom, branch
 		cmpi.w	#4,d1
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		bls.w	Solid_SideAir
+	else
 		bls.s	Solid_SideAir
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		tst.w	d0		; where is Sonic?
 		beq.s	Solid_Centre	; if inside the object, branch
 		bmi.s	Solid_Right	; if right of the object, branch
@@ -202,10 +206,36 @@ Solid_Centre:
 		sub.w	d0,obX(a1)	; correct Sonic's position
 		btst	#1,obStatus(a1)	; is Sonic in the air?
 		bne.s	Solid_SideAir	; if yes, branch
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		tst.b	f_spindash(a1)	; is Sonic charging a spindash?
+		bne.s	Solid_SpindashSide ; if yes, don't enter pushing state
+		btst	#2,obStatus(a1)	; is Sonic rolling?
+		bne.s	Solid_StopRollingSide ; if yes, stop rolling without entering pushing state
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		bset	#5,obStatus(a1)	; make Sonic push object
 		bset	#5,obStatus(a0)	; make object be pushed
 		moveq	#1,d4		; return side collision
 		rts
+; ===========================================================================
+
+	if FeatureSpindash|FixBugEnemyDeathRoll
+Solid_SpindashSide:
+		bclr	#5,obStatus(a1)	; clear Sonic's pushing flag
+		bclr	#5,obStatus(a0)	; clear object's pushing flag
+		moveq	#1,d4		; return side collision
+		rts
+
+Solid_StopRollingSide:
+		bclr	#2,obStatus(a1)	; clear rolling flag
+		bclr	#5,obStatus(a1)	; clear Sonic's pushing flag
+		bclr	#5,obStatus(a0)	; clear object's pushing flag
+		move.b	#sonic_height,obHeight(a1) ; reset Sonic's hitbox height to default
+		move.b	#sonic_width,obWidth(a1) ; reset Sonic's hitbox width to default
+		move.b	#id_Wait,obAnim(a1) ; use "standing" animation
+		subq.w	#sonic_height-sonic_roll_height,obY(a1) ; adjust Y-position for standing
+		moveq	#1,d4		; return side collision
+		rts
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 ; ===========================================================================
 
 Solid_SideAir:
@@ -218,16 +248,22 @@ Solid_Ignore:
 		btst	#5,obStatus(a0)	; is Sonic pushing?
 		beq.s	Solid_Debug	; if not, branch
 
-	if BugFixWalkJump=1
+	if FixBugWalkJump=1
 		cmpi.b	#id_Roll,obAnim(a1)		; is Sonic in his jumping/rolling animation?
+		if (FixBugWalkJump<2)&(FixBugs=0)
 		beq.s	Solid_NotPushing		; if so, branch
+		endif
 		cmpi.b	#id_Drown,obAnim(a1)	; is Sonic in his drowning animation?
+		if (FixBugWalkJump<2)&(FixBugs=0)
 		beq.s	Solid_NotPushing		; if so, branch
+		endif
 		cmpi.b	#id_Hurt,obAnim(a1)		; is Sonic in his hurt animation?
+		if (FixBugWalkJump<2)&(FixBugs=0)
 		beq.s	Solid_NotPushing		; if so, branch
+		endif
 	endif
 
-	if (BugFixWalkJump<2)&(FixBugs=0)
+	if (FixBugWalkJump<2)&(FixBugs=0)
 		; This causes the infamous "walk-jump bug"
 		move.w	#id_Run,obAnim(a1) ; use running animation
 	endif

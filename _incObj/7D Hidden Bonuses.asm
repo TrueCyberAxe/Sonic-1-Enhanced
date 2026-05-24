@@ -59,7 +59,7 @@ Bonus_Main:	; Routine 0
 .points:	dc.w 0			; Bonus points array
 		dc.w 1000
 		dc.w 100
-	if (BugFixHiddenPoints)|(FixBugs)
+	if (FixBugHiddenPoints)|(FixBugs)
 		; Fix the Hidden Points bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_Hidden_Points_bug_in_Sonic_1
 		dc.w 10

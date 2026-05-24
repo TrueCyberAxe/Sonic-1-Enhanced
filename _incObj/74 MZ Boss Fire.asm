@@ -60,7 +60,7 @@ BossFire_Action:	; Routine 2
 ; ===========================================================================
 
 BossFire_Delete:
-	if BugFixRenderBeforeInit ; Bug 6 Fix
+	if FixBugRenderBeforeInit ; Bug 6 Fix
 		addq.l  #4,sp
 	endif
 		jmp	(DeleteObject).l
@@ -193,7 +193,7 @@ locret_1887E:
 ; ===========================================================================
 
 BossFire_Delete2:
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6 Fix
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6 Fix
 		; Do not return to BossFire_Action, to avoid double-delete
 		; and display-and-delete bugs.
 		addq.l	#4,sp
@@ -223,7 +223,7 @@ BossFire_Animate:
 
 ; BossFire_Delete3:
 BossFire_TempFireDel:	; Routine 6
-	if BugFixRenderBeforeInit	; Bug 6 Fix
+	if FixBugRenderBeforeInit	; Bug 6 Fix
 		addq.l  #4,sp
 	endif
 		jmp	(DeleteObject).l

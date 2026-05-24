@@ -14,11 +14,11 @@ GeyserMaker:
 		jsr	GMake_Index(pc,d1.w)
 	endif
 
-	if BugFixRenderBeforeInit ; Bug 6
+	if FixBugRenderBeforeInit ; Bug 6
 		addq.l	#4,sp					; discard return address from stack to safely exit early
 	else
 		bra.w	Geyser_ChkDel			; branch to object deletion check routine
-	endif ; if BugFixRenderBeforeInit
+	endif ; if FixBugRenderBeforeInit
 ; ===========================================================================
 GMake_Index:	dc.w GMake_Main-GMake_Index
 		dc.w GMake_Wait-GMake_Index
@@ -228,11 +228,11 @@ Geyser_Action:	; Routine 2
 		bsr.w	AnimateSprite
 
 Geyser_ChkDel:
-	if BugFixRenderBeforeInit ; Bug 6
+	if FixBugRenderBeforeInit ; Bug 6
 		out_of_range	.delete
 	else
 		out_of_range	DeleteObject
-	endif ; if BugFixRenderBeforeInit
+	endif ; if FixBugRenderBeforeInit
 
 	if FixBugs
 		; Moved to prevent a delete-and-display bug.
@@ -241,11 +241,11 @@ Geyser_ChkDel:
 		rts
 	endif
 
-	if BugFixRenderBeforeInit ; Bug 6
+	if FixBugRenderBeforeInit ; Bug 6
 .delete:
 		addq.l	#4,sp				; remove one longword return address from the stack
     	bra.w   DeleteObject
-	endif ; if BugFixRenderBeforeInit
+	endif ; if FixBugRenderBeforeInit
 ; ===========================================================================
 Geyser_Types:	dc.w Geyser_Type00-Geyser_Types
 		dc.w Geyser_Type01-Geyser_Types

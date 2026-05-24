@@ -327,7 +327,7 @@ loc_18166:
 ; ===========================================================================
 
 BossLabyrinth_ShipDel:
-	if (BugFixRenderBeforeInit)|(FixBugs)	; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs)	; Bug 6
 		; Avoid returning to BossLabyrinth_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

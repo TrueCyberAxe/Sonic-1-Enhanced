@@ -22,7 +22,7 @@ QueueSound1:
 		move.b	d0,(Z80_RAM+zAbsVar.SFXUnknown).l	; Queue sound
 		startZ80					; Start the Z80 back up again so the sound driver can continue functioning
 	else
-		move.b	d0,(v_snddriver_ram+v_soundqueue0).w
+		move.b	d0,(v_snddriver_ram.v_soundqueue0).w
 	endif
 		rts
 ; End of function QueueSound1
@@ -68,7 +68,7 @@ QueueSound2:
 		startZ80					; Start the Z80 back up again so the sound driver can continue functioning
 .done:
 	else
-		move.b	d0,(v_snddriver_ram+v_soundqueue1).w
+		move.b	d0,(v_snddriver_ram.v_soundqueue1).w
 	endif
 		rts
 ; End of function QueueSound2

@@ -22,8 +22,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
@@ -52,8 +50,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
@@ -93,8 +89,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
@@ -130,8 +124,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
@@ -159,8 +151,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting
@@ -188,8 +178,6 @@ dbug:	macro map,object,subtype,frame,vram
 
 	if EnhancedDebug
 		include "Enhancements/_inc/DebugListEnhancedStart.asm"
-	else
-		include "Enhancements/_inc/DebugListStart.asm"
 	endif ; if EnhancedDebug
 
 ;			mappings	object		subtype	frame	VRAM setting

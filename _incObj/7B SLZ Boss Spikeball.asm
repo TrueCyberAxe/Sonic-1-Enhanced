@@ -393,7 +393,7 @@ BossSpikeball_MoveFrag:	; Routine $A
 		move.b	d0,obFrame(a0)
 
 		tst.b	obRender(a0)
-	if (BugFixRenderBeforeInit)|(FixBugs) ; Bug 6
+	if (FixBugRenderBeforeInit)|(FixBugs) ; Bug 6
 		; Avoid returning to BossSpikeball to prevent a
 		; display-and-delete bug.
 		bmi.s	.return
@@ -401,7 +401,7 @@ BossSpikeball_MoveFrag:	; Routine $A
 		bra.w	BossStarLight_Delete
 	else
 		bpl.w	BossStarLight_Delete
-	endif ; if (BugFixRenderBeforeInit)|(FixBugs)
+	endif ; if (FixBugRenderBeforeInit)|(FixBugs)
 
 .return:
 		rts

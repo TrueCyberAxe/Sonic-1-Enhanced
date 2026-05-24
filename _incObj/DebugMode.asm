@@ -14,11 +14,11 @@ Debug_Index:
 ; ===========================================================================
 
 Debug_Main:	; Routine 0
-	if BugFixDebugMomentum
+	if FixBugDebugMomentum
 		clr.w   (v_objspace+$14).w ; Clear Inertia
 		clr.w   (v_objspace+$12).w ; Clear X/Y Speed
 		clr.w   (v_objspace+$10).w ; Clear X/Y Speed
-	endif ; if BugFixDebugMomentum
+	endif ; if FixBugDebugMomentum
 		addq.b	#2,(v_debuguse).w
 		move.w	(v_limittop2).w,(v_limittopdb).w ; buffer level x-boundary
 		move.w	(v_limitbtm1).w,(v_limitbtmdb).w ; buffer level y-boundary
@@ -139,6 +139,38 @@ loc_1D066:
 		move.l	d3,obX(a0)
 
 Debug_ChgItem:
+	if Enhanced
+		tst.b	(f_debug_6button).w			; is a six-button pad detected?
+		beq.s	.threebutton				; if not, use original debug controls
+		btst	#bitX,(v_jpadpress1ext).w		; was X pressed?
+		beq.s	.checknext6				; if not, branch
+		subq.b	#1,(v_debugitem).w			; go back 1 item
+		bcc.s	.display
+		add.b	d6,(v_debugitem).w
+		bra.s	.display
+; ===========================================================================
+
+.checknext6:
+		btst	#bitZ,(v_jpadpress1ext).w		; was Z pressed?
+		beq.s	.createitem6				; if not, branch
+		addq.b	#1,(v_debugitem).w			; go forwards 1 item
+		cmp.b	(v_debugitem).w,d6
+		bhi.s	.display
+		move.b	#0,(v_debugitem).w			; loop back to first item
+		bra.s	.display
+; ===========================================================================
+
+.createitem6:
+		move.b	(v_jpadpress1).w,d0			; get pressed face buttons
+		andi.b	#btnABC,d0				; were A, B, or C pressed?
+		bne.s	.createitemnow				; if yes, place the current debug object
+		btst	#bitMode,(v_jpadpress1ext).w		; was Mode pressed?
+		bne.w	Debug_Exit				; if yes, leave debug mode
+		bra.w	Debug_StayInDebug			; otherwise, remain in debug mode
+; ===========================================================================
+
+.threebutton:
+	endif ; if Enhanced
 		btst	#bitA,(v_jpadhold1).w ; is button A held?
 		beq.s	.createitem	; if not, branch
 		btst	#bitC,(v_jpadpress1).w ; is button C pressed?
@@ -164,6 +196,8 @@ Debug_ChgItem:
 .createitem:
 		btst	#bitC,(v_jpadpress1).w ; is button C pressed?
 		beq.s	.backtonormal	; if not, branch
+
+.createitemnow:
 		jsr	(FindFreeObj).l
 		bne.s	.backtonormal
 
@@ -187,7 +221,7 @@ Debug_ChgItem:
 
 .backtonormal:
 		btst	#bitB,(v_jpadpress1).w 	; is button B pressed?
-		beq.s	.stayindebug	; if not, branch
+		beq.s	Debug_StayInDebug	; if not, branch
 
 Debug_Exit:
 		moveq	#0,d0
@@ -207,7 +241,7 @@ Debug_Exit:
 		move.w	(v_limittopdb).w,(v_limittop2).w 	; restore level boundaries
 		move.w	(v_limitbtmdb).w,(v_limitbtm1).w
 		cmpi.b	#id_Special,(v_gamemode).w 				; are you in the special stage?
-		bne.s	.stayindebug	; if not, branch
+		bne.s	Debug_StayInDebug	; if not, branch
 
 		clr.w	(v_ssangle).w
 		move.w	#$40,(v_ssrotate).w ; set new level rotation speed
@@ -217,7 +251,7 @@ Debug_Exit:
 		bset	#2,(v_player+obStatus).w
 		bset	#1,(v_player+obStatus).w
 
-.stayindebug:
+Debug_StayInDebug:
 		rts
 ; End of function Debug_Control
 ; ===========================================================================

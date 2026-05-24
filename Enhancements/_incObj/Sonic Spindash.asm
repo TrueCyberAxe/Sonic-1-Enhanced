@@ -4,6 +4,14 @@
 
 ; loc_1AC3E:
 ; Sonic_CheckSpindash:
+SpindashChargeMax:	equ $800
+SpindashChargeStep:	equ $2E		; $800 / 45 frames, rounded up
+	if FeatureSuperPeelout>1
+SpindashReleaseMax:	equ $F00		; match the Super Peel-Out cap
+	else
+SpindashReleaseMax:	equ $A00		; match the Peel-Out cap
+	endif ; if FeatureSuperPeelout>1
+
 Sonic_SpinDash:
 		tst.b	f_spindash(a0)			; already Spin Dashing?
 		bne.s	Sonic_UpdateSpindash		; if set, branch
@@ -20,10 +28,11 @@ Sonic_SpinDash:
 	else
 		move.b	#sonic_roll_height,obHeight(a0) ; adjust height for CD spindash
 		move.b	#sonic_roll_width,obWidth(a0) 	; adjust width for CD spindash
-		move.w	#$C00,obInertia(a0)		; set Sonic's speed to maximum run speed
+		move.w	#0,obInertia(a0)		; charge before releasing the dash
 	endif
 
 		move.b	#id_Spindash,obAnim(a0)		; set Spin Dash anim (9 in s2)
+		bclr	#bitPushing,obStatus(a0)	; don't let input put Sonic into pushing while charging
 		sfx	#sfx_Spindash,snd_jsr		; play spin sound
 
 		addq.l	#4,sp				; skip Sonic_Jump when returning to Obj01_MdNormal
@@ -52,6 +61,7 @@ Sonic_SpinDash:
 ; loc2_1AC8E
 Sonic_UpdateSpindash:
 		move.b #id_Spindash,obAnim(a0)			; set Spin Dash anim (9 in s2)
+		bclr	#bitPushing,obStatus(a0)		; prevent monitor/block pushing during charge
 
 		move.b	(v_jpadhold2).w,d0			; read controller
 		btst	#bitDn,d0				; check down button
@@ -66,14 +76,9 @@ Sonic_UpdateSpindash:
 		; add the difference between Sonic's rolling and standing heights
 		addq.w	#sonic_height-sonic_roll_height,obY(a0) ; keep Sonic grounded after radius change
 		move.b	#$00,f_spindash(a0)			; clear Spin Dash flag
-		moveq	#0,d0
-
-		; Sonic 2 Style Extra Charging
-	if FeatureSpindash>1
-		move.b	v_charging(a0),d0			; copy charge count
-		add.w	d0,d0					; double it
-		move.w	SpindashSpeeds(pc,d0.w),obInertia(a0)	; get normal speed
-	endif	; if FeatureSpindash>1
+		bset	#2,obStatus(a0)			; classify Sonic as rolling on release
+		bsr.w	Sonic_GetSpindashChargeSpeed		; get the charged release speed
+		move.w	d0,obInertia(a0)			; set inertia from the current charge
 
 		move.w	obInertia(a0),d0			; get inertia
 		subi.w	#$800,d0				; subtract $800
@@ -99,8 +104,32 @@ Sonic_UpdateSpindash:
 
 ;===========================================================================
 
+Sonic_GetSpindashChargeSpeed:
+		move.w	v_charging(a0),d0			; copy charge count
+		lsr.w	#8,d0					; convert $000-$800 charge to table index
+		cmpi.w	#8,d0					; is charge over the last entry?
+		bls.s	.chargeindexok				; if not, branch
+		moveq	#8,d0					; clamp to the last entry
+
+.chargeindexok:
+		add.w	d0,d0					; double it for word-based indexing
+	if FeatureSuperPeelout>1
+		move.w	SpindashSpeedsSuper(pc,d0.w),d0		; get Super Peel-Out capped speed
+	else
+		move.w	SpindashSpeeds(pc,d0.w),d0		; get normal speed
+	endif ; if FeatureSuperPeelout>1
+		cmpi.w	#SpindashReleaseMax,d0			; has it gone over the peel-out cap?
+		bls.s	.speedok				; if not, branch
+		move.w	#SpindashReleaseMax,d0			; cap to the peel-out maximum
+
+.speedok:
+		rts
+
+;===========================================================================
+
 ; word_1AD0C:
 SpindashSpeeds:
+	if FeatureSpindash>1
 		dc.w  $800	; 0
 		dc.w  $880	; 1
 		dc.w  $900	; 2
@@ -110,6 +139,17 @@ SpindashSpeeds:
 		dc.w  $B00	; 6
 		dc.w  $B80	; 7
 		dc.w  $C00	; 8
+	else
+		dc.w  $200	; 0
+		dc.w  $300	; 1
+		dc.w  $400	; 2
+		dc.w  $500	; 3
+		dc.w  $600	; 4
+		dc.w  $700	; 5
+		dc.w  $800	; 6
+		dc.w  $900	; 7
+		dc.w  $A00	; 8
+	endif ; if FeatureSpindash>1
 
 ; word_1AD1E:
 SpindashSpeedsSuper:
@@ -128,29 +168,29 @@ SpindashSpeedsSuper:
 ; If still charging the dash...
 ; loc2_1AD30
 Sonic_ChargingSpindash:
-		tst.w	v_charging(a0)				; check charge count
-		beq.s	Sonic_ChargingSpindashInput			; if zero, branch
-		move.w	v_charging(a0),d0			; otherwise put it in d0
-		lsr.w	#5,d0					; shift right 5 (divide it by 32)
-		sub.w	d0,v_charging(a0)			; subtract from charge count
-		bcc.s	Sonic_ChargingSpindashInput		; if charge did not underflow, branch
-		move.w	#$00,v_charging(a0)			; set charge count to 0
+		bclr	#bitPushing,obStatus(a0)		; don't allow pushing while charging
 
 ; loc_1AD78:
 Sonic_ChargingSpindashInput:
 		move.b	(v_jpadpress2).w,d0			; read controller
 		andi.b	#btnABC,d0				; pressing A/B/C?
-		beq.w	Obj01_Spindash_ResetScr			; if not, branch
+		beq.s	.nochargesound				; if not, branch
 
 	if FeatureSpindash>1
 		queue_sfx	#sfx_Spindash			; Spindash Reving was $E0 in sonic 2
 	endif ; if FeatureSpindash>1
 
 		play_queued_sfx					; play charge sound
-		addi.w	#$200,v_charging(a0)			; increase charge count
-		cmpi.w	#$800,v_charging(a0)			; check if it's maxed
-		bcs.s	Obj01_Spindash_ResetScr			; if not, then branch
-		move.w	#$800,v_charging(a0)			; reset it to max
+
+.nochargesound:
+		addi.w	#SpindashChargeStep,v_charging(a0) ; reach full spindash speed in 45 frames
+		cmpi.w	#SpindashChargeMax,v_charging(a0)	; check if it's maxed
+		bcs.s	.chargeok				; if not, branch
+		move.w	#SpindashChargeMax,v_charging(a0)	; reset it to max
+
+.chargeok:
+		bsr.w	Sonic_GetSpindashChargeSpeed		; get the current charged speed
+		move.w	d0,obInertia(a0)			; show charge speed increasing while charging
 
 ; loc_1AD78:
 Obj01_Spindash_ResetScr:

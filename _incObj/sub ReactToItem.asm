@@ -274,9 +274,9 @@ HurtSonic:
 		bne.s	.hasshield	; if yes, branch
 
 	if FeatureRestoreMonitorScubaGear
-		tst.b	(f_goggles).w									; does Sonic have a Goggle Flag?
+		tst.b	(v_goggles).w									; does Sonic have a Goggle Flag?
 		beq.s	.ringcheck										; if not, branch
-		move.b	#0,(f_goggles).w						; remove goggles
+		move.b	#0,(v_goggles).w						; remove goggles
 
 .ringcheck:
 	endif
@@ -390,7 +390,7 @@ KillSonic:
 		cmpi.b	#id_Flamethrower,obID(a2)									; was damage caused by a Fire Object?
 		beq.s	.flamingdeath												; if yes, branch
 
-		cmpi.b	#id_ExplosionBomb,obID(a2)									; was damage caused by a Fire Object?
+		cmpi.b	#id_Explosion,obID(a2)									; was damage caused by a Fire Object?
 		beq.s	.flamingdeath												; if yes, branch
 
 		cmpi.b	#id_Bomb,obID(a2)									; was damage caused by a Fire Object?
@@ -469,7 +469,7 @@ KillSonicByCrushing:
 
 		moveq	#-1,d0
 		rts
-endif ; FeatureContextualDeath
+	endif ; if FeatureContextualDeath
 
 React_Special:
 		move.b	obColType(a1),d1

@@ -40,8 +40,18 @@ SonicSS_Main:	; Routine 0
 SonicSS_ChkDebug:	; Routine 2
 		tst.w	(f_debugmode).w	; is debug mode cheat enabled?
 		beq.s	SonicSS_NoDebug	; if not, branch
+	if Enhanced
+		tst.b	(f_debug_6button).w			; is a six-button pad detected?
+		beq.s	.threebuttondebug			; if not, use B
+		btst	#bitMode,(v_jpadpress1ext).w		; is Mode pressed?
+		beq.s	SonicSS_NoDebug			; if not, branch
+		bra.s	.enterdebug
+
+.threebuttondebug:
+	endif ; if Enhanced
 		btst	#bitB,(v_jpadpress1).w ; is button B pressed?
 		beq.s	SonicSS_NoDebug	; if not, branch
+.enterdebug:
 		move.w	#1,(v_debuguse).w ; change Sonic into a ring
 
 ; Obj09_NoDebug:
@@ -62,9 +72,6 @@ SonicSS_Modes:	dc.w SonicSS_OnWall-SonicSS_Modes
 
 ; Obj09_OnWall:
 SonicSS_OnWall:
-	if TweakBetterBonusStageControls>1
-		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endif
 		bsr.w	SonicSS_Jump
 		bsr.w	SonicSS_Move
 		bsr.w	SonicSS_Fall
@@ -84,10 +91,7 @@ SonicSS_Display:
 		jsr	(SpeedToPos).l
 		bsr.w	SS_FixCamera
 		move.w	(v_ssangle).w,d0
-	if FeatureDisableSSRotation
-		; Keep Sonic visually aligned when the stage rotation is being suppressed.
 		add.w	(v_ssrotate).w,d0
-	endif
 		move.w	d0,(v_ssangle).w
 		jsr	(Sonic_Animate).l
 		rts
@@ -231,9 +235,6 @@ SonicSS_Jump:
 		asr.l	#8,d0
 		move.w	d0,obVelY(a0)
 		bset	#1,obStatus(a0)
-	if TweakBetterBonusStageControls>1
-		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endif
 		sfx	#sfx_Jump,snd_jsr	; set jump sound and play it
 
 ; Obj09_NoJump:
@@ -248,53 +249,19 @@ SonicSS_NoJump:
 ; removed as it doesn't work (it doesn't account for the stage rotation).
 ; ---------------------------------------------------------------------------
 
-Obj09_JumpHeight:
-	if TweakBetterBonusStageControls>1
-		; Project velocity onto the rotated jump direction before applying the release cap.
-		move.b	(v_jpadhold2).w,d0						; read held controller buttons
-		andi.b	#btnABC,d0							; isolate jump buttons
-		bne.s	locret_1BBB4							; if jump is still held, branch to return
-		btst	#7,obStatus(a0)							; has Sonic initiated a jump?
-		beq.s	locret_1BBB4							; if not, branch to return
-		move.b	(v_ssangle).w,d0						; get special stage rotation angle
-		andi.b	#$FC,d0								; align angle to sine table entry
-		neg.b	d0								; invert angle direction
-		subi.b	#$40,d0								; rotate angle by 90 degrees
-		jsr	(CalcSine).l							; calculate sine/cosine values for jump direction
-		move.w	obVelY(a0),d2							; get current Y velocity
-		muls.w	d2,d0								; project Y velocity onto jump direction sine
-		asr.l	#8,d0								; scale projected Y component
-		move.w	obVelX(a0),d2							; get current X velocity
-		muls.w	d2,d1								; project X velocity onto jump direction cosine
-		asr.l	#8,d1								; scale projected X component
-		add.w	d0,d1								; combine projected X/Y velocity into jump speed
-		cmpi.w	#$400,d1							; has jump speed exceeded the release threshold?
-		ble.s	locret_1BBB4							; if not, branch to return
-		move.b	(v_ssangle).w,d0						; get special stage rotation angle again
-		andi.b	#$FC,d0								; align angle to sine table entry
-		neg.b	d0								; invert angle direction
-		subi.b	#$40,d0								; rotate angle by 90 degrees
-		jsr	(CalcSine).l							; recalculate sine/cosine for capped jump speed
-		muls.w	#$400,d1							; apply jump-release speed to cosine component
-		asr.l	#8,d1								; scale new X velocity
-		move.w	d1,obVelX(a0)							; set capped X velocity
-		muls.w	#$400,d0							; apply jump-release speed to sine component
-		asr.l	#8,d0								; scale new Y velocity
-		move.w	d0,obVelY(a0)							; set capped Y velocity
-		bclr	#7,obStatus(a0)							; clear "Sonic has jumped" flag so cap only applies once
-	elseif TweakBetterBonusStageControls
-		move.w	#-$400,d1							; set maximum jump speed
-		cmp.w	obVelY(a0),d1							; is Sonic already below the cap?
-		ble.s	.return								; if yes, branch
-		move.b	(v_jpadhold2).w,d0						; get held buttons
-		andi.b	#btnABC,d0							; is A, B, or C being held?
-		bne.s	.return								; if yes, branch
-		move.w	d1,obVelY(a0)							; cap vertical speed if not holding ABC
-	else
-		rts									; return immediately if jump-height control restoration is disabled
-	endif ; if TweakBetterBonusStageControls>1
+nullsub_2:
+		rts
 
-; locret_1BBB4:
+		; dead code
+		move.w	#-$400,d1		; set maximum jump speed
+		cmp.w	obVelY(a0),d1		; is Sonic already below the cap?
+		ble.s	locret_1BBB4		; if yes, branch
+		move.b	(v_jpadhold2).w,d0	; get held buttons
+		andi.b	#btnABC,d0		; is A, B, or C being held?
+		bne.s	locret_1BBB4		; if yes, branch
+		move.w	d1,obVelY(a0)		; cap vertical speed if not holding ABC
+
+locret_1BBB4:
 .return:
 		rts
 ; End of function nullsub_2
@@ -516,7 +483,12 @@ SonicSS_GetCont:
 		bset	#0,(v_lifecount).w
 		bne.s	SonicSS_NoCont
 		addq.b	#1,(v_continues).w		; add 1 to number of continues
+	if Enhanced
 		sfx	#sfx_Continue,snd_jsr		; play continue sound
+	else
+		move.w	#sfx_Continue,d0
+		jsr	(QueueSound1).l			; play extra continue sound
+	endif ; if Enhanced
 
 ; Obj09_NoCont:
 SonicSS_NoCont:
@@ -665,9 +637,6 @@ SonicSS_ChkBumper:
 		asr.l	#8,d0
 		move.w	d0,obVelY(a0)
 		bset	#1,obStatus(a0)
-	if TweakBetterBonusStageControls>1
-		bclr	#7,obStatus(a0)	; clear "Sonic has jumped" flag
-	endif
 		bsr.w	SS_RemoveCollectedItem
 		bne.s	SonicSS_BumpSnd
 		move.b	#2,(a2)

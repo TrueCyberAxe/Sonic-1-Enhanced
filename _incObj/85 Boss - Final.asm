@@ -481,7 +481,7 @@ loc_1A248:
 		tst.b	obRender(a0)
 		bmi.s	loc_1A260
 		move.b	#id_Ending,(v_gamemode).w
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		; Avoid returning to BossFinal_Eggman to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

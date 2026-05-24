@@ -33,7 +33,7 @@ Edge_Solid:	; Routine 2
 		bsr.w	EdgeWall_SolidWall
 
 Edge_Display:	; Routine 4
-	if (BugFixRenderBeforeInit)|(FixBugs)	; Bug 1
+	if (FixBugRenderBeforeInit)|(FixBugs)	; Bug 1
 		; Objects shouldn't call DisplaySprite and DeleteObject on
 		; the same frame, or else cause a null-pointer dereference.
 		out_of_range.w	DeleteObject

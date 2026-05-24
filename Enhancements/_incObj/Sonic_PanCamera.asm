@@ -25,20 +25,31 @@ Sonic_PanCamera:
 ;		cmpi.w	#$1B00,obX(a0)			; is sonic's x position lower than $1B00?
 ;		bcs.s	.reset_pan			; if so, branch
 
-; These lines aren't part of the original routine; I added them myself.
-; If you've ported the Spin Dash, uncomment the following lines of code
-; to allow the camera to pan ahead while charging the Spin Dash:
-;		tst.b	$39(a0)				; is sonic charging up a spin dash?
-;		beq.s	.skip				; if not, branch
-;		btst	#0,obStatus(a0)			; check the direction that sonic is facing
-;		bne.s	.pan_right			; if he's facing right, pan the camera to the right
-;		bra.s	.pan_left			; otherwise, pan the camera to the left
+	if FeatureSpindash|FeatureSuperPeelout
+	if FeatureSpindash&FeatureSuperPeelout
+		tst.b	f_spindash(a0)			; is Sonic charging a spin dash?
+		bne.s	.charge_pan			; if yes, branch
+		btst	#1,f_superpeelout(a0)		; is Sonic charging a peel-out?
+		beq.s	.skip				; if not, branch
+	elseif FeatureSpindash
+		tst.b	f_spindash(a0)			; is Sonic charging a spin dash?
+		beq.s	.skip				; if not, branch
+	elseif FeatureSuperPeelout
+		btst	#1,f_superpeelout(a0)		; is Sonic charging a peel-out?
+		beq.s	.skip				; if not, branch
+	endif ; if FeatureSpindash&FeatureSuperPeelout
+.charge_pan:
+		btst	#0,obStatus(a0)			; check the direction that Sonic is facing
+		bne.s	.pan_right			; if facing left, pan the camera left
+		bra.s	.pan_left			; otherwise, pan the camera right
+	endif ; if FeatureSpindash|FeatureSuperPeelout
 
 .skip:
 		cmpi.w	#$600,d0			; is sonic's inertia greater than $600
 		bcs.s	.reset_pan			; if not, recenter the screen (if needed)
 		tst.w	obInertia(a0)			; otherwise, check the direction of inertia (by subtracting it from 0)
-		bpl.s	.pan_left			; if the result was positive, then inertia was negative, so we pan the screen left
+		bmi.s	.pan_right			; if inertia is negative, pan the screen left
+		bra.s	.pan_left			; otherwise, pan the screen right
 
 .pan_right:
 		addq.w	#2,d1				; add 2 to the pan value

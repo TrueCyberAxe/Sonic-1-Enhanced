@@ -26,10 +26,10 @@ Rock_Solid:	; Routine 2
 		move.w	#$10,d3
 		move.w	obX(a0),d4
 		bsr.w	SolidObject
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		; Objects shouldn't call DisplaySprite and DeleteObject in
 		; the same frame or else cause a null-pointer dereference.
-		; This same bugfix can be found in Sonic 2's unused copy of
+		; This same FixBug can be found in Sonic 2's unused copy of
 		; this object.
 		out_of_range.w	DeleteObject
 		bra.w	DisplaySprite

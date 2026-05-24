@@ -74,7 +74,7 @@ SpeedUpIndex:
 		dc.b 8		; SBZ
 		dc.b $FF	; Invincibility
 		dc.b 5		; Extra Life
-	if BugFixSoundDriverBugs
+	if FixBugSoundDriver
 		; @TODO find the correct spedup tempos
 		; dc.b ?		; Special Stage
 		; dc.b ?		; Title Screen
@@ -87,7 +87,7 @@ SpeedUpIndex:
 		; dc.b ?		; Credits
 		; dc.b ?		; Drowning
 		; dc.b ?		; Get Emerald
-	endif ; if BugFixSoundDriverBugs
+	endif ; if FixBugSoundDriver
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -670,7 +670,7 @@ PlaySoundID:
 		beq.w	StopAllSound
 		bpl.s	.locret				; If >= 0, return (not a valid sound, bgm or command)
 		move.b	#$80,SMPS_RAM.v_sound_id(a6)	; reset music flag
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		cmpi.b	#bgm__Last,d7		; Is this music ($81-$93)?
 	else
 		; DANGER! Music ends at $93, yet this checks until $9F; attempting to
@@ -685,11 +685,11 @@ PlaySoundID:
 		bls.w	Sound_PlaySFX							; Branch if yes
 		cmpi.b	#spec__First,d7					; Is this after sfx but before special sfx? (redundant check)
 		blo.w	.locret			; Return if yes
-	if (BugFixSoundDriverBugs)|(ExtendedSoundEffects)|(FixBugs)
+	if (FixBugSoundDriver)|(ExtendedSoundEffects)|(FixBugs)
 		cmpi.b	#spec__Last,d7		; Is this special sfx ($D0-$D0)?
 		bls.w	Sound_PlaySpecial	; Branch if yes
 
-	if (BugFixSoundDriverBugs)|(ExtendedSoundEffects)
+	if (FixBugSoundDriver)|(ExtendedSoundEffects)
 		cmpi.b	#spec__Last,d7					; Is this special sfx ($D1-$DF)?
 		bls.w	Sound_PlaySFX2
 	endif
@@ -849,17 +849,17 @@ Sound_PlayBGM:
 		moveq	#0,d7
 		move.b	2(a3),d7		; load number of FM+DAC tracks
 
-	if BugFixSongFadeRestoration
+	if FixBugSongFadeRestoration
 		move.b	4(a3),d4		; load tempo dividing timing
 		moveq	#TrackSz,d6
 		move.b	#1,d5			; Note duration for first "note"
-	endif ; if BugFixSongFadeRestoration
+	endif ; if FixBugSongFadeRestoration
 
 		beq.w	.bgm_fmdone		; branch if zero
 		subq.b	#1,d7
 		move.b	#$C0,d1			; Default AMS+FMS+Panning
 
-	if BugFixSongFadeRestoration=0
+	if FixBugSongFadeRestoration=0
 		move.b	4(a3),d4		; load tempo dividing timing
 		moveq	#SMPS_Track.len,d6
 		move.b	#1,d5			; Note duration for first "note"
@@ -1003,12 +1003,12 @@ PSGInitBytes:	dc.b $80, $A0, $C0	; Specifically, these configure writes to the P
 ; ---------------------------------------------------------------------------
 	if ExtendedSoundEffects
 Sound_PlaySFX2:
-		tst.b	f_1up_playing(a6)					; Is 1-up playing?
-		bne.w	clear_sndprio							; Exit is it is
-		tst.b	v_fadeout_counter(a6)			; Is music being faded out?
-		bne.w	clear_sndprio							; Exit if it is
-		tst.b	f_fadein_flag(a6)					; Is music being faded in?
-		bne.w	clear_sndprio							; Exit if it is
+		tst.b	SMPS_RAM.f_1up_playing(a6)	; Is 1-up playing?
+		bne.w	Sound_ClearSndPrio		; Exit is it is
+		tst.b	SMPS_RAM.v_fadeout_counter(a6)	; Is music being faded out?
+		bne.w	Sound_ClearSndPrio		; Exit if it is
+		tst.b	SMPS_RAM.f_fadein_flag(a6)	; Is music being faded in?
+		bne.w	Sound_ClearSndPrio		; Exit if it is
 
 	if FeatureSpindash>1
 		clr.b	(f_sfx_spinrev).w
@@ -1043,11 +1043,11 @@ Sound_PlaySFX2:
 ; Sound_A0toCF:
 Sound_PlaySFX:
 		tst.b	SMPS_RAM.f_1up_playing(a6)	; Is 1-up playing?
-		bne.w	.clear_sndprio			; Exit is it is
+		bne.w	Sound_ClearSndPrio		; Exit is it is
 		tst.b	SMPS_RAM.v_fadeout_counter(a6)	; Is music being faded out?
-		bne.w	.clear_sndprio			; Exit if it is
+		bne.w	Sound_ClearSndPrio		; Exit if it is
 		tst.b	SMPS_RAM.f_fadein_flag(a6)	; Is music being faded in?
-		bne.w	.clear_sndprio			; Exit if it is
+		bne.w	Sound_ClearSndPrio		; Exit if it is
 
 	if FeatureSpindash>1
 		clr.b	(f_sfx_spinrev).w
@@ -1066,7 +1066,7 @@ Sound_PlaySFX:
 		cmpi.b	#sfx_Push,d7						; is "pushing" sound played?
 		bne.s	.sfx_notPush				; if not, branch
 		tst.b	SMPS_RAM.f_push_playing(a6)		; Is pushing sound already playing?
-		bne.w	.locret					; Return if not
+		bne.w	SoundEffects_LocRet			; Return if not
 		move.b	#$80,SMPS_RAM.f_push_playing(a6)	; Mark it as playing
 ; Sound_notA7:
 .sfx_notPush:
@@ -1081,7 +1081,7 @@ SoundEffects_Common:
 		move.w	(a1)+,d1								; Voice pointer
 		add.l	a3,d1											; Relative pointer
 		move.b	(a1)+,d5								; Dividing timing
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		moveq	#0,d7
 	else
 		; DANGER! there is a missing 'moveq	#0,d7' here, without which SFXes whose
@@ -1169,14 +1169,14 @@ SoundEffects_Common:
 ; loc_722B8:
 .doneoverride:
 		tst.b	SMPS_RAM.v_sfx_psg3_track.PlaybackControl(a6)		; Is SFX being played?
-		bpl.s	.locret							; Branch if not
+		bpl.s	SoundEffects_LocRet					; Branch if not
 		bset	#2,SMPS_RAM.v_spcsfx_psg3_track.PlaybackControl(a6)	; Set 'SFX is overriding' bit
 ; locret_722C4:
-.locret:
+SoundEffects_LocRet:
 		rts
 ; ===========================================================================
 ; loc_722C6:
-.clear_sndprio:
+Sound_ClearSndPrio:
 		_clr.b	SMPS_RAM.v_sndprio(a6)	; Clear priority
 		rts
 ; ===========================================================================
@@ -1226,7 +1226,7 @@ Sound_PlaySpecial:
 		move.l	d0,SMPS_RAM.v_special_voice_ptr(a6)	; Store voice pointer
 		move.b	(a1)+,d5										; Dividing timing
 
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		moveq	#0,d7
 	else
 		; DANGER! there is a missing 'moveq	#0,d7' here, without which special SFXes whose
@@ -1337,7 +1337,7 @@ StopSFX:
 		bne.s	.getfmpointer					; Branch if not
 		tst.b	SMPS_RAM.v_spcsfx_fm4_track.PlaybackControl(a6)	; Is special SFX playing?
 		bpl.s	.getfmpointer					; Branch if not
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		movea.l	a5,a3
 	else
 		; DANGER! there is a missing 'movea.l	a5,a3' here, without which the
@@ -1566,7 +1566,7 @@ StopAllSound:
 		moveq	#0,d1		; FM3/FM6 normal mode, disable timers
 		jsr	WriteFMI(pc)
 		movea.l	a6,a0
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		move.w	#(SMPS_RAM.v_1up_ram_copy/4)-1,d0	; Clear $400 bytes: all variables and track data
 	else
 		; DANGER! This should be clearing all variables and track data, but misses the last $10 bytes of v_spcsfx_psg3_Track.
@@ -1614,7 +1614,7 @@ InitMusicPlayback:
 		; DANGER! Only v_soundqueue0 and v_soundqueue1 are restored, once again breaking v_soundqueue2
 	endif
 		move.b	#$80,SMPS_RAM.v_sound_id(a6)	; set music to $80 (silence)
-	if BugFixSoundDriverBugs|(FixBugs)
+	if FixBugSoundDriver|(FixBugs)
 		lea	SMPS_RAM.v_music_dac_track.VoiceControl(a6),a1
 		lea	FMDACInitBytes(pc),a2
 		moveq	#SMPS_MUSIC_FM_DAC_TRACK_COUNT-1,d1	; 7 DAC/FM tracks
@@ -1750,7 +1750,7 @@ DoFadeIn:
 		bclr	#2,SMPS_RAM.v_music_dac_track.PlaybackControl(a6)	; Clear 'SFX overriding' bit
 		clr.b	SMPS_RAM.f_fadein_flag(a6)				; Stop fadein
 
-	if (BugFixSongFadeRestoration)|(FixBugs)
+	if (FixBugSongFadeRestoration)|(FixBugs)
 		; Fix the DAC fade-in bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 		tst.b	SMPS_RAM.v_music_dac_track.PlaybackControl(a6)		; is the DAC channel running?
@@ -2085,7 +2085,7 @@ SendPSGNoteOff:
 		move.b	SMPS_Track.VoiceControl(a5),d0	; PSG channel to change
 		ori.b	#$1F,d0				; Maximum volume attenuation
 		move.b	d0,(psg_input).l
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		; This is the same fix that S&K's driver uses:
 		cmpi.b	#$DF,d0				; Are stopping PSG3?
 		bne.s	locret_729B4
@@ -2249,7 +2249,7 @@ cfFadeInToPrevious:
 		move.l	(a1)+,(a0)+
 		dbf	d0,.restoreramloop
 
-	if (BugFixSongFadeRestoration)|(FixBugs)
+	if (FixBugSongFadeRestoration)|(FixBugs)
 		; Fix the FM 6 restoration bug
 		; https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 		move.b	#$2B,d0		; Register: DAC mode (bit 7 = enable)
@@ -2466,7 +2466,7 @@ SendVoiceTL:
 		movea.l	SMPS_RAM.v_voice_ptr(a6),a1		; Voice pointer
 		tst.b	SMPS_RAM.f_voice_selector(a6)
 		beq.s	.gotvoiceptr
-	if (BugFixSoundDriverBugs)|(FixBugs)
+	if (FixBugSoundDriver)|(FixBugs)
 		movea.l	SMPS_Track.VoicePtr(a5),a1
 	else
 		; DANGER! This uploads the wrong voice! It should have been a5 instead of a6!

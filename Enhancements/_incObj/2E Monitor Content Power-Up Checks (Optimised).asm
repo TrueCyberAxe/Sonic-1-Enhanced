@@ -120,7 +120,9 @@ Pow_ChkGoggles:
 	if FeatureRestoreMonitorScubaGear
 		cmpi.b	#8,d0					; does monitor contain Goggles?
 		bne.s	Pow_ChkEnd				; if not, branch to Pow_ChkEnd
-		move.b	#1,(f_goggles).w			; mark goggles as active
+		move.b	#1,(v_goggles).w			; mark goggles as active
+		move.b	#id_ShieldItem,(v_gogglesobj).w		; load goggles object
+		move.b	#$80,(v_gogglesobj+obAnim).w		; mark object as goggles, not stars
 	endif
   
 ; ===========================================================================

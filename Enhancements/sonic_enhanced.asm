@@ -31,19 +31,19 @@ FeatureEnableUnusedArt: 						equ 1
 FeatureEnableUnusedArt: 						equ Enhanced
 	endif
 
-	if (BugFixCameraFollow)|(FeatureSpindash)
+	if (FixBugCameraFollow)|(FeatureSpindash)
 FixCameraFollow: 							equ 1
 	else
 FixCameraFollow: 							equ 0
 	endif
 
-	if BugFixInvincibilityDelayDeath
+	if FixBugInvincibilityDelayDeath
 OptimizeMonitorOrder:							equ 1
 	else
 OptimizeMonitorOrder: 							equ 0
 	endif
 
-	if (FeatureSonicCDExtendedCamera)|(BugFixCameraFollow)
+	if (FeatureCDExtendedCamera)|(FixBugCameraFollow)
 FixCameraFollowBug: 							equ 1
 	else
 FixCameraFollowBug: 							equ 0

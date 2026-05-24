@@ -179,6 +179,23 @@ btnStart:	equ 1<<bitStart			; ($80)
 btnDir:		equ btnUp|btnDn|btnL|btnR	; ($0F)
 btnABC:		equ btnA|btnB|btnC		; ($70)
 
+bitZ:		equ 0
+bitY:		equ 1
+bitX:		equ 2
+bitMode:	equ 3
+btnZ:		equ 1<<bitZ			; ($01)
+btnY:		equ 1<<bitY			; ($02)
+btnX:		equ 1<<bitX			; ($04)
+btnMode:	equ 1<<bitMode			; ($08)
+
+bitDebugLevelSelect:	equ 7		; stored in f_debugmode
+
+; SRAM save data
+sram_save_sig1:		equ $200001
+sram_save_sig2:		equ $200003
+sram_unlock_flags:	equ $200005
+maskSRAMGameComplete:	equ 1<<0
+
 ; Object variables
 obID:		equ 0	; object ID number
 obRender:	equ 1	; bitfield for x/y flip, display mode
@@ -654,6 +671,7 @@ ArtTile_Animal_2:		equ $592
 ArtTile_Explosion:		equ $5A0
 ArtTile_Monitor:		equ $680
 ArtTile_HUD:			equ $6CA
+ArtTile_Goggles:		equ $7AA	; dynamic unused goggles overlay, between lamppost and ring art
 ArtTile_Sonic:			equ $780
 ArtTile_Points:			equ $797
 ArtTile_Lamppost:		equ $7A0
@@ -864,7 +882,7 @@ bitStandingOn:	 equ 3
 bitPushing:	     equ 5
 bitObjectFlag:	 equ 7
 
-obSmoke:      equ $FFFFD11C
+obSmoke:	equ	v_spindashdust+obAnim	; spin dash/skid dust animation byte
 
 max_ring_scatter: equ $20 				; 32
 max_demo:         equ 4
@@ -884,3 +902,7 @@ snd_jmp:	equ 3		; jmp (routine).l
 
 snd_queue1:	equ 1		; QueueSound1
 snd_queue2:	equ 2		; QueueSound2
+
+	if FeatureSonicJamModes
+		include "Enhancements/Sonic Jam/Sonic1/_inc/SonicJam_Constants.asm"
+	endif ; FeatureSonicJamModes

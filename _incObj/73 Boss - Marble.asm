@@ -338,7 +338,7 @@ loc_185A2:
 ; ===========================================================================
 
 BossMarble_ShipDel:
-	if (BugFixRenderBeforeInit)|(FixBugs)
+	if (FixBugRenderBeforeInit)|(FixBugs)
 		; Avoid returning to BossMarble_ShipMain to prevent a
 		; display-and-delete bug.
 		addq.l	#4,sp

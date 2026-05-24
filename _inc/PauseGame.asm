@@ -15,6 +15,16 @@ PauseGame:
 		beq.s	Unpause																		; if not, branch
 	endif
 
+	if FixBugPauseOnSSResults
+		tst.w	(f_pause).w																; is game already paused?
+		bne.s	.allowpause																; if yes, allow unpausing
+		cmpi.b	#id_Level,(v_gamemode).w 										; are we in a normal level?
+		bne.s	.allowpause																; if not, branch
+		tst.b	(f_timecount).w 													; has the stage already finished?
+		beq.w	Pause_DoNothing														; if yes, don't allow pausing
+.allowpause:
+	endif ; if FixBugPauseOnSSResults
+
 		tst.w	(f_pause).w																; is game already paused?
 		bne.s	Pause_StopGame														; if yes, branch
 		btst	#bitStart,(v_jpadpress1).w 								; is Start button pressed?
@@ -30,6 +40,7 @@ Pause_StopGame:
 		tst.b (v_debuguse).w 														; Is debug mode active?
 		beq.s @skip																			; if not, branch
 
+		bset	#bitDebugLevelSelect,(f_debugmode).w			; mark level select as opened from debug mode
 		bra.w GotoLevelSelect
 	@skip:
 	endif ; if EnhancedDebug

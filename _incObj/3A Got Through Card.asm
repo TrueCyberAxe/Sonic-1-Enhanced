@@ -212,7 +212,7 @@ Got_Boundary:	; Routine $10
 		addq.w	#2,(v_limitright2).w
 		cmpi.w	#$2100,(v_limitright2).w
 		beq.w	DeleteObject
-	if (BugFixVictoryDebug)|(FeatureBetaVictoryAnimation)
+	if (FixBugVictoryDebug)|(FeatureBetaVictoryAnimation)
 		clr.b  (f_victory).w 													; Unset victory animation flag
 	endif
 		rts
