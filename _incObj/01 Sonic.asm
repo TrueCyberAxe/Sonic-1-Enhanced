@@ -329,6 +329,8 @@ Sonic2013_UpdateSuperSonic:
 		move.b	#1,(v_shoes).w			; keep Super Sonic using the speed-shoes state
 		clr.w	invtime(a0)				; do not use invincibility music/timer expiry
 		clr.w	shoetime(a0)				; do not use speed-shoes music/timer expiry
+		bsr.w	Sonic2013_ClearPowerUpObjects		; keep invincibility graphics disabled
+		bsr.w	Sonic2013_ClearSpeedupTempo		; keep speed-shoes music speed disabled
 		cmpi.w	#SuperSonicSpeedMax,(v_sonspeedmax).w ; were Super speeds overwritten?
 		beq.s	.return				; if not, branch
 		bsr.s	Sonic2013_SetSuperSpeeds		; restore speed values when another path overwrites them
@@ -341,16 +343,26 @@ Sonic2013_EnterSuperSonic:
 		bne.s	.return				; if yes, branch
 		move.b	#1,(v_supersonic).w			; mark Super Sonic active
 		move.b	#SuperSonicRingTime,(v_superringtimer).w ; start ring drain timer
+		tst.w	invtime(a0)				; was invincibility music active before Super?
+		bne.s	.restoremusic			; if yes, restore the level track
+	if FeatureUseSonic2SoundDriver=0
+		tst.b	(v_snddriver_ram.f_speedup).w		; was speed-shoes tempo active before Super?
+		bne.s	.restoremusic			; if yes, restore the level track
+	endif ; if FeatureUseSonic2SoundDriver=0
+		bra.s	.musicok
+
+.restoremusic:
+		bsr.w	Sonic2013_RestoreLevelMusic		; only reset music if replacing a power-up track/tempo
+
+.musicok:
 		move.b	#1,(v_invinc).w			; Super Sonic is invulnerable
 		clr.w	invtime(a0)				; do not use the normal invincibility timer
 		move.b	#1,(v_shoes).w			; use the normal speed-shoes state without its timer/music
 		clr.w	shoetime(a0)				; do not use the normal speed-shoes timer
-	if FeatureUseSonic2SoundDriver=0
-		clr.b	(v_snddriver_ram.f_speedup).w		; clear stale speed-shoes tempo state
-	endif ; if FeatureUseSonic2SoundDriver=0
+		bsr.w	Sonic2013_ClearPowerUpObjects		; remove any invincibility stars from prior power-ups
+		bsr.w	Sonic2013_ClearSpeedupTempo		; clear stale speed-shoes tempo state
 		bsr.s	Sonic2013_SetSuperSpeeds		; apply fast movement stats
-		bsr.s	Sonic2013_LoadSuperPalette		; tint Sonic yellow
-		move.b	#$FF,(v_sonframenum).w		; force Sonic art to reload with Super colours
+		bsr.w	Sonic2013_LoadSuperPalette		; tint Sonic yellow through palette only
 		ori.b	#1,(f_ringcount).w			; refresh ring display
 
 .return:
@@ -364,8 +376,7 @@ Sonic2013_ExitSuperSonic:
 		clr.w	invtime(a0)				; clear Super-owned invincibility timer
 		clr.w	shoetime(a0)				; clear Super-owned speed-shoes timer
 		bsr.s	Sonic2013_SetNormalSpeeds		; restore normal/water movement stats
-		bsr.s	Sonic2013_LoadNormalSonicPalette	; restore Sonic palette
-		move.b	#$FF,(v_sonframenum).w		; force Sonic art to reload without Super colours
+		bsr.w	Sonic2013_LoadNormalSonicPalette	; restore Sonic palette
 		rts
 
 Sonic2013_SetSuperSpeeds:
@@ -388,8 +399,40 @@ Sonic2013_SetNormalSpeeds:
 		move.w	#$80,(v_sonspeeddec).w		; restore normal deceleration
 		rts
 
+Sonic2013_ClearPowerUpObjects:
+		clr.b	(v_starsobj1).w			; Super uses flags only, with no invincibility-star graphics
+		clr.b	(v_starsobj2).w
+		clr.b	(v_starsobj3).w
+		clr.b	(v_starsobj4).w
+		rts
+
+Sonic2013_ClearSpeedupTempo:
+	if FeatureUseSonic2SoundDriver=0
+		clr.b	(v_snddriver_ram.f_speedup).w		; disable speed-shoes tempo without playing slowdown
+	endif ; if FeatureUseSonic2SoundDriver=0
+		rts
+
+Sonic2013_RestoreLevelMusic:
+		tst.b	(f_lockscreen).w			; is a boss fight active?
+		bne.s	.return				; if yes, don't change music
+		cmpi.w	#12,(v_air).w				; is drowning countdown active?
+		blo.s	.return				; if yes, don't change music
+		moveq	#0,d0					; clear d0
+		move.b	(v_zone).w,d0				; get current zone ID
+		cmpi.w	#id_LZ_act4,(v_zone).w			; check if level is SBZ3 (LZ4)
+		bne.s	.music				; if not, branch
+		moveq	#5,d0					; play SBZ music instead of LZ
+
+.music:
+		lea	(MusicList2).l,a1			; load music list for the current level
+		move.b	(a1,d0.w),d0				; get entry for current zone
+		play_queued_music snd_jsr			; resume normal level music
+.return:
+		rts
+
 Sonic2013_LoadSuperPalette:
-		; Super remaps Sonic art, leaving shared palette users alone
+		lea	(Pal_SuperSonic).l,a1			; use Sonic 2-like yellows with the original art
+		bra.s	Sonic2013_LoadPaletteLine1
 
 Sonic2013_LoadNormalSonicPalette:
 		lea	(Pal_Sonic).l,a1
@@ -406,17 +449,17 @@ Sonic2013_LoadPaletteLine1:
 		rts
 
 Sonic2013_TestSuperArt:
-		tst.b	(v_supersonic).w			; is Super Sonic active?
-		bne.s	.return				; if yes, use recoloured art
-		tst.b	(v_supersonic_finish).w		; did Sonic finish the act as Super?
-
-.return:
+		moveq	#0,d0					; Super now uses a palette swap, not per-frame art recolouring
 		rts
 
-SuperSonicBlueDark:	equ $E				; Sonic's darkest blue pixels become dark warm yellow
-SuperSonicBlueMidDark:	equ $D				; Sonic's dark blue pixels become warm yellow
-SuperSonicBlueMid:	equ $F				; Sonic's mid blue pixels become bright yellow
-SuperSonicBlueLight:	equ $6				; Sonic's light blue pixels become yellow-white
+Pal_SuperSonic:
+		dc.w	$0000,$0000,$0024,$006A,$008E,$00EE,$0EEE,$0AAA
+		dc.w	$0888,$0444,$08AE,$046A,$000E,$0008,$0004,$00EE
+
+SuperSonicBlueDark:	equ $E				; unused compatibility: old art remap darkest yellow
+SuperSonicBlueMidDark:	equ $D				; unused compatibility: old art remap dark yellow
+SuperSonicBlueMid:	equ $F				; unused compatibility: old art remap bright yellow
+SuperSonicBlueLight:	equ $6				; unused compatibility: old art remap yellow-white
 
 ; ---------------------------------------------------------------------------
 ; Recolour Sonic's dynamic art buffer only. This keeps enemies and stage

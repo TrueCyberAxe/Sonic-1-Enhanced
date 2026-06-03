@@ -12,6 +12,10 @@ ResumeMusic:
 
 .notsbz:
 	if Revision<>0
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w ; is Super Sonic active?
+		bne.s	.notinvinc ; if yes, keep the selected level music
+	endif ; if FeatureSonic2013SuperSonic
 		tst.b	(v_invinc).w ; is Sonic invincible?
 		beq.s	.notinvinc ; if not, branch
 		queue_music	#bgm_Invincible	; load Invincibility music
