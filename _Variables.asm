@@ -379,7 +379,11 @@ f_restart:		ds.w	1		; restart level flag
 v_framecount:		ds.w	1		; frame counter (adds 1 every frame)
 v_framebyte:	equ	v_framecount+1		; low byte for frame counter
 v_debugitem:		ds.b	1		; debug item currently selected (NOT the object number of the item)
+	if EnhancedDebug
+f_debug_restore_fade:	ds.b	1		; debug viewer - restore level palette by fade
+	else
 			ds.b	1		; unused
+	endif ; if EnhancedDebug
 v_debuguse:		ds.w	1		; debug mode use & routine counter (when Sonic is a ring/item)
 v_debugspeedtimer:	ds.b	1		; debug mode - timer before movement starts
 v_debugspeed:		ds.b	1		; debug mode - movement speed
@@ -436,7 +440,12 @@ v_lamp_wtrpos:		ds.w	1		; water position at lamppost
 v_lamp_wtrrout:		ds.b	1		; water routine at lamppost
 v_lamp_wtrstat:		ds.b	1		; water state at lamppost
 v_lamp_lives:		ds.b	1		; lives counter at lamppost
+	if FeatureSonic2013SevenChaosEmeralds
+v_emldlist7:		ds.b	1		; special stage where the 7th emerald was obtained
+			ds.b	1		; unused
+	else
 			ds.b	2		; unused
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 v_emeralds:		ds.b	1		; number of chaos emeralds
 v_emldlist:		ds.b	6		; special stage where each emerald was obtained
 v_oscillate:		ds.w	1		; oscillation bitfield
@@ -456,7 +465,32 @@ v_ani3_buf:		ds.w	1		; synchronised sprite animation 3 - info buffer
 			ds.b	$26		; unused
 v_limittopdb:		ds.w	1		; level upper boundary, buffered for debug mode
 v_limitbtmdb:		ds.w	1		; level bottom boundary, buffered for debug mode
-			ds.b	$C		; unused
+v_debug_sonic_frame:	ds.b	1		; debug sprite viewer - Sonic frame
+v_debug_goggle_art:	ds.b	1		; debug sprite viewer - goggles art frame
+v_debug_goggle_x:	ds.b	1		; debug sprite viewer - goggles X offset adjustment
+v_debug_goggle_y:	ds.b	1		; debug sprite viewer - goggles Y offset adjustment
+v_debug_goggle_flip:	ds.b	1		; debug sprite viewer - goggles flip adjustment
+v_debug_hide_bg:	ds.b	1		; debug sprite viewer - hide level planes
+	if FeatureEnhancedLevelFadeIn
+f_titlecard_only:	ds.b	1		; only title cards should render during enhanced level fade-in
+		if FeatureSonic2013SuperSonic
+v_supersonic:		ds.b	1		; Super Sonic active flag
+v_superringtimer:	ds.b	1		; Super Sonic ring drain timer
+v_supersonic_finish:	ds.b	1		; Super Sonic visual latch for end-of-act animations
+			ds.b	2		; unused
+		else
+			ds.b	5		; unused
+		endif ; if FeatureSonic2013SuperSonic
+	else
+		if FeatureSonic2013SuperSonic
+v_supersonic:		ds.b	1		; Super Sonic active flag
+v_superringtimer:	ds.b	1		; Super Sonic ring drain timer
+v_supersonic_finish:	ds.b	1		; Super Sonic visual latch for end-of-act animations
+			ds.b	3		; unused
+		else
+			ds.b	6		; unused
+		endif ; if FeatureSonic2013SuperSonic
+	endif ; if FeatureEnhancedLevelFadeIn
 v_timingvariables_end:
 
     if FixBugs
@@ -487,7 +521,13 @@ v_timingandscreenvariables_end:
 v_levseldelay:		ds.w	1		; level select - time until change when up/down is held
 v_levselitem:		ds.w	1		; level select - item selected
 v_levselsound:		ds.w	1		; level select - sound selected
+	if FeatureSonic2013SpecialStage7
+v_levselss:		ds.w	1		; level select - Special Stage selected
+v_levselemeralds:	ds.w	1		; level select - Chaos Emerald count selected
+			ds.b	$36		; unused
+	else
 			ds.b	$3A		; unused
+	endif ; if FeatureSonic2013SpecialStage7
 	if Revision=0
 v_scorecopy:		ds.l	1		; score, duplicate (REV00 only)
 	else

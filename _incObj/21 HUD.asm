@@ -22,7 +22,16 @@ HUD_Main:	; Routine 0
 		move.b	#0,obPriority(a0)
 
 HUD_Flash:	; Routine 2
-	if (FixBugBlinkingHUD)|(FixBugs)
+	if EnhancedDebug
+		tst.w	(v_debuguse).w			; is debug mode being used?
+		beq.s	.normalhud			; if not, branch
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w ; is Sonic sprite viewer active?
+		beq.s	.normalhud			; if not, branch
+		rts					; debug text is drawn directly to the plane
+
+.normalhud:
+	endif ; if EnhancedDebug
+	if (FixBugBlinkingHUD)|(FixBugTimeOverHUDFlash)|(FixBugs)
 		; Fix the HUD blinking
 		; https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
 		moveq	#0,d0

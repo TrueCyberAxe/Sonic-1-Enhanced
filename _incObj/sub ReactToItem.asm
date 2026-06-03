@@ -166,6 +166,10 @@ React_Monitor:
 .movingdown:
 		cmpi.b	#id_Roll,obAnim(a0) 				; is Sonic rolling/jumping?
 		bne.s	.donothing
+	if (FixBugMonitorHurtBreak)|(FixBugs)
+		btst	#2,obStatus(a0)					; is Sonic actually in ball form?
+		beq.s	.donothing
+	endif ; if (FixBugMonitorHurtBreak)|(FixBugs)
 		neg.w	obVelY(a0)										; reverse Sonic's y-motion
 		addq.b	#2,obRoutine(a1) 						; advance the monitor's routine counter
 
@@ -174,6 +178,10 @@ React_Monitor:
 ; ===========================================================================
 
 React_Enemy:
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w				; is pseudo Super Sonic active?
+		bne.s	.donthurtsonic					; if yes, treat as invincible
+	endif ; if FeatureSonic2013SuperSonic
 		tst.b	(v_invinc).w									; is Sonic invincible?
 		bne.s	.donthurtsonic	; if yes, branch
 
@@ -248,6 +256,14 @@ React_Caterkiller:
 		bset	#7,obStatus(a1)
 
 React_ChkHurt:
+	if FeatureLavaSplash
+		movea.l	a1,a2
+		bsr.w	LoadLavaSplashIfNeeded	; show lava splash even when invincibility prevents damage
+	endif ; if FeatureLavaSplash
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w				; is pseudo Super Sonic active?
+		bne.s	.isflashing					; if yes, skip hurt processing
+	endif ; if FeatureSonic2013SuperSonic
 		tst.b	(v_invinc).w									; is Sonic invincible?
 		beq.s	.notinvincible	; if not, branch
 
@@ -262,7 +278,9 @@ React_ChkHurt:
 	endif ; if TweakCodeOptimizations=0
 		tst.w	flashtime(a0)		; is Sonic flashing?
 		bne.s	.isflashing	; if yes, branch
+	if FeatureLavaSplash=0
 		movea.l	a1,a2
+	endif ; if FeatureLavaSplash=0
 		; continue straight to HurtSonic
 
 ; ---------------------------------------------------------------------------
@@ -293,7 +311,11 @@ HurtSonic:
 .hasshield:
 		move.b	#0,(v_shield).w							; remove shield
 		move.b	#4,obRoutine(a0)
+	if Enhanced
+		jsr	(Sonic_ResetOnFloor).l
+	else
 		bsr.w	Sonic_ResetOnFloor
+	endif ; if Enhanced
 		bset	#1,obStatus(a0)
 		move.w	#-$400,obVelY(a0) 					; make Sonic bounce away from the object
 		move.w	#-$200,obVelX(a0)
@@ -357,7 +379,11 @@ KillSonic:
 	endif ; if FeatureContextualDeath=0
 		move.b	#0,(v_invinc).w	; remove invincibility
 		move.b	#6,obRoutine(a0)
+	if Enhanced
+		jsr	(Sonic_ResetOnFloor).l
+	else
 		bsr.w	Sonic_ResetOnFloor
+	endif ; if Enhanced
 		bset	#1,obStatus(a0)
 		move.w	#-$700,obVelY(a0)
 		move.w	#0,obVelX(a0)
@@ -441,13 +467,51 @@ KillSonic:
 ; End of function KillSonic
 ; ===========================================================================
 
+	if FeatureLavaSplash
+; ---------------------------------------------------------------------------
+; Spawn a fixed-position splash when Sonic lands on the top of a lava object.
+; ---------------------------------------------------------------------------
+
+LoadLavaSplashIfNeeded:
+		tst.w	obVelY(a0)			; is Sonic moving upwards?
+		bmi.s	.return				; if yes, don't show an impact splash
+		cmpi.b	#id_LavaTag,obID(a2)		; lava surface tag?
+		bne.s	.return				; if not, branch
+		move.w	obY(a2),d1			; get lava marker centre
+		subi.w	#$20,d1				; use top of lava marker collision
+		move.w	obY(a0),d0			; get Sonic's Y position
+		sub.w	d1,d0				; compare against lava surface
+		cmpi.w	#$20,d0				; is Sonic touching the top of the lava?
+		bgt.s	.return				; if not, branch
+		btst	#bitObjectFlag,obStatus(a2)	; has this lava tag already produced a splash?
+		bne.s	.return				; if yes, wait until Sonic leaves it
+		bset	#bitObjectFlag,obStatus(a2)	; remember this lava contact
+
+.load:
+		cmpi.b	#id_Splash,(v_splash).w		; is a splash already active?
+		bne.s	.new				; if not, branch
+		tst.b	(v_splash+obSubtype).w		; is the active splash already lava?
+		bne.s	.return				; if yes, don't restart it every frame
+
+.new:
+		move.b	#id_Splash,(v_splash).w		; load splash object
+		move.b	#1,(v_splash+obSubtype).w	; mark as lava splash
+		move.w	obX(a0),(v_splash+obX).w	; use Sonic's impact X
+		move.w	d1,(v_splash+obY).w		; use lava surface Y
+		move.w	#sfx_Splash,d0			; play normal splash sound
+		play_queued_sfx
+
+.return:
+		rts
+	endif ; if FeatureLavaSplash
+
 	if FeatureContextualDeath
 KillSonicByCrushing:
 		move.b	#0,(v_invinc).w				; remove invincibility
 		move.b	#0,(v_shield).w				; remove shield
 		move.b	#6,obRoutine(a0)
 
-		bsr.w	Sonic_ResetOnFloor
+		jsr	(Sonic_ResetOnFloor).l
 		bset	#1,obStatus(a0)
 
 		move.w	#-$140,obVelY(a0)			; distance of death vertical movement

@@ -698,7 +698,14 @@ VBlank:
 .notPAL:
 		move.b	(v_vblank_routine).w,d0		; copy specified VBlank routine to d0
 		move.b	#id_VBlank_Lag,(v_vblank_routine).w ; reset actual routine to lag frame (which ideally should get set again in the next frame)
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are title cards the only visible sprites?
+		bne.s	.skiphblankpal			; if yes, don't let LZ HBlank swap palettes over them
+	endif ; if FeatureEnhancedLevelFadeIn
 		move.w	#1,(f_hblank_pal).w		; set HBlank palette swap flag (only relevant for LZ)
+	if FeatureEnhancedLevelFadeIn
+.skiphblankpal:
+	endif ; if FeatureEnhancedLevelFadeIn
 		andi.w	#$3E,d0				; mask out irrelevant bits in VBlank routine
 		move.w	VBlank_Index(pc,d0.w),d0	; load address to relevant VBlank routine
 		jsr	VBlank_Index(pc,d0.w)		; jump to VBlank routine and then return here
@@ -757,21 +764,44 @@ VBlank_Lag:
 		dbf	d0,.waitPAL			; loop until cycles have been wasted
 
 .notPAL:
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are title cards the only visible sprites?
+		bne.s	.skiphblankpal			; if yes, keep water HBlank from changing CRAM
+	endif ; if FeatureEnhancedLevelFadeIn
 		move.w	#1,(f_hblank_pal).w		; set HBlank flag
+	if FeatureEnhancedLevelFadeIn
+.skiphblankpal:
+	endif ; if FeatureEnhancedLevelFadeIn
 	if TweakRemoveUselessZ80Commands=0
 		stopZ80
 		waitZ80
 	endif ; TweakRemoveUselessZ80Commands=0
 
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are title cards the only visible sprites?
+		bne.s	.levelpal			; if yes, keep the regular title-card palette
+	endif ; if FeatureEnhancedLevelFadeIn
 		tst.b	(f_wtr_state).w			; is the screen completely underewater?
 		bne.s	.waterabove 			; if not, branch
+.levelpal:
 		writeCRAM	v_palette,0		; write regular palette buffer to CRAM
 		bra.s	.waterbelow			; skip over
 .waterabove:
 		writeCRAM	v_palette_water,0	; write water palette buffer to CRAM
 
 .waterbelow:
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are title cards the only visible sprites?
+		beq.s	.normalhblanklag		; if not, use the level water split
+		move.w	#$8A00+223,(a5)			; park HBlank below the screen while cards are isolated
+		bra.s	.afterhblanklag
+
+.normalhblanklag:
+	endif ; if FeatureEnhancedLevelFadeIn
 		move.w	(v_hblank_hreg).w,(a5)		; write HBlank trigger scan line for water palette swap to VDP
+	if FeatureEnhancedLevelFadeIn
+.afterhblanklag:
+	endif ; if FeatureEnhancedLevelFadeIn
 	if TweakRemoveUselessZ80Commands=0
 		startZ80
 	endif ; TweakRemoveUselessZ80Commands=0
@@ -919,10 +949,28 @@ VBlank_Levels:
 
 ; Demo_Time: VBla_UpdateScreen:
 VBlank_UpdateScreen:
+	if EnhancedDebug
+		tst.w	(v_debuguse).w			; is debug mode active?
+		beq.s	.normalupdates			; if not, run the normal level updates
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w ; is Sonic sprite viewer active?
+		beq.s	.normalupdates			; if not, run the normal level updates
+		clearRAM v_fg_scroll_flags,v_bg3_scroll_flags+2 ; keep the hidden backdrop stable
+		clr.l	(v_scrposy_vdp).w		; keep the debug HUD vertically fixed
+		clearRAM v_spritetablebuffer,v_spritetablebuffer_end ; keep old HUD/object sprites off the debug overlay
+		clearRAM v_hscrolltablebuffer,v_hscrolltablebuffer_end_padded ; keep the debug HUD fixed at 8 pixels from the left
+		jsr	(HUD_Update).l			; update Sonic sprite viewer HUD only
+		bsr.w	ProcessPLC_3Tiles		; run a bit of PLC decompression
+		bra.s	.skipnormalupdates
+
+.normalupdates:
+	endif ; if EnhancedDebug
 		bsr.w	LoadTilesAsYouMove		; update level tiles while screen is moving
 		jsr	(AnimateLevelGfx).l		; updated animated tiles
 		jsr	(HUD_Update).l			; update HUD data
 		bsr.w	ProcessPLC_3Tiles		; run a bit of PLC decompression
+	if EnhancedDebug
+.skipnormalupdates:
+	endif ; if EnhancedDebug
 	if DebugDisableDemoTime=0
 		tst.w	(v_generictimer).w		; is there time left in the generic timer left?
 		beq.w	.end				; if not, branch
@@ -944,6 +992,31 @@ VBlank_SpecialStage:
 		waitZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
 		bsr.w	ReadJoypads
+	if EnhancedDebug
+		tst.w	(v_debuguse).w			; is debug mode active?
+		beq.w	.normalupdates			; if not, run normal Special Stage updates
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w ; is Sonic sprite viewer active?
+		beq.w	.normalupdates			; if not, run normal Special Stage updates
+		writeCRAM	v_palette,0
+		writeVRAM	v_spritetablebuffer,vram_sprites
+		writeVRAM	v_hscrolltablebuffer,vram_hscroll
+	if TweakRemoveUselessZ80Commands=0
+		startZ80
+	endif ; if TweakRemoveUselessZ80Commands=0
+	if FeatureEnhancedPLCQueue
+		jsr	(ProcessDMAQueue).l
+	else
+		tst.b	(f_sonframechg).w		; has Sonic's sprite changed?
+		beq.s	.debughud			; if not, branch
+		writeVRAM	v_sgfx_buffer,ArtTile_Sonic*tile_size ; load new Sonic gfx
+		move.b	#0,(f_sonframechg).w
+.debughud:
+	endif ; if FeatureEnhancedPLCQueue
+		jsr	(HUD_Update).l			; update Sonic sprite viewer HUD only
+		bra.w	.nochg				; skip Special Stage palette cycling
+
+.normalupdates:
+	endif ; if EnhancedDebug
 		writeCRAM	v_palette,0
 		writeVRAM	v_spritetablebuffer,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,vram_hscroll
@@ -982,9 +1055,14 @@ VBlank_Ending:
 		waitZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
 		bsr.w	ReadJoypads
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are only title cards visible?
+		bne.s	.titlecardpal			; if yes, keep title cards on the regular palette path
+	endif ; if FeatureEnhancedLevelFadeIn
 		tst.b	(f_wtr_state).w
 		bne.s	.waterabove
 
+.titlecardpal:
 		writeCRAM	v_palette,0
 		bra.s	.waterbelow
 
@@ -992,7 +1070,18 @@ VBlank_Ending:
 		writeCRAM	v_palette_water,0
 
 .waterbelow: ; loc_EEE
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are title cards the only visible sprites?
+		beq.s	.normalhblank			; if not, use the level's water split
+		move.w	#$8A00+223,(a5)			; park HBlank below the screen while cards are isolated
+		bra.s	.afterhblank
+
+.normalhblank:
+	endif ; if FeatureEnhancedLevelFadeIn
 		move.w	(v_hblank_hreg).w,(a5)
+	if FeatureEnhancedLevelFadeIn
+.afterhblank:
+	endif ; if FeatureEnhancedLevelFadeIn
 		writeVRAM	v_hscrolltablebuffer,vram_hscroll
 		writeVRAM	v_spritetablebuffer,vram_sprites
 
@@ -1009,6 +1098,10 @@ VBlank_Ending:
 	if TweakRemoveUselessZ80Commands=0
 		startZ80
 	endif ; if TweakRemoveUselessZ80Commands=0
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w		; are only title-card sprites meant to be visible?
+		bne.s	.plconly			; if yes, don't redraw stage planes or HUD yet
+	endif ; if FeatureEnhancedLevelFadeIn
 		movem.l	(v_screenposx).w,d0-d7
 		movem.l	d0-d7,(v_screenposx_dup).w
 		movem.l	(v_fg_scroll_flags).w,d0-d1
@@ -1016,6 +1109,11 @@ VBlank_Ending:
 		bsr.w	LoadTilesAsYouMove
 		jsr	(AnimateLevelGfx).l
 		jsr	(HUD_Update).l
+	if FeatureEnhancedLevelFadeIn
+.plconly:
+		bsr.w	ProcessPLC_9Tiles		; keep level-art PLCs within the original VBlank budget
+		rts
+	endif ; if FeatureEnhancedLevelFadeIn
 		bsr.w	ProcessPLC_9Tiles
 		rts
 
@@ -1500,6 +1598,10 @@ AddPLC:
 		lea	(v_plc_queue_base).w,a2	; load PLC process list
 
 .findspace:
+	if FixBugPLCShifting
+		cmpa.l	#v_plc_queue_end-plc_slot_size,a2 ; has the search reached the end of the enhanced queue?
+		bhi.s	.return				; if yes, don't overwrite decompression state
+	endif ; if FixBugPLCShifting
 		tst.l	(a2)				; is this slot taken?
 		beq.s	.copytoRAM			; if not, branch
 		addq.w	#plc_slot_size,a2		; advance to next slot
@@ -1511,6 +1613,10 @@ AddPLC:
 		bmi.s	.return				; if there is no list, branch
 
 .loop:
+	if FixBugPLCShifting
+		cmpa.l	#v_plc_queue_end-plc_slot_size,a2 ; is there room for another cue?
+		bhi.s	.return				; if not, stop before corrupting adjacent RAM
+	endif ; if FixBugPLCShifting
 		move.l	(a1)+,(a2)+			; copy Nemesis art address
 		move.w	(a1)+,(a2)+			; copy VRAM location to dump to
 		dbf	d0,.loop			; repeat for all entries
@@ -1539,6 +1645,10 @@ NewPLC:
 		bmi.s	.return				; if there is no list, branch
 
 .loop:
+	if FixBugPLCShifting
+		cmpa.l	#v_plc_queue_end-plc_slot_size,a2 ; is there room for another cue?
+		bhi.s	.return				; if not, stop before corrupting adjacent RAM
+	endif ; if FixBugPLCShifting
 		move.l	(a1)+,(a2)+			; copy Nemesis art address
 		move.w	(a1)+,(a2)+			; copy VRAM location to dump to
 		dbf	d0,.loop			; repeat for all entries
@@ -1770,9 +1880,9 @@ QuickPLC:
 		include	"Enhancements/_inc/Decompression COMPER.asm"
 	endif ; if TweakLevelCompressionMode>2
 
-	if TweakUncompressedTitleCards
+	if (TweakUncompressedTitleCards)|(FeatureLavaSplash)
 		include	"Enhancements/_inc/Uncompressed Art.asm"
-	endif ; if TweakUncompressedTitleCards
+	endif ; if (TweakUncompressedTitleCards)|(FeatureLavaSplash)
 
 ; ===========================================================================
 ; >>> Palette logic routines
@@ -2307,7 +2417,11 @@ Tit_LoadText:
 
 		locVRAM	ArtTile_Level*tile_size		; set target VRAM location for level patterns
 
+	if TweakLevelCompressionMode
+		lea	(Gra_Title).l,a0 		; load first half of GHZ patterns
+	else
 		lea	(Nem_GHZ_1st).l,a0 		; load first half of GHZ patterns
+	endif ; if TweakLevelCompressionMode
 
 	if (TweakTitleCompress)&(TweakLevelCompressionMode>1)
 		;if TweakLevelCompressionMode=2 					; @NOTE needs proper implementation
@@ -2536,9 +2650,12 @@ Tit_EnterLevelSelect:
 		move.l	d0,(v_scrposy_vdp).w		; clear VSRAM (d0 is still 0)
 		disable_ints				; disable interrupts
 
-	if EnhancedDebug
+	if Enhanced
 		bsr.w	ClearScreen					; wipe old level planes and sprites for debug entry
 		moveq	#0,d0						; restore clear value after ClearScreen
+		clearRAM v_spritequeue,v_spritequeue+$400		; remove any previous level/special-stage sprites
+		clearRAM v_spritetablebuffer,v_spritetablebuffer_end ; keep the menu background blank
+		move.w	#$8700,(vdp_control_port).l			; use palette line 0 colour 0 as the backdrop
 		lea	(vdp_data_port).l,a6				; prepare VDP data write
 		locVRAM	ArtTile_Level_Select_Font*tile_size,4(a6)	; load level select font for debug entry
 		lea	(Art_Text).l,a5					; load font source
@@ -2546,7 +2663,16 @@ Tit_EnterLevelSelect:
 .LevSelLoadFont:
 		move.w	(a5)+,(a6)					; write one word of font art
 		dbf	d1,.LevSelLoadFont				; loop until font is loaded
-	endif ; if EnhancedDebug
+	if FeatureSonic2013SpecialStage7
+		moveq	#0,d0
+		move.b	(v_emeralds).w,d0			; mirror the real emerald count into the selector
+		cmpi.w	#7,d0					; cap any bad value to the supported count
+		bls.s	.levselemeraldok
+		moveq	#7,d0
+.levselemeraldok:
+		move.w	d0,(v_levselemeralds).w
+	endif ; if FeatureSonic2013SpecialStage7
+	endif ; if Enhanced
 
 		lea	(vdp_data_port).l,a6		; prepare VDP data write
 		locVRAM	vram_bg				; write to background nametable
@@ -2675,6 +2801,8 @@ LevSel_RestoreLevelDisplay:
 		enable_ints
 		moveq	#palid_Sonic,d0			; load Sonic's palette
 		bsr.w	PalLoad
+		moveq	#palid_Sonic,d0			; also prepare Sonic colours for fade-in restores
+		bsr.w	PalLoad_Fade
 		cmpi.b	#id_LZ,(v_zone).w		; is level LZ?
 		bne.s	.getlevelpal			; if not, branch
 		moveq	#palid_LZSonWater,d0		; load Sonic's underwater palette
@@ -2732,6 +2860,10 @@ LevSel_RestoreLevelDisplay:
 		enable_ints
 		rts
 LevSel_NotDebugCancel:
+		bclr	#bitDebugSonicSpriteView,(f_debugmode).w ; don't carry Sonic overlay HUD into a selected level
+		clr.b	(v_debug_hide_bg).w		; selected levels should use the normal loader display path
+		clearRAM v_spritequeue,v_spritequeue+$400 ; remove debug-only queued sprites before menu fade
+		clearRAM v_spritetablebuffer,v_spritetablebuffer_end ; keep only the level-select menu visible during fade
 	endif ; if EnhancedDebug
 
 LevSel_SelectionMade:
@@ -2841,11 +2973,40 @@ LevSel_Level_SS:
 	endif ; if Enhanced|ExtendedMenu
 		bmi.w	LevelSelect			; if it's an invalid entry, branch back to main loop
 		cmpi.w	#id_SS<<8,d0			; check if selected level Special Stage (0700 is used as dummy value)
-		bne.s	LevSel_Level			; if not, branch
 	if EnhancedDebug
-		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag after selecting Special Stage
+		bne.w	LevSel_Level			; if not, branch
+	else
+		bne.s	LevSel_Level			; if not, branch
 	endif ; if EnhancedDebug
+	if EnhancedDebug
+		moveq	#0,d7				; assume this is not a Special Stage reload
+		cmpi.b	#id_Special,(v_gamemode).w	; did level select open from an active Special Stage?
+		bne.s	.notactivespecial		; if not, branch
+		moveq	#1,d7				; reload Special Stage directly after selection
+
+.notactivespecial:
+		bclr	#bitDebugLevelSelect,(f_debugmode).w ; clear debug level select flag after selecting Special Stage
+		bclr	#bitDebugSonicSpriteView,(f_debugmode).w ; don't carry Sonic viewer state into the Special Stage loader
+		clr.b	(v_debug_hide_bg).w		; Special Stage owns the display from here
+		clr.w	(v_debuguse).w			; leave debug mode before changing game mode
+		clr.w	(f_pause).w			; clear pause state from debug level select
+	endif ; if EnhancedDebug
+	if FeatureSonic2013SpecialStage7
+		move.w	(v_levselss).w,d0		; get selected Special Stage
+		ori.b	#$80,d0				; force SS_Load to use this exact index
+		move.b	d0,(v_lastspecial).w		; SS_Load uses this as the next stage index
+		bsr.w	LevSel_ApplyEmeraldCount	; apply selected emerald count
+	endif ; if FeatureSonic2013SpecialStage7
+	if EnhancedDebug
+		moveq	#id_Special,d1			; set screen mode to $10 (Special Stage)
+		tst.b	d7				; did level select open from an active Special Stage?
+		beq.s	.setspecialmode			; if not, branch
+		ori.b	#$80,d1				; force the current Special Stage loop to reload cleanly
+.setspecialmode:
+		move.b	d1,(v_gamemode).w
+	else
 		move.b	#id_Special,(v_gamemode).w	; set screen mode to $10 (Special Stage)
+	endif ; if EnhancedDebug
 		clr.w	(v_zone).w			; clear level
 		move.b	#3,(v_lives).w			; set lives to 3
 		moveq	#0,d0				; set d0 to 0
@@ -2863,7 +3024,52 @@ LevSel_Level_SS:
 	if Revision<>0
 		move.l	#5000,(v_scorelife).w		; extra life is awarded at 50000 points
 	endif
+	if EnhancedDebug
+		tst.b	d7				; are we already inside GM_Special?
+		bne.w	GM_Special			; if yes, run the selected Special Stage loader now
+	endif ; if EnhancedDebug
 		rts
+
+	if FeatureSonic2013SpecialStage7
+; ---------------------------------------------------------------------------
+; Apply the level select emerald count to normal Special Stage state.
+; The first six emeralds use the upstream contiguous list. The 7th uses an
+; enhanced-only spare byte so the upstream list layout stays intact.
+; ---------------------------------------------------------------------------
+
+LevSel_ApplyEmeraldCount:
+		moveq	#0,d0
+		move.w	(v_levselemeralds).w,d0		; get selected emerald count
+		move.b	d0,(v_emeralds).w		; save count
+		moveq	#0,d1
+		move.l	d1,(v_emldlist).w		; clear upstream emerald list
+		move.w	d1,(v_emldlist+4).w		; clear the last two upstream emerald entries
+	if FeatureSonic2013SevenChaosEmeralds
+		move.b	d1,(v_emldlist7).w		; clear 7th emerald list entry
+	endif ; if FeatureSonic2013SevenChaosEmeralds
+		subq.w	#1,d0				; convert count to loop index
+		bmi.s	.return				; if no emeralds, branch
+		lea	(v_emldlist).w,a1		; upstream emerald list
+		moveq	#0,d1				; stage number to write
+
+.loop:
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.w	#6,d1				; is this the 7th emerald entry?
+		bne.s	.storeupstream			; if not, branch
+		move.b	d1,(v_emldlist7).w		; store 7th stage in enhanced spare byte
+		bra.s	.next
+
+.storeupstream:
+	endif ; if FeatureSonic2013SevenChaosEmeralds
+		move.b	d1,(a1,d1.w)			; store stage where emerald was collected
+
+.next:
+		addq.w	#1,d1				; next stage number
+		dbf	d0,.loop			; repeat for selected emerald count
+
+.return:
+		rts
+	endif ; if FeatureSonic2013SpecialStage7
 
 	if ExtendedMenu
 Option_Level_SS:   ; Levsel_Level_SS loads Level Select Pointers, this jumps back to LevelSelect
@@ -2893,7 +3099,16 @@ LevSel_Level:
 		move.w d0,($FFFFFE10).w ; set level number
 	endif ; if ExtendedMenu
 
+	if FeatureSonic2013SpecialStage7
+		moveq	#1,d7				; normal level was selected from level select
+		bra.s	PlayLevel_Setup
+	endif ; if FeatureSonic2013SpecialStage7
+
 PlayLevel:
+	if FeatureSonic2013SpecialStage7
+		moveq	#0,d7				; title/demo start should clear emerald progress
+PlayLevel_Setup:
+	endif ; if FeatureSonic2013SpecialStage7
 		move.b	#id_Level,(v_gamemode).w	; set screen mode to $0C (level)
 		move.b	#3,(v_lives).w			; set lives to 3
 		moveq	#0,d0				; set d0 to 0
@@ -2906,11 +3121,22 @@ PlayLevel:
 		move.b	d0,(v_lastspecial).w		; clear special stage number
 		move.b	d0,(v_emeralds).w		; clear emeralds
 		move.l	d0,(v_emldlist).w		; clear emeralds
+	if FeatureSonic2013SevenChaosEmeralds
+		move.w	d0,(v_emldlist+4).w		; clear the last two upstream emerald entries
+		move.b	d0,(v_emldlist7).w		; clear enhanced 7th emerald entry
+	else
 		move.l	d0,(v_emldlist+4).w		; clear emeralds
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		move.b	d0,(v_continues).w		; clear continues
 	if Revision<>0
 		move.l	#5000,(v_scorelife).w		; extra life is awarded at 50000 points
 	endif
+	if FeatureSonic2013SpecialStage7
+		tst.b	d7				; did this come from level select?
+		beq.s	.noemeraldapply			; if not, keep the normal cleared state
+		bsr.w	LevSel_ApplyEmeraldCount	; preserve selected emerald count for the chosen level
+.noemeraldapply:
+	endif ; if FeatureSonic2013SpecialStage7
 		music	#bgm_Fade,snd_bsr,snd_load_b,QueueSound2	; fade out music
 		rts					; return to MainGameLoop to start level
 ; End of function GM_Title
@@ -2961,6 +3187,9 @@ LevSel_Ptrs:
 		dc.w id_FZ		; Final Zone
 		dc.w id_SS<<8		; Special Stage (dummy value)
 		dc.w $8000		; Sound Test
+	if FeatureSonic2013SpecialStage7
+		dc.w $8001		; Emerald count selector
+	endif ; if FeatureSonic2013SpecialStage7
 LevSel_PtrsEnd:	even
 
 ; ===========================================================================
@@ -3117,6 +3346,12 @@ LevSel_Refresh:
 ; ===========================================================================
 
 LevSel_SndTest:
+	if FeatureSonic2013SpecialStage7
+		cmpi.w	#levsel_special_row,(v_levselitem).w ; is Special Stage row selected?
+		beq.w	LevSel_SpecialStageNo		; if yes, handle stage number
+		cmpi.w	#levsel_emerald_row,(v_levselitem).w ; is emerald count row selected?
+		beq.w	LevSel_EmeraldCount		; if yes, handle emerald count
+	endif ; if FeatureSonic2013SpecialStage7
 		cmpi.w	#levsel_sndtest_row,(v_levselitem).w ; is sound test row selected?
 		bne.s	LevSel_NoMove			; if not, branch
 		move.b	(v_jpadpress1).w,d1		; get currently pressed buttons
@@ -3173,20 +3408,100 @@ LevSel_NoMove:
 		rts
 ; End of function LevSelControls
 
+	if FeatureSonic2013SpecialStage7
+; ---------------------------------------------------------------------------
+; Change the Special Stage number shown in the level select.
+; ---------------------------------------------------------------------------
+
+LevSel_SpecialStageNo:
+		move.b	(v_jpadpress1).w,d1		; get current button presses
+		andi.b	#btnR+btnL,d1			; is left/right pressed?
+		beq.s	LevSel_NoMove			; if not, branch
+		move.w	(v_levselss).w,d0		; get selected Special Stage
+		btst	#bitL,d1			; is left pressed?
+		beq.s	.right				; if not, branch
+		subq.w	#1,d0				; previous Special Stage
+		bhs.s	.right				; if still valid, branch
+		moveq	#7-1,d0				; wrap to stage 7
+
+.right:
+		btst	#bitR,d1			; is right pressed?
+		beq.s	.refresh			; if not, branch
+		addq.w	#1,d0				; next Special Stage
+		cmpi.w	#7,d0				; past stage 7?
+		blo.s	.refresh			; if not, branch
+		moveq	#0,d0				; wrap to stage 1
+
+.refresh:
+		move.w	d0,(v_levselss).w		; save selected Special Stage
+		bsr.w	LevSelTextLoad			; refresh text
+		rts
+
+; ---------------------------------------------------------------------------
+; Change the selected Chaos Emerald count shown in the level select.
+; ---------------------------------------------------------------------------
+
+LevSel_EmeraldCount:
+		move.b	(v_jpadpress1).w,d1		; get current button presses
+		andi.b	#btnR+btnL,d1			; is left/right pressed?
+		beq.s	LevSel_NoMove			; if not, branch
+		move.w	(v_levselemeralds).w,d0		; get selected emerald count
+		btst	#bitL,d1			; is left pressed?
+		beq.s	.right				; if not, branch
+		subq.w	#1,d0				; reduce emerald count
+		bhs.s	.right				; if still valid, branch
+		moveq	#7,d0				; wrap to all emeralds
+
+.right:
+		btst	#bitR,d1			; is right pressed?
+		beq.s	.refresh			; if not, branch
+		addq.w	#1,d0				; increase emerald count
+		cmpi.w	#7+1,d0				; past all emeralds?
+		blo.s	.refresh			; if not, branch
+		moveq	#0,d0				; wrap to no emeralds
+
+.refresh:
+		move.w	d0,(v_levselemeralds).w		; save selected emerald count
+		bsr.w	LevSel_ApplyEmeraldCount	; immediately update the game's emerald state
+		bsr.w	LevSelTextLoad			; refresh text
+		rts
+	endif ; if FeatureSonic2013SpecialStage7
+
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Subroutine to load level select text
 ; ---------------------------------------------------------------------------
 
+	if FeatureSonic2013SpecialStage7
+levsel_line_count:	equ 22	; total number of lines
+	else
 levsel_line_count:	equ 21	; total number of lines
+	endif ; if FeatureSonic2013SpecialStage7
 levsel_line_length:	equ 24	; characters per line
+	if FeatureSonic2013SpecialStage7
+levsel_sndtest_row:	equ levsel_line_count-2  ; row index of the sound test
+levsel_emerald_row:	equ levsel_line_count-1  ; row index of emerald count
+	else
 levsel_sndtest_row:	equ levsel_line_count-1  ; row index of the sound test
+	endif ; if FeatureSonic2013SpecialStage7
+levsel_special_row:	equ levsel_sndtest_row-1 ; row index of the Special Stage
+	if FeatureSonic2013SpecialStage7
+levsel_value_col:	equ levsel_line_length-1 ; shared right-aligned value column
+levsel_sndtest_col:	equ levsel_value_col-1 ; column offset for the sound test number
+levsel_ss_col:		equ levsel_value_col ; column offset for the Special Stage number
+levsel_emerald_col:	equ levsel_value_col ; column offset for Chaos Emerald count
+	else
 levsel_sndtest_col:	equ levsel_line_length-8 ; column offset for the sound test number
+	endif ; if FeatureSonic2013SpecialStage7
 
 levsel_start_row:	equ 4	; top tile offset for start position
 levsel_start_col:	equ 8	; left tile offset for start position
 levsel_vram_main:	equ vram_bg+(levsel_start_row<<7)+(levsel_start_col<<1)	; nametable address in VRAM
 levsel_vram_sndtestnum:	equ levsel_vram_main+(levsel_sndtest_row<<7)+(levsel_sndtest_col<<1) ; nametable address for sound test numbers
+	if FeatureSonic2013SpecialStage7
+levsel_vram_ssnum:	equ levsel_vram_main+(levsel_special_row<<7)+(levsel_ss_col<<1) ; nametable address for Special Stage number
+levsel_vram_emeralds:	equ levsel_vram_main+(levsel_emerald_row<<7)+(levsel_emerald_col<<1) ; nametable address for emerald count
+	endif ; if FeatureSonic2013SpecialStage7
 
 levsel_white:		equ ArtTile_Level_Select_Font|Tile_Pal4|Tile_Prio ; VRAM setting for white text (non-selected lines)
 levsel_yellow:		equ ArtTile_Level_Select_Font|Tile_Pal3|Tile_Prio ; VRAM setting for yellow text (selected line)
@@ -3277,7 +3592,46 @@ LevSel_DrawSnd:
 		bsr.w	LevSel_ChgSnd			; draw 1st digit
 		move.b	d2,d0				; restore backup
 		bsr.w	LevSel_ChgSnd			; draw 2nd digit
+	if FeatureSonic2013SpecialStage7
+		bsr.w	LevSel_DrawSpecialStageNo	; draw selected Special Stage number
+		bsr.w	LevSel_DrawEmeralds		; draw selected emerald count
+	endif ; if FeatureSonic2013SpecialStage7
 		rts
+; ===========================================================================
+
+	if FeatureSonic2013SpecialStage7
+; ---------------------------------------------------------------------------
+; Draw the Special Stage number beside the Special Stage row.
+; ---------------------------------------------------------------------------
+
+LevSel_DrawSpecialStageNo:
+		move.w	#levsel_white,d3		; draw number in white by default
+		cmpi.w	#levsel_special_row,(v_levselitem).w ; is Special Stage row selected?
+		bne.s	.draw				; if not, branch
+		move.w	#levsel_yellow,d3		; draw number in yellow
+
+.draw:
+		locVRAM	levsel_vram_ssnum		; write Special Stage number position to VRAM
+		move.w	(v_levselss).w,d0		; get 0-based Special Stage number
+		addq.w	#1,d0				; display as 1-based
+		bra.w	LevSel_ChgSnd			; draw digit
+
+; ---------------------------------------------------------------------------
+; Draw selected emerald count as a number.
+; ---------------------------------------------------------------------------
+
+LevSel_DrawEmeralds:
+		move.w	#levsel_white,d3		; draw number in white by default
+		cmpi.w	#levsel_emerald_row,(v_levselitem).w ; is emerald count row selected?
+		bne.s	.draw				; if not, branch
+		move.w	#levsel_yellow,d3		; draw number in yellow
+
+.draw:
+		locVRAM	levsel_vram_emeralds		; write emerald count position to VRAM
+		move.w	(v_levselemeralds).w,d0		; get number of collected emeralds
+		bra.w	LevSel_ChgSnd			; draw digit
+	endif ; if FeatureSonic2013SpecialStage7
+
 ; ===========================================================================
 
 LevSel_ChgSnd:
@@ -3407,6 +3761,9 @@ LevelMenuText:
 		lstxt "FINAL ZONE              "
 		lstxt "SPECIAL STAGE           "
 		lstxt "SOUND SELECT            "
+		if FeatureSonic2013SpecialStage7
+			lstxt "EMERALDS                "
+		endif ; if FeatureSonic2013SpecialStage7
 	else
 		dc.b    "GREEN HILL ZONE  STAGE 1"
 		dc.b    "                 STAGE 2"
@@ -3429,6 +3786,9 @@ LevelMenuText:
 		dc.b    "FINAL ZONE              "
 		dc.b    "SPECIAL STAGE           "
 		dc.b    "SOUND TEST              "
+		if FeatureSonic2013SpecialStage7
+			dc.b    "EMERALDS                "
+		endif ; if FeatureSonic2013SpecialStage7
 	endif ; if AsciiMenu=0
 		even
 
@@ -3540,7 +3900,22 @@ GM_Level:	; fading out from previous game mode
 
 Level_NoMusicFade:
 		bsr.w	ClearPLC			; clear any remaining PLC entries
+	if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+		jsr	(ClearPlayerPowerUps).l		; clear active power-up state before loading the next stage
+	endif ; if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
 		bsr.w	PaletteFadeOut			; fade out from the previous screen
+	if FeatureEnhancedLevelFadeIn
+		clearRAM v_spritetablebuffer,v_palette_fading_end ; start level loading from clean sprite and palette buffers
+		disable_ints
+		bsr.w	ClearScreen			; clear old planes before title-card art is loaded
+		move.l	#$C0000000,(vdp_control_port).l ; set VDP to CRAM line 1 write
+		moveq	#$80/2-1,d0			; clear all CRAM colours
+
+.clearloadcram:
+		move.w	#cBlack,(vdp_data_port).l
+		dbf	d0,.clearloadcram
+		enable_ints
+	endif ; if FeatureEnhancedLevelFadeIn
 ; ---------------------------------------------------------------------------
 
 	if TweakFastLevelReload
@@ -3593,6 +3968,9 @@ Level_ClrRam:
 		clearRAM v_misc_variables		; clear various miscellaneous RAM
 		clearRAM v_levelvariables		; clear level variables RAM (camera position, etc.)
 		clearRAM v_timingandscreenvariables	; clear various timing and screen RAM (for animated tiles, etc.)
+	if FeatureEnhancedLevelFadeIn
+		clearRAM v_spritetablebuffer,v_palette_fading_end ; clear staged sprite/palette data before loading this level
+	endif ; if FeatureEnhancedLevelFadeIn
 
 	; @TODO figure out where this goes after the clearRAM stuff above was added
 	if TweakNoWaitPLCLevelTiles
@@ -3616,6 +3994,9 @@ Level_ClrRam:
 		clr.w	(v_sgfx_buffer).w																						; ResetDMAQueue
 		move.l	#v_sgfx_buffer,(v_sgfx_buffer+$FC).w
 	endif ; if FeatureEnhancedPLCQueue
+	if FeatureEnhancedLevelFadeIn
+		clr.b	(f_titlecard_only).w		; clear title-card-only render gate on level load
+	endif ; if FeatureEnhancedLevelFadeIn
 
 	if FeatureBetaVictoryAnimation
 		clr.b	(f_victory).w
@@ -3684,6 +4065,9 @@ Level_PlayBgm:
 		move.b	(a1,d0.w),d0			; get music ID for current level
 		play_queued_music snd_bsr		; play music
 		move.b	#id_TitleCard,(v_titlecard).w	; load title card object
+	if FeatureEnhancedLevelFadeIn
+		move.b	#1,(f_titlecard_only).w		; keep level planes/objects hidden while title cards settle
+	endif ; if FeatureEnhancedLevelFadeIn
 	if TweakNoWaitPLCLevelTiles
 	  	move.w  #3,v_framecount.w      																		; set the timer (Fixes Title card bug)
 	endif ; if TweakNoWaitPLCLevelTiles
@@ -3726,8 +4110,12 @@ Level_CheckTtlCard:
 		subi.w	#1,v_framecount.w		; subtract 1 from timer
 	else
 		tst.l	(v_plc_queue_base).w		; have patterns been fully decompressed and loaded?
-	endif ; if TweakNoWaitPLCLevelTiles
 		bne.s	Level_TtlCardLoop		; if not, loop until they have
+	if FeatureEnhancedLevelFadeIn
+		tst.w	(v_plc_patternsleft).w		; is the final PLC entry still decompressing?
+		bne.s	Level_TtlCardLoop		; if not, loop until they have
+	endif ; if FeatureEnhancedLevelFadeIn
+	endif ; if TweakNoWaitPLCLevelTiles
 ; ---------------------------------------------------------------------------
 
 		; PLCs have finished, load/initialize remaining data
@@ -3757,10 +4145,43 @@ Level_SkipTtlCard:
 		bsr.w	LoadZoneTiles																								; load level art
 	endif ; if TweakNonNemesisLevelArtLoad
 		bsr.w	LevelDataLoad			; load block mappings and palettes
+	if FixBugTitleCardSonicPaletteArtifacts
+		bsr.w	ClearTitleCardSonicPaletteArtifacts ; hide Sonic-palette foreground artifacts before fade-in
+	endif ; if FixBugTitleCardSonicPaletteArtifacts
+	if FeatureEnhancedLevelFadeIn
+		lea	(v_palette_line_2).w,a1		; keep stage palettes black until fade-in starts
+		moveq	#((v_palette_end-v_palette_line_2)/4)-1,d0
+
+.clearpal:
+		clr.l	(a1)+
+		dbf	d0,.clearpal
+
+		lea	(v_palette_water_line_2).w,a1	; keep underwater stage palette lines black too
+		moveq	#((v_palette_water_end-v_palette_water_line_2)/4)-1,d0
+
+.clearwaterpal:
+		clr.l	(a1)+
+		dbf	d0,.clearwaterpal
+
+		disable_ints				; clear stage palette lines before the first plane draw
+		move.w	#$8700,(vdp_control_port).l	; use palette line 0, colour 0 while stage palettes are black
+		move.l	#$C0200000,(vdp_control_port).l ; set VDP to CRAM line 2 write
+		moveq	#$60/2-1,d0			; keep title-card palette line untouched
+
+.clearcram:
+		move.w	#cBlack,(vdp_data_port).l
+		dbf	d0,.clearcram
+		enable_ints
+	endif ; if FeatureEnhancedLevelFadeIn
 		bsr.w	LoadTilesFromStart		; fully draw the foreground and background once before fade-in
 		jsr	(ConvertCollisionArray).l	; call a routine that immediately returns (this is a disabled development function)
 		bsr.w	ColIndexLoad			; set collision index for current zone
 		bsr.w	LZWaterFeatures			; initialize water features if zone is LZ
+	if FeatureEnhancedLevelFadeIn
+		jsr	(AnimateLevelGfx).l		; seed initial animated level art before fade-in
+		jsr	(AnimateLevelGfx).l		; GHZ flowers/waterfall are loaded by separate passes
+		jsr	(AnimateLevelGfx).l		; keep stale title-screen art out of animated slots
+	endif ; if FeatureEnhancedLevelFadeIn
 
 		move.b	#id_SonicPlayer,(v_player).w	; load Sonic object
 
@@ -3789,6 +4210,9 @@ Level_ChkWater:
 		move.w	#$120,(v_watersurface2+obX).w	; set base X-position for surface B
 
 Level_LoadObj:
+	if FeatureEnhancedLevelFadeIn
+		move.b	#1,(f_titlecard_only).w		; only title cards should render before level planes return
+	endif ; if FeatureEnhancedLevelFadeIn
 		jsr	(ObjPosLoad).l			; initialize object manager
 		jsr	(ExecuteObjects).l		; load objects that are already visible during fade-in
 		jsr	(BuildSprites).l		; build sprites for objects before fade-in
@@ -3804,10 +4228,14 @@ Level_LoadObj:
 
 Level_SkipClr:
 		move.b	d0,(f_timeover).w		; clear time over flag
+	if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+		jsr	(ClearPlayerPowerUps).l		; clear shield, invincibility, speed shoes, and goggles
+	else
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
 		move.b	d0,(v_goggles).w		; clear goggles flag
+	endif ; if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -3853,15 +4281,32 @@ Level_WtrNotSbz:
 		bsr.w	PalLoad_Water			; load underwater palette to active palette
 
 Level_Delay:
+	if FeatureEnhancedLevelFadeIn
+		move.w	#1-1,d1				; one VBlank is enough after CRAM and planes are already staged
+	else
 		move.w	#4-1,d1				; run 4 extra frames of VBlank to do palette transfers
+	endif ; if FeatureEnhancedLevelFadeIn
 
 Level_DelayLoop:
+	if FeatureEnhancedLevelFadeIn
+		move.b	#id_VBlank_PaletteFade,(v_vblank_routine).w ; transfer palette/sprites without redrawing level planes
+	else
 		move.b	#id_VBlank_Levels,(v_vblank_routine).w ; set VBlank routine to $08
+	endif ; if FeatureEnhancedLevelFadeIn
 		bsr.w	WaitForVBlank			; wait until VBlank has finished
 		dbf	d1,Level_DelayLoop		; repeat for 4 frames in total
 
+	if FeatureEnhancedLevelFadeIn
+		disable_ints
+		move.w	#$8720,(vdp_control_port).l	; restore normal level backdrop colour
+		enable_ints
+		move.w	#$202F,(v_pfade_start).w	; fade in stage palette lines; keep title cards solid
+		bsr.w	PalFadeIn_Alt			; fade-in main palette
+		clr.b	(f_titlecard_only).w		; render level objects after the planes are ready
+	else
 		move.w	#$202F,(v_pfade_start).w	; set to fade in 2nd, 3rd & 4th palette lines
 		bsr.w	PalFadeIn_Alt			; fade-in main palette
+	endif ; if FeatureEnhancedLevelFadeIn
 ; ---------------------------------------------------------------------------
 
 		; level has faded in, make title cards move and enter main loop
@@ -3902,6 +4347,18 @@ Level_MainLoop:
 		bsr.w	MoveSonicInDemo			; simulate controls in demos (immediately returns outside demos)
 		bsr.w	LZWaterFeatures			; apply water features if in Labyrinth Zone
 		jsr	(ExecuteObjects).l		; execute all objects in object RAM
+	if EnhancedDebug
+		tst.w	(v_debuguse).w			; is debug mode active?
+		beq.s	.notsonicview			; if not, branch
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w ; is Sonic sprite viewer active?
+		beq.s	.notsonicview			; if not, branch
+		clr.l	(v_scrposy_vdp).w		; keep the debug HUD vertically fixed
+		clearRAM v_hscrolltablebuffer,v_hscrolltablebuffer_end_padded ; keep both planes screen-relative
+		jsr	(BuildSprites).l		; build only Sonic and goggles; DisplaySprite filters the rest
+		bra.s	Level_SonicViewFrameDone
+
+.notsonicview:
+	endif ; if EnhancedDebug
 
 	if Revision<>0
 		; For REV01, this code has been relocated from below to also restart levels
@@ -3926,6 +4383,9 @@ Level_SkipScroll:
 		bsr.w	SynchroAnimate			; advance animation timers
 		bsr.w	SignpostArtLoad			; check if sign post art needs to be loaded and lock left boundary
 
+	if EnhancedDebug
+Level_SonicViewFrameDone:
+	endif ; if EnhancedDebug
 		cmpi.b	#id_Demo,(v_gamemode).w		; are we in a demo?
 		beq.s	Level_ChkDemo			; if yes, branch
 	if Revision=0
@@ -4116,20 +4576,52 @@ Demo_SS:	include	"demodata/Intro - Special Stage.asm"
 ; Special Stage
 ; ---------------------------------------------------------------------------
 
+	if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+; ---------------------------------------------------------------------------
+; Subroutine to clear active player power-up state when changing gameplay modes.
+; ---------------------------------------------------------------------------
+
+ClearPlayerPowerUps:
+		moveq	#0,d0
+		move.b	d0,(v_shield).w			; clear shield
+		move.b	d0,(v_invinc).w			; clear invincibility
+		move.b	d0,(v_shoes).w			; clear speed shoes
+	if FeatureRestoreMonitorScubaGear
+		move.b	d0,(v_goggles).w		; clear goggles flag
+	endif ; if FeatureRestoreMonitorScubaGear
+	if FeatureSonic2013SuperSonic
+		move.b	d0,(v_supersonic).w		; clear Super Sonic flag
+		move.b	d0,(v_superringtimer).w		; clear Super Sonic ring drain timer
+		move.b	d0,(v_supersonic_finish).w	; clear Super Sonic end-of-act visual latch
+	endif ; if FeatureSonic2013SuperSonic
+	if FixBugInvincibleMusic
+		move.w	d0,(v_player+invtime).w		; clear stale invincibility timer state
+		move.w	d0,(v_player+shoetime).w		; clear stale speed shoes timer state
+		if FeatureUseSonic2SoundDriver=0
+			move.b	d0,(v_snddriver_ram.f_speedup).w ; clear speed shoes tempo state
+		endif ; if FeatureUseSonic2SoundDriver=0
+	endif ; if FixBugInvincibleMusic
+		rts
+	endif ; if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+
+; ---------------------------------------------------------------------------
+
 ; SpecialStage:
 GM_Special:	; white fade-out from previous game mode
 		sfx	#sfx_EnterSS			; set special stage entry sound and play it
-	if FeatureRestoreMonitorScubaGear
-		clr.b	(v_goggles).w			; don't let level goggles art persist into the Special Stage
-	endif ; if FeatureRestoreMonitorScubaGear
-	if FixBugInvincibleMusic
-		clr.b	(v_shoes).w			; don't carry speed shoes into the Special Stage
-		clr.w	(v_player+shoetime).w		; clear any stale speed shoes timer state
-		if FeatureUseSonic2SoundDriver=0
-			clr.b	(v_snddriver_ram.f_speedup).w ; clear speed shoes tempo before SS music loads
-		endif ; if FeatureUseSonic2SoundDriver=0
-	endif ; if FixBugInvincibleMusic
+	if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+		jsr	(ClearPlayerPowerUps).l		; don't let level power-up state persist into the Special Stage
+	endif ; if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+	if EnhancedDebug
+		btst	#7,(v_gamemode).w		; is this a forced Special Stage reload?
+		beq.s	.whiteout			; if not, keep the original white transition
+		bsr.w	PaletteFadeOut			; reload from black so old Special Stage art is not visible
+		bra.s	.fadeoutdone
+
+.whiteout:
+	endif ; if EnhancedDebug
 		bsr.w	PaletteWhiteOut			; fade-out to white
+.fadeoutdone:
 ; ---------------------------------------------------------------------------
 
 		; load special stage patterns
@@ -4195,7 +4687,17 @@ GM_Special:	; white fade-out from previous game mode
 
 SS_NoDebug:
 		enable_display				; enable screen out-put
+	if EnhancedDebug
+		btst	#7,(v_gamemode).w		; was this a forced Special Stage reload?
+		beq.s	.whitein			; if not, keep the original white transition
+		bclr	#7,(v_gamemode).w		; main loop is now the normal Special Stage mode
+		bsr.w	PaletteFadeIn			; fade-in from black
+		bra.s	.fadeindone
+
+.whitein:
+	endif ; if EnhancedDebug
 		bsr.w	PaletteWhiteIn			; fade-in from white
+.fadeindone:
 
 ; ---------------------------------------------------------------------------
 ; Special Stage main loop
@@ -4210,8 +4712,22 @@ SS_MainLoop:
 
 		jsr	(ExecuteObjects).l		; execute Special Stage object
 		jsr	(BuildSprites).l		; build sprites
+	if EnhancedDebug
+		tst.w	(v_debuguse).w			; is debug mode active?
+		beq.s	.normalssdraw			; if not, draw the Special Stage
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w ; is Sonic sprite viewer active?
+		beq.s	.normalssdraw			; if not, draw the Special Stage
+		clr.l	(v_scrposy_vdp).w		; keep the debug HUD vertically fixed
+		clearRAM v_hscrolltablebuffer,v_hscrolltablebuffer_end_padded ; keep both planes screen-relative
+		bra.s	.ssdrawdone			; viewer owns the screen
+
+.normalssdraw:
+	endif ; if EnhancedDebug
 		jsr	(SS_ShowLayout).l		; render Special Stage layout
 		bsr.w	SS_BGAnimate			; animate Special Stage background
+	if EnhancedDebug
+.ssdrawdone:
+	endif ; if EnhancedDebug
 
 	if DebugDisableDemoTime=0
 		tst.w	(f_demo).w			; is demo mode on?
@@ -4536,7 +5052,11 @@ GM_Ending:
 		move.w	#30,(v_air).w			; replenish air
 
 		move.w	#id_EndZ_good,(v_zone).w	; set to good ending by default (level number 600, extra flowers)
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w		; do you have all 7 emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w		; do you have all 6 emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.s	End_LoadData			; if yes, use good ending
 		move.w	#id_EndZ_bad,(v_zone).w		; otherwise, set to bad ending (level number 601, no extra flowers)
 
@@ -4593,10 +5113,14 @@ End_LoadSonic:
 		move.w	d0,(v_rings).w			; clear rings
 		move.l	d0,(v_time).w			; clear time
 		move.b	d0,(v_lifecount).w		; clear extra lives flags when getting 100/200 rings
+	if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
+		jsr	(ClearPlayerPowerUps).l		; clear shield, invincibility, speed shoes, and goggles
+	else
 		move.b	d0,(v_shield).w			; clear shield
 		move.b	d0,(v_invinc).w			; clear invincibility
 		move.b	d0,(v_shoes).w			; clear speed shoes
 		move.b	d0,(v_goggles).w		; clear goggles flag
+	endif ; if (FixBugInvincibleMusic)|(FeatureRestoreMonitorScubaGear)|(FixBugClearPowerUpsOnGiantRing)|(FeatureSonic2013SuperSonic)
 		move.w	d0,(v_debuguse).w		; exit debug mode if necessary
 		move.w	d0,(f_restart).w		; clear level restart flag
 		move.w	d0,(v_framecount).w		; reset frames since level start to 0
@@ -4604,9 +5128,6 @@ End_LoadSonic:
 		move.b	#1,(f_scorecount).w		; update score counter
 		move.b	#1,(f_ringcount).w		; update rings counter
 		move.b	#0,(f_timecount).w		; stop time counter for the ending sequence
-	if FeatureRestoreMonitorScubaGear
-		move.b	#0,(v_goggles).w 					; move 0 to the goggle check
-	endif ; if FeatureRestoreMonitorScubaGear
 		move.w	#1800,(v_generictimer).w	; set generic timer to 30 seconds (unused in ending sequence)
 		move.b	#id_VBlank_Ending,(v_vblank_routine).w ; set VBlank routine to $18
 		bsr.w	WaitForVBlank			; wait until VBlank has finished
@@ -5555,6 +6076,12 @@ Nem_Goggle:	binclude	"artnem/Unused - Goggles.nem" ; unused goggles
 	if FeatureRestoreMonitorScubaGear
 Art_Goggles:	binclude	"Enhancements/artunc/Unused - Goggles.bin" ; unused goggles overlay frames
 		even
+Art_Goggles_Rot90:	binclude	"Enhancements/artunc/Unused - Goggles Rot90.bin" ; goggles overlay frames rotated 90 degrees clockwise
+		even
+Art_Goggles_Rot180:	binclude	"Enhancements/artunc/Unused - Goggles Rot180.bin" ; goggles overlay frames rotated 180 degrees
+		even
+Art_Goggles_Rot270:	binclude	"Enhancements/artunc/Unused - Goggles Rot270.bin" ; goggles overlay frames rotated 270 degrees clockwise
+		even
 	endif ; if FeatureRestoreMonitorScubaGear
 
 ; ---------------------------------------------------------------------------
@@ -5594,6 +6121,10 @@ Nem_SSZone5:	binclude	"artnem/Special ZONE5.nem" ; ZONE5 block
 		even
 Nem_SSZone6:	binclude	"artnem/Special ZONE6.nem" ; ZONE6 block
 		even
+	if FeatureSonic2013SpecialStage7
+Nem_SSZone7:	binclude	"Enhancements/artnem/sonic2013/Special ZONE7.nem" ; Sonic 2013 ZONE7 block
+		even
+	endif ; if FeatureSonic2013SpecialStage7
 Nem_SSUpDown:	binclude	"artnem/Special UP-DOWN.nem" ; special stage UP/DOWN block
 		even
 Nem_SSEmerald:	binclude	"artnem/Special Emeralds.nem" ; special stage chaos emeralds
@@ -5798,11 +6329,11 @@ Gra_TitleCard:	binclude	"Enhancements/artunc/Decompressed/Title Cards.nem"
 	else
 		if TweakLevelCompressionMode
 			if TweakLevelCompressionMode=1
-Gra_TitleCard:	binclude	"Enhancements/artnem/Recompressed/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artnem/Title Cards.nem"
 			elseif TweakLevelCompressionMode=2
-Gra_TitleCard:	binclude	"Enhancements/artkos/Recompressed/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artkos/Title Cards.kosp"
 			else
-Gra_TitleCard:	binclude	"Enhancements/artcom/Title Cards.nem"
+Gra_TitleCard:	binclude	"Enhancements/artcom/Title Cards.comp"
 			endif
 		else
 Gra_TitleCard:	binclude	"artnem/Title Cards.nem"
@@ -6052,6 +6583,10 @@ SS_6:		binclude	"sslayout/6 (REV01).eni"
 		even
 	  endif ; if FeatureSonicJam
 	endif
+	if FeatureSonic2013SpecialStage7
+SS_7:		binclude	"sslayout/6 (REV01).eni" ; Sonic 2013 SS7 layout placeholder until converted layout data is supplied
+		even
+	endif ; if FeatureSonic2013SpecialStage7
 
 ; ---------------------------------------------------------------------------
 ; Animated uncompressed graphics
@@ -6063,11 +6598,16 @@ Art_GhzFlower1:	binclude	"artunc/GHZ Flower Large.unc"
 Art_GhzFlower2:	binclude	"artunc/GHZ Flower Small.unc"
 		even
 Art_MzLava1:	binclude	"artunc/MZ Lava Surface.unc"
-		even
+	even
 Art_MzLava2:	binclude	"artunc/MZ Lava.unc"
+	even
+	if FeatureLavaSplash
+Art_LavaSplash:	binclude	"Enhancements/artunc/Lava Splash.unc"
+Art_LavaSplash_End:
 		even
+	endif ; if FeatureLavaSplash
 Art_MzTorch:	binclude	"artunc/MZ Background Torch.unc"
-		even
+	even
 Art_SbzSmoke:	binclude	"artunc/SBZ Background Smoke.unc"
 		even
 

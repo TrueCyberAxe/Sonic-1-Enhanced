@@ -39,6 +39,7 @@ KosDec:
 
         ; TRASHES: a3, d0-d2, d4-d7
 
+        subq.l  #2,sp                           ; reserve scratch word used by _Kos_RunBitStream
         moveq   #7,d7                           ; used to mask bits 0-2 twice below
         moveq   #0,d1                           ; clear bits 8-15 (index into x-mirror table)
         moveq   #-1,d4                          ; used in "dictionary reference long" for displacement
@@ -148,6 +149,7 @@ KosDec_largecopy:
 KosDec_Quit:
         bcc.w   KosDec_FetchNewCode             ; 10/12 if count_m1 == 1 fetch a new code (!)
 
+        addq.l  #2,sp                           ; release scratch word
         rts
 
 ; ---------------------------------------------------------------------------

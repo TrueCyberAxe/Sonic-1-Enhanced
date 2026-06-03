@@ -26,7 +26,11 @@ Jun_Main:	; Routine 0
 ; ===========================================================================
 
 .repeat:
+	if Enhanced
+		jsr	(FindFreeObj).l
+	else
 		bsr.w	FindFreeObj
+	endif ; if Enhanced
 		bne.s	.fail
 		_move.b	#id_Junction,obID(a1)
 		addq.b	#4,obRoutine(a1) ; goto Jun_Display next

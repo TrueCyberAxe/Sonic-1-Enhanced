@@ -41,4 +41,34 @@ LTag_ChkDel:	; Routine 2
 		bmi.w	DeleteObject				; this branch isn't in the common out_of_range macro
 		cmpi.w	#$280,d0		; $280 = 128+320+192
 		bhi.w	DeleteObject
+	if FeatureLavaSplash
+		bsr.s	LTag_UpdateSplashTouch		; clear splash debounce once Sonic leaves this lava tag
+	endif ; if FeatureLavaSplash
 		rts
+
+	if FeatureLavaSplash
+; ---------------------------------------------------------------------------
+; Clear the lava splash contact latch once Sonic is no longer touching the
+; same lava surface. This keeps the splash to one impact instead of one per
+; frame while standing on the lava tag.
+; ---------------------------------------------------------------------------
+
+LTag_UpdateSplashTouch:
+		btst	#bitObjectFlag,obStatus(a0)	; did this lava tag already splash?
+		beq.s	.return				; if not, branch
+		lea	(v_player).w,a1			; load Sonic object
+		move.w	obY(a0),d1			; get lava tag centre
+		subi.w	#$20,d1				; get lava surface
+		move.w	obY(a1),d0			; get Sonic Y
+		sub.w	d1,d0				; compare against lava surface
+		addi.w	#$10,d0				; allow Sonic to be slightly above the surface
+		bmi.s	.clear				; if he is no longer touching, clear latch
+		cmpi.w	#$34,d0				; allow Sonic's middle/body contact range
+		bls.s	.return				; if still touching, keep latch
+
+.clear:
+		bclr	#bitObjectFlag,obStatus(a0)	; allow the next fresh lava contact to splash
+
+.return:
+		rts
+	endif ; if FeatureLavaSplash

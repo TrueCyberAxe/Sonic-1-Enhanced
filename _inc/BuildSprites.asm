@@ -24,7 +24,9 @@ BuildSprites:
 		movea.w	(a4,d6.w),a0	; load object ID
 		tst.b	(a0)		; if null, branch
 		beq.w	.skipObject
+	if FixBugSolidObjectRenderFlicker=0
 		bclr	#7,obRender(a0)		; set as not visible
+	endif ; if FixBugSolidObjectRenderFlicker=0
 
 		move.b	obRender(a0),d0
 		move.b	d0,d4
@@ -38,11 +40,19 @@ BuildSprites:
 		sub.w	(a1),d3
 		move.w	d3,d1
 		add.w	d0,d1
+	if FixBugSolidObjectRenderFlicker
+		bmi.w	.hideObject	; left edge out of bounds
+	else
 		bmi.w	.skipObject	; left edge out of bounds
+	endif ; if FixBugSolidObjectRenderFlicker
 		move.w	d3,d1
 		sub.w	d0,d1
 		cmpi.w	#320,d1
+	if FixBugSolidObjectRenderFlicker
+		bge.s	.hideObject	; right edge out of bounds
+	else
 		bge.s	.skipObject	; right edge out of bounds
+	endif ; if FixBugSolidObjectRenderFlicker
 		addi.w	#128,d3		; VDP sprites start at 128px
 
 		btst	#4,d4		; is assume height flag on?
@@ -53,11 +63,19 @@ BuildSprites:
 		sub.w	4(a1),d2
 		move.w	d2,d1
 		add.w	d0,d1
+	if FixBugSolidObjectRenderFlicker
+		bmi.s	.hideObject	; top edge out of bounds
+	else
 		bmi.s	.skipObject	; top edge out of bounds
+	endif ; if FixBugSolidObjectRenderFlicker
 		move.w	d2,d1
 		sub.w	d0,d1
 		cmpi.w	#224,d1
+	if FixBugSolidObjectRenderFlicker
+		bge.s	.hideObject
+	else
 		bge.s	.skipObject
+	endif ; if FixBugSolidObjectRenderFlicker
 		addi.w	#128,d2		; VDP sprites start at 128px
 		bra.s	.drawObject
 ; ===========================================================================
@@ -73,9 +91,17 @@ BuildSprites:
 		sub.w	4(a1),d2
 		addi.w	#$80,d2
 		cmpi.w	#$60,d2
+	if FixBugSolidObjectRenderFlicker
+		blo.s	.hideObject
+	else
 		blo.s	.skipObject
+	endif ; if FixBugSolidObjectRenderFlicker
 		cmpi.w	#$180,d2
+	if FixBugSolidObjectRenderFlicker
+		bhs.s	.hideObject
+	else
 		bhs.s	.skipObject
+	endif ; if FixBugSolidObjectRenderFlicker
 
 	.drawObject:
 		movea.l	obMap(a0),a1
@@ -94,6 +120,13 @@ BuildSprites:
 
 	.setVisible:
 		bset	#7,obRender(a0)		; set object as visible
+
+	if FixBugSolidObjectRenderFlicker
+		bra.s	.skipObject
+
+	.hideObject:
+		bclr	#7,obRender(a0)		; clear visibility only when the object is offscreen
+	endif ; if FixBugSolidObjectRenderFlicker
 
 	.skipObject:
 		addq.w	#2,d6

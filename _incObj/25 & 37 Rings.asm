@@ -307,6 +307,9 @@ RLoss_Count:	; Routine 0
 RLoss_Bounce:	; Routine 2
 		move.b	(v_ani3_frame).w,obFrame(a0)
 		bsr.w	SpeedToPos
+	if FixBugScatteredRingsWallBounce
+		bsr.w	RLoss_WallBounce	; bounce lost rings off solid side walls
+	endif ; if FixBugScatteredRingsWallBounce
 		addi.w	#$18,obVelY(a0)
 
 	if TweakFixUnderwaterRingPhysics
@@ -397,6 +400,38 @@ RLoss_Sparkle:	; Routine 6 ; Obj_37_sub_6
 
 RLoss_Delete:	; Routine 8
 		bra.w	DeleteObject
+
+	if FixBugScatteredRingsWallBounce
+; ---------------------------------------------------------------------------
+; Make lost rings rebound from solid side walls instead of passing through.
+; ---------------------------------------------------------------------------
+
+RLoss_WallBounce:
+		tst.w	obVelX(a0)			; is ring moving sideways?
+		beq.s	.return				; if not, branch
+		bmi.s	.left				; if moving left, branch
+		moveq	#0,d3
+		move.b	obActWid(a0),d3		; probe ring's right edge
+		jsr	(ObjHitWallRight).l
+		tst.w	d1				; did it hit a wall?
+		bpl.s	.return				; if not, branch
+		add.w	d1,obX(a0)			; keep ring outside the wall
+		neg.w	obVelX(a0)			; reverse X direction
+		rts
+
+.left:
+		moveq	#0,d3
+		move.b	obActWid(a0),d3		; probe ring's left edge
+		not.w	d3
+		jsr	(ObjHitWallLeft).l
+		tst.w	d1				; did it hit a wall?
+		bpl.s	.return				; if not, branch
+		sub.w	d1,obX(a0)			; keep ring outside the wall
+		neg.w	obVelX(a0)			; reverse X direction
+
+.return:
+		rts
+	endif ; if FixBugScatteredRingsWallBounce
 
 ; ---------------------------------------------------------------------------
 ; Ring Spawn Array

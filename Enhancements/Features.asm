@@ -35,8 +35,8 @@ FeatureSonicJamModes			equ 1*Enhanced	; Runtime title-screen selector: A=Easy, B
 FeatureCDExtendedCamera:		equ 1*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/sonic-1-github-how-to-port-sonic-cds-extended-camera-to-sonic-1.5339/
 
 ; Causes Crash when Entering Water
-FeatureSpindash:			equ 1*Enhanced	; 0 = Off, 1 = Sonic CD, 2 = Sonic 2											Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and  https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
-FeatureUnlockMovesAfterCompletion:	equ 1*Enhanced	; Unlock Spin Dash and Super Peel-Out after the game has been completed
+FeatureSpindash:			equ 2*Enhanced	; 0 = Off, 1 = Sonic CD, 2 = CD normally/Sonic 2 when Super or complete, 3 = Sonic 2				Based on https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_1 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_2 and https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_3 and  https://info.sonicretro.org/SCHG_How-to:Add_Spin_Dash_to_Sonic_1/Part_4 and http://sonicresearch.org/community/index.php?threads/adding-sonic-2s-splash-and-skid-dust-to-sonic-1.5970/
+FeatureUnlockMovesAfterCompletion:	equ 1*Enhanced	; Unlock Spin Dash and Super Peel-Out after the game has been completed, You still ahve Regular Peel our and Sonic CD Spindash at the start
 
 ; Feature
 FeatureCentreTitleScreen:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-710848
@@ -93,6 +93,7 @@ FixBugDeathBoundary:			equ 1*Enhanced	; 															Based on https://info.son
 FixBugHurtDeathBoundary:		equ 1*Enhanced	; 															Based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/page-2#post-838489
 FixBugSongFadeRestoration:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_Song_Restoration_Bugs_in_Sonic_1%27s_Sound_Driver
 FixBugBlinkingHUD:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_HUD_blinking
+FixBugTimeOverHUDFlash:			equ 1*Enhanced	; Let TIME flash at 9 minutes even when Sonic has rings.
 FixBugLevelSelectCorruption:		equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_the_Level_Select_graphics_bug
 FixBugRememberSprite:			equ 1*Enhanced	; 															Based on https://info.sonicretro.org/SCHG_How-to:Fix_a_remember_sprite_related_bug
 FixBugSoundDriver:			equ 1*Enhanced	; Uncommenting of code in Sound_ChkValue
@@ -108,8 +109,20 @@ FixBugDrownLockTitleScreen:		equ 1*Enhanced	; 															Based on https://fo
 ; @todo port from sonic 2 code
 FixBugMonitors:				equ 0*Enhanced	; 															Based on http://sonicresearch.org/community/index.php?threads/how-to-fix-weird-monitor-collision-errors.5834/
 FixBugBrokenMonitorFall:		equ 1*Enhanced	; Broken monitors fall to the floor when loaded from respawn state instead of floating in midair.
-FixBugStackedMonitorJumpBreak:	equ 1*Enhanced	; Make airborne top hits break monitors before solidity can stand Sonic on stacked monitors.
-FixBugClearPowerUpsOnGiantRing:	equ 1*Enhanced	; Clear active power-up objects immediately when Sonic enters a giant ring.
+FixBugStackedMonitorJumpBreak:		equ 1*Enhanced	; Make airborne top hits break monitors before solidity can stand Sonic on stacked monitors.
+FixBugMonitorHurtBreak:			equ 1*Enhanced	; Require Sonic's actual ball state before a downward monitor hit can break it.
+FixBugScatteredRingsWallBounce:		equ 1*Enhanced	; Make scattered rings bounce off solid side walls instead of passing through them.
+FeaturePushableMonitors:		equ 1*Enhanced	; Let intact monitors be pushed like small solid objects without changing their original break rules.
+FixBugSolidObjectRenderFlicker:		equ 1*Enhanced	; Keep solid object collision stable even if the previous frame's sprite draw was skipped.
+FixBugClearPowerUpsOnGiantRing:		equ 1*Enhanced	; Clear active power-up objects immediately when Sonic enters a giant ring.
+FixBugClearStalePushing:		equ 1*Enhanced	; Clear Sonic's pushing state if no pushable object is still in front of him.
+FixBugTitleCardSonicPaletteArtifacts:	equ 1*Enhanced	; Remove foreground blocks that use Sonic's palette line before the stage fade-in.
+FeatureEnhancedLevelFadeIn:		equ 1*Enhanced	; Fade level palettes consistently while hiding Sonic-palette foreground artifacts until fade-in finishes.
+FeatureLavaSplash:			equ 1*Enhanced	; Show the normal splash art with the lava palette when Sonic falls onto lava.
+FeatureSonic2013SevenChaosEmeralds:	equ 1*Enhanced	; Track a 7th Chaos Emerald without moving the upstream emerald list.
+FeatureSonic2013SpecialStage7:		equ FeatureSonic2013SevenChaosEmeralds*Enhanced	; Sonic 2013/2015-style 7th Special Stage and menu selector scaffolding.
+FeatureSonic2013SuperSonic:		equ 1*Enhanced	; Pseudo Super Sonic with 7 emeralds, 50 rings, Sonic 2-style ring drain, and faster movement.
+FeatureGammaCorrectedFades:		equ 1*Enhanced	; Gamma-corrected palette fade tables for future fade routine replacement.
 
 ; @TODO Fix Bug when going too fast at ghz 1 slope checkpoint causing death
 ; @TODO Reset Camera location when entering DEBUG MODE
@@ -207,7 +220,7 @@ TweakS2LevelArtLoader:		equ 0*Enhanced	; 													Based on https://info.soni
 TweakUncompressedChunkMapping:		equ 0*Enhanced	; Loads chunks from ROM like later games and frees up more ram						Based on https://info.sonicretro.org/SCHG_How-to:Load_chunks_from_ROM_in_Sonic_1
 TweakUncompressedTitleCards:		equ 0*Enhanced	; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode				Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 
-TweakImproovedDecompression:		equ 0*Enhanced	; Improved Decompression Algorithms									Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
+TweakImproovedDecompression:		equ 1*Enhanced	; Improved Decompression Algorithms									Based on https://forums.sonicretro.org/index.php?threads/optimized-kosdec-and-nemdec-considerably-faster-decompression.32235/
 TweakLevelCompressionMode:		equ 0*Enhanced	; 0 = Original, 1 = Recompressed Original, 2 = Kosinski, 3 = COMPER					Based on https://info.sonicretro.org/SCHG_How-to:Port_Sonic_2%27s_Level_Art_Loader_to_Sonic_1#GitHub
 TweakNoWaitPLCLevelTiles:		equ 0*Enhanced	; Uses Faster Level Title Loading Code and Activates TweakLevelCompressionMode				Based on https://forums.sonicretro.org/index.php?threads/s1-considerably-speeding-up-level-loading.33616/
 TweakTitleCompress:			equ 0*Enhanced	; 0 to Keep using Nemesis Art on the Title Screen
@@ -223,9 +236,9 @@ TweakNavigationLevelSelect:		equ 0*Enhanced	; 													Based on https://foru
 
 TweakRemoveReduntantCode:		equ 0*Enhanced	; Modify Certain Code to Remove Duplicate or Redundant code, should cause some performance improvements by removing junk code left over that is executed - Partially based on https://forums.sonicretro.org/index.php?threads/some-changes-fixes-for-sonic-1.29751/#post-714327
 
-FeatureAnimateWhilePaused:		equ 0*Enhanced	; Animated Background while paused - Need to fix waterfalls, need to fix HUD, need to test LZ Water
-FeatureMusicWhilePaused:		equ 0*Enhanced
-FeatureCDPauseRestartLevel:		equ 0*Enhanced	; Reloads Level like in Sonic CD when you press a button while paused					Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
+FeatureAnimateWhilePaused:		equ 1*Enhanced	; Animated Background while paused - Need to fix waterfalls, need to fix HUD, need to test LZ Water
+FeatureMusicWhilePaused:		equ 1*Enhanced
+FeatureCDPauseRestartLevel:		equ 1*Enhanced	; Reloads Level like in Sonic CD when you press a button while paused					Based on https://forums.sonicretro.org/index.php?threads/adding-a-cd-style-level-restart-to-sonic-1.37014/
 
 FeatureUseSonic2SoundDriver:		equ 0*Enhanced	; 													Based on https://forums.sonicretro.org/index.php?threads/s1-friendly-improved-sonic-2-sound-driver.34249/
 

@@ -83,8 +83,10 @@ SolidObject71:
 
 SolidObject2F:
 		lea	(v_player).w,a1
+	if FixBugSolidObjectRenderFlicker=0
 		tst.b	obRender(a0)
 		bpl.w	Solid_Ignore
+	endif ; if FixBugSolidObjectRenderFlicker=0
 		move.w	obX(a1),d0
 		sub.w	obX(a0),d0
 		add.w	d1,d0
@@ -122,8 +124,10 @@ SolidObject2F:
 ; ===========================================================================
 
 Solid_ChkEnter:
+	if FixBugSolidObjectRenderFlicker=0
 		tst.b	obRender(a0)
 		bpl.w	Solid_Ignore
+	endif ; if FixBugSolidObjectRenderFlicker=0
 
 loc_FAD0:
 		lea	(v_player).w,a1
@@ -269,8 +273,12 @@ Solid_Ignore:
 	endif
 
 Solid_NotPushing:
+	if FixBugClearStalePushing
+		bclr	#5,obStatus(a0)	; clear this object's pushing flag
+	else
 		bclr	#5,obStatus(a0)	; clear pushing flag
 		bclr	#5,obStatus(a1)	; clear Sonic's pushing flag
+	endif ; if FixBugClearStalePushing
 
 Solid_Debug:
 		moveq	#0,d4		; return no collision

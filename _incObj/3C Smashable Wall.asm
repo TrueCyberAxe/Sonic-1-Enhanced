@@ -14,6 +14,7 @@ Smash_Index:	dc.w Smash_Main-Smash_Index
 		dc.w Smash_FragMove-Smash_Index
 
 smash_speed = objoff_30		; Sonic's horizontal speed
+smash_sonstatus = objoff_32	; Sonic's status before solid collision
 ; ===========================================================================
 
 Smash_Main:	; Routine 0
@@ -27,11 +28,35 @@ Smash_Main:	; Routine 0
 
 Smash_Solid:	; Routine 2
 		move.w	(v_player+obVelX).w,smash_speed(a0) ; load Sonic's horizontal speed
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		move.b	(v_player+obStatus).w,smash_sonstatus(a0) ; remember if Sonic was rolling before SolidObject
+		btst	#2,smash_sonstatus(a0) ; was Sonic rolling before SolidObject?
+		beq.s	.keepvel	; if not, keep horizontal speed
+		move.w	smash_speed(a0),d0 ; get Sonic's horizontal speed
+		bpl.s	.velpositive	; if positive, branch
+		neg.w	d0
+
+.velpositive:
+		move.w	(v_player+obInertia).w,d1 ; get Sonic's ground speed
+		bpl.s	.inertiapositive ; if positive, branch
+		neg.w	d1
+
+.inertiapositive:
+		cmp.w	d0,d1		; is inertia stronger than horizontal speed?
+		bls.s	.keepvel	; if not, keep horizontal speed
+		move.w	(v_player+obInertia).w,smash_speed(a0) ; use roll/spindash speed
+
+.keepvel:
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		move.w	#$10+sonic_solid_width,d1
 		move.w	#$20,d2
 		move.w	#$20,d3
 		move.w	obX(a0),d4
 		bsr.w	SolidObject
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		tst.w	d4		; did Sonic hit the side?
+		bne.s	.chkroll	; if yes, branch
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		btst	#5,obStatus(a0)	; is Sonic pushing against the wall?
 		bne.s	.chkroll	; if yes, branch
 
@@ -40,8 +65,15 @@ Smash_Solid:	; Routine 2
 ; ===========================================================================
 
 .chkroll:
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		btst	#2,smash_sonstatus(a0) ; was Sonic rolling before SolidObject adjusted him?
+		bne.s	.wasroll	; if yes, branch
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		cmpi.b	#id_Roll,obAnim(a1) ; is Sonic rolling?
 		bne.s	.donothing	; if not, branch
+	if FeatureSpindash|FixBugEnemyDeathRoll
+.wasroll:
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		move.w	smash_speed(a0),d0
 		bpl.s	.chkspeed
 		neg.w	d0
@@ -59,6 +91,17 @@ Smash_Solid:	; Routine 2
 		lea	(Smash_FragSpd2).l,a4 ; use fragments that move left
 
 .smash:
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		btst	#2,smash_sonstatus(a0) ; was Sonic rolling before SolidObject adjusted him?
+		beq.s	.keepanim	; if not, branch
+		bset	#2,obStatus(a1)	; keep Sonic rolling through the smashed wall
+		move.b	#sonic_roll_height,obHeight(a1)
+		move.b	#sonic_roll_width,obWidth(a1)
+		move.b	#id_Roll,obAnim(a1)
+		addq.w	#sonic_height-sonic_roll_height,obY(a1) ; undo SolidObject's standing adjustment
+
+.keepanim:
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		move.w	obVelX(a1),obInertia(a1)
 		bclr	#5,obStatus(a0)
 		bclr	#5,obStatus(a1)

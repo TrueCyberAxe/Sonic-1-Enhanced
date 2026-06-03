@@ -447,6 +447,9 @@ SS_LayoutIndex:
 		dc.l SS_4
 		dc.l SS_5
 		dc.l SS_6
+	if FeatureSonic2013SpecialStage7
+		dc.l SS_7
+	endif ; if FeatureSonic2013SpecialStage7
 		even
 
 ; ---------------------------------------------------------------------------
@@ -461,6 +464,9 @@ SS_StartLoc:
 		binclude	"startpos/Special Stages/ss4.bin"
 		binclude	"startpos/Special Stages/ss5.bin"
 		binclude	"startpos/Special Stages/ss6.bin"
+	if FeatureSonic2013SpecialStage7
+		binclude	"startpos/Special Stages/ss6.bin" ; Sonic 2013 SS7 layout start placeholder
+	endif ; if FeatureSonic2013SpecialStage7
 		even
 
 ; ===========================================================================
@@ -471,13 +477,32 @@ SS_StartLoc:
 SS_Load:
 		moveq	#0,d0
 		move.b	(v_lastspecial).w,d0 ; load number of last special stage entered
+	if FeatureSonic2013SpecialStage7
+		move.b	d0,d2				; keep direct level-select flag
+		andi.b	#$7F,d0				; use the low bits as the selected stage index
+		move.b	d0,d3
+		addq.b	#1,d3
+		cmpi.b	#7,d3
+		blo.s	.storelastspecial
+		moveq	#0,d3
+
+.storelastspecial:
+		move.b	d3,(v_lastspecial).w
+		btst	#7,d2				; direct level-select Special Stage load?
+		bne.s	SS_LoadData			; if yes, don't skip collected stages
+	else
 		addq.b	#1,(v_lastspecial).w
 		cmpi.b	#6,(v_lastspecial).w
 		blo.s	SS_ChkEmldNum
-		move.b	#0,(v_lastspecial).w ; reset if higher than 6
+		move.b	#0,(v_lastspecial).w ; reset if higher than the last Special Stage
+	endif ; if FeatureSonic2013SpecialStage7
 
 SS_ChkEmldNum:
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w ; do you have all emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w ; do you have all emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.s	SS_LoadData	; if yes, branch
 		moveq	#0,d1
 		move.b	(v_emeralds).w,d1
@@ -497,12 +522,22 @@ SS_ChkEmldRepeat:
 SS_LoadData:
 		; Load player position data
 		lsl.w	#2,d0
+	if FeatureSonic2013SpecialStage7
+		lea	(SS_StartLoc).l,a1
+		adda.w	d0,a1
+	else
 		lea	SS_StartLoc(pc,d0.w),a1
+	endif ; if FeatureSonic2013SpecialStage7
 		move.w	(a1)+,(v_player+obX).w
 		move.w	(a1)+,(v_player+obY).w
 
 		; Load layout data
+	if FeatureSonic2013SpecialStage7
+		lea	(SS_LayoutIndex).l,a2
+		movea.l	(a2,d0.w),a0
+	else
 		movea.l	SS_LayoutIndex(pc,d0.w),a0
+	endif ; if FeatureSonic2013SpecialStage7
 		lea	(v_ssbuffer2).l,a1
 		move.w	#ArtTile_SS_Background_Clouds,d0
 		jsr	(EniDec).l

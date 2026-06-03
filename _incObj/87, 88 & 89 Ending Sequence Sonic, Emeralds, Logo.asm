@@ -24,7 +24,11 @@ eson_time = objoff_30	; time to wait between events
 ; ===========================================================================
 
 ESon_Main:	; Routine 0
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w ; do you have all 7 emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w ; do you have all 6 emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.s	ESon_Main2	; if yes, branch
 		addi.b	#$10,ob2ndRout(a0) ; else, skip emerald sequence
 		move.w	#216,eson_time(a0)

@@ -54,7 +54,11 @@ SSR_Loop:
 		move.b	(v_emeralds).w,d1
 		beq.s	loc_C842
 		moveq	#0,d0
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,d1		; do you have all chaos emeralds?
+	else
 		cmpi.b	#6,d1		; do you have all chaos emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		bne.s	loc_C842	; if not, branch
 		moveq	#8,d0		; load "Sonic got them all" text
 		move.w	#$18,obX(a0)

@@ -26,7 +26,11 @@ EEgg_Main:	; Routine 0
 		move.b	#0,obRender(a0)
 		move.b	#2,obPriority(a0)
 		move.b	#2,obAnim(a0)	; use "END" animation
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w ; do you have all 7 emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w ; do you have all 6 emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.s	EEgg_Animate	; if yes, branch
 
 		move.b	#id_CreditsText,(v_tryagain).w ; load credits object
@@ -48,7 +52,11 @@ EEgg_Juggle:	; Routine 4
 
 .noflip:
 		lea	(v_eggmanchaos).w,a1 ; get RAM address for emeralds
+	if FeatureSonic2013SevenChaosEmeralds
+		moveq	#6,d1
+	else
 		moveq	#5,d1
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 
 .emeraldloop:
 		move.b	d0,objoff_3E(a1)
@@ -92,7 +100,11 @@ TCha_Main:	; Routine 0
 		movea.l	a0,a1
 		moveq	#0,d2
 		moveq	#0,d3
+	if FeatureSonic2013SevenChaosEmeralds
+		moveq	#6,d1
+	else
 		moveq	#5,d1
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		sub.b	(v_emeralds).w,d1
 
 .makeemerald:
@@ -116,6 +128,16 @@ TCha_Main:	; Routine 0
 		bcs.s	.loc_5B42
 
 .chkloop:
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.w	#6,d0				; is this the enhanced 7th emerald slot?
+		bne.s	.checkupstream			; if not, check upstream list
+		cmp.b	(v_emldlist7).w,d2		; has this emerald been collected?
+		bne.s	.notgot
+		addq.b	#1,d2
+		bra.s	.chkemerald
+
+.checkupstream:
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		cmp.b	(a3,d0.w),d2
 		bne.s	.notgot
 		addq.b	#1,d2
@@ -127,7 +149,14 @@ TCha_Main:	; Routine 0
 
 .loc_5B42:
 		move.b	d2,obFrame(a1)
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#6,d2				; is this the enhanced 7th emerald?
+		beq.s	.keepframe			; if yes, use the final real emerald mapping
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		addq.b	#1,obFrame(a1)
+	if FeatureSonic2013SevenChaosEmeralds
+.keepframe:
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		addq.b	#1,d2
 		move.b	#$80,obAngle(a1)
 		move.b	d3,obTimeFrame(a1)

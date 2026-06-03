@@ -3,6 +3,33 @@
 ; ---------------------------------------------------------------------------
 
 DisplaySprite:
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w
+		beq.s	.checkdebug
+		cmpa.w	#v_titlecard,a0
+		blo.s	.hide
+		cmpa.w	#v_titlecard+(object_size*4),a0
+		blo.s	.checkdebug
+
+.hide:
+		rts
+
+.checkdebug:
+	endif ; if FeatureEnhancedLevelFadeIn
+	if EnhancedDebug
+		tst.w	(v_debuguse).w
+		beq.s	.show
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w
+		beq.s	.show
+		cmpa.w	#v_player,a0
+		beq.s	.show
+		cmpa.w	#v_gogglesobj,a0
+		beq.s	.show
+		rts
+
+.show:
+	endif ; if EnhancedDebug
+
 		lea	(v_spritequeue).w,a1
 		move.w	obPriority(a0),d0 ; get sprite priority
 		lsr.w	#1,d0
@@ -25,6 +52,33 @@ DSpr_Full:
 
 ; DisplaySprite1: <-- old misnomer
 DisplaySprite2:
+	if FeatureEnhancedLevelFadeIn
+		tst.b	(f_titlecard_only).w
+		beq.s	.checkdebug
+		cmpa.w	#v_titlecard,a1
+		blo.s	.hide
+		cmpa.w	#v_titlecard+(object_size*4),a1
+		blo.s	.checkdebug
+
+.hide:
+		rts
+
+.checkdebug:
+	endif ; if FeatureEnhancedLevelFadeIn
+	if EnhancedDebug
+		tst.w	(v_debuguse).w
+		beq.s	.show
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w
+		beq.s	.show
+		cmpa.w	#v_player,a1
+		beq.s	.show
+		cmpa.w	#v_gogglesobj,a1
+		beq.s	.show
+		rts
+
+.show:
+	endif ; if EnhancedDebug
+
 		lea	(v_spritequeue).w,a2
 		move.w	obPriority(a1),d0
 		lsr.w	#1,d0

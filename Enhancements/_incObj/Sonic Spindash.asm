@@ -6,32 +6,61 @@
 ; Sonic_CheckSpindash:
 SpindashChargeMax:	equ $800
 SpindashChargeStep:	equ $2E		; $800 / 45 frames, rounded up
-	if FeatureSuperPeelout>1
-SpindashReleaseMax:	equ $F00		; match the Super Peel-Out cap
-	else
 SpindashReleaseMax:	equ $A00		; match the Peel-Out cap
-	endif ; if FeatureSuperPeelout>1
+SpindashReleaseMaxSuper:	equ $F00	; match the Sonic 2/Super cap
 
 Sonic_SpinDash:
 		tst.b	f_spindash(a0)			; already Spin Dashing?
-		bne.s	Sonic_UpdateSpindash		; if set, branch
+		bne.w	Sonic_UpdateSpindash		; if set, branch
 
 		cmpi.b	#id_Duck,obAnim(a0)		; is anim duck
-		bne.s	.end				; if not, return
+		bne.w	.end				; if not, return
 
 		move.b	(v_jpadpress2).w,d0		; read controller
 		andi.b	#btnABC,d0			; pressing A/B/C ?
 		beq.w	.end				; if not, return
 
-	if FeatureSpindash>1
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; does Super Sonic force Sonic 2 behaviour?
+		bne.s	.s2start				; if yes, branch
+	endif ; if FeatureSonic2013SuperSonic
+	if FeatureSpindash=2
+		bsr.w	Sonic_UseS2SpindashMode		; should this charge use Sonic 2 behaviour?
+		bne.s	.s2start			; if yes, branch
+		move.b	#sonic_roll_height,obHeight(a0) ; adjust height for CD spindash
+		move.b	#sonic_roll_width,obWidth(a0) 	; adjust width for CD spindash
+		move.w	#0,obInertia(a0)		; charge before releasing the dash
+		bra.s	.startdone
+
+.s2start:
+		move.w	#$1F00,obAnim(a0)		; changed from #$900
+.startdone:
+	elseif FeatureSpindash>2
+.s2start:
 		move.w	#$1F00,obAnim(a0)		; changed from #$900
 	else
 		move.b	#sonic_roll_height,obHeight(a0) ; adjust height for CD spindash
 		move.b	#sonic_roll_width,obWidth(a0) 	; adjust width for CD spindash
 		move.w	#0,obInertia(a0)		; charge before releasing the dash
+		bra.s	.startdone
+
+.s2start:
+		move.w	#$1F00,obAnim(a0)		; use Sonic 2-style charge state while Super
+.startdone:
 	endif
 
+	if FeatureSpindash=2
+		bsr.w	Sonic_UseS2SpindashMode		; should this charge use Sonic 2 frames?
+		bne.s	.sets2anim			; if yes, branch
+		move.b	#id_Roll2,obAnim(a0)		; use Sonic CD-style rolling charge frames
+		bra.s	.animset
+
+.sets2anim:
+	endif ; if FeatureSpindash=2
 		move.b	#id_Spindash,obAnim(a0)		; set Spin Dash anim (9 in s2)
+	if FeatureSpindash=2
+.animset:
+	endif ; if FeatureSpindash=2
 		bclr	#bitPushing,obStatus(a0)	; don't let input put Sonic into pushing while charging
 		sfx	#sfx_Spindash,snd_jsr		; play spin sound
 
@@ -41,7 +70,7 @@ Sonic_SpinDash:
 
 	if FeatureSpindash>1
 		cmpi.b	#$C,obSubtype(a0)		; if he's drowning, branch to not make dust
-		bcs.s	.loc2_1AC84			; if below drowning subtype, branch
+		bcc.s	.loc2_1AC84			; if drowning subtype or above, branch
 		move.b	#$02,(obSmoke).w		; start the smoke/dust object
 	endif
 
@@ -60,7 +89,18 @@ Sonic_SpinDash:
 
 ; loc2_1AC8E
 Sonic_UpdateSpindash:
+	if FeatureSpindash=2
+		bsr.w	Sonic_UseS2SpindashMode		; should this charge use Sonic 2 frames?
+		bne.s	.sets2anim			; if yes, branch
+		move.b	#id_Roll2,obAnim(a0)		; use Sonic CD-style rolling charge frames
+		bra.s	.animset
+
+.sets2anim:
+	endif ; if FeatureSpindash=2
 		move.b #id_Spindash,obAnim(a0)			; set Spin Dash anim (9 in s2)
+	if FeatureSpindash=2
+.animset:
+	endif ; if FeatureSpindash=2
 		bclr	#bitPushing,obStatus(a0)		; prevent monitor/block pushing during charge
 
 		move.b	(v_jpadhold2).w,d0			; read controller
@@ -100,7 +140,7 @@ Sonic_UpdateSpindash:
 	endif	; if FeatureSpindash>1
 
 		sfx	#sfx_Teleport,snd_jsr			; play release sound
-		bra.s	Obj01_Spindash_ResetScr
+		bra.w	Obj01_Spindash_ResetScr
 
 ;===========================================================================
 
@@ -113,11 +153,32 @@ Sonic_GetSpindashChargeSpeed:
 
 .chargeindexok:
 		add.w	d0,d0					; double it for word-based indexing
-	if FeatureSuperPeelout>1
-		move.w	SpindashSpeedsSuper(pc,d0.w),d0		; get Super Peel-Out capped speed
+		move.w	d0,d2					; keep table index while checking enhanced modes
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; is pseudo Super Sonic active?
+		beq.s	.normalspeed			; if not, use normal table
+		move.w	SpindashSpeedsSuper(pc,d2.w),d0		; get Sonic 2-style Super speed
+		cmpi.w	#SpindashReleaseMaxSuper,d0		; has it gone over the Super cap?
+		bls.s	.speedok				; if not, branch
+		move.w	#SpindashReleaseMaxSuper,d0		; cap to the Super maximum
+		bra.s	.speedok
+
+.normalspeed:
+	endif ; if FeatureSonic2013SuperSonic
+	if FeatureSpindash=2
+		bsr.w	Sonic_UseS2SpindashMode		; should this use the Sonic 2 speed curve?
+		beq.s	.cdstyle			; if not, use Sonic CD-style charge values
+		move.w	SpindashSpeedsS2(pc,d2.w),d0		; get Sonic 2-style speed
+		bra.s	.normalcap
+
+.cdstyle:
+		move.w	SpindashSpeeds(pc,d2.w),d0		; get Sonic CD-style speed
+	elseif (FeatureSpindash>2)|(FeatureSuperPeelout>1)
+		move.w	SpindashSpeedsS2(pc,d2.w),d0		; get Sonic 2-style speed
 	else
-		move.w	SpindashSpeeds(pc,d0.w),d0		; get normal speed
-	endif ; if FeatureSuperPeelout>1
+		move.w	SpindashSpeeds(pc,d2.w),d0		; get normal speed
+	endif ; if FeatureSpindash=2
+.normalcap:
 		cmpi.w	#SpindashReleaseMax,d0			; has it gone over the peel-out cap?
 		bls.s	.speedok				; if not, branch
 		move.w	#SpindashReleaseMax,d0			; cap to the peel-out maximum
@@ -127,19 +188,28 @@ Sonic_GetSpindashChargeSpeed:
 
 ;===========================================================================
 
+	if FeatureSpindash=2
+Sonic_UseS2SpindashMode:
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; is pseudo Super Sonic active?
+		bne.s	.enabled				; if yes, use Sonic 2-style behaviour
+	endif ; if FeatureSonic2013SuperSonic
+	if FeatureUnlockMovesAfterCompletion
+		bsr.w	CheckSRAMGameComplete			; has the game been completed?
+		bne.s	.enabled				; if yes, use Sonic 2-style behaviour
+	endif ; if FeatureUnlockMovesAfterCompletion
+		moveq	#0,d0					; Sonic CD-style behaviour
+		rts
+
+.enabled:
+		moveq	#1,d0					; Sonic 2-style behaviour
+		rts
+	endif ; if FeatureSpindash=2
+
+;===========================================================================
+
 ; word_1AD0C:
 SpindashSpeeds:
-	if FeatureSpindash>1
-		dc.w  $800	; 0
-		dc.w  $880	; 1
-		dc.w  $900	; 2
-		dc.w  $980	; 3
-		dc.w  $A00	; 4
-		dc.w  $A80	; 5
-		dc.w  $B00	; 6
-		dc.w  $B80	; 7
-		dc.w  $C00	; 8
-	else
 		dc.w  $200	; 0
 		dc.w  $300	; 1
 		dc.w  $400	; 2
@@ -149,7 +219,17 @@ SpindashSpeeds:
 		dc.w  $800	; 6
 		dc.w  $900	; 7
 		dc.w  $A00	; 8
-	endif ; if FeatureSpindash>1
+
+SpindashSpeedsS2:
+		dc.w  $800	; 0
+		dc.w  $880	; 1
+		dc.w  $900	; 2
+		dc.w  $980	; 3
+		dc.w  $A00	; 4
+		dc.w  $A80	; 5
+		dc.w  $B00	; 6
+		dc.w  $B80	; 7
+		dc.w  $C00	; 8
 
 ; word_1AD1E:
 SpindashSpeedsSuper:
@@ -411,7 +491,9 @@ loc_1DF0A:
 		move	d4,d2
 		add	d3,d4
 		add	d3,d4
+	if FeatureEnhancedPLCQueue
 		jsr	(QueueDMATransfer).l
+	endif ; if FeatureEnhancedPLCQueue
 		dbf	d5,loc_1DF0A
 		rts
 
@@ -425,7 +507,7 @@ off_1DF38:
 		dc	byte_1DF40-off_1DF38
 		dc	byte_1DF43-off_1DF38
 		dc	byte_1DF4F-off_1DF38
-		dc	byte_1DF5obRoutineff_1DF38
+		dc	byte_1DF58-off_1DF38
 
 ; DATA XREF: h+6FC4?o
 byte_1DF40:

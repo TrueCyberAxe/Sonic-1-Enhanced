@@ -22,9 +22,10 @@ NemDec:
 NemDec_Main:
         lea     $FFFFAA00,a1            ; load Nemesis decompression buffer
         move.w  (a0)+,d2                ; get number of patterns
-        bpl.s   @0                      ; are we in Mode 0?
+        bpl.s   NemDec_Mode0            ; are we in Mode 0?
         lea     $A(a3),a3               ; if not, use Mode 1
-@0      lsl.w   #3,d2
+NemDec_Mode0:
+        lsl.w   #3,d2
         movea.w d2,a5
         moveq   #7,d3
         moveq   #0,d2
@@ -53,11 +54,12 @@ NemDec_ProcessCompressedData:
         add.w   d1,d1
         sub.b   (a1,d1.w),d6            ; ~~ subtract from shift value so that the next code is read next time around
         cmpi.w  #9,d6                   ; does a new byte need to be read?
-        bcc.s   @0                      ; if not, branch
+        bcc.s   NemDec_NoByteFetch      ; if not, branch
         addq.w  #8,d6
         asl.w   #8,d5
         move.b  (a0)+,d5                ; read next byte
-@0      move.b  1(a1,d1.w),d1
+NemDec_NoByteFetch:
+        move.b  1(a1,d1.w),d1
         move.w  d1,d0
         andi.w  #$F,d1                  ; get palette index for pixel
         andi.w  #$F0,d0
@@ -84,11 +86,12 @@ NemDec_WritePixelLoop:
 NemDec_InlineData:
         subq.w  #6,d6                   ; 6 bits needed to signal inline data
         cmpi.w  #9,d6
-        bcc.s   @0
+        bcc.s   NemDec_InlineNoByteFetch
         addq.w  #8,d6
         asl.w   #8,d5
         move.b  (a0)+,d5
-@0      subq.w  #7,d6                   ; and 7 bits needed for the inline data itself
+NemDec_InlineNoByteFetch:
+        subq.w  #7,d6                   ; and 7 bits needed for the inline data itself
         move.w  d5,d1
         lsr.w   d6,d1                   ; shift so that low bit of the code is in bit position 0
         move.w  d1,d0
@@ -147,18 +150,18 @@ NemDec_WriteRowToRAM_XOR:
 NemDec_BuildCodeTable:
         move.b  (a0)+,d0                ; read first byte
 
-@ChkEnd:
+NemDec_Build_ChkEnd:
         cmpi.b  #$FF,d0                 ; has the end of the code table description been reached?
-        bne.s   @NewPalIndex            ; if not, branch
+        bne.s   NemDec_Build_NewPalIndex ; if not, branch
         rts
 ; ---------------------------------------------------------------------------
 
-@NewPalIndex:
+NemDec_Build_NewPalIndex:
         move.w  d0,d7
 
-@ItemLoop:
+NemDec_Build_ItemLoop:
         move.b  (a0)+,d0                ; read next byte
-        bmi.s   @ChkEnd                 ; ~~
+        bmi.s   NemDec_Build_ChkEnd     ; ~~
         move.b  d0,d1
         andi.w  #$F,d7                  ; get palette index
         andi.w  #$70,d1                 ; get repeat count for palette index
@@ -169,14 +172,14 @@ NemDec_BuildCodeTable:
         or.w    d1,d7                   ; combine with palette index and repeat count to form code table entry
         moveq   #8,d1
         sub.w   d0,d1                   ; is the code 8 bits long?
-        bne.s   @ItemShortCode          ; if not, a bit of extra processing is needed
+        bne.s   NemDec_Build_ItemShortCode ; if not, a bit of extra processing is needed
         move.b  (a0)+,d0                ; get code
         add.w   d0,d0                   ; each code gets a word-sized entry in the table
         move.w  d7,(a1,d0.w)            ; store the entry for the code
-        bra.s   @ItemLoop               ; repeat
+        bra.s   NemDec_Build_ItemLoop   ; repeat
 ; ---------------------------------------------------------------------------
 
-@ItemShortCode:
+NemDec_Build_ItemShortCode:
         move.b  (a0)+,d0                ; get code
         lsl.w   d1,d0                   ; shift so that high bit is in bit position 7
         add.w   d0,d0                   ; get index into code table
@@ -185,7 +188,7 @@ NemDec_BuildCodeTable:
         subq.w  #1,d5                   ; d5 = 2^d1 - 1
         lea     (a1,d0.w),a6            ; ~~
 
-@ItemShortCodeLoop:
+NemDec_Build_ItemShortCodeLoop:
         move.w  d7,(a6)+                ; ~~ store entry
-        dbf     d5,@ItemShortCodeLoop   ; repeat for required number of entries
-        bra.s   @ItemLoop
+        dbf     d5,NemDec_Build_ItemShortCodeLoop ; repeat for required number of entries
+        bra.s   NemDec_Build_ItemLoop

@@ -40,7 +40,20 @@ Pause_StopGame:
 		tst.b (v_debuguse).w 														; Is debug mode active?
 		beq.s @skip																			; if not, branch
 
+		btst	#bitDebugSonicSpriteView,(f_debugmode).w	; are we entering level select from Sonic viewer?
+		beq.s	@notviewer														; if not, branch
+		jsr	(Debug_RestoreSonicViewState).l				; restore the level position before menu setup
+		clr.b	(v_debug_hide_bg).w									; restore normal planes before handing display to menu
+		cmpi.b	#id_Special,(v_gamemode).w			; is this Special Stage debug?
+		beq.s	@notviewer					; if yes, the menu will clear the screen itself
+		jsr	(Debug_UpdateBackdrop).l						; reload the level display state the menu expects
+
+@notviewer:
 		bset	#bitDebugLevelSelect,(f_debugmode).w			; mark level select as opened from debug mode
+		bclr	#bitDebugSonicSpriteView,(f_debugmode).w	; don't carry Sonic viewer HUD into the menu
+		clr.b	(v_debug_hide_bg).w									; menu owns the display while it fades
+		clearRAM v_spritequeue,v_spritequeue+$400		; remove debug-only queued sprites
+		clearRAM v_spritetablebuffer,v_spritetablebuffer_end ; keep only menu sprites during fade
 		bra.w GotoLevelSelect
 	@skip:
 	endif ; if EnhancedDebug

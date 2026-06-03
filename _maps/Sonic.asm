@@ -90,6 +90,14 @@ Map_Sonic_internal:	mappingsTable
 	mappingsTableEntry.w MS_Injury
 	mappingsTableEntry.w MS_GetAir
 	mappingsTableEntry.w MS_WaterSlide
+	if FeatureSpindash>1
+	mappingsTableEntry.w MS_Spindash1
+	mappingsTableEntry.w MS_Spindash2
+	mappingsTableEntry.w MS_Spindash3
+	mappingsTableEntry.w MS_Spindash4
+	mappingsTableEntry.w MS_Spindash5
+	mappingsTableEntry.w MS_Spindash6
+	endif ; if FeatureSpindash>1
 
 MS_Null:	spriteHeader
 MS_Null_End

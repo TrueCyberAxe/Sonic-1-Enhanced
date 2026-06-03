@@ -21,7 +21,11 @@ GRing_Main:	; Routine 0
 		move.b	#$40,obActWid(a0)
 		tst.b	obRender(a0)
 		bpl.s	GRing_Animate
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w ; do you have 7 emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w ; do you have 6 emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.w	GRing_Delete	; if yes, branch
 		cmpi.w	#50,(v_rings).w	; do you have at least 50 rings?
 		bhs.s	GRing_Okay	; if yes, branch
@@ -44,14 +48,7 @@ GRing_Collect:	; Routine 4
 		subq.b	#2,obRoutine(a0)
 		move.b	#0,obColType(a0)
 	if FixBugClearPowerUpsOnGiantRing
-		clr.b	(v_invinc).w			; remove invincibility immediately
-		clr.w	(v_player+invtime).w		; clear stale invincibility timer state
-		clr.b	(v_shoes).w			; remove speed shoes immediately
-		clr.w	(v_player+shoetime).w		; clear stale speed shoes timer state
-		clr.b	(v_shield).w			; remove shield immediately
-	if FeatureRestoreMonitorScubaGear
-		clr.b	(v_goggles).w			; remove goggles before Sonic vanishes
-	endif ; if FeatureRestoreMonitorScubaGear
+		jsr	(ClearPlayerPowerUps).l		; remove active power-ups immediately
 	endif ; if FixBugClearPowerUpsOnGiantRing
 		bsr.w	FindFreeObj
 		bne.w	GRing_PlaySnd

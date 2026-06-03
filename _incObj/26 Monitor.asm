@@ -120,12 +120,23 @@ Mon_Solid:														; Routine 2
 		bpl.s	.notjumpbreak				; if not, branch
 		btst	#1,obStatus(a1)				; is Sonic airborne?
 		beq.s	.notjumpbreak				; if not, keep normal standing logic
-		tst.w	obVelY(a1)				; is Sonic moving upwards?
-		bmi.s	.notjumpbreak				; if yes, keep normal logic
+	if (FixBugMonitorHurtBreak)|(FixBugs)
+		btst	#2,obStatus(a1)				; is Sonic actually in ball form?
+		beq.s	.notjumpbreak				; if not, keep normal standing logic
+	endif ; if (FixBugMonitorHurtBreak)|(FixBugs)
+		tst.w	obVelY(a1)				; is Sonic already bouncing upwards?
+		bmi.s	.keepbounce				; if yes, keep the bounce for stacked monitors
 		neg.w	obVelY(a1)				; bounce Sonic as React_Monitor does
+.keepbounce:
+		bset	#1,obStatus(a1)				; keep Sonic airborne for stacked monitors
+		bset	#2,obStatus(a1)				; keep Sonic in ball form for stacked monitors
+		move.b	#sonic_roll_height,obHeight(a1)		; keep rolling hitbox after the bounce
+		move.b	#sonic_roll_width,obWidth(a1)
+		move.b	#id_Roll,obAnim(a1)			; keep rolling animation instead of snapping to stand
 		addq.b	#2,obRoutine(a0)			; break this monitor immediately
 		bclr	#3,obStatus(a0)				; don't leave standing state on stacked monitors
 		bclr	#3,obStatus(a1)
+		clr.b	obSolid(a0)
 		bra.w	Mon_BreakOpen
 .notjumpbreak:
 	endif ; if FixBugStackedMonitorJumpBreak
@@ -133,15 +144,39 @@ Mon_Solid:														; Routine 2
 		bmi.s	loc_A20A
 	if FeatureSpindash|FixBugEnemyDeathRoll
 		btst	#2,obStatus(a1)			; is Sonic rolling or spin-dashing?
-		bne.s	loc_A25C			; if yes, break the monitor instead of pushing it
+		bne.w	Mon_RollBreakSide		; if yes, break the monitor instead of pushing it
 	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 		cmpi.b	#id_Roll,obAnim(a1) 			; is Sonic rolling?
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		beq.w	loc_A25C										; if yes, branch
+	else
 		beq.s	loc_A25C										; if yes, branch
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 
 	if FeatureSpindash
 		cmpi.b	#id_Spindash,obAnim(a1)		; is Sonic spin-dashing?
-		beq.s	loc_A25C										; if yes, branch
+		beq.w	loc_A25C										; if yes, branch
 	endif ; if FeatureSpindash
+
+	if FeatureSpindash|FixBugEnemyDeathRoll
+		bra.s	loc_A20A				; keep original non-rolling monitor collision
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
+
+	if FeatureSpindash|FixBugEnemyDeathRoll
+Mon_RollBreakSide:
+		tst.w	d1				; did Sonic hit the monitor from above?
+		bmi.s	.break				; if yes, don't side-correct him
+		tst.w	d0				; did Sonic hit from the side?
+		beq.s	.break				; if not, branch
+		sub.w	d0,obX(a1)			; keep Sonic out of the monitor before it breaks
+		move.w	#0,obInertia(a1)		; stop stale side-push momentum
+		move.w	#0,obVelX(a1)			; stop stale side-push velocity
+
+.break:
+		bclr	#5,obStatus(a0)			; clear object pushing state
+		bclr	#5,obStatus(a1)			; clear Sonic pushing state
+		bra.w	Mon_BreakOpen			; break the monitor immediately
+	endif ; if FeatureSpindash|FixBugEnemyDeathRoll
 
 loc_A20A:
 		tst.w	d1
@@ -175,6 +210,9 @@ loc_A246:
 		bne.s	loc_A26A
 		bset	#5,obStatus(a1)
 		bset	#5,obStatus(a0)
+	if FeaturePushableMonitors
+		bsr.w	Mon_PushMonitor			; let intact monitors move when pushed
+	endif ; if FeaturePushableMonitors
 		bra.s	Mon_Animate
 ; ===========================================================================
 
@@ -218,6 +256,128 @@ Mon_Display:	; Routine 8
 		rts
 	endif
 ; ===========================================================================
+
+	if FeaturePushableMonitors
+; ---------------------------------------------------------------------------
+; Move an intact monitor one pixel while Sonic is pushing it. This keeps the
+; original monitor break logic intact and only adds a controlled push response.
+; ---------------------------------------------------------------------------
+
+Mon_PushMonitor:
+		tst.b	obColType(a0)			; is monitor collision still active?
+		beq.w	.return				; if not, branch
+		btst	#bitPushing,obStatus(a0)	; is Sonic pushing this monitor?
+		beq.w	.return				; if not, branch
+		btst	#1,obStatus(a1)			; is Sonic airborne?
+		bne.w	.return				; if yes, branch
+		btst	#2,obStatus(a1)			; is Sonic rolling?
+		bne.w	.return				; if yes, keep original roll/break behaviour
+
+		move.w	obX(a0),-(sp)			; save monitor X
+		move.w	obY(a0),-(sp)			; save monitor Y
+		moveq	#1,d6				; push right by default
+		btst	#0,obStatus(a1)			; is Sonic facing left?
+		beq.s	.checkright			; if not, branch
+		neg.w	d6				; push left
+		moveq	#0,d3
+		move.b	obActWid(a0),d3			; get monitor width
+		not.w	d3				; left-side wall probe
+		jsr	(ObjHitWallLeft).l		; would the monitor hit a wall?
+		bra.s	.chkwall
+
+.checkright:
+		moveq	#0,d3
+		move.b	obActWid(a0),d3			; get monitor width
+		jsr	(ObjHitWallRight).l		; would the monitor hit a wall?
+
+.chkwall:
+		tst.w	d1				; has monitor touched a wall?
+		bmi.s	.blocked			; if yes, branch
+		add.w	d6,obX(a0)			; move monitor one pixel
+		bsr.w	Mon_CheckMonitorObjectBlock	; would monitor overlap another pushed solid?
+		bne.s	.blocked			; if yes, branch
+		jsr	(ObjFloorDist).l		; find floor below new position
+		cmpi.w	#$C,d1				; is floor too far below?
+		bgt.s	.blocked			; if yes, branch
+		cmpi.w	#-$C,d1				; is step too steep?
+		blt.s	.blocked			; if yes, branch
+		add.w	d1,obY(a0)			; keep monitor on floor
+		lea	(v_player).w,a1			; ObjFloorDist uses a1
+		add.w	d6,obX(a1)			; carry Sonic with the push
+		move.w	#$40,obInertia(a1)		; keep push animation active
+		tst.w	d6				; pushing left?
+		bpl.s	.clearspeed			; if not, branch
+		neg.w	obInertia(a1)			; use leftward inertia
+
+.clearspeed:
+		clr.w	obVelX(a1)			; don't let side collision leave extra speed
+		addq.l	#4,sp				; discard saved Y/X
+		rts
+
+.blocked:
+		move.w	(sp)+,obY(a0)			; restore monitor Y
+		move.w	(sp)+,obX(a0)			; restore monitor X
+		lea	(v_player).w,a1			; restore Sonic pointer after collision helpers
+
+.return:
+		rts
+
+; ---------------------------------------------------------------------------
+; Prevent a pushed monitor from being moved into another intact monitor or
+; pushable block. Other level walls are handled by the tile collision checks.
+; ---------------------------------------------------------------------------
+
+Mon_CheckMonitorObjectBlock:
+		movem.l	d0-d3/a1,-(sp)
+		lea	(v_lvlobjspace).w,a1
+		move.w	#(v_lvlobjend-v_lvlobjspace)/object_size-1,d3
+
+.loop:
+		cmpa.l	a0,a1				; is this the current monitor?
+		beq.s	.next				; if yes, branch
+		move.b	obID(a1),d0			; get object ID
+		beq.s	.next				; if not active, branch
+		cmpi.b	#id_Monitor,d0			; is this another monitor?
+		beq.s	.chkmonitor			; if yes, branch
+		cmpi.b	#id_PushBlock,d0		; is this a pushable block?
+		bne.s	.next				; if not, branch
+		bra.s	.chkoverlap
+
+.chkmonitor:
+		tst.b	obColType(a1)			; is other monitor intact?
+		beq.s	.next				; if not, branch
+
+.chkoverlap:
+		move.w	obY(a1),d0			; get object Y
+		sub.w	obY(a0),d0			; compare against monitor Y
+		bpl.s	.ypositive			; if positive, branch
+		neg.w	d0				; get absolute Y distance
+
+.ypositive:
+		cmpi.w	#$1C,d0				; close enough vertically?
+		bhi.s	.next				; if not, branch
+		move.w	obX(a1),d0			; get object X
+		sub.w	obX(a0),d0			; compare against monitor X
+		bpl.s	.xpositive			; if positive, branch
+		neg.w	d0				; get absolute X distance
+
+.xpositive:
+		cmpi.w	#$1C,d0				; close enough horizontally?
+		bls.s	.blocked			; if yes, branch
+
+.next:
+		lea	object_size(a1),a1		; next object slot
+		dbf	d3,.loop			; repeat for all objects
+		moveq	#0,d0				; set Z flag for allowed movement
+		bra.s	.done
+
+.blocked:
+		moveq	#1,d0				; clear Z flag for blocked movement
+
+.done:
+		movem.l	(sp)+,d0-d3/a1
+		rts
+	endif ; if FeaturePushableMonitors
 
 	if FixBugMonitors 							; Spindash Roll to Walk when Spindashing Next to Monitor
 Mon_CheckRelease:

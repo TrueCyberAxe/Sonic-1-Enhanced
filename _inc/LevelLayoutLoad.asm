@@ -41,11 +41,68 @@ LevelDataLoad:
 		moveq	#0,d0
 		move.b	(a2),d0
 		beq.s	.skipPLC	; if 2nd PLC is 0 (i.e. the ending sequence), branch
+	if FeatureEnhancedLevelFadeIn
+		disable_ints
+		bsr.w	QuickPLC	; load secondary level art before the enhanced fade starts
+		enable_ints
+	else
 		bsr.w	AddPLC		; load pattern load cues
+	endif ; if FeatureEnhancedLevelFadeIn
 
 .skipPLC:
+	if FeatureLavaSplash
+		bsr.w	LoadLavaSplashArt	; preload Marble lava splash art before gameplay can spawn it
+	endif ; if FeatureLavaSplash
 		rts
 ; End of function LevelDataLoad
+
+	if FeatureLavaSplash
+; ---------------------------------------------------------------------------
+; Load just the splash frames into an enhanced-mode free slot for MZ lava.
+; The LZ PLC includes waterfalls too, so loading the whole PLC would overwrite
+; Marble's stage art.
+; ---------------------------------------------------------------------------
+
+LoadLavaSplashArt:
+		cmpi.b	#id_MZ,(v_zone).w	; is Marble Zone loaded?
+		bne.s	.return			; if not, branch
+		locVRAM	ArtTile_MZ_Lava_Splash*tile_size ; set VRAM target for lava splash tiles
+		lea	(Art_LavaSplash).l,a0	; load extracted splash-only art
+		move.w	#((Art_LavaSplash_End-Art_LavaSplash)/tile_size)-1,d0 ; length in tiles
+		jsr	(LoadUncArt).l		; load uncompressed splash art
+
+.return:
+		rts
+	endif ; if FeatureLavaSplash
+
+	if FixBugTitleCardSonicPaletteArtifacts
+; ---------------------------------------------------------------------------
+; Remove foreground subtile entries that use Sonic/title-card palette line.
+; Stage art is kept black until the enhanced fade starts, but line 1 remains
+; live for title cards, so Sonic-palette foreground junk can otherwise show.
+; ---------------------------------------------------------------------------
+
+ClearTitleCardSonicPaletteArtifacts:
+		cmpi.b	#id_SYZ,(v_zone).w	; Spring Yard has Sonic-palette bars hidden behind sprites
+		bne.s	.return			; other stages can use palette line 1 for valid blocks
+		lea	(v_16x16).w,a1		; RAM address for 16x16 mappings
+		move.w	#$1800/2-1,d0		; number of words in 16x16 mappings
+
+.loop:
+		move.w	(a1),d1			; get 8x8 tile entry
+		beq.s	.next			; ignore already blank entries
+		move.w	d1,d2			; copy tile attributes
+		andi.w	#$6000,d2		; keep only palette bits
+		bne.s	.next			; if not palette line 1, branch
+		clr.w	(a1)			; remove Sonic-palette foreground junk
+
+.next:
+		addq.w	#2,a1			; next subtile entry
+		dbf	d0,.loop		; repeat for all 16x16 mappings
+
+.return:
+		rts
+	endif ; if FixBugTitleCardSonicPaletteArtifacts
 
 ; ===========================================================================
 ; ---------------------------------------------------------------------------

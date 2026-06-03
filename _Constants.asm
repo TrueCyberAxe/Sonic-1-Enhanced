@@ -189,6 +189,7 @@ btnX:		equ 1<<bitX			; ($04)
 btnMode:	equ 1<<bitMode			; ($08)
 
 bitDebugLevelSelect:	equ 7		; stored in f_debugmode
+bitDebugSonicSpriteView:	equ 6	; stored in f_debugmode
 
 ; SRAM save data
 sram_save_sig1:		equ $200001
@@ -579,6 +580,9 @@ ArtTile_MZ_Spike_Stomper:	equ $300
 ArtTile_MZ_Fireball:		equ $345
 ArtTile_MZ_Glass_Pillar:	equ $38E
 ArtTile_MZ_Lava:		equ $3A8
+	if FeatureLavaSplash
+ArtTile_MZ_Lava_Splash:	equ $640	; enhanced lava splash art, below common monitor art
+	endif ; if FeatureLavaSplash
 
 ; Spring Yard Zone
 ArtTile_SYZ_Bumper:		equ $380
@@ -677,7 +681,7 @@ ArtTile_Points:			equ $797
 ArtTile_Lamppost:		equ $7A0
 ArtTile_Ring:			equ $7B2
 ArtTile_Lives_Counter:		equ $7D4
-ArtTile_SpindashDust:     	equ ($D800/$20) ; $6C0
+ArtTile_SpindashDust:		equ $600	; dynamic spin dash/skid dust, free gap before monitor art
 
 ; Eggman
 ArtTile_Eggman:			equ $400
@@ -858,12 +862,12 @@ fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
 
 ; ------- Additional -------
-fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)/2	; $58
-fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)/2	; $59
-fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)/2	; $5A
-fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)/2	; $5B
-fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)/2	; $5C
-fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)/2	; $5D
+fr_Spindash1:	equ $58
+fr_Spindash2:	equ $59
+fr_Spindash3:	equ $5A
+fr_Spindash4:	equ $5B
+fr_Spindash5:	equ $5C
+fr_Spindash6:	equ $5D
 
   if FeatureSpindash=1
 sfx_Spindash:	equ sfx_Roll 				; $BE

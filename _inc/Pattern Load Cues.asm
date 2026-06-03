@@ -73,7 +73,7 @@ PLC_Main:	plcheader
 	if FeatureSpindash<2
 		plcm	Nem_Lamp,	ArtTile_Lamppost		; lamppost
 	else
-		plcm	Nem_Lamp,	$F800					; lamppost
+		plcm	Nem_Lamp,	ArtTile_Lamppost		; lamppost
 	endif ; if FeatureSpindash<2
 		plcm	Nem_Hud,	ArtTile_HUD				; HUD
 		plcm	Nem_Lives,	ArtTile_Lives_Counter	; lives counter

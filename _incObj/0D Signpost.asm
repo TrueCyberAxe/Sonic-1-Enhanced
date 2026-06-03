@@ -193,6 +193,12 @@ GotThroughAct:
 		clr.w	(v_player+invtime).w		; clear stale invincibility timer state
 		clr.b	(v_shoes).w			; disable speed shoes
 		clr.w	(v_player+shoetime).w		; clear stale speed shoes timer state
+		if FeatureSonic2013SuperSonic
+			move.b	(v_supersonic).w,(v_supersonic_finish).w ; keep the victory animation visually Super
+			clr.b	(v_supersonic).w		; disable Super Sonic
+			clr.b	(v_superringtimer).w		; clear Super Sonic ring drain timer
+			move.b	#$FF,(v_sonframenum).w		; force Sonic art to reload for the results card
+		endif ; if FeatureSonic2013SuperSonic
 		move.w	#$600,(v_sonspeedmax).w		; restore Sonic's max speed
 		move.w	#$C,(v_sonspeedacc).w		; restore Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w		; restore Sonic's deceleration

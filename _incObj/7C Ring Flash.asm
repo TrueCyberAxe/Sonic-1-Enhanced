@@ -44,12 +44,7 @@ Flash_Collect:
 		clr.b	(v_invinc).w	; remove invincibility
 		clr.b	(v_shield).w	; remove shield
 	if FixBugClearPowerUpsOnGiantRing
-		clr.w	(v_player+invtime).w	; clear stale invincibility timer state
-		clr.b	(v_shoes).w	; remove speed shoes
-		clr.w	(v_player+shoetime).w	; clear stale speed shoes timer state
-	if FeatureRestoreMonitorScubaGear
-		clr.b	(v_goggles).w	; remove goggles
-	endif ; if FeatureRestoreMonitorScubaGear
+		jsr	(ClearPlayerPowerUps).l	; clear stale timers, speed shoes, and goggles
 	endif ; if FixBugClearPowerUpsOnGiantRing
 
 locret_9F76:

@@ -527,13 +527,26 @@ SonicSS_ChkEmer:
 
 ; Obj09_GetEmer:
 SonicSS_GetEmer:
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#7,(v_emeralds).w ; do you have all the emeralds?
+	else
 		cmpi.b	#6,(v_emeralds).w ; do you have all the emeralds?
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		beq.s	SonicSS_NoEmer	; if yes, branch
 		subi.b	#$3B,d4
 		moveq	#0,d0
 		move.b	(v_emeralds).w,d0
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#6,d0		; is this the 7th emerald entry?
+		bne.s	.storeupstream	; if not, branch
+		move.b	d4,(v_emldlist7).w ; store 7th emerald stage in enhanced spare byte
+		bra.s	.addemerald
+
+.storeupstream:
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		lea	(v_emldlist).w,a2
 		move.b	d4,(a2,d0.w)
+.addemerald:
 		addq.b	#1,(v_emeralds).w ; add 1 to number of emeralds
 
 ; Obj09_NoEmer:

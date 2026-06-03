@@ -15,8 +15,13 @@ Roll_Index:	dc.w Roll_Main-Roll_Index
 Roll_Main:	; Routine 0
 		move.b	#$E,obHeight(a0)
 		move.b	#8,obWidth(a0)
+	if Enhanced
+		jsr	(ObjectFall).l
+		jsr	(ObjFloorDist).l
+	else
 		bsr.w	ObjectFall
 		bsr.w	ObjFloorDist
+	endif ; if Enhanced
 		tst.w	d1
 		bpl.s	locret_E052
 		add.w	d1,obY(a0)	; match roller's position with the floor
@@ -108,8 +113,13 @@ loc_E0F8:
 
 Roll_ChkJump:
 		bsr.w	Roll_Stop
+	if Enhanced
+		jsr	(SpeedToPos).l
+		jsr	(ObjFloorDist).l
+	else
 		bsr.w	SpeedToPos
 		bsr.w	ObjFloorDist
+	endif ; if Enhanced
 		cmpi.w	#-8,d1
 		blt.s	Roll_Jump
 		cmpi.w	#$C,d1
@@ -129,10 +139,18 @@ locret_E12E:
 ; ===========================================================================
 
 Roll_MatchFloor:
+	if Enhanced
+		jsr	(ObjectFall).l
+	else
 		bsr.w	ObjectFall
+	endif ; if Enhanced
 		tst.w	obVelY(a0)
 		bmi.s	locret_E150
+	if Enhanced
+		jsr	(ObjFloorDist).l
+	else
 		bsr.w	ObjFloorDist
+	endif ; if Enhanced
 		tst.w	d1
 		bpl.s	locret_E150
 		add.w	d1,obY(a0)	; match Roller's position with the floor

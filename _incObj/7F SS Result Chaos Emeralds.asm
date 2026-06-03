@@ -15,6 +15,9 @@ SSRC_Index:	dc.w SSRC_Main-SSRC_Index
 ; X-axis positions for chaos emeralds
 ; ---------------------------------------------------------------------------
 SSRC_PosData:	dc.w $110, $128, $F8, $140, $E0, $158
+	if FeatureSonic2013SevenChaosEmeralds
+		dc.w $C8
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 ; ===========================================================================
 
 SSRC_Main:	; Routine 0
@@ -31,7 +34,19 @@ SSRC_Loop:
 		move.w	(a2)+,obX(a1)	; set x-position
 		move.w	#$F0,obScreenY(a1) ; set y-position
 		lea	(v_emldlist).w,a3 ; check which emeralds you have
+	if FeatureSonic2013SevenChaosEmeralds
+		cmpi.b	#6,d2		; is this the 7th emerald entry?
+		bne.s	.readupstream	; if not, branch
+		move.b	(v_emldlist7).w,d3 ; use enhanced 7th emerald slot
+		cmpi.b	#6,d3		; does it use the 7th emerald index?
+		bne.s	.gotframe	; if not, branch
+		moveq	#5,d3		; reuse visible emerald art until unique result art is wired
+		bra.s	.gotframe
+
+.readupstream:
+	endif ; if FeatureSonic2013SevenChaosEmeralds
 		move.b	(a3,d2.w),d3
+.gotframe:
 		move.b	d3,obFrame(a1)
 		move.b	d3,obAnim(a1)
 		addq.b	#1,d2

@@ -35,6 +35,20 @@ Pow_ChkS:
 		cmpi.b	#7,d0					; does monitor contain 'S'?
 		bne.w	Pow_ChkEggman				; if not, branch to Eggman Monitor Code
     
+	if FeatureSonic2013SuperSonic
+		cmpi.b	#7,(v_emeralds).w			; do we have all seven emeralds?
+		blo.s	.normalsmonitor			; if not, use restored S-monitor behaviour
+		addi.w	#50,(v_rings).w			; S monitor adds 50 rings before transforming
+		ori.b	#1,(f_ringcount).w			; update the ring counter
+
+		move.l	a0,-(sp)				; preserve monitor content object
+		lea	(v_player).w,a0			; Super helper expects Sonic in a0
+		jsr	(Sonic2013_EnterSuperSonic).l	; transform immediately
+		movea.l	(sp)+,a0				; restore monitor content object
+		rts
+
+.normalsmonitor:
+	endif ; if FeatureSonic2013SuperSonic
 	if FeatureRestoreMonitorSuper
 		; The S monitor combines speed shoes and invincibility.
 		bsr.w	Pow_ShoesActivate

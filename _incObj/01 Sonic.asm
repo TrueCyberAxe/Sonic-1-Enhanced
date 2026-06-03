@@ -114,6 +114,10 @@ Sonic_Control_Nodebug:
 
 ; loc_12C7E:
 .ignoremodes:
+	if FeatureSonic2013SuperSonic
+		bsr.w	Sonic2013_CheckSuperActivation		; transform after a qualifying jump press
+		bsr.w	Sonic2013_UpdateSuperSonic		; keep Super state and ring drain current
+	endif ; if FeatureSonic2013SuperSonic
 		bsr.s	Sonic_Display				; display Sonic sprite and handle power-up expiration
 		bsr.w	Sonic_RecordPosition			; record Sonic's previous position for the invincibility stars trail
 		bsr.w	Sonic_Water				; handle Sonic while in water (LZ only)
@@ -132,6 +136,9 @@ Sonic_Control_Nodebug:
 		tst.b	(f_playerctrl).w			; is object interactions ignore flag set?
 		bmi.s	.ignoreobjcoll				; if yes, branch
 		jsr	(ReactToItem).l				; handle object interaction with Sonic
+	if FixBugClearStalePushing
+		bsr.w	Sonic_CheckPushingObject		; clear stale pushing after object collision has refreshed it
+	endif ; if FixBugClearStalePushing
 
 ; loc_12CB6:
 .ignoreobjcoll:
@@ -191,6 +198,10 @@ Sonic_Display:
 .chkinvincible:
 		tst.b	(v_invinc).w				; does Sonic have invincibility?
 		beq.s	.chkshoes				; if not, branch
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; is pseudo Super Sonic active?
+		bne.s	.chkshoes				; if yes, keep invincibility from expiring by timer
+	endif ; if FeatureSonic2013SuperSonic
 		tst.w	invtime(a0)				; check time remaining for invinciblity
 	if FixBugInvincibleMusic
 		beq.s	.restoremusic				; if no time remains, restore normal state
@@ -236,6 +247,10 @@ Sonic_Display:
 
 ; Obj01_ChkShoes:
 .chkshoes:
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; is pseudo Super Sonic active?
+		bne.s	.return				; if yes, don't expire the Super speed state here
+	endif ; if FeatureSonic2013SuperSonic
 		tst.b	(v_shoes).w				; does Sonic have speed shoes?
 		beq.s	.return					; if not, branch
 		tst.w	shoetime(a0)				; check time remaining
@@ -262,6 +277,227 @@ Sonic_Display:
 .return:
 		rts						; return
 ; End of function Sonic_Display
+
+	if FeatureSonic2013SuperSonic
+; ===========================================================================
+; ---------------------------------------------------------------------------
+; Sonic 2013-style pseudo Super Sonic.
+; This keeps the original Sonic art and swaps palette/speed state only.
+; ---------------------------------------------------------------------------
+
+SuperSonicSpeedMax:	equ $F00
+SuperSonicSpeedAcc:	equ $30
+SuperSonicSpeedDec:	equ $100
+SuperSonicRingTime:	equ 60-1
+
+Sonic2013_CheckSuperActivation:
+		tst.b	(v_supersonic).w			; already Super Sonic?
+		bne.s	.return				; if yes, branch
+		cmpi.b	#7,(v_emeralds).w			; do we have all seven emeralds?
+		blo.s	.return				; if not, branch
+		cmpi.w	#50,(v_rings).w			; do we have enough rings?
+		blo.s	.return				; if not, branch
+		btst	#1,obStatus(a0)			; is Sonic airborne after jumping?
+		beq.s	.return				; if not, branch
+		move.b	(v_jpadpress2).w,d0			; get jump presses
+		andi.b	#btnABC,d0				; did A, B, or C trigger?
+		beq.s	.return				; if not, branch
+		bsr.s	Sonic2013_EnterSuperSonic		; transform
+
+.return:
+		rts
+
+Sonic2013_UpdateSuperSonic:
+		tst.b	(v_supersonic).w			; is Super Sonic active?
+		beq.s	.return				; if not, branch
+		tst.w	(v_rings).w				; are there any rings left?
+		beq.w	Sonic2013_ExitSuperSonic		; if not, revert to normal
+		subq.b	#1,(v_superringtimer).w		; drain one ring per second
+		bpl.s	.keepsuper				; if timer remains, branch
+		move.b	#SuperSonicRingTime,(v_superringtimer).w ; reset drain timer
+		subq.w	#1,(v_rings).w			; spend one ring
+		bpl.s	.ringsok				; if still positive, branch
+		clr.w	(v_rings).w				; clamp underflow
+
+.ringsok:
+		move.b	#$80,(f_ringcount).w			; full refresh because Super drains rings downward
+		tst.w	(v_rings).w				; did that spend the last ring?
+		beq.w	Sonic2013_ExitSuperSonic		; if yes, revert
+
+.keepsuper:
+		move.b	#1,(v_invinc).w			; keep Super Sonic invulnerable
+		move.b	#1,(v_shoes).w			; keep Super Sonic using the speed-shoes state
+		clr.w	invtime(a0)				; do not use invincibility music/timer expiry
+		clr.w	shoetime(a0)				; do not use speed-shoes music/timer expiry
+		cmpi.w	#SuperSonicSpeedMax,(v_sonspeedmax).w ; were Super speeds overwritten?
+		beq.s	.return				; if not, branch
+		bsr.s	Sonic2013_SetSuperSpeeds		; restore speed values when another path overwrites them
+
+.return:
+		rts
+
+Sonic2013_EnterSuperSonic:
+		tst.b	(v_supersonic).w			; already transformed?
+		bne.s	.return				; if yes, branch
+		move.b	#1,(v_supersonic).w			; mark Super Sonic active
+		move.b	#SuperSonicRingTime,(v_superringtimer).w ; start ring drain timer
+		move.b	#1,(v_invinc).w			; Super Sonic is invulnerable
+		clr.w	invtime(a0)				; do not use the normal invincibility timer
+		move.b	#1,(v_shoes).w			; use the normal speed-shoes state without its timer/music
+		clr.w	shoetime(a0)				; do not use the normal speed-shoes timer
+	if FeatureUseSonic2SoundDriver=0
+		clr.b	(v_snddriver_ram.f_speedup).w		; clear stale speed-shoes tempo state
+	endif ; if FeatureUseSonic2SoundDriver=0
+		bsr.s	Sonic2013_SetSuperSpeeds		; apply fast movement stats
+		bsr.s	Sonic2013_LoadSuperPalette		; tint Sonic yellow
+		move.b	#$FF,(v_sonframenum).w		; force Sonic art to reload with Super colours
+		ori.b	#1,(f_ringcount).w			; refresh ring display
+
+.return:
+		rts
+
+Sonic2013_ExitSuperSonic:
+		clr.b	(v_supersonic).w			; clear Super Sonic flag
+		clr.b	(v_superringtimer).w			; clear drain timer
+		clr.b	(v_invinc).w				; remove Super invulnerability
+		clr.b	(v_shoes).w				; remove Super speed-shoes state
+		clr.w	invtime(a0)				; clear Super-owned invincibility timer
+		clr.w	shoetime(a0)				; clear Super-owned speed-shoes timer
+		bsr.s	Sonic2013_SetNormalSpeeds		; restore normal/water movement stats
+		bsr.s	Sonic2013_LoadNormalSonicPalette	; restore Sonic palette
+		move.b	#$FF,(v_sonframenum).w		; force Sonic art to reload without Super colours
+		rts
+
+Sonic2013_SetSuperSpeeds:
+		move.w	#SuperSonicSpeedMax,(v_sonspeedmax).w
+		move.w	#SuperSonicSpeedAcc,(v_sonspeedacc).w
+		move.w	#SuperSonicSpeedDec,(v_sonspeeddec).w
+		rts
+
+Sonic2013_SetNormalSpeeds:
+		btst	#6,obStatus(a0)			; is Sonic underwater?
+		beq.s	.dry				; if not, branch
+		move.w	#$300,(v_sonspeedmax).w		; restore underwater max speed
+		move.w	#6,(v_sonspeedacc).w		; restore underwater acceleration
+		move.w	#$40,(v_sonspeeddec).w		; restore underwater deceleration
+		rts
+
+.dry:
+		move.w	#$600,(v_sonspeedmax).w		; restore normal max speed
+		move.w	#$C,(v_sonspeedacc).w		; restore normal acceleration
+		move.w	#$80,(v_sonspeeddec).w		; restore normal deceleration
+		rts
+
+Sonic2013_LoadSuperPalette:
+		; Super remaps Sonic art, leaving shared palette users alone
+
+Sonic2013_LoadNormalSonicPalette:
+		lea	(Pal_Sonic).l,a1
+
+Sonic2013_LoadPaletteLine1:
+		movem.l	d0/a1-a2,-(sp)
+		lea	(v_palette_line_1).w,a2
+		moveq	#($20/4)-1,d0			; one palette line, longword copy
+
+.copy:
+		move.l	(a1)+,(a2)+
+		dbf	d0,.copy
+		movem.l	(sp)+,d0/a1-a2
+		rts
+
+Sonic2013_TestSuperArt:
+		tst.b	(v_supersonic).w			; is Super Sonic active?
+		bne.s	.return				; if yes, use recoloured art
+		tst.b	(v_supersonic_finish).w		; did Sonic finish the act as Super?
+
+.return:
+		rts
+
+SuperSonicBlueDark:	equ $E				; Sonic's darkest blue pixels become dark warm yellow
+SuperSonicBlueMidDark:	equ $D				; Sonic's dark blue pixels become warm yellow
+SuperSonicBlueMid:	equ $F				; Sonic's mid blue pixels become bright yellow
+SuperSonicBlueLight:	equ $6				; Sonic's light blue pixels become yellow-white
+
+; ---------------------------------------------------------------------------
+; Recolour Sonic's dynamic art buffer only. This keeps enemies and stage
+; sprites that share Sonic's palette line from changing with Super Sonic.
+; ---------------------------------------------------------------------------
+
+Sonic2013_ApplySuperArt:
+		movem.l	d0-d2/a1,-(sp)
+		lea	(v_sgfx_buffer).w,a1
+		move.l	a3,d1				; a3 points just after the DPLC art copied this frame
+		subi.l	#v_sgfx_buffer,d1
+		beq.w	.done				; no copied art to recolour
+		subq.w	#1,d1				; DBF uses length minus 1
+
+.loop:
+		move.b	(a1),d0
+		move.b	d0,d2
+		andi.b	#$F0,d0
+		cmpi.b	#$20,d0
+		bne.s	.chkhighmiddark
+		andi.b	#$0F,d2
+		ori.b	#SuperSonicBlueDark<<4,d2
+		bra.s	.chklow
+
+.chkhighmiddark:
+		cmpi.b	#$30,d0
+		bne.s	.chkhighmid
+		andi.b	#$0F,d2
+		ori.b	#SuperSonicBlueMidDark<<4,d2
+		bra.s	.chklow
+
+.chkhighmid:
+		cmpi.b	#$40,d0
+		bne.s	.chkhighlight
+		andi.b	#$0F,d2
+		ori.b	#SuperSonicBlueMid<<4,d2
+		bra.s	.chklow
+
+.chkhighlight:
+		cmpi.b	#$50,d0
+		bne.s	.chklow
+		andi.b	#$0F,d2
+		ori.b	#SuperSonicBlueLight<<4,d2
+
+.chklow:
+		move.b	d2,d0
+		andi.b	#$0F,d0
+		cmpi.b	#$2,d0
+		bne.s	.chklowmiddark
+		andi.b	#$F0,d2
+		ori.b	#SuperSonicBlueDark,d2
+		bra.s	.store
+
+.chklowmiddark:
+		cmpi.b	#$3,d0
+		bne.s	.chklowmid
+		andi.b	#$F0,d2
+		ori.b	#SuperSonicBlueMidDark,d2
+		bra.s	.store
+
+.chklowmid:
+		cmpi.b	#$4,d0
+		bne.s	.chklowlight
+		andi.b	#$F0,d2
+		ori.b	#SuperSonicBlueMid,d2
+		bra.s	.store
+
+.chklowlight:
+		cmpi.b	#$5,d0
+		bne.s	.store
+		andi.b	#$F0,d2
+		ori.b	#SuperSonicBlueLight,d2
+
+.store:
+		move.b	d2,(a1)+
+		dbf	d1,.loop
+
+.done:
+		movem.l	(sp)+,d0-d2/a1
+		rts
+	endif ; if FeatureSonic2013SuperSonic
 
 
 ; ===========================================================================
@@ -360,12 +596,22 @@ Sonic_Water:
 
 ; Obj01_MdNormal:
 Sonic_MdNormal:	; While Sonic is on the ground and not rolling
+	if FeatureSpindash=2
+		bsr.w	Sonic_SpinDash			; mode 2 keeps the CD-style spin dash available before completion
+	endif ; if FeatureSpindash=2
 	if ((FeatureSpindash)|(FeatureSuperPeelout))&FeatureUnlockMovesAfterCompletion
+	if FeatureSonic2013SuperSonic
+		tst.b	(v_supersonic).w			; Super Sonic always has the enhanced move set
+		bne.s	.unlockedmoves			; if yes, skip the SRAM gate
+	endif ; if FeatureSonic2013SuperSonic
 		bsr.w	CheckSRAMGameComplete
 		beq.s	.skipunlockedmoves
+.unlockedmoves:
 	endif ; if ((FeatureSpindash)|(FeatureSuperPeelout))&FeatureUnlockMovesAfterCompletion
 	if FeatureSpindash
+	if FeatureSpindash<>2
 		bsr.w	Sonic_SpinDash
+	endif ; if FeatureSpindash<>2
 	endif ; if FeatureSpindash
 	if FeatureSuperPeelout
 		bsr.w	Sonic_Peelout
@@ -745,6 +991,94 @@ Sonic_WallSpeedAdjust:
 .return:
 		rts						; return
 ; End of function Sonic_Move
+
+	if FixBugClearStalePushing
+; ---------------------------------------------------------------------------
+; Clear Sonic's pushing flag when no pushable object remains in front of the
+; middle of his body. Object collisions still set pushing later in the object
+; pass; this only clears stale states after walking away or stepping above it.
+; ---------------------------------------------------------------------------
+
+Sonic_CheckPushingObject:
+		btst	#bitPushing,obStatus(a0)		; is Sonic currently marked as pushing?
+		beq.w	.return					; if not, branch
+		lea	(v_lvlobjspace).w,a1			; only level objects can be push targets
+		move.w	#(v_lvlobjend-v_lvlobjspace)/object_size-1,d6 ; check every dynamic object slot
+
+.loop:
+		move.b	obID(a1),d7				; get object ID
+		beq.s	.next					; if not active, branch
+		cmpi.b	#id_PushBlock,d7			; is this a real pushable block?
+		beq.s	.pushable				; if yes, branch
+	if FeaturePushableMonitors
+		cmpi.b	#id_Monitor,d7				; is this an intact pushable monitor?
+		bne.s	.next					; if not, branch
+		tst.b	obColType(a1)
+		beq.s	.next					; if broken, branch
+	else
+		bra.s	.next
+	endif ; if FeaturePushableMonitors
+
+.pushable:
+		btst	#bitPushing,obStatus(a1)		; did this object mark Sonic as pushing it?
+		beq.s	.next					; if not, branch
+
+.checkposition:
+		moveq	#0,d0
+		move.b	obHeight(a0),d0			; get Sonic's collision height
+		moveq	#0,d1
+		move.b	obHeight(a1),d1			; get object collision height
+		add.w	d1,d0					; combined vertical overlap
+		addq.w	#4,d0					; allow minor animation bobbing
+		move.w	obY(a1),d1				; get object Y
+		sub.w	obY(a0),d1				; compare against Sonic Y
+		bpl.s	.ypositive				; if positive, branch
+		neg.w	d1					; get absolute Y difference
+
+.ypositive:
+		cmp.w	d0,d1					; is it in Sonic's middle rows?
+		bhi.s	.next					; if not, branch
+		moveq	#0,d0
+		move.b	obWidth(a0),d0			; get Sonic's collision width
+		moveq	#0,d1
+		move.b	obActWid(a1),d1			; get object's active width
+		bne.s	.gotwidth				; if it has one, branch
+		move.b	obWidth(a1),d1			; otherwise use collision width
+
+.gotwidth:
+		add.w	d1,d0					; combined horizontal overlap
+		addq.w	#8,d0					; allow one tile of side correction
+		move.w	obX(a1),d1				; get object X
+		sub.w	obX(a0),d1				; compare against Sonic X
+		btst	#0,obStatus(a0)				; is Sonic facing left?
+		bne.s	.faceleft				; if yes, branch
+
+.faceright:
+		tst.w	d1					; is object in front of Sonic?
+		bmi.s	.next					; if not, branch
+		cmp.w	d0,d1					; is it close enough to still be pushed?
+		bls.s	.return					; if yes, keep pushing
+		bra.s	.next
+; ===========================================================================
+
+.faceleft:
+		tst.w	d1					; is object in front of Sonic?
+		bpl.s	.next					; if not, branch
+		neg.w	d1					; get distance to object on the left
+		cmp.w	d0,d1					; is it close enough to still be pushed?
+		bls.s	.return					; if yes, keep pushing
+
+.next:
+		lea	object_size(a1),a1			; next object slot
+		dbf	d6,.loop				; repeat for all dynamic objects
+		bclr	#bitPushing,obStatus(a0)		; otherwise clear stale pushing
+		cmpi.b	#id_Push,obAnim(a0)			; was the push animation active?
+		bne.s	.return					; if not, branch
+		move.b	#id_Walk,obAnim(a0)			; resume regular walking animation
+
+.return:
+		rts
+	endif ; if FixBugClearStalePushing
 
 
 ; ---------------------------------------------------------------------------
@@ -2613,9 +2947,10 @@ Sonic_LoadGfx:
 		adda.w	(a2,d0.w),a2				; find relevant DPLC definition for new frame
 
 	if FeatureEnhancedPLCQueue
-		moveq	#0,d5
-		move.b	(a2)+,d5				; read "number of entries" value
-		subq.b	#1,d5
+		moveq	#0,d1
+		move.b	(a2)+,d1				; read "number of entries" value
+		subq.b	#1,d1
+		move.w	d1,d5					; keep a copy for the DMA queue path
 	else
 		moveq	#0,d1					; clear d1
 		move.b	(a2)+,d1				; read "number of entries" value
@@ -2625,6 +2960,14 @@ Sonic_LoadGfx:
 		bmi.s	.nochange				; if this was an empty entry, nothing to do, branch
 
 	if FeatureEnhancedPLCQueue
+	if FeatureSonic2013SuperSonic
+		bsr.w	Sonic2013_TestSuperArt		; does this frame need recoloured art?
+		beq.s	.queuedsetup				; if not, branch
+		lea	(v_sgfx_buffer).w,a3			; load Sonic's graphics transfer buffer
+		bra.s	.readentry
+
+.queuedsetup:
+	endif ; if FeatureSonic2013SuperSonic
 		move.w	#$F000,d4				; set starting VRAM destination for Sonic graphics
 		move.l	#Art_Sonic,d6				; load base address of Sonic's uncompressed art
 	else
@@ -2635,6 +2978,10 @@ Sonic_LoadGfx:
 ; SPLC_ReadEntry:
 .readentry:
 	if FeatureEnhancedPLCQueue
+	if FeatureSonic2013SuperSonic
+		bsr.w	Sonic2013_TestSuperArt		; copy through RAM so only Sonic gets recoloured
+		bne.s	.bufferentry				; if yes, branch
+	endif ; if FeatureSonic2013SuperSonic
 		moveq	#0,d1					; clear d1
 		move.b	(a2)+,d1				; read first byte of DPLC entry
 		lsl.w	#8,d1					; shift into upper byte
@@ -2651,6 +2998,32 @@ Sonic_LoadGfx:
 		add.w	d3,d4					; double because VRAM addresses are word-based
 		jsr	(QueueDMATransfer).l			; queue DMA transfer for this DPLC entry
 		dbf	d5,.readentry				; repeat for number of entries
+	if FeatureSonic2013SuperSonic
+		bra.s	.nochange
+
+.bufferentry:
+		moveq	#0,d2					; clear d2
+		move.b	(a2)+,d2				; read next byte of DPLC entry
+		move.w	d2,d0					; copy to d0
+		lsr.b	#4,d0					; shift out lower nybble, upper nybble is number of tiles
+		lsl.w	#8,d2					; shift value into upper byte of word
+		move.b	(a2)+,d2				; read next byte of DPLC entry
+		lsl.w	#5,d2					; multiply by $20 (tile_size)
+		lea	(Art_Sonic).l,a1			; load Sonic's uncompressed graphics
+		adda.l	d2,a1					; add offset for current DPLC entry
+
+.loadsupertile:
+		movem.l	(a1)+,d2-d6/a4-a6			; copy a full tile's worth of data to 8 different registers
+		movem.l	d2-d6/a4-a6,(a3)			; write them to Sonic's graphics transfer buffer
+		lea	tile_size(a3),a3			; go to next tile
+		dbf	d0,.loadsupertile			; repeat for number of tiles
+		dbf	d1,.readentry				; repeat for number of entries
+		bsr.w	Sonic2013_ApplySuperArt		; recolour only Sonic's buffered art
+		move.l	#v_sgfx_buffer,d1			; source buffer
+		move.w	#ArtTile_Sonic*tile_size,d2		; VRAM destination
+		move.w	#(v_sgfx_buffer_end-v_sgfx_buffer)/2,d3 ; transfer length in words
+		jsr	(QueueDMATransfer).l			; queue recoloured Sonic art
+	endif ; if FeatureSonic2013SuperSonic
 	else
 		moveq	#0,d2					; clear d2
 		move.b	(a2)+,d2				; read next byte of DPLC entry
@@ -2670,6 +3043,12 @@ Sonic_LoadGfx:
 		dbf	d0,.loadtile				; repeat for number of tiles
 		dbf	d1,.readentry				; repeat for number of entries
 	endif ; if FeatureEnhancedPLCQueue
+
+	if FeatureSonic2013SuperSonic&(FeatureEnhancedPLCQueue=0)
+		bsr.w	Sonic2013_TestSuperArt		; is Super Sonic art active?
+		beq.s	.nochange				; if not, branch
+		bsr.w	Sonic2013_ApplySuperArt		; recolour only Sonic's buffered art
+	endif ; if FeatureSonic2013SuperSonic&(FeatureEnhancedPLCQueue=0)
 
 ; locret_13C96:
 .nochange:

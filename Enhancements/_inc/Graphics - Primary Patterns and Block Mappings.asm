@@ -35,7 +35,7 @@ Blk16_TITLE:		incbin	"Enhancements/map16/GHZ.eni"
 		even
 Gra_Title:		enhancedTitleArt "Enhancements/artnem/8x8 - GHZ1.nem","Enhancements/artkos/8x8 - GHZ1.kosp","Enhancements/artcom/8x8 - GHZ1.comp" ; GHZ primary patterns
 		even
-Blk256_TITLE:		enhancedChunkMap "Enhancements/map256/GHZ.kosp","Enhancements/map256/GHZ.unc"
+Blk256_TITLE:		enhancedChunkMap "Enhancements/map256/GHZ.kos","Enhancements/map256/GHZ.unc"
 		even
 	else
 Blk16_TITLE:
@@ -56,7 +56,7 @@ Gra_GHZ:		enhancedLevelArt "Enhancements/artnem/8x8 - GHZ2.nem","Enhancements/ar
 	if TweakMergedArt=0
 Blk256_TITLE:
 	endif ; if TweakMergedArt=0
-Blk256_GHZ:		enhancedChunkMap "Enhancements/map256/GHZ.kosp","Enhancements/map256/GHZ.unc"
+Blk256_GHZ:		enhancedChunkMap "Enhancements/map256/GHZ.kos","Enhancements/map256/GHZ.unc"
 		even
 ; ---------------------------------------------------------------------------
 ; Labyrinth Zone
@@ -65,7 +65,7 @@ Blk16_LZ:		incbin	"Enhancements/map16/LZ.eni"
 		even
 Gra_LZ:			enhancedLevelArt "Enhancements/artnem/8x8 - LZ.nem","Enhancements/artkos/8x8 - LZ.kosp","Enhancements/artcom/8x8 - LZ.comp" ; LZ primary patterns
 		even
-Blk256_LZ:		enhancedChunkMap "Enhancements/map256/LZ.kosp","Enhancements/map256/LZ.unc"
+Blk256_LZ:		enhancedChunkMap "Enhancements/map256/LZ.kos","Enhancements/map256/LZ.unc"
 		even
 ; ---------------------------------------------------------------------------
 ; Marble Zone
@@ -76,9 +76,9 @@ Gra_MZ:			enhancedLevelArt "Enhancements/artnem/8x8 - MZ.nem","Enhancements/artk
 		even
 Blk256_MZ:
 	if Revision=0
-			enhancedChunkMap "Enhancements/map256/MZ.kosp","Enhancements/map256/MZ.unc"
+			enhancedChunkMap "Enhancements/map256/MZ.kos","Enhancements/map256/MZ.unc"
 	else
-			enhancedChunkMap "Enhancements/map256/MZ (JP1).kosp","Enhancements/map256/MZ (JP1).unc"
+			enhancedChunkMap "Enhancements/map256/MZ (JP1).kos","Enhancements/map256/MZ (JP1).unc"
 	endif
 		even
 ; ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ Blk16_SLZ:		incbin	"Enhancements/map16/SLZ.eni"
 		even
 Gra_SLZ:		enhancedLevelArt "Enhancements/artnem/8x8 - SLZ.nem","Enhancements/artkos/8x8 - SLZ.kosp","Enhancements/artcom/8x8 - SLZ.comp" ; SLZ primary patterns
 		even
-Blk256_SLZ:		enhancedChunkMap "Enhancements/map256/SLZ.kosp","Enhancements/map256/SLZ.unc"
+Blk256_SLZ:		enhancedChunkMap "Enhancements/map256/SLZ.kos","Enhancements/map256/SLZ.unc"
 		even
 ; ---------------------------------------------------------------------------
 ; Spring Yard Zone
@@ -97,7 +97,7 @@ Blk16_SYZ:		incbin	"Enhancements/map16/SYZ.eni"
 		even
 Gra_SYZ:		enhancedLevelArt "Enhancements/artnem/8x8 - SYZ.nem","Enhancements/artkos/8x8 - SYZ.kosp","Enhancements/artcom/8x8 - SYZ.comp" ; SYZ primary patterns
 		even
-Blk256_SYZ:		enhancedChunkMap "Enhancements/map256/SYZ.kosp","Enhancements/map256/SYZ.unc"
+Blk256_SYZ:		enhancedChunkMap "Enhancements/map256/SYZ.kos","Enhancements/map256/SYZ.unc"
 		even
 ; ---------------------------------------------------------------------------
 ; Scrap Brain Zone
@@ -108,8 +108,8 @@ Gra_SBZ:		enhancedLevelArt "Enhancements/artnem/8x8 - SBZ.nem","Enhancements/art
 		even
 Blk256_SBZ:
 	if Revision=0
-			enhancedChunkMap "Enhancements/map256/SBZ.kosp","Enhancements/map256/SBZ.unc"
+			enhancedChunkMap "Enhancements/map256/SBZ.kos","Enhancements/map256/SBZ.unc"
 	else
-			enhancedChunkMap "Enhancements/map256/SBZ (JP1).kosp","Enhancements/map256/SBZ (JP1).unc"
+			enhancedChunkMap "Enhancements/map256/SBZ (JP1).kos","Enhancements/map256/SBZ (JP1).unc"
 	endif
 		even
